@@ -5,24 +5,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
-import java.util.UUID
-import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.Foreldrepenger
-import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.GradertPeriode
-import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
-import no.nav.helse.hendelser.GraderteAndreYtelserType
-import no.nav.helse.hendelser.InntekterForBeregning
-import no.nav.helse.hendelser.Institusjonsopphold
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
-import no.nav.helse.hendelser.Omsorgspenger
-import no.nav.helse.hendelser.Opplæringspenger
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.Pleiepenger
-import no.nav.helse.hendelser.Svangerskapspenger
-import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.til
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype
 import no.nav.helse.spleis.IHendelseMediator
@@ -32,10 +16,13 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.slf4j.LoggerFactory
+import java.util.*
 
 // Understands a JSON message representing an Ytelserbehov
-internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: Meldingsporing) : BehovMessage(packet) {
-
+internal class YtelserMessage(
+    packet: JsonMessage,
+    override val meldingsporing: Meldingsporing,
+) : BehovMessage(packet) {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
@@ -43,10 +30,14 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
-    private val foreldrepengerytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder"]
-        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
-    private val svangerskapsytelse = packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder"]
-        .takeIf(JsonNode::isArray)?.map(::asGradertPeriode) ?: emptyList()
+    private val foreldrepengerytelse =
+        packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder"]
+            .takeIf(JsonNode::isArray)
+            ?.map(::asGradertPeriode) ?: emptyList()
+    private val svangerskapsytelse =
+        packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder"]
+            .takeIf(JsonNode::isArray)
+            ?.map(::asGradertPeriode) ?: emptyList()
 
     internal val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
     internal val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
@@ -61,107 +52,129 @@ internal class YtelserMessage(packet: JsonMessage, override val meldingsporing: 
         Opplæringspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Opplæringspenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
 
     internal val institusjonsopphold =
-        Institusjonsopphold(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Institusjonsopphold.utgåendeNavn}", "perioder") {
-            Institusjonsoppholdsperiode(
-                it.path("startdato").asLocalDate(),
-                it.path("faktiskSluttdato").asOptionalLocalDate()
-            )
-        })
+        Institusjonsopphold(
+            packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Institusjonsopphold.utgåendeNavn}", "perioder") {
+                Institusjonsoppholdsperiode(
+                    it.path("startdato").asLocalDate(),
+                    it.path("faktiskSluttdato").asOptionalLocalDate(),
+                )
+            },
+        )
 
     internal val graderteAndreYtelser =
         packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { gradertAndreYtelse ->
             GraderteAndreYtelserForBeregning(
-                graderteAndreYtelserForBeregningPeriodeList = gradertAndreYtelse.path("graderteAndreYtelserPerioder").map { graderteAndreYtelserPeriode ->
-                    GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
-                        fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
-                        tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
-                        grad = graderteAndreYtelserPeriode.path("grad").asInt()
-                    )
-                },
-                graderteAndreYtelserType = GraderteAndreYtelserType.valueOf(gradertAndreYtelse.path("graderteAndreYtelserType").asText())
+                graderteAndreYtelserForBeregningPeriodeList =
+                    gradertAndreYtelse.path("graderteAndreYtelserPerioder").map { graderteAndreYtelserPeriode ->
+                        GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
+                            fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
+                            tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
+                            grad = graderteAndreYtelserPeriode.path("grad").asInt(),
+                        )
+                    },
+                graderteAndreYtelserType =
+                    GraderteAndreYtelserType.valueOf(
+                        gradertAndreYtelse.path("graderteAndreYtelserType").asText(),
+                    ),
+                yrkesaktivitet =
+                    GraderteAndreYtelserForBeregning.yrkesaktivitet(
+                        gradertAndreYtelse.path("yrkesaktivitet").asText(),
+                    ),
             )
         }
 
-    internal val inntekterForBeregning = InntekterForBeregning(packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
-        InntekterForBeregning.Inntektsperiode(
-            inntektskilde = it.path("inntektskilde").asText(),
-            periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
-            beløp = when {
-                it.path("daglig").isNumber -> it.path("daglig").asDouble().daglig
-                it.path("måndelig").isNumber -> it.path("måndelig").asDouble().månedlig
-                it.path("årlig").isNumber -> it.path("årlig").asDouble().årlig
+    internal val inntekterForBeregning =
+        InntekterForBeregning(
+            packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
+                InntekterForBeregning.Inntektsperiode(
+                    inntektskilde = it.path("inntektskilde").asText(),
+                    periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
+                    beløp =
+                        when {
+                            it.path("daglig").isNumber -> it.path("daglig").asDouble().daglig
+                            it.path("måndelig").isNumber -> it.path("måndelig").asDouble().månedlig
+                            it.path("årlig").isNumber -> it.path("årlig").asDouble().årlig
 
-                else -> {
-                    error("Fant ikke noe beløp")
-                }
-            }
+                            else -> {
+                                error("Fant ikke noe beløp")
+                            }
+                        },
+                )
+            },
         )
-    })
 
-    internal val arbeidsavklaringspengerV2 = Arbeidsavklaringspenger(
-        packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
-            .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) })
+    internal val arbeidsavklaringspengerV2 =
+        Arbeidsavklaringspenger(
+            packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
+                .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
+        )
 
-    internal val forsikringsvurderingResultat = packet["@løsning.${Behovstype.ForsikringsvurderingResultat.utgåendeNavn}"]
-        .takeUnless { it.isMissingOrNull() }
-        ?.let { løsningJson ->
-            ForsikringsvurderingResultat(
-                forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
-                dekning = løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
-                    ForsikringsvurderingResultat.Dekning(
-                        grad = dekningJson["grad"].asInt(),
-                        iVentetid = dekningJson["iVentetid"].asBoolean()
-                    )
-                },
-                opphørsdato = løsningJson["opphørsdato"]?.takeUnless { it.isNull }?.asLocalDate(),
-                harIndividuellForsikring = løsningJson["harIndividuellForsikring"].asBoolean(),
-                villeHattForsikringOmDenVarBetalt = løsningJson["villeHattForsikringOmDenVarBetalt"].asBoolean(),
-                harForsikringSomIkkePasserMedSøknadstype = løsningJson["harForsikringSomIkkePasserMedSøknadstype"].asBoolean(),
-            )
-        }
-
-    internal val opptjeningsvurderingResultatOk : Boolean = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].asBoolean()
-
-    internal val dagpengerV2 = Dagpenger(
-        packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
-            .map {
-                Periode(
-                    it.path("fom").asLocalDate(),
-                    it.path("tom").asLocalDate()
+    internal val forsikringsvurderingResultat =
+        packet["@løsning.${Behovstype.ForsikringsvurderingResultat.utgåendeNavn}"]
+            .takeUnless { it.isMissingOrNull() }
+            ?.let { løsningJson ->
+                ForsikringsvurderingResultat(
+                    forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
+                    dekning =
+                        løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
+                            ForsikringsvurderingResultat.Dekning(
+                                grad = dekningJson["grad"].asInt(),
+                                iVentetid = dekningJson["iVentetid"].asBoolean(),
+                            )
+                        },
+                    opphørsdato = løsningJson["opphørsdato"]?.takeUnless { it.isNull }?.asLocalDate(),
+                    harIndividuellForsikring = løsningJson["harIndividuellForsikring"].asBoolean(),
+                    villeHattForsikringOmDenVarBetalt = løsningJson["villeHattForsikringOmDenVarBetalt"].asBoolean(),
+                    harForsikringSomIkkePasserMedSøknadstype = løsningJson["harForsikringSomIkkePasserMedSøknadstype"].asBoolean(),
                 )
             }
-            .partition { it.start <= it.endInclusive }
-            .also {
-                if (it.second.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
-            }.first
-    )
 
-    private val ytelser
-        get() = Ytelser(
-            meldingsreferanseId = meldingsporing.id,
-            behandlingsporing = yrkesaktivitetssporing,
-            vedtaksperiodeId = vedtaksperiodeId,
-            foreldrepenger = foreldrepenger,
-            svangerskapspenger = svangerskapspenger,
-            pleiepenger = pleiepenger,
-            omsorgspenger = omsorgspenger,
-            opplæringspenger = opplæringspenger,
-            institusjonsopphold = institusjonsopphold,
-            arbeidsavklaringspenger = arbeidsavklaringspengerV2,
-            dagpenger = dagpengerV2,
-            inntekterForBeregning = inntekterForBeregning,
-            graderteAndreYtelser = graderteAndreYtelser,
-            forsikringsvurderingResultat = forsikringsvurderingResultat,
-            opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+    internal val opptjeningsvurderingResultatOk: Boolean = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].asBoolean()
+
+    internal val dagpengerV2 =
+        Dagpenger(
+            packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
+                .map {
+                    Periode(
+                        it.path("fom").asLocalDate(),
+                        it.path("tom").asLocalDate(),
+                    )
+                }.partition { it.start <= it.endInclusive }
+                .also {
+                    if (it.second.isNotEmpty()) sikkerlogg.warn("Arena inneholdt en eller flere Dagpengeperioder med ugyldig fom/tom for")
+                }.first,
         )
 
-    override fun behandle(mediator: IHendelseMediator, context: BehandlingContext) {
+    private val ytelser
+        get() =
+            Ytelser(
+                meldingsreferanseId = meldingsporing.id,
+                behandlingsporing = yrkesaktivitetssporing,
+                vedtaksperiodeId = vedtaksperiodeId,
+                foreldrepenger = foreldrepenger,
+                svangerskapspenger = svangerskapspenger,
+                pleiepenger = pleiepenger,
+                omsorgspenger = omsorgspenger,
+                opplæringspenger = opplæringspenger,
+                institusjonsopphold = institusjonsopphold,
+                arbeidsavklaringspenger = arbeidsavklaringspengerV2,
+                dagpenger = dagpengerV2,
+                inntekterForBeregning = inntekterForBeregning,
+                graderteAndreYtelser = graderteAndreYtelser,
+                forsikringsvurderingResultat = forsikringsvurderingResultat,
+                opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+            )
+
+    override fun behandle(
+        mediator: IHendelseMediator,
+        context: BehandlingContext,
+    ) {
         mediator.behandle(this, ytelser, context)
     }
 
     private fun asGradertPeriode(jsonNode: JsonNode) =
         GradertPeriode(
             Periode(jsonNode.path("fom").asLocalDate(), jsonNode.path("tom").asLocalDate()),
-            jsonNode.path("grad").asInt()
+            jsonNode.path("grad").asInt(),
         )
 }

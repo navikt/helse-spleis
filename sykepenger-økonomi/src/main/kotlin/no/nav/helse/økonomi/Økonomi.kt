@@ -4,7 +4,6 @@ import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.dto.serialisering.ØkonomiUtDto
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Prosentdel.Companion.HundreProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 
@@ -19,39 +18,66 @@ data class Økonomi(
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
     private val reservertArbeidsgiverbeløp: Inntekt? = null,
-    private val reservertPersonbeløp: Inntekt? = null
+    private val reservertPersonbeløp: Inntekt? = null,
 ) {
     companion object {
-        fun inntekt(sykdomsgrad: Prosentdel, aktuellDagsinntekt: Inntekt, dekningsgrad: Prosentdel, refusjonsbeløp: Inntekt, inntektjustering: Inntekt) =
-            Økonomi(
-                sykdomsgrad = sykdomsgrad,
-                utbetalingsgrad = sykdomsgrad,
-                refusjonsbeløp = refusjonsbeløp,
-                aktuellDagsinntekt = aktuellDagsinntekt,
-                inntektjustering = inntektjustering,
-                dekningsgrad = dekningsgrad
-            )
+        fun inntekt(
+            sykdomsgrad: Prosentdel,
+            aktuellDagsinntekt: Inntekt,
+            dekningsgrad: Prosentdel,
+            refusjonsbeløp: Inntekt,
+            inntektjustering: Inntekt,
+        ) = Økonomi(
+            sykdomsgrad = sykdomsgrad,
+            utbetalingsgrad = sykdomsgrad,
+            refusjonsbeløp = refusjonsbeløp,
+            aktuellDagsinntekt = aktuellDagsinntekt,
+            inntektjustering = inntektjustering,
+            dekningsgrad = dekningsgrad,
+        )
 
-        fun ikkeBetalt(aktuellDagsinntekt: Inntekt = INGEN, inntektjustering: Inntekt = INGEN) = inntekt(
+        fun ikkeBetalt(
+            aktuellDagsinntekt: Inntekt = INGEN,
+            inntektjustering: Inntekt = INGEN,
+        ) = inntekt(
             sykdomsgrad = NullProsent,
             aktuellDagsinntekt = aktuellDagsinntekt,
             refusjonsbeløp = INGEN,
             dekningsgrad = DekningsgradArbeidstaker,
-            inntektjustering = inntektjustering
+            inntektjustering = inntektjustering,
         ).ikkeBetalt()
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
+
         private fun List<Økonomi>.inntektjustering() = map { it.inntektjustering }.summer()
 
-        private fun totalGrad(økonomiList: List<Økonomi>, gradStrategi: (Økonomi) -> Prosentdel, inntektjustering: Inntekt = økonomiList.inntektjustering()): Prosentdel {
+        /**
+         * graderteAndreYtelser er indeksert likt som økonomiList: graderingen for en yrkesaktivitet
+         * trekkes direkte fra yrkesaktivitetens egen grad før det inntektsvektede gjennomsnittet beregnes
+         */
+        private fun totalGrad(
+            økonomiList: List<Økonomi>,
+            gradStrategi: (Økonomi) -> Prosentdel,
+            graderteAndreYtelser: List<Prosentdel>,
+        ): Prosentdel {
+            check(graderteAndreYtelser.isEmpty() || graderteAndreYtelser.size == økonomiList.size) {
+                "Graderte andre ytelser (${graderteAndreYtelser.size}) må ha like mange elementer som økonomiList (${økonomiList.size})"
+            }
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
             if (aktuellDagsinntekt == INGEN) return NullProsent
-            val totalgrad = Inntekt.vektlagtGjennomsnitt(økonomiList.map { gradStrategi(it) to it.aktuellDagsinntekt }, inntektjustering)
-            return totalgrad
+            val gradertePerYrkesaktivitet =
+                økonomiList.mapIndexed { index, økonomi ->
+                    val andreYtelser = graderteAndreYtelser.getOrElse(index) { NullProsent }
+                    (gradStrategi(økonomi) - andreYtelser) to økonomi.aktuellDagsinntekt
+                }
+            return Inntekt.vektlagtGjennomsnitt(gradertePerYrkesaktivitet, økonomiList.inntektjustering())
         }
 
-        fun totalSykdomsgrad(økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel = 0.prosent): List<Økonomi> {
-            val totalSykdomsgrad = totalGradMedGraderteAndreYtelser(økonomiList, Økonomi::sykdomsgrad, graderteAndreYtelser)
+        fun totalSykdomsgrad(
+            økonomiList: List<Økonomi>,
+            graderteAndreYtelser: List<Prosentdel> = emptyList(),
+        ): List<Økonomi> {
+            val totalSykdomsgrad = totalGrad(økonomiList, Økonomi::sykdomsgrad, graderteAndreYtelser)
             return økonomiList.map { økonomi ->
                 økonomi.copy(totalSykdomsgrad = totalSykdomsgrad)
             }
@@ -59,23 +85,16 @@ data class Økonomi(
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel) =
-            totalGradMedGraderteAndreYtelser(økonomiList, Økonomi::utbetalingsgrad, graderteAndreYtelser)
-
-        private fun totalGradMedGraderteAndreYtelser(
+        internal fun totalUtbetalingsgrad(
             økonomiList: List<Økonomi>,
-            gradStrategi: (Økonomi) -> Prosentdel,
-            graderteAndreYtelser: Prosentdel
-        ): Prosentdel {
-            val grad = totalGrad(økonomiList, gradStrategi)
-            if (graderteAndreYtelser == NullProsent) return grad
+            graderteAndreYtelser: List<Prosentdel>,
+        ) = totalGrad(økonomiList, Økonomi::utbetalingsgrad, graderteAndreYtelser)
 
-            val gradUtenInntektjustering = totalGrad(økonomiList, gradStrategi, INGEN)
-            val romForAndreYtelser = HundreProsent - gradUtenInntektjustering
-            return grad - (graderteAndreYtelser - romForAndreYtelser)
-        }
-
-        fun betal(sykepengegrunnlagBegrenset6G: Inntekt, økonomiList: List<Økonomi>, graderteAndreYtelser: Prosentdel): List<Økonomi> {
+        fun betal(
+            sykepengegrunnlagBegrenset6G: Inntekt,
+            økonomiList: List<Økonomi>,
+            graderteAndreYtelser: List<Prosentdel> = emptyList(),
+        ): List<Økonomi> {
             val utbetalingsgrad = totalUtbetalingsgrad(økonomiList, graderteAndreYtelser)
             val foreløpig = delteUtbetalinger(økonomiList)
             val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
@@ -84,7 +103,11 @@ data class Økonomi(
 
         private fun delteUtbetalinger(økonomiList: List<Økonomi>) = økonomiList.map { it.reserver() }
 
-        private fun fordelBeløp(økonomiList: List<Økonomi>, sykepengegrunnlagBegrenset6G: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
+        private fun fordelBeløp(
+            økonomiList: List<Økonomi>,
+            sykepengegrunnlagBegrenset6G: Inntekt,
+            utbetalingsgrad: Prosentdel,
+        ): List<Økonomi> {
             val totalArbeidsgiverFør6GBegrensning = totalArbeidsgiver(økonomiList)
             val totalPersonFør6GBegrensning = totalPerson(økonomiList)
             val total = totalArbeidsgiverFør6GBegrensning + totalPersonFør6GBegrensning
@@ -98,17 +121,25 @@ data class Økonomi(
                 .sjekkRestbeløp(inntektstapSomSkalDekkesAvNAV)
         }
 
-        private fun List<Økonomi>.fordelRefusjon(totalArbeidsgiverFør6GBegrensning: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
-            return reduserBeløpTilTotal(
+        private fun List<Økonomi>.fordelRefusjon(
+            totalArbeidsgiverFør6GBegrensning: Inntekt,
+            inntektstapSomSkalDekkesAvNAV: Inntekt,
+            utbetalingsgrad: Prosentdel,
+        ): List<Økonomi> =
+            reduserBeløpTilTotal(
                 økonomiList = this,
                 total = totalArbeidsgiverFør6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
-                getter = { it.reservertArbeidsgiverbeløp!! }
+                getter = { it.reservertArbeidsgiverbeløp!! },
             )
-        }
 
-        private fun List<Økonomi>.fordelBruker(totalArbeidsgiverFør6GBegrensning: Inntekt, total: Inntekt, inntektstapSomSkalDekkesAvNAV: Inntekt, utbetalingsgrad: Prosentdel): List<Økonomi> {
+        private fun List<Økonomi>.fordelBruker(
+            totalArbeidsgiverFør6GBegrensning: Inntekt,
+            total: Inntekt,
+            inntektstapSomSkalDekkesAvNAV: Inntekt,
+            utbetalingsgrad: Prosentdel,
+        ): List<Økonomi> {
             val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
             val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiverFør6GBegrensning * ratio
 
@@ -117,7 +148,7 @@ data class Økonomi(
                 total = total - totalArbeidsgiverEtter6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning,
                 setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
-                getter = { it.reservertPersonbeløp!! }
+                getter = { it.reservertPersonbeløp!! },
             )
         }
 
@@ -129,7 +160,13 @@ data class Økonomi(
             return this
         }
 
-        private fun reduserBeløpTilTotal(økonomiList: List<Økonomi>, total: Inntekt, grense: Inntekt, setter: (Økonomi, Inntekt) -> Økonomi, getter: (Økonomi) -> Inntekt): List<Økonomi> {
+        private fun reduserBeløpTilTotal(
+            økonomiList: List<Økonomi>,
+            total: Inntekt,
+            grense: Inntekt,
+            setter: (Økonomi, Inntekt) -> Økonomi,
+            getter: (Økonomi) -> Inntekt,
+        ): List<Økonomi> {
             val ratio = reduksjon(grense, total)
             return økonomiList.map {
                 val redusertBeløp = getter(it).times(ratio)
@@ -137,20 +174,25 @@ data class Økonomi(
             }
         }
 
-        private fun reduksjon(grense: Inntekt, total: Inntekt): Prosentdel {
+        private fun reduksjon(
+            grense: Inntekt,
+            total: Inntekt,
+        ): Prosentdel {
             if (total == INGEN) return NullProsent
             return grense ratio total
         }
 
-        private fun total(økonomiList: List<Økonomi>, strategi: (Økonomi) -> Inntekt): Inntekt =
-            økonomiList.map { strategi(it) }.summer()
+        private fun total(
+            økonomiList: List<Økonomi>,
+            strategi: (Økonomi) -> Inntekt,
+        ): Inntekt = økonomiList.map { strategi(it) }.summer()
 
         private fun totalArbeidsgiver(økonomiList: List<Økonomi>) = total(økonomiList) { it.reservertArbeidsgiverbeløp!! }
 
         private fun totalPerson(økonomiList: List<Økonomi>) = total(økonomiList) { it.reservertPersonbeløp!! }
 
-        fun gjenopprett(dto: ØkonomiInnDto): Økonomi {
-            return Økonomi(
+        fun gjenopprett(dto: ØkonomiInnDto): Økonomi =
+            Økonomi(
                 sykdomsgrad = Prosentdel.gjenopprett(dto.grad),
                 totalSykdomsgrad = Prosentdel.gjenopprett(dto.totalGrad),
                 utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
@@ -161,9 +203,9 @@ data class Økonomi(
                 arbeidsgiverbeløp = dto.arbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
                 personbeløp = dto.personbeløp?.let { Inntekt.gjenopprett(it) },
                 reservertArbeidsgiverbeløp = dto.reservertArbeidsgiverbeløp?.let { Inntekt.gjenopprett(it) },
-                reservertPersonbeløp = dto.reservertPersonbeløp?.let { Inntekt.gjenopprett(it) }
+                reservertPersonbeløp = dto.reservertPersonbeløp?.let { Inntekt.gjenopprett(it) },
             )
-        }
+
         private val DekningsgradArbeidstaker = 100.prosent
         private val DekningsgradSelvstendig = 80.prosent
         private val DekningsgradInaktiv = 65.prosent
@@ -187,7 +229,7 @@ data class Økonomi(
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
             reservertArbeidsgiverbeløp = arbeidsgiverbeløp,
-            reservertPersonbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN)
+            reservertPersonbeløp = (total - arbeidsgiverbeløp).coerceAtLeast(INGEN),
         )
     }
 
@@ -202,19 +244,23 @@ data class Økonomi(
 
     fun ikkeBetalt() = copy(utbetalingsgrad = NullProsent)
 
-    fun dto() = ØkonomiUtDto(
-        grad = sykdomsgrad.dto(),
-        totalGrad = totalSykdomsgrad.dto(),
-        utbetalingsgrad = utbetalingsgrad.dto(),
-        arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
-        aktuellDagsinntekt = aktuellDagsinntekt.dto(),
-        inntektjustering = inntektjustering.dto(),
-        dekningsgrad = dekningsgrad.dto(),
-        arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
-        personbeløp = personbeløp?.dto(),
-        reservertArbeidsgiverbeløp = reservertArbeidsgiverbeløp?.dto(),
-        reservertPersonbeløp = reservertPersonbeløp?.dto()
-    )
+    fun dto() =
+        ØkonomiUtDto(
+            grad = sykdomsgrad.dto(),
+            totalGrad = totalSykdomsgrad.dto(),
+            utbetalingsgrad = utbetalingsgrad.dto(),
+            arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
+            aktuellDagsinntekt = aktuellDagsinntekt.dto(),
+            inntektjustering = inntektjustering.dto(),
+            dekningsgrad = dekningsgrad.dto(),
+            arbeidsgiverbeløp = arbeidsgiverbeløp?.dto(),
+            personbeløp = personbeløp?.dto(),
+            reservertArbeidsgiverbeløp = reservertArbeidsgiverbeløp?.dto(),
+            reservertPersonbeløp = reservertPersonbeløp?.dto(),
+        )
 }
 
-fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt, graderteAndreYtelser: Prosentdel) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, graderteAndreYtelser)
+fun List<Økonomi>.betal(
+    sykepengegrunnlagBegrenset6G: Inntekt,
+    graderteAndreYtelser: List<Prosentdel> = emptyList(),
+) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this, graderteAndreYtelser)

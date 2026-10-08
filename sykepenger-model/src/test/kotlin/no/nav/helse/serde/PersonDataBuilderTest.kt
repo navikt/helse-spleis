@@ -1,56 +1,21 @@
 package no.nav.helse.serde
 
-import java.time.LocalDate
-import java.time.Year
-import java.util.UUID
-import no.nav.helse.EnableFeriepenger
-import no.nav.helse.august
-import no.nav.helse.desember
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.INNTEKT
-import no.nav.helse.dsl.OverstyrtArbeidsgiveropplysning
-import no.nav.helse.dsl.UNG_PERSON_FNR_2018
-import no.nav.helse.dsl.UNG_PERSON_FØDSELSDATO
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.a3
-import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.dto.BegrunnelseDto
-import no.nav.helse.dto.DokumenttypeDto
-import no.nav.helse.dto.InntektDto
-import no.nav.helse.dto.InntektbeløpDto
-import no.nav.helse.dto.ProsentdelDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto
-import no.nav.helse.dto.VedtaksperiodetilstandDto
+import no.nav.helse.*
+import no.nav.helse.dsl.*
+import no.nav.helse.dto.*
 import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
 import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
 import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
-import no.nav.helse.erHelg
-import no.nav.helse.februar
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
-import no.nav.helse.januar
-import no.nav.helse.juni
-import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.AVV
-import no.nav.helse.testhelpers.FOR
-import no.nav.helse.testhelpers.FRI
-import no.nav.helse.testhelpers.HELG
-import no.nav.helse.testhelpers.NAP
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.UKJ
-import no.nav.helse.testhelpers.assertInstanceOf
-import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
@@ -59,16 +24,20 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
+import java.time.Year
+import java.util.*
 
 @EnableFeriepenger
 internal class PersonDataBuilderTest : AbstractDslTest() {
     private companion object {
-        private val IngenBeløp = InntektDto(
-            InntektbeløpDto.Årlig(beløp = 0.0),
-            InntektbeløpDto.MånedligDouble(beløp = 0.0),
-            InntektbeløpDto.DagligDouble(beløp = 0.0),
-            InntektbeløpDto.DagligInt(beløp = 0)
-        )
+        private val IngenBeløp =
+            InntektDto(
+                InntektbeløpDto.Årlig(beløp = 0.0),
+                InntektbeløpDto.MånedligDouble(beløp = 0.0),
+                InntektbeløpDto.DagligDouble(beløp = 0.0),
+                InntektbeløpDto.DagligInt(beløp = 0),
+            )
         private val IngenGrad = ProsentdelDto(prosentDesimal = 0.0)
     }
 
@@ -90,18 +59,22 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(5.januar, 17.januar, 100.prosent))
             håndterSelvbestemtArbeidsgiveropplysninger(
-                listOf(1.januar til 16.januar), refusjon = Inntektsmelding.Refusjon(
-                beløp = INNTEKT / 2,
-                opphørsdato = 31.januar
-            ))
+                listOf(1.januar til 16.januar),
+                refusjon =
+                    Inntektsmelding.Refusjon(
+                        beløp = INNTEKT / 2,
+                        opphørsdato = 31.januar,
+                    ),
+            )
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                arbeidsforhold = listOf(
-                    Triple(a1, LocalDate.EPOCH, null),
-                    Triple(a2, 1.desember(2017), null)
-                )
+                arbeidsforhold =
+                    listOf(
+                        Triple(a1, LocalDate.EPOCH, null),
+                        Triple(a2, 1.desember(2017), null),
+                    ),
             )
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
@@ -117,9 +90,10 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(
-                Sykdom(3.februar, 28.februar, 100.prosent), Arbeid(21.februar, 28.februar),
+                Sykdom(3.februar, 28.februar, 100.prosent),
+                Arbeid(21.februar, 28.februar),
                 egenmeldinger = listOf(1.februar til 2.februar),
-                sendtTilNAVEllerArbeidsgiver = 1.juni
+                sendtTilNAVEllerArbeidsgiver = 1.juni,
             )
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
@@ -133,7 +107,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                 listOf(1.juni til 16.juni),
                 beregnetInntekt = INNTEKT,
                 begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
-                refusjon = Inntektsmelding.Refusjon(INGEN, null)
+                refusjon = Inntektsmelding.Refusjon(INGEN, null),
             )
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
@@ -169,22 +143,24 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     @Test
     fun `dto av utbetalingstidslinje`() {
         val sykepengegrunnlag = 1200.daglig
-        val utbetalingstidslinje = tidslinjeOf(
-            1.AP,
-            1.NAP,
-            1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0),
-            1.HELG,
-            1.ARB,
-            1.FRI,
-            1.FOR,
-            1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
-            1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
-            1.UKJ
-        )
-        val dto = Utbetalingstidslinje
-            .betale(sykepengegrunnlag, listOf(utbetalingstidslinje), { 0.prosent })
-            .single()
-            .dto()
+        val utbetalingstidslinje =
+            tidslinjeOf(
+                1.AP,
+                1.NAP,
+                1.NAV(dekningsgrunnlag = 1200, refusjonsbeløp = 600.0),
+                1.HELG,
+                1.ARB,
+                1.FRI,
+                1.FOR,
+                1.AVV(dekningsgrunnlag = 1000, begrunnelse = Begrunnelse.SykepengedagerOppbrukt),
+                1.AVV(dekningsgrunnlag = 500, begrunnelse = Begrunnelse.MinimumInntekt),
+                1.UKJ,
+            )
+        val dto =
+            Utbetalingstidslinje
+                .betale(sykepengegrunnlag, listOf(utbetalingstidslinje))
+                .single()
+                .dto()
         assertEquals(10, dto.dager.size)
         dto.dager[0].also { dag ->
             assertEquals(1.januar, dag.dato)
@@ -204,8 +180,9 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     InntektbeløpDto.Årlig(beløp = 312000.0),
                     InntektbeløpDto.MånedligDouble(beløp = 26000.0),
                     InntektbeløpDto.DagligDouble(beløp = 1200.0),
-                    InntektbeløpDto.DagligInt(beløp = 1200)
-                ), dag.økonomi.personbeløp
+                    InntektbeløpDto.DagligInt(beløp = 1200),
+                ),
+                dag.økonomi.personbeløp,
             )
             assertInstanceOf<UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto>(dag)
         }
@@ -218,16 +195,18 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     InntektbeløpDto.Årlig(beløp = 156000.0),
                     InntektbeløpDto.MånedligDouble(beløp = 13000.0),
                     InntektbeløpDto.DagligDouble(beløp = 600.0),
-                    InntektbeløpDto.DagligInt(beløp = 600)
-                ), dag.økonomi.arbeidsgiverbeløp
+                    InntektbeløpDto.DagligInt(beløp = 600),
+                ),
+                dag.økonomi.arbeidsgiverbeløp,
             )
             assertEquals(
                 InntektDto(
                     InntektbeløpDto.Årlig(beløp = 156000.0),
                     InntektbeløpDto.MånedligDouble(beløp = 13000.0),
                     InntektbeløpDto.DagligDouble(beløp = 600.0),
-                    InntektbeløpDto.DagligInt(beløp = 600)
-                ), dag.økonomi.personbeløp
+                    InntektbeløpDto.DagligInt(beløp = 600),
+                ),
+                dag.økonomi.personbeløp,
             )
             assertInstanceOf<UtbetalingsdagUtDto.NavDagDto>(dag)
         }
@@ -240,8 +219,9 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     InntektbeløpDto.Årlig(beløp = 312000.0),
                     InntektbeløpDto.MånedligDouble(beløp = 26000.0),
                     InntektbeløpDto.DagligDouble(beløp = 1200.0),
-                    InntektbeløpDto.DagligInt(beløp = 1200)
-                ), dag.økonomi.arbeidsgiverbeløp
+                    InntektbeløpDto.DagligInt(beløp = 1200),
+                ),
+                dag.økonomi.arbeidsgiverbeløp,
             )
             assertEquals(IngenBeløp, dag.økonomi.personbeløp)
             assertInstanceOf<UtbetalingsdagUtDto.NavHelgDagDto>(dag)
@@ -322,8 +302,11 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                     forventetPeriode.forEach { dato ->
                         val dagen = dager.single { it.dato == dato }
                         assertEquals("Søknad", dagen.kilde.type)
-                        if (dato.erHelg()) assertInstanceOf<SykdomstidslinjeDagDto.SykHelgedagDto>(dagen)
-                        else assertInstanceOf<SykdomstidslinjeDagDto.SykedagDto>(dagen)
+                        if (dato.erHelg()) {
+                            assertInstanceOf<SykdomstidslinjeDagDto.SykHelgedagDto>(dagen)
+                        } else {
+                            assertInstanceOf<SykdomstidslinjeDagDto.SykedagDto>(dagen)
+                        }
                     }
                 }
                 assertEquals(13, sykdomshistorikkElement.beregnetSykdomstidslinje.dager.size)
@@ -382,16 +365,17 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
                 skatteinntekter = listOf(a1 to INNTEKT),
-                forsikringsvurderingId = forsikringsvurderingId
+                forsikringsvurderingId = forsikringsvurderingId,
             )
         }
 
         val dto = dto()
 
-        val spleis = dto.vilkårsgrunnlagHistorikk.historikk
-            .flatMap { it.vilkårsgrunnlag }
-            .filterIsInstance<VilkårsgrunnlagUtDto.Spleis>()
-            .single()
+        val spleis =
+            dto.vilkårsgrunnlagHistorikk.historikk
+                .flatMap { it.vilkårsgrunnlag }
+                .filterIsInstance<VilkårsgrunnlagUtDto.Spleis>()
+                .single()
         assertEquals(forsikringsvurderingId, spleis.forsikringsvurderingId)
 
         assertGjenoppbygget(dto)
@@ -411,8 +395,9 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                             InntektbeløpDto.Årlig(beløp = 372000.0),
                             InntektbeløpDto.MånedligDouble(beløp = 31000.0),
                             InntektbeløpDto.DagligDouble(beløp = 1430.7692307692307),
-                            InntektbeløpDto.DagligInt(beløp = 1430)
-                        ), arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp
+                            InntektbeløpDto.DagligInt(beløp = 1430),
+                        ),
+                        arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp,
                     )
                 }
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[1].also { arbeidsgiverInntektsopplysningDto ->
@@ -423,8 +408,10 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
                             InntektbeløpDto.Årlig(beløp = 0.0),
                             InntektbeløpDto.MånedligDouble(beløp = 0.0),
                             InntektbeløpDto.DagligDouble(beløp = 0.0),
-                            InntektbeløpDto.DagligInt(beløp = 0)
-                        ), arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp)
+                            InntektbeløpDto.DagligInt(beløp = 0),
+                        ),
+                        arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsdata.beløp,
+                    )
                 }
             }
         }

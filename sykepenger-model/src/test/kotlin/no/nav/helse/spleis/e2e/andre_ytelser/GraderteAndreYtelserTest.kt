@@ -5,6 +5,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.assertInntektsgrunnlag
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.selvstendig
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
 import no.nav.helse.hendelser.GraderteAndreYtelserType
@@ -18,6 +19,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -25,8 +28,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class GraderteAndreYtelserTest : AbstractDslTest() {
-
-    //@OpenInSpanner
+    // @OpenInSpanner
     @Test
     fun `pleiepenger sykt barn`() {
         a1 {
@@ -39,12 +41,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             håndterGraderteAndreYtelserEndret(20.januar)
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-                    )
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1400,-
@@ -72,13 +76,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-
-                    )
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
             assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 19.januar)
@@ -94,13 +99,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-
-                    )
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 1435,-
@@ -116,12 +122,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     @Test
     fun `annen ytelse for person med to arbeidsforhold, men under 6G til sammen`() {
         val inntektPerArbeidsgiver = 260_000.årlig
-        val gradertePleiepenger = listOf(
-            GraderteAndreYtelserForBeregning(
-                graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
-                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-            )
-        )
+        val gradertePleiepenger =
+            listOf(a1, a2).map { orgnr ->
+                GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                    yrkesaktivitet = Arbeidstaker(orgnr),
+                )
+            }
 
         listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
 
@@ -175,12 +183,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     fun `annen ytelse for person med to arbeidsforhold, og 6G-begrenset til sammen`() {
         val inntektA1 = 400_000.årlig
         val inntektA2 = 600_000.årlig
-        val gradertePleiepenger = listOf(
-            GraderteAndreYtelserForBeregning(
-                graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
-                graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-            )
-        )
+        val gradertePleiepenger =
+            listOf(a1, a2).map { orgnr ->
+                GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                    yrkesaktivitet = Arbeidstaker(orgnr),
+                )
+            }
 
         a1 {
             håndterSykmelding(januar)
@@ -196,7 +206,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         a1 {
             håndterVilkårsgrunnlag(
                 1.vedtaksperiode,
-                skatteinntekter = listOf(a1 to inntektA1, a2 to inntektA2)
+                skatteinntekter = listOf(a1 to inntektA1, a2 to inntektA2),
             )
             assertInntektsgrunnlag(1.januar, 2) {
                 assertInntektsgrunnlag(a1, inntektA1)
@@ -250,13 +260,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             håndterYtelser(
                 1.vedtaksperiode,
                 inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 30.januar, 250.daglig)),
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 29.januar, 50)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
-
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 29.januar, 50)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
                     ),
-                )
             )
 
             // Jeg er bare et regnestykke for å vise hvorfor det blir 750,-
@@ -295,18 +306,25 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 31.januar, 81)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
-                    )
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 31.januar, 81)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
             // Alt er avvist, under 20 prosent
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 2000, subset = 17.januar til 31.januar)
 
-            assertEquals(11, inspektør(a1).utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.size)
+            assertEquals(
+                11,
+                inspektør(a1)
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
 
             assertEquals(0.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
             assertEquals(19.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
@@ -316,7 +334,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `gradert sykmeldt, graderte foreldrepenger og 6G-begrenset`() {
+    fun `gradert sykmeldt og graderte foreldrepenger trekkes direkte fra sykdomsgraden`() {
         a1 {
             nyttVedtak(1.juni(2025) til 30.juni(2025), beregnetInntekt = 2_000_000.årlig, grad = 50.prosent)
             assertInntektsgrunnlag(1.juni(2025), 1) {
@@ -328,16 +346,26 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             håndterGraderteAndreYtelserEndret(1.juni(2025))
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.juni(2025), 30.juni(2025), 50)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
-                    )
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.juni(2025), 30.juni(2025), 50)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
-            // Her er det "plass" til 50% foreldrepenger uten at det går utover sykepengene
-            assertUtbetalingsbeløp(1.vedtaksperiode, 1502, 7692, subset = 17.juni(2025) til 30.juni(2025))
+            // Graderingen trekkes direkte fra sykdomsgraden, uten hensyn til at personen er i arbeid de resterende 50 %: 50 % - 50 % = 0 %
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 7692, subset = 17.juni(2025) til 30.juni(2025))
+            assertEquals(0.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(17.juni(2025)))
+            assertEquals(
+                10,
+                inspektør
+                    .utbetalingstidslinjer(1.vedtaksperiode)
+                    .inspektør.avvistedager.size,
+            )
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_4)
         }
     }
 
@@ -350,34 +378,125 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             håndterYtelser(
                 1.vedtaksperiode,
-                graderteAndreYtelser = listOf(
-                    GraderteAndreYtelserForBeregning(
-                        graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 28.januar, 20)),
-                        graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER
-                    ), GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(17.januar, 22.januar, 20)),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER
-
-                ), GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 22.januar, 15)),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER
-
-                ), GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 30.januar, 20)),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.OPPLARINGSPENGER
-
-                )
-
-                )
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 28.januar, 20)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(17.januar, 22.januar, 20)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 22.januar, 15)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(22.januar, 30.januar, 20)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OPPLARINGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
             )
 
             assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 17.januar til 21.januar) // 1431 * 0,60 =  858
-            assertUtbetalingsbeløp(1.vedtaksperiode, 358, 1431, subset = 22.januar.somPeriode())  // 1431 * 0,25 =  358
+            assertUtbetalingsbeløp(1.vedtaksperiode, 358, 1431, subset = 22.januar.somPeriode()) // 1431 * 0,25 =  358
             assertUtbetalingsbeløp(1.vedtaksperiode, 858, 1431, subset = 23.januar til 28.januar) // 1431 * 0,60 =  858
-            assertUtbetalingsbeløp(1.vedtaksperiode, 1145, 1431, subset = 29.januar til 30.januar)// 1431 * 0,80 = 1145
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1145, 1431, subset = 29.januar til 30.januar) // 1431 * 0,80 = 1145
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 31.januar.somPeriode()) // 1431 * 1,00 = 1431
 
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+        }
+    }
+
+    @Test
+    fun `annen ytelse graderes kun mot yrkesaktiviteten den gjelder for`() {
+        val inntektPerArbeidsgiver = 260_000.årlig
+        val gradertePleiepengerMotA1 =
+            listOf(
+                GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                    yrkesaktivitet = Arbeidstaker(a1),
+                ),
+            )
+
+        listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
+
+        a1 {
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepengerMotA1)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            // a1: 100 % - 30 % = 70 %, a2: 100 % => (70 % * 1000 + 100 % * 1000) / 2000 = 85 %
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 850, 1000, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepengerMotA1)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 850, 1000, subset = 20.januar til 30.januar)
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `annen ytelse mot yrkesaktivitet som ikke er med i beregningen ignoreres`() {
+        a1 {
+            nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 30)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a2),
+                        ),
+                    ),
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 2000, 2000, subset = 17.januar til 31.januar)
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+        }
+    }
+
+    @Test
+    fun `annen ytelse graderes mot selvstendig næringsdrivende`() {
+        selvstendig {
+            håndterFørstegangssøknadSelvstendig(januar)
+            håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(1.januar, 31.januar, 40)),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
+                            yrkesaktivitet = Selvstendig,
+                        ),
+                    ),
+            )
+
+            assertEquals(60.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(60.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
         }
     }
 }

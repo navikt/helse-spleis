@@ -1,8 +1,5 @@
 package no.nav.helse.hendelser
 
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.UUID
 import no.nav.helse.Tidslinje
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
@@ -14,6 +11,9 @@ import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Ann
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
 import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.*
 
 class Ytelser(
     meldingsreferanseId: MeldingsreferanseId,
@@ -30,17 +30,18 @@ class Ytelser(
     private val inntekterForBeregning: InntekterForBeregning,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
     val opptjeningsvurderingResultatOk: Boolean,
-    private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList()
+    private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
 ) : Hendelse {
-    override val metadata = LocalDateTime.now().let { nå ->
-        HendelseMetadata(
-            meldingsreferanseId = meldingsreferanseId,
-            avsender = SYSTEM,
-            innsendt = nå,
-            registrert = nå,
-            automatiskBehandling = true
-        )
-    }
+    override val metadata =
+        LocalDateTime.now().let { nå ->
+            HendelseMetadata(
+                meldingsreferanseId = meldingsreferanseId,
+                avsender = SYSTEM,
+                innsendt = nå,
+                registrert = nå,
+                automatiskBehandling = true,
+            )
+        }
 
     companion object {
         internal val Periode.familieYtelserPeriode get() = oppdaterFom(start.minusWeeks(4))
@@ -53,7 +54,7 @@ class Ytelser(
         periode: Periode,
         skjæringstidspunkt: LocalDate,
         maksdato: LocalDate,
-        erForlengelse: Boolean
+        erForlengelse: Boolean,
     ): Boolean {
         if (periode.start > maksdato) return true
 
@@ -74,29 +75,46 @@ class Ytelser(
         val kilde = Kilde(metadata.meldingsreferanseId, SYSTEM, LocalDateTime.now())
         return inntekterForBeregning.inntektsperioder
             .groupBy { it.inntektskilde }
-            .mapKeys { (inntektskilde, _) -> inntektskilde.uppercase().let {
-                when {
-                    it == "SELVSTENDIG" -> Yrkesaktivitet.Selvstendig
-                    it == "FRILANS" -> Yrkesaktivitet.Frilans
-                    it.matches("\\d{9}".toRegex()) -> Yrkesaktivitet.Arbeidstaker(it)
-                    else -> AnnenInntektskilde(it)
+            .mapKeys { (inntektskilde, _) ->
+                inntektskilde.uppercase().let {
+                    when {
+                        it == "SELVSTENDIG" -> Yrkesaktivitet.Selvstendig
+                        it == "FRILANS" -> Yrkesaktivitet.Frilans
+                        it.matches("\\d{9}".toRegex()) -> Yrkesaktivitet.Arbeidstaker(it)
+                        else -> AnnenInntektskilde(it)
+                    }
                 }
-            }}
-            .mapValues { (_, inntektsperioder) ->
+            }.mapValues { (_, inntektsperioder) ->
                 inntektsperioder.fold(Beløpstidslinje()) { sammenslått, ny ->
                     sammenslått + Beløpstidslinje.fra(ny.periode, ny.beløp, kilde)
                 }
             }
     }
 
-    internal fun graderteAndreYtelser() = graderteAndreYtelser.flatMap { graderteAndreYtelserForBeregning -> graderteAndreYtelserForBeregning.graderteAndreYtelserForBeregningPeriodeList }.fold(GraderteAndreYtelserTidslinje()) { sammenslått, graderteAndreYtelserForBeregningPeriode ->
-        sammenslått + GraderteAndreYtelserTidslinje(graderteAndreYtelserForBeregningPeriode.tilPeriode() to graderteAndreYtelserForBeregningPeriode.grad.prosent)
-    }
+    internal fun graderteAndreYtelser(): Map<Yrkesaktivitet, GraderteAndreYtelserTidslinje> =
+        graderteAndreYtelser
+            .groupBy { it.yrkesaktivitet }
+            .mapValues { (_, graderteAndreYtelserForYrkesaktivitet) ->
+                graderteAndreYtelserForYrkesaktivitet
+                    .flatMap { it.graderteAndreYtelserForBeregningPeriodeList }
+                    .fold(GraderteAndreYtelserTidslinje()) { sammenslått, periode ->
+                        sammenslått + GraderteAndreYtelserTidslinje(periode.tilPeriode() to periode.grad.prosent)
+                    }
+            }
 }
 
-data class GradertPeriode(internal val periode: Periode, internal val grad: Int)
+data class GradertPeriode(
+    internal val periode: Periode,
+    internal val grad: Int,
+)
 
-internal class GraderteAndreYtelserTidslinje(vararg perioder: Pair<Periode, Prosentdel>) : Tidslinje<Prosentdel, GraderteAndreYtelserTidslinje>(*perioder) {
+internal class GraderteAndreYtelserTidslinje(
+    vararg perioder: Pair<Periode, Prosentdel>,
+) : Tidslinje<Prosentdel, GraderteAndreYtelserTidslinje>(*perioder) {
     override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = GraderteAndreYtelserTidslinje(*perioder)
-    override fun pluss(eksisterendeVerdi: Prosentdel, nyVerdi: Prosentdel) = eksisterendeVerdi + nyVerdi
+
+    override fun pluss(
+        eksisterendeVerdi: Prosentdel,
+        nyVerdi: Prosentdel,
+    ) = eksisterendeVerdi + nyVerdi
 }

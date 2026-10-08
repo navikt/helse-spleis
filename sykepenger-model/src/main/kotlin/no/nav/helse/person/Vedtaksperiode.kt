@@ -6,72 +6,22 @@ import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
 import no.nav.helse.erRettFør
-import no.nav.helse.etterlevelse.Regelverkslogg
-import no.nav.helse.etterlevelse.Subsumsjonslogg
+import no.nav.helse.etterlevelse.*
 import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjonsformat
-import no.nav.helse.etterlevelse.`fvl § 35 ledd 1`
-import no.nav.helse.etterlevelse.`§ 8-12 ledd 1 punktum 1`
-import no.nav.helse.etterlevelse.`§ 8-12 ledd 2`
-import no.nav.helse.etterlevelse.`§ 8-13 ledd 1`
-import no.nav.helse.etterlevelse.`§ 8-13 ledd 2`
-import no.nav.helse.etterlevelse.`§ 8-28 ledd 3 bokstav a`
-import no.nav.helse.etterlevelse.`§ 8-29`
-import no.nav.helse.etterlevelse.`§ 8-3 ledd 1 punktum 2`
-import no.nav.helse.etterlevelse.`§ 8-51 ledd 3`
 import no.nav.helse.forrigeDag
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeNyArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.IkkeUtbetaltArbeidsgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.RedusertUtbetaltBeløpIArbeidsgiverperioden
-import no.nav.helse.hendelser.Arbeidsgiveropplysning.UtbetaltDelerAvArbeidsgiverperioden
-import no.nav.helse.hendelser.Arbeidsgiveropplysninger
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.*
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somArbeidstakerOrThrow
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
-import no.nav.helse.hendelser.BitAvArbeidsgiverperiode
-import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.FunksjonelleFeilTilVarsler
-import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.HendelseMetadata
-import no.nav.helse.hendelser.Hendelseskilde
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
-import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
-import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.mapWithNext
 import no.nav.helse.nesteDag
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
@@ -88,24 +38,9 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Mottatt søknad som delvis overlapper`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.varsel
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_24
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_25
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_27
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_28
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_10
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_11
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_OV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RV_7
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SV_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_17
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_4
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_VV_9
 import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
@@ -116,88 +51,21 @@ import no.nav.helse.person.infotrygdhistorikk.Friperiode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
 import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
-import no.nav.helse.person.inntekt.ArbeidsgiverInntektsopplysning
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
-import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklarteInntekter
-import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
-import no.nav.helse.person.inntekt.Inntektsdata
-import no.nav.helse.person.inntekt.Inntektsgrunnlag
-import no.nav.helse.person.inntekt.Inntektshistorikk
-import no.nav.helse.person.inntekt.Inntektssituasjon
+import no.nav.helse.person.inntekt.*
 import no.nav.helse.person.inntekt.Saksbehandler
-import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
-import no.nav.helse.person.inntekt.SelvstendigInntektsopplysning
-import no.nav.helse.person.inntekt.Skatteopplysning
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
-import no.nav.helse.person.inntekt.SkatteopplysningerForSykepengegrunnlag
-import no.nav.helse.person.inntekt.harAvklartArbeidstakerinntekt
 import no.nav.helse.person.refusjon.Refusjonsservitør
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigStart
-import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
-import no.nav.helse.person.tilstandsmaskin.Avsluttet
-import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
-import no.nav.helse.person.tilstandsmaskin.AvventerAnnulleringTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenning
-import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenningRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerHistorikk
-import no.nav.helse.person.tilstandsmaskin.AvventerHistorikkRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsmelding
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsopplysningerForAnnenArbeidsgiver
-import no.nav.helse.person.tilstandsmaskin.AvventerRefusjonsopplysningerAnnenPeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerRevurderingTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerSimulering
-import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
-import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.FrilansStart
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenningRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikk
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikkRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurderingTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimuleringRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
-import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.TilAnnullering
-import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
-import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
-import no.nav.helse.person.tilstandsmaskin.nesteTilstandEtterInntekt
-import no.nav.helse.person.tilstandsmaskin.starttilstander
+import no.nav.helse.person.tilstandsmaskin.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig.somString
-import no.nav.helse.utbetalingstidslinje.ArbeidsgiverberegningBuilder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.MinimumSykdomsgrad
-import no.nav.helse.utbetalingstidslinje.BeregnetPeriode
 import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
-import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
-import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Minsteinntektsvurdering.Companion.lagMinsteinntektsvurdering
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinjesubsumsjon
-import no.nav.helse.utbetalingstidslinje.filtrerUtbetalingstidslinjer
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Prosentdel
@@ -205,7 +73,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class Vedtaksperiode private constructor(
     internal val person: Person,
@@ -1862,7 +1730,7 @@ internal class Vedtaksperiode private constructor(
 
         val avslåtteDagerUtbetaltIInfotrygdObservatør = AvslåtteDagerUtbetaltIInfotrygdObservatør(infotrygdtidslinje)
 
-        val graderteAndreYtelserTidslinje = ytelser.graderteAndreYtelser()
+        val graderteAndreYtelserPerYrkesaktivitet = ytelser.graderteAndreYtelser()
         val beregnetTidslinjePerVedtaksperiode =
             filtrerUtbetalingstidslinjer(
                 uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
@@ -1877,7 +1745,11 @@ internal class Vedtaksperiode private constructor(
                 historisktidslinje = historisktidslinje,
                 perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
                 regler = person.regler,
-                graderteAndreYtelser = { dato -> graderteAndreYtelserTidslinje[dato] ?: 0.prosent },
+                graderteAndreYtelser = { inntektskilde, dato ->
+                    graderteAndreYtelserPerYrkesaktivitet[inntektskilde]?.get(
+                        dato,
+                    ) ?: 0.prosent
+                },
                 avslåttDag = avslåtteDagerUtbetaltIInfotrygdObservatør::avslåttDag,
             )
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)

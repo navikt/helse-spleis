@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.utenPerioder
@@ -8,6 +7,7 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Prosentdel
+import java.time.LocalDate
 
 internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatoberegning: Maksdatoberegning): List<Arbeidsgiverberegning> {
     val vurderinger = maksdatoberegning.beregn(this)
@@ -16,35 +16,50 @@ internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatobe
      *  fra sisteVurdering, men det er noen enhetstester som tester veldig lange
      *  tidslinjer og de forventer at alle maksdatodager avslås, uavhengig av maksdatosak
      */
-    val begrunnelser = vurderinger
-        .flatMap { maksdatosak ->
-            maksdatosak.begrunnelser.map { (begrunnelse, dato) -> dato to begrunnelse }
-        }
-        .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+    val begrunnelser =
+        vurderinger
+            .flatMap { maksdatosak ->
+                maksdatosak.begrunnelser.map { (begrunnelse, dato) -> dato to begrunnelse }
+            }.groupBy(keySelector = { it.first }, valueTransform = { it.second })
 
-    val avvisteTidslinjer = begrunnelser.entries.fold(this) { result, (begrunnelse, dager) ->
-        result.avvis(dager.grupperSammenhengendePerioder(), begrunnelse)
-    }
+    val avvisteTidslinjer =
+        begrunnelser.entries.fold(this) { result, (begrunnelse, dager) ->
+            result.avvis(dager.grupperSammenhengendePerioder(), begrunnelse)
+        }
 
     return avvisteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt, graderteAndreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
-    val betalteTidslinjer = Utbetalingstidslinje
-        .betale(sykepengegrunnlagBegrenset6G, this.map { it.samletTidslinje }, graderteAndreYtelser)
-        .zip(this) { beregnetTidslinje, arbeidsgiver ->
-            arbeidsgiver.copy(
-                vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
-                    vedtaksperiode.copy(
-                        utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiode.periode)
-                    )
-                }
-            )
-        }
+internal fun List<Arbeidsgiverberegning>.graderteAndreYtelserPerDag(graderteAndreYtelser: GraderteAndreYtelser): (dato: LocalDate) -> List<Prosentdel> = { dato -> this.map { graderteAndreYtelser(it.inntektskilde, dato) } }
+
+internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(
+    sykepengegrunnlagBegrenset6G: Inntekt,
+    graderteAndreYtelser: GraderteAndreYtelser,
+): List<Arbeidsgiverberegning> {
+    val betalteTidslinjer =
+        Utbetalingstidslinje
+            .betale(
+                sykepengegrunnlagBegrenset6G,
+                this.map { it.samletTidslinje },
+                graderteAndreYtelserPerDag(graderteAndreYtelser),
+            ).zip(this) { beregnetTidslinje, arbeidsgiver ->
+                arbeidsgiver.copy(
+                    vedtaksperioder =
+                        arbeidsgiver.vedtaksperioder.map { vedtaksperiode ->
+                            vedtaksperiode.copy(
+                                utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiode.periode),
+                            )
+                        },
+                )
+            }
     return betalteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.avvisMinsteinntekt(sekstisyvårsdagen: LocalDate, erUnderMinsteinntektskravTilFylte67: Boolean, erUnderMinsteinntektEtterFylte67: Boolean): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.avvisMinsteinntekt(
+    sekstisyvårsdagen: LocalDate,
+    erUnderMinsteinntektskravTilFylte67: Boolean,
+    erUnderMinsteinntektEtterFylte67: Boolean,
+): List<Arbeidsgiverberegning> {
     fun List<Arbeidsgiverberegning>.avvisMinsteinntektTilFylte67(): List<Arbeidsgiverberegning> {
         if (!erUnderMinsteinntektskravTilFylte67) return this
         return avvis(listOf(LocalDate.MIN til sekstisyvårsdagen), Begrunnelse.MinimumInntekt)
@@ -69,22 +84,29 @@ internal fun List<Arbeidsgiverberegning>.avvisMedlemskap(erMedlemAvFolketrygden:
     return this.avvis(listOf(LocalDate.MIN til LocalDate.MAX), Begrunnelse.ManglerMedlemskap)
 }
 
-internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>, graderteAndreYtelser: (dato: LocalDate) -> Prosentdel): List<Arbeidsgiverberegning> {
-    fun List<Arbeidsgiverberegning>.totalSykdomsgradsberegning(): List<Arbeidsgiverberegning> {
-        return Utbetalingstidslinje.totalSykdomsgrad(this.map { it.samletTidslinje }, graderteAndreYtelser)
-            .zip(this) { beregnetTidslinje, arbeidsgiver ->
+internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(
+    perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
+    graderteAndreYtelser: GraderteAndreYtelser,
+): List<Arbeidsgiverberegning> {
+    fun List<Arbeidsgiverberegning>.totalSykdomsgradsberegning(): List<Arbeidsgiverberegning> =
+        Utbetalingstidslinje
+            .totalSykdomsgrad(
+                this.map { it.samletTidslinje },
+                graderteAndreYtelserPerDag(graderteAndreYtelser),
+            ).zip(this) { beregnetTidslinje, arbeidsgiver ->
                 arbeidsgiver.copy(
-                    vedtaksperioder = arbeidsgiver.vedtaksperioder.map { vedtaksperiodeberegning ->
-                        vedtaksperiodeberegning.copy(
-                            utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiodeberegning.periode)
-                        )
-                    },
-                    ghostOgAndreInntektskilder = arbeidsgiver.ghostOgAndreInntektskilder.map {
-                        beregnetTidslinje.subset(it.periode())
-                    }
+                    vedtaksperioder =
+                        arbeidsgiver.vedtaksperioder.map { vedtaksperiodeberegning ->
+                            vedtaksperiodeberegning.copy(
+                                utbetalingstidslinje = beregnetTidslinje.subset(vedtaksperiodeberegning.periode),
+                            )
+                        },
+                    ghostOgAndreInntektskilder =
+                        arbeidsgiver.ghostOgAndreInntektskilder.map {
+                            beregnetTidslinje.subset(it.periode())
+                        },
                 )
             }
-    }
 
     fun List<Arbeidsgiverberegning>.avvisSykdomsgradUnderGrense(): List<Arbeidsgiverberegning> {
         val tentativtAvvistePerioder = Utbetalingsdag.dagerUnderGrensen(this.map { it.samletVedtaksperiodetidslinje })

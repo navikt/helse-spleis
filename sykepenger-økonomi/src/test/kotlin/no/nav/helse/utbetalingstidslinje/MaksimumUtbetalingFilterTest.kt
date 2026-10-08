@@ -1,21 +1,17 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.*
 
 internal class MaksimumUtbetalingFilterTest {
-
     @Test
     fun `når inntekt er under 6G blir utbetaling lik inntekt`() {
         val inntekt = 1200.daglig
@@ -35,9 +31,10 @@ internal class MaksimumUtbetalingFilterTest {
     fun `utbetaling for tidslinje med ulike daginntekter blir kalkulert per dag`() {
         val sykepengegrunnlag = 3500.daglig
         val tidslinje = tidslinjeOf(12.NAV(3500.0), 14.NAV(1200.0))
-        val m = assertThrows<IllegalStateException> {
-            tidslinje.betal(sykepengegrunnlag)
-        }
+        val m =
+            assertThrows<IllegalStateException> {
+                tidslinje.betal(sykepengegrunnlag)
+            }
         assertEquals("Det er et restbeløp på kr [Årlig: 598000.0, Månedlig: 49833.333333333336, Daglig: 2300.0] etter all fordeling", m.message)
     }
 
@@ -55,20 +52,30 @@ internal class MaksimumUtbetalingFilterTest {
         assertEquals(6000, tidslinje.inspektør.totalUtbetaling())
     }
 
-    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }): Utbetalingstidslinje {
-        val input = listOf(
-            Arbeidsgiverberegning(
-                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a1"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = this
-                    )
+    private fun Utbetalingstidslinje.betal(
+        sykepengegrunnlag: Inntekt,
+        andreYtelser: GraderteAndreYtelser = IngenGraderteAndreYtelser,
+    ): Utbetalingstidslinje {
+        val input =
+            listOf(
+                Arbeidsgiverberegning(
+                    inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a1"),
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiodeberegning(
+                                vedtaksperiodeId = UUID.randomUUID(),
+                                utbetalingstidslinje = this,
+                            ),
+                        ),
+                    ghostOgAndreInntektskilder = emptyList(),
                 ),
-                ghostOgAndreInntektskilder = emptyList()
             )
-        )
 
-        return input.maksimumUtbetalingsberegning(sykepengegrunnlag, andreYtelser).single().vedtaksperioder.single().utbetalingstidslinje
+        return input
+            .maksimumUtbetalingsberegning(sykepengegrunnlag, andreYtelser)
+            .single()
+            .vedtaksperioder
+            .single()
+            .utbetalingstidslinje
     }
 }

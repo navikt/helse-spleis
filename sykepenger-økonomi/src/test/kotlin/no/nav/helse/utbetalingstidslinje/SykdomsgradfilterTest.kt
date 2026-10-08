@@ -1,6 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.util.UUID
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -11,12 +10,11 @@ import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class SykdomsgradfilterTest {
-
     private lateinit var inspektør: UtbetalingstidslinjeInspektør
 
     @Test
@@ -61,10 +59,11 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avvis dager for begge tidslinjer`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
-            tidslinjeOf(16.AP, 5.NAV(1200, 19.0))
-        )
+        val tidslinjer =
+            listOf(
+                tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
+                tidslinjeOf(16.AP, 5.NAV(1200, 19.0)),
+            )
         val periode = Periode(1.januar, 21.januar)
         val resultat = undersøke(tidslinjer)
         assertEquals(3, resultat.inspektør(0).avvistDagTeller)
@@ -75,10 +74,11 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser utbetaling når samlet grad er under 20 prosent`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 39)),
-            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
-        )
+        val tidslinjer =
+            listOf(
+                tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 39)),
+                tidslinjeOf(16.AP, 5.NAV, 1.FRI),
+            )
         val resultat = undersøke(tidslinjer)
         assertEquals(3, resultat.inspektør(0).navDagTeller)
         assertEquals(2, resultat.inspektør(0).navHelgDagTeller)
@@ -90,10 +90,11 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser ikke utbetaling når samlet grad er minst 20 prosent`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 40)),
-            tidslinjeOf(16.AP, 5.NAV, 1.FRI)
-        )
+        val tidslinjer =
+            listOf(
+                tidslinjeOf(16.AP, 5.NAV, 1.NAV(1200, 40)),
+                tidslinjeOf(16.AP, 5.NAV, 1.FRI),
+            )
         val resultat = undersøke(tidslinjer)
         assertEquals(4, resultat.inspektør(0).navDagTeller)
         assertEquals(2, resultat.inspektør(0).navHelgDagTeller)
@@ -105,9 +106,10 @@ internal class SykdomsgradfilterTest {
 
     @Test
     fun `avviser ikke andre ytelser`() {
-        val tidslinjer = listOf(
-            tidslinjeOf(16.AP, 6.AVV(grad = 0, dekningsgrunnlag = 0, begrunnelse = Begrunnelse.AndreYtelserForeldrepenger))
-        )
+        val tidslinjer =
+            listOf(
+                tidslinjeOf(16.AP, 6.AVV(grad = 0, dekningsgrunnlag = 0, begrunnelse = Begrunnelse.AndreYtelserForeldrepenger)),
+            )
         val periode = Periode(1.januar, 22.januar)
         undersøke(tidslinjer)
         assertEquals(16, inspektør.arbeidsgiverperiodeDagTeller)
@@ -116,21 +118,25 @@ internal class SykdomsgradfilterTest {
     }
 
     private fun undersøke(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> {
-        val input = tidslinjer.mapIndexed { index, it ->
-            Arbeidsgiverberegning(
-                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
-                    )
-                ),
-                ghostOgAndreInntektskilder = emptyList()
-            )
-        }
+        val input =
+            tidslinjer.mapIndexed { index, it ->
+                Arbeidsgiverberegning(
+                    inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiodeberegning(
+                                vedtaksperiodeId = UUID.randomUUID(),
+                                utbetalingstidslinje = it,
+                            ),
+                        ),
+                    ghostOgAndreInntektskilder = emptyList(),
+                )
+            }
 
-        val resultat = input.sykdomsgradsberegning(emptySet()) { _ -> 0.prosent }
-            .map { it.samletVedtaksperiodetidslinje }
+        val resultat =
+            input
+                .sykdomsgradsberegning(emptySet(), IngenGraderteAndreYtelser)
+                .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat
     }

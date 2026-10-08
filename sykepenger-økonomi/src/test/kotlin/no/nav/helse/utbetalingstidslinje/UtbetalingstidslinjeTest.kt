@@ -1,7 +1,5 @@
 package no.nav.helse.utbetalingstidslinje
 
-import java.math.MathContext
-import java.time.LocalDate
 import no.nav.helse.desember
 import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.hendelser.til
@@ -12,24 +10,21 @@ import no.nav.helse.testhelpers.FRI
 import no.nav.helse.testhelpers.NAP
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.MathContext
 
 internal class UtbetalingstidslinjeTest {
-
     @Test
     fun subsetting() {
         assertEquals(1.januar til 5.januar, tidslinjeOf(5.NAV).subset(1.januar til 5.januar).periode())
         assertEquals(4.januar.somPeriode(), tidslinjeOf(5.NAV).subset(4.januar.somPeriode()).periode())
         assertEquals(
             1.januar til 5.januar,
-            tidslinjeOf(5.NAV).subset(31.desember(2017) til 6.januar).periode()
+            tidslinjeOf(5.NAV).subset(31.desember(2017) til 6.januar).periode(),
         )
         Assertions.assertTrue(tidslinjeOf(5.NAV).subset(6.januar til 6.januar).isEmpty())
     }
@@ -54,22 +49,27 @@ internal class UtbetalingstidslinjeTest {
         assertEquals(1.januar til 5.januar, (tidslinjeOf() + tidslinjeOf(5.NAV)).periode())
         assertEquals(
             1.januar til 10.januar,
-            (tidslinjeOf(3.NAV) + tidslinjeOf(5.NAV, startDato = 6.januar)).periode()
+            (tidslinjeOf(3.NAV) + tidslinjeOf(5.NAV, startDato = 6.januar)).periode(),
         )
     }
 
     @Test
     fun `totalbeløp summerer opp dager som kan utbetales`() {
         val inntekt = 1000.daglig
-        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                10.AP(dekningsgrunnlag = inntekt.dagligInt),
-                6.NAP(dekningsgrunnlag = inntekt.dagligInt),
-                5.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = inntekt.dagligInt),
-                1.FRI(dekningsgrunnlag = inntekt.dagligInt),
-                4.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = 0)
-            )
-        )).single()
+        val fullRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            10.AP(dekningsgrunnlag = inntekt.dagligInt),
+                            6.NAP(dekningsgrunnlag = inntekt.dagligInt),
+                            5.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = inntekt.dagligInt),
+                            1.FRI(dekningsgrunnlag = inntekt.dagligInt),
+                            4.NAV(dekningsgrunnlag = inntekt.dagligInt, refusjonsbeløp = 0),
+                        ),
+                    ),
+                ).single()
         assertEquals(inntekt * 3, fullRefusjon.totalbeløpRefusjon)
         assertEquals(inntekt * 8, fullRefusjon.totalbeløpPerson)
     }
@@ -77,38 +77,58 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun negativEndringIBeløp() {
         val inntekt = 1000.daglig
-        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = inntekt.dagligInt,
-                    refusjonsbeløp = inntekt.dagligInt
-                )
-            )
-        )).single()
-        val merRefusjon = Utbetalingstidslinje.betale(inntekt * 2, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = (inntekt * 2).dagligInt,
-                    refusjonsbeløp = (inntekt * 2).dagligInt
-                )
-            )
-        )).single()
-        val delvisRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = inntekt.dagligInt,
-                    refusjonsbeløp = (inntekt / 2).dagligInt
-                )
-            )
-        )).single()
-        val ingenRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = inntekt.dagligInt,
-                    refusjonsbeløp = 0
-                )
-            )
-        )).single()
+        val fullRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = inntekt.dagligInt,
+                                refusjonsbeløp = inntekt.dagligInt,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val merRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt * 2,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = (inntekt * 2).dagligInt,
+                                refusjonsbeløp = (inntekt * 2).dagligInt,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val delvisRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = inntekt.dagligInt,
+                                refusjonsbeløp = (inntekt / 2).dagligInt,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val ingenRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = inntekt.dagligInt,
+                                refusjonsbeløp = 0,
+                            ),
+                        ),
+                    ),
+                ).single()
 
         val ferie = Utbetalingstidslinje.betale(inntekt, listOf(tidslinjeOf(5.FRI))).single()
 
@@ -128,38 +148,58 @@ internal class UtbetalingstidslinjeTest {
     @Test
     fun `negativ endring i personbeløp`() {
         val inntekt = 1000.daglig
-        val fullRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = inntekt.dagligInt,
-                    refusjonsbeløp = inntekt.dagligInt
-                )
-            )
-        )).single()
-        val øktInntektMedRefusjonOgPerson = Utbetalingstidslinje.betale(inntekt * 2, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = (inntekt * 2).dagligInt,
-                    refusjonsbeløp = inntekt.dagligInt
-                )
-            )
-        )).single()
-        val øktInntektMedPerson = Utbetalingstidslinje.betale(inntekt * 2, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = (inntekt * 2).dagligInt,
-                    refusjonsbeløp = 0
-                )
-            )
-        )).single()
-        val ingenRefusjon = Utbetalingstidslinje.betale(inntekt, listOf(
-            tidslinjeOf(
-                5.NAV(
-                    dekningsgrunnlag = inntekt.dagligInt,
-                    refusjonsbeløp = 0
-                )
-            )
-        )).single()
+        val fullRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = inntekt.dagligInt,
+                                refusjonsbeløp = inntekt.dagligInt,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val øktInntektMedRefusjonOgPerson =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt * 2,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = (inntekt * 2).dagligInt,
+                                refusjonsbeløp = inntekt.dagligInt,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val øktInntektMedPerson =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt * 2,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = (inntekt * 2).dagligInt,
+                                refusjonsbeløp = 0,
+                            ),
+                        ),
+                    ),
+                ).single()
+        val ingenRefusjon =
+            Utbetalingstidslinje
+                .betale(
+                    inntekt,
+                    listOf(
+                        tidslinjeOf(
+                            5.NAV(
+                                dekningsgrunnlag = inntekt.dagligInt,
+                                refusjonsbeløp = 0,
+                            ),
+                        ),
+                    ),
+                ).single()
 
         Assertions.assertTrue(fullRefusjon.negativEndringIBeløp(ingenRefusjon)) {
             "mindre personbeløp vil starte en tilbakekreving fra bruker"
@@ -174,13 +214,18 @@ internal class UtbetalingstidslinjeTest {
 
     @Test
     fun betale() {
-        val `6G`= 2161.daglig
+        val `6G` = 2161.daglig
         val input = listOf(tidslinjeOf(1.NAV(1081)), tidslinjeOf(1.NAV(1081)))
         val result = Utbetalingstidslinje.betale(`6G`, input)
 
         input.forEachIndexed { index, input ->
             Assertions.assertNull(input[1.januar].økonomi.inspektør.arbeidsgiverbeløp) { "den uberegnede listen skal ikke modifiseres" }
-            assertEquals(1081, result[index][1.januar].økonomi.inspektør.arbeidsgiverbeløp?.dagligInt)
+            assertEquals(
+                1081,
+                result[index][1.januar]
+                    .økonomi.inspektør.arbeidsgiverbeløp
+                    ?.dagligInt,
+            )
         }
     }
 
@@ -202,13 +247,14 @@ internal class UtbetalingstidslinjeTest {
     fun `samlet periode`() {
         assertEquals(1.januar til 1.januar, Utbetalingstidslinje.periode(listOf(tidslinjeOf(1.NAV))))
         assertEquals(
-            1.desember(2017) til 7.mars, Utbetalingstidslinje.periode(
+            1.desember(2017) til 7.mars,
+            Utbetalingstidslinje.periode(
                 listOf(
                     tidslinjeOf(7.NAV),
                     tidslinjeOf(7.NAV, startDato = 1.mars),
                     tidslinjeOf(7.NAV, startDato = 1.desember(2017)),
-                )
-            )
+                ),
+            ),
         )
     }
 
@@ -224,7 +270,10 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (100 / 6.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                val actual =
+                    it[dato]
+                        .økonomi.inspektør.totalGrad
+                        .toBigDecimal(mc)
                 assertEquals(expected.toInt(), actual.toInt())
             }
         }
@@ -234,7 +283,10 @@ internal class UtbetalingstidslinjeTest {
             val mc = MathContext(15)
             val expected = (250 / 3.0).toBigDecimal(mc)
             result.forEach {
-                val actual = it[dato].økonomi.inspektør.totalGrad.toBigDecimal(mc)
+                val actual =
+                    it[dato]
+                        .økonomi.inspektør.totalGrad
+                        .toBigDecimal(mc)
                 assertEquals(expected.toInt(), actual.toInt())
             }
         }
@@ -255,4 +307,4 @@ internal class UtbetalingstidslinjeTest {
     }
 }
 
-fun Utbetalingstidslinje.Companion.betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }) = Utbetalingstidslinje.betale(sykepengegrunnlagBegrenset6G, tidslinjer, andreYtelser)
+// fun Utbetalingstidslinje.Companion.betale(sykepengegrunnlagBegrenset6G: Inntekt, tidslinjer: List<Utbetalingstidslinje>, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }) = Utbetalingstidslinje.betale(sykepengegrunnlagBegrenset6G, tidslinjer, andreYtelser)

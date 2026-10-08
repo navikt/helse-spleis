@@ -1,7 +1,5 @@
 package no.nav.helse.økonomi
 
-import java.time.LocalDate
-import java.util.UUID
 import no.nav.helse.januar
 import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
@@ -9,19 +7,20 @@ import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
+import no.nav.helse.utbetalingstidslinje.GraderteAndreYtelser
+import no.nav.helse.utbetalingstidslinje.IngenGraderteAndreYtelser
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
 import no.nav.helse.utbetalingstidslinje.maksimumUtbetalingsberegning
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
-import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.util.*
 
 internal class ØkonomiDagTest {
-
     @Test
     fun `Beløp er ikke 6G-begrenset`() {
         val sykepengegrunnlag = 1500.daglig
@@ -123,26 +122,35 @@ internal class ØkonomiDagTest {
         assertØkonomi(c, 0.0)
     }
 
-    private fun assertØkonomi(tidslinje: Utbetalingstidslinje, arbeidsgiverbeløp: Double?, personbeløp: Double? = 0.0) {
+    private fun assertØkonomi(
+        tidslinje: Utbetalingstidslinje,
+        arbeidsgiverbeløp: Double?,
+        personbeløp: Double? = 0.0,
+    ) {
         tidslinje.forEach {
             Assertions.assertEquals(arbeidsgiverbeløp?.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
             Assertions.assertEquals(personbeløp?.daglig, it.økonomi.inspektør.personbeløp)
         }
     }
 
-    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt, andreYtelser: (dato: LocalDate) -> Prosentdel = { 0.prosent }): List<Utbetalingstidslinje> {
-        val input = mapIndexed { index, it ->
-            Arbeidsgiverberegning(
-                inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
-                vedtaksperioder = listOf(
-                    Vedtaksperiodeberegning(
-                        vedtaksperiodeId = UUID.randomUUID(),
-                        utbetalingstidslinje = it
-                    )
-                ),
-                ghostOgAndreInntektskilder = emptyList()
-            )
-        }
+    private fun List<Utbetalingstidslinje>.betal(
+        sykepengegrunnlagBegrenset6G: Inntekt,
+        andreYtelser: GraderteAndreYtelser = IngenGraderteAndreYtelser,
+    ): List<Utbetalingstidslinje> {
+        val input =
+            mapIndexed { index, it ->
+                Arbeidsgiverberegning(
+                    inntektskilde = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker("a${index + 1}"),
+                    vedtaksperioder =
+                        listOf(
+                            Vedtaksperiodeberegning(
+                                vedtaksperiodeId = UUID.randomUUID(),
+                                utbetalingstidslinje = it,
+                            ),
+                        ),
+                    ghostOgAndreInntektskilder = emptyList(),
+                )
+            }
 
         return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G, andreYtelser).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
