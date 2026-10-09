@@ -1,6 +1,7 @@
 package no.nav.helse.spleis
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonUnwrapped
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -10,6 +11,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import no.nav.helse.dto.SpannerPersonDto
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.person.Person
@@ -47,7 +49,12 @@ internal fun Application.spannerApi(
                     val person = Person.gjenopprett(EmptyLog, dto)
                     val personDto = person.dto().tilSpannerPersonDto()
 
-                    val vedtaksperiode = personDto.arbeidsgivere.flatMap { it.vedtaksperioder }.find { it.id.toString() == vedtaksperiodeId } ?: throw NotFoundException("Kunne ikke finne vedtaksperiode for vedtaksperiodeId = $vedtaksperiodeId")
+                    val vedtaksperiode =
+                        personDto.arbeidsgivere.firstNotNullOfOrNull { arbeidsgiver ->
+                            arbeidsgiver.vedtaksperioder.find { it.id.toString() == vedtaksperiodeId }?.let { vedtaksperiode ->
+                                VedtaksperiodeResponse(arbeidsgiver.organisasjonsnummer, arbeidsgiver.yrkesaktivitetstype, vedtaksperiode)
+                            }
+                        } ?: throw NotFoundException("Kunne ikke finne vedtaksperiode for vedtaksperiodeId = $vedtaksperiodeId")
 
                     call.respond(vedtaksperiode)
                 }
@@ -105,6 +112,13 @@ internal fun Application.sporingApi(personDao: PersonDao) {
         }
     }
 }
+
+private data class VedtaksperiodeResponse(
+    val organisasjonsnummer: String,
+    val yrkesaktivitetstype: SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData,
+    @get:JsonUnwrapped
+    val vedtaksperiode: SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(

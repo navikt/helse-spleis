@@ -77,6 +77,9 @@ internal class RestApiTest : AbstractApiTest() {
         blackboxTestApplication(::opprettTestdata) {
             "/api/vedtaksperiode/$vedtaksperiodeId".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR)) {
                 assertTrue(contains(vedtaksperiodeId.toString()))
+                assertTrue(contains("\"organisasjonsnummer\":\"$ORGNUMMER\""))
+                assertTrue(contains("\"yrkesaktivitetstype\":\"ARBEIDSTAKER\""))
+                assertTrue(contains("\"tilstand\":"))
             }
         }
 
