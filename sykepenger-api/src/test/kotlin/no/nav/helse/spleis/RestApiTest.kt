@@ -18,6 +18,7 @@ import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.testdatabase.TestDataSource
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
@@ -30,6 +31,8 @@ internal class RestApiTest : AbstractApiTest() {
     // testmetodene i klassen og kollidert med unique-constrainten når databasen deles uten
     // opprydding mellom tester
     private val MELDINGSREFERANSE = UUID.randomUUID()
+
+    private lateinit var vedtaksperiodeId: UUID
 
     companion object {
         @JvmStatic private val UNG_PERSON_FØDSELSDATO = 12.februar(1992)
@@ -70,6 +73,24 @@ internal class RestApiTest : AbstractApiTest() {
         }
 
     @Test
+    fun `finner vedtaksperiode`() =
+        blackboxTestApplication(::opprettTestdata) {
+            "/api/vedtaksperiode/$vedtaksperiodeId".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR)) {
+                assertTrue(contains(vedtaksperiodeId.toString()))
+            }
+        }
+
+    @Test
+    fun `finner ikke vedtaksperiode`() =
+        blackboxTestApplication(::opprettTestdata) {
+            val ukjentVedtaksperiodeId = UUID.randomUUID()
+            "/api/vedtaksperiode/$ukjentVedtaksperiodeId".httpPost(HttpStatusCode.NotFound, mapOf("fødselsnummer" to UNG_PERSON_FNR)) {
+                println("RESPONSE: $this")
+                assertTrue(contains("Kunne ikke finne vedtaksperiode for vedtaksperiodeId = $ukjentVedtaksperiodeId"))
+            }
+        }
+
+    @Test
     fun `finner ikke melding`() =
         blackboxTestApplication(::opprettTestdata) {
             "/api/hendelse-json/${UUID.randomUUID()}".httpGet(HttpStatusCode.NotFound)
@@ -90,7 +111,7 @@ internal class RestApiTest : AbstractApiTest() {
         val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER))
         val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER)
         person.håndterSøknad(eventBus, søknad, aktivitetslogg)
-        val vedtaksperiodeId =
+        vedtaksperiodeId =
             eventBus.events
                 .filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>()
                 .single()

@@ -38,6 +38,7 @@ spec:
         - application: spanner
         - application: sporing
         - application: sp-vilkarsproving
+        - application: speil
     outbound:
       rules:
         - application: logging

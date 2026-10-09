@@ -37,6 +37,22 @@ internal fun Application.spannerApi(
                 }
             }
 
+            post("/api/vedtaksperiode/{vedtaksperiodeId}") {
+                val vedtaksperiodeId = call.parameters["vedtaksperiodeId"] ?: throw IllegalArgumentException("Kall Mangler vedtaksperiodeId")
+
+                val request = call.receive<PersonRequest>()
+                withContext(Dispatchers.IO) {
+                    val serialisertPerson = personDao.hentPersonFraFnr(request.fødselsnummer.toLong()) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
+                    val dto = serialisertPerson.tilPersonDto()
+                    val person = Person.gjenopprett(EmptyLog, dto)
+                    val personDto = person.dto().tilSpannerPersonDto()
+
+                    val vedtaksperiode = personDto.arbeidsgivere.flatMap { it.vedtaksperioder }.find { it.id.toString() == vedtaksperiodeId } ?: throw NotFoundException("Kunne ikke finne vedtaksperiode for vedtaksperiodeId = $vedtaksperiodeId")
+
+                    call.respond(vedtaksperiode)
+                }
+            }
+
             get("/api/hendelse-json/{hendelse}") {
                 withContext(Dispatchers.IO) {
                     val hendelseId = call.parameters["hendelse"] ?: throw IllegalArgumentException("Kall Mangler hendelse referanse")
