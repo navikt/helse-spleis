@@ -1165,6 +1165,7 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         forsikringsvurderingId: UUID?,
+        opptjeningsvurderingId: UUID? = null,
     ): Pair<String, String> =
         lagBehovMedLøsning(
             behov =
@@ -1175,6 +1176,8 @@ internal class TestMessageFactory(
                     Behov.Behovstype.Arbeidsforhold.utgåendeNavn,
                     Behov.Behovstype.Forsikringsvurdering.utgåendeNavn
                         .takeIf { forsikringsvurderingId != null },
+                    Behov.Behovstype.Opptjeningsvurdering.utgåendeNavn
+                        .takeIf { opptjeningsvurderingId != null },
                 ),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -1242,6 +1245,14 @@ internal class TestMessageFactory(
                     if (forsikringsvurderingId != null) {
                         mapOf(
                             Behov.Behovstype.Forsikringsvurdering.utgåendeNavn to mapOf("forsikringsvurderingId" to forsikringsvurderingId),
+                        )
+                    } else {
+                        emptyMap()
+                    },
+                ).plus(
+                    if (opptjeningsvurderingId != null) {
+                        mapOf(
+                            Behov.Behovstype.Opptjeningsvurdering.utgåendeNavn to mapOf("id" to opptjeningsvurderingId.toString()),
                         )
                     } else {
                         emptyMap()

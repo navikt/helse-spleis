@@ -127,6 +127,10 @@ internal class UtkastTilVedtakBuilder(
 
     internal fun vilkårsgrunnlagId(vilkårsgrunnlagId: UUID) = apply { this.vilkårsgrunnlagId = vilkårsgrunnlagId }
 
+    private lateinit var opptjeningsvurderingId: UUID
+
+    internal fun opptjeningsvurderingId(opptjeningsvurderingId: UUID) = apply { this.opptjeningsvurderingId = opptjeningsvurderingId }
+
     private var forsikringsvurderingId: UUID? = null
 
     internal fun forsikringsvurderingId(forsikringsvurderingId: UUID?) = apply { this.forsikringsvurderingId = forsikringsvurderingId }
@@ -323,6 +327,7 @@ internal class UtkastTilVedtakBuilder(
                 periode = periode,
                 skjæringstidspunkt = skjæringstidspunkt,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
+                opptjeningsvurderingId = opptjeningsvurderingId,
                 forsikringsvurderingId = forsikringsvurderingId,
                 periodetype = periodetypeForGodkjenningsbehov,
                 førstegangsbehandling = tags.contains(Tag.Førstegangsbehandling),

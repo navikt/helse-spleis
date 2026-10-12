@@ -4,6 +4,7 @@ import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.januar
@@ -15,6 +16,18 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
+    @Test
+    fun `godkjenningsbehovet inneholder opptjeningsvurderingId fra vilkårsgrunnlaget`() {
+        a1 {
+            val godkjenningsbehov =
+                enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                    tilGodkjenning(januar)
+                }
+            val opptjeningsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
+            assertEquals(opptjeningsvurderingId, godkjenningsbehov.event.opptjeningsvurderingId)
+        }
+    }
+
     @Test
     fun `Overstyring av arbeidsforhold skal medføre ny opptjeningsvurderingId`() {
         a1 {

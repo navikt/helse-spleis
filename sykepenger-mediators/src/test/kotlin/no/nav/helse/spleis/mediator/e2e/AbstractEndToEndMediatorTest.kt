@@ -689,6 +689,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntekter = listOf(InntekterForSykepengegrunnlagFraLøsning.Inntekt(INNTEKT, orgnummer)),
             ),
+        opptjeningsvurderingId: UUID? = null,
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Arbeidsforhold))
@@ -715,6 +716,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 orgnummer = orgnummer,
                 yrkesaktivitetstype = yrkesaktivitetstypeFraBehov,
                 forsikringsvurderingId = null,
+                opptjeningsvurderingId = opptjeningsvurderingId,
             )
         testRapid.sendTestMessage(message)
     }

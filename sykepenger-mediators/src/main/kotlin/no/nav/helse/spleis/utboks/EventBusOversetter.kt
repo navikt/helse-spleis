@@ -974,6 +974,7 @@ internal class EventBusOversetter(
                 "periodeTom" to "${event.periode.endInclusive}",
                 "skjæringstidspunkt" to "${event.skjæringstidspunkt}",
                 "vilkårsgrunnlagId" to "${event.vilkårsgrunnlagId}",
+                "opptjeningsvurderingId" to "${event.opptjeningsvurderingId}",
                 event.forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
                 "periodetype" to event.periodetype,
                 "førstegangsbehandling" to event.førstegangsbehandling,
