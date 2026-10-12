@@ -6,7 +6,6 @@ import no.nav.helse.hendelser.Periode.Companion.utenPerioder
 import no.nav.helse.hendelser.til
 import no.nav.helse.nesteDag
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 
 internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatoberegning: Maksdatoberegning): List<Arbeidsgiverberegning> {
@@ -30,18 +29,14 @@ internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatobe
     return avvisteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.graderteAndreYtelserPerDag(graderteAndreYtelser: GraderteAndreYtelser): (dato: LocalDate) -> List<Prosentdel> = { dato -> this.map { graderteAndreYtelser(it.inntektskilde, dato) } }
-
 internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(
     sykepengegrunnlagBegrenset6G: Inntekt,
-    graderteAndreYtelser: GraderteAndreYtelser,
 ): List<Arbeidsgiverberegning> {
     val betalteTidslinjer =
         Utbetalingstidslinje
             .betale(
                 sykepengegrunnlagBegrenset6G,
                 this.map { it.samletTidslinje },
-                graderteAndreYtelserPerDag(graderteAndreYtelser),
             ).zip(this) { beregnetTidslinje, arbeidsgiver ->
                 arbeidsgiver.copy(
                     vedtaksperioder =
@@ -86,13 +81,11 @@ internal fun List<Arbeidsgiverberegning>.avvisMedlemskap(erMedlemAvFolketrygden:
 
 internal fun List<Arbeidsgiverberegning>.sykdomsgradsberegning(
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
-    graderteAndreYtelser: GraderteAndreYtelser,
 ): List<Arbeidsgiverberegning> {
     fun List<Arbeidsgiverberegning>.totalSykdomsgradsberegning(): List<Arbeidsgiverberegning> =
         Utbetalingstidslinje
             .totalSykdomsgrad(
                 this.map { it.samletTidslinje },
-                graderteAndreYtelserPerDag(graderteAndreYtelser),
             ).zip(this) { beregnetTidslinje, arbeidsgiver ->
                 arbeidsgiver.copy(
                     vedtaksperioder =

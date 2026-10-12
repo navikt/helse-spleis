@@ -54,7 +54,6 @@ internal class MaksimumUtbetalingFilterTest {
 
     private fun Utbetalingstidslinje.betal(
         sykepengegrunnlag: Inntekt,
-        andreYtelser: GraderteAndreYtelser = IngenGraderteAndreYtelser,
     ): Utbetalingstidslinje {
         val input =
             listOf(
@@ -72,7 +71,7 @@ internal class MaksimumUtbetalingFilterTest {
             )
 
         return input
-            .maksimumUtbetalingsberegning(sykepengegrunnlag, andreYtelser)
+            .maksimumUtbetalingsberegning(sykepengegrunnlag)
             .single()
             .vedtaksperioder
             .single()

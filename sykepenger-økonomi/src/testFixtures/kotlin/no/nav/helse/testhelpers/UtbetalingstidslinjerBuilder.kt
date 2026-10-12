@@ -8,6 +8,7 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
+import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -27,7 +28,7 @@ fun tidslinjeOf(
             var dato = startDato
             val antallDager = antallDagerFun(startDato)
             repeat(antallDager) {
-                val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, 100.prosent, inntektjustering = INGEN, refusjonsbeløp = arbeidsgiverbeløp)
+                val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, 100.prosent, inntektjustering = INGEN, refusjonsbeløp = arbeidsgiverbeløp, andreYtelserGrad = Prosentdel.NullProsent)
                 if (helgedag != null && dato.erHelg()) {
                     this.helgedag(dato, økonomi)
                 } else {

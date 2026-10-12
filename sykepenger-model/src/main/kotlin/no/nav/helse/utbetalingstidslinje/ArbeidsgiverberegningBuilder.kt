@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.person.beløp.Beløpsdag
@@ -19,6 +20,7 @@ internal class ArbeidsgiverberegningBuilder(
     private val inntekter: MutableMap<Yrkesaktivitet, Inntekt> = mutableMapOf()
     private val inntektsjusteringer: MutableMap<Inntektskilde, Beløpstidslinje> = mutableMapOf()
     private val vedtaksperioder: MutableMap<Yrkesaktivitet, MutableList<UberegnetVedtaksperiode>> = mutableMapOf()
+    private val graderteAndreYtelserTidslinjer: MutableMap<Yrkesaktivitet, GraderteAndreYtelserTidslinje> = mutableMapOf()
     private var sykepengegrunnlag: Inntekt = Inntekt.INGEN
 
     fun fastsattÅrsinntekt(
@@ -130,6 +132,7 @@ internal class ArbeidsgiverberegningBuilder(
                         sykdomstidslinje = it.sykdomstidslinje,
                         inntekt = inntekt ?: Inntekt.INGEN,
                         inntektjusteringer = inntektsjusteringer.subset(it.periode),
+                        graderteAndreYtelserTidslinje = graderteAndreYtelserTidslinjer[yrkesaktivitet]?.subset(it.periode) ?: GraderteAndreYtelserTidslinje(),
                     ),
             )
         }
@@ -161,6 +164,13 @@ internal class ArbeidsgiverberegningBuilder(
             }
             build()
         }
+
+    fun graderteAndreYtelser(
+        inntektskilde: Yrkesaktivitet,
+        tidslinje: GraderteAndreYtelserTidslinje,
+    ) {
+        graderteAndreYtelserTidslinjer[inntektskilde] = tidslinje
+    }
 
     private data class UberegnetVedtaksperiode(
         val vedtaksperiodeId: UUID,

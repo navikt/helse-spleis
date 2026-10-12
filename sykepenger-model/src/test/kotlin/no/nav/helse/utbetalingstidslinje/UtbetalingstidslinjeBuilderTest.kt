@@ -2,6 +2,7 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.somPeriode
@@ -15,25 +16,7 @@ import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.AIG
-import no.nav.helse.testhelpers.F
-import no.nav.helse.testhelpers.K
-import no.nav.helse.testhelpers.P
-import no.nav.helse.testhelpers.PROBLEM
-import no.nav.helse.testhelpers.R
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.U
-import no.nav.helse.testhelpers.YA
-import no.nav.helse.testhelpers.YD
-import no.nav.helse.testhelpers.YF
-import no.nav.helse.testhelpers.YO
-import no.nav.helse.testhelpers.YOL
-import no.nav.helse.testhelpers.YP
-import no.nav.helse.testhelpers.YS
-import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.opphold
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -1019,7 +1002,7 @@ internal class UtbetalingstidslinjeBuilderTest {
                 avslagstidslinje = avslagstidslinje,
             )
 
-        utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
+        utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje(), GraderteAndreYtelserTidslinje())
         inspektør = utbetalingstidslinje.inspektør
     }
 

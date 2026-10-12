@@ -1,18 +1,11 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.dsl.a1
-import no.nav.helse.etterlevelse.Paragraf
-import no.nav.helse.etterlevelse.Subsumsjon
+import no.nav.helse.etterlevelse.*
 import no.nav.helse.etterlevelse.Subsumsjon.Utfall
-import no.nav.helse.etterlevelse.Subsumsjonslogg
-import no.nav.helse.etterlevelse.annetLedd
-import no.nav.helse.etterlevelse.bokstavA
-import no.nav.helse.etterlevelse.folketrygdloven
-import no.nav.helse.etterlevelse.førsteLedd
-import no.nav.helse.etterlevelse.paragraf
-import no.nav.helse.etterlevelse.tredjeLedd
 import no.nav.helse.hendelser.Avsender.ARBEIDSGIVER
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.til
@@ -22,11 +15,7 @@ import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.UK
-import no.nav.helse.testhelpers.opphold
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -208,7 +197,7 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
                 avslagstidslinje = Avslagstidslinje(),
             )
 
-        val utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
+        val utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje(), GraderteAndreYtelserTidslinje())
 
         observatør = Dagobservatør(utbetalingstidslinje)
 

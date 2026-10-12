@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.DagerUtenNavAnsvaravklaring
 import no.nav.helse.person.beløp.Beløpsdag
@@ -25,13 +26,15 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-    ): Økonomi = medInntekt(dato, grad, næringsinntekt, inntektjusteringer)
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje = GraderteAndreYtelserTidslinje(),
+    ): Økonomi = medInntekt(dato, grad, næringsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
 
     private fun medInntekt(
         dato: LocalDate,
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ): Økonomi =
         Økonomi.inntekt(
             sykdomsgrad = grad,
@@ -46,6 +49,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 ).riktigProsent,
             refusjonsbeløp = INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
+            andreYtelserGrad = graderteAndreYtelserTidslinje[dato] ?: Prosentdel.NullProsent,
         )
 
     private fun ForsikringsvurderingResultat.erOpphørtPå(dato: LocalDate): Boolean = opphørsdato != null && dato > opphørsdato
@@ -77,6 +81,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         sykdomstidslinje: Sykdomstidslinje,
         inntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
@@ -107,10 +112,10 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                         when (erVentetid || erFørVentetid) {
                             true ->
                                 when (navSkalUtbetaleVentetidsDag(dag.dato)) {
-                                    true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                                    true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
                                     false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                                 }
-                            false -> navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                            false -> navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
                         }
                     }
                 is Dag.MeldingTilNavDag ->
@@ -179,8 +184,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ) {
-        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer))
+        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje))
     }
 
     private fun arbeidsdag(
@@ -208,8 +214,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         sykdomsgrad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ) {
-        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer))
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje))
     }
 
     private fun foreldetdag(

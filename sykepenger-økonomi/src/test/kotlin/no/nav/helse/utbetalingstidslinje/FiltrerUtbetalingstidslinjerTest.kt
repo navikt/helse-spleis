@@ -4,11 +4,7 @@ import no.nav.helse.erHelg
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.NAVDAGER
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import no.nav.helse.utbetalingstidslinje.Begrunnelse.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
@@ -184,7 +180,6 @@ class FiltrerUtbetalingstidslinjerTest {
             undersøke(
                 uberegnetTidslinjePerArbeidsgiver = input,
                 sykepengegrunnlagBegrenset6G = (2 * inntekt).daglig,
-                graderteAndreYtelser = { inntektskilde, _ -> if (inntektskilde == a1) 50.prosent else 0.prosent },
             )
 
         // a1: 100 % - 50 % = 50 %, a2: 100 % => (50 % * 1200 + 100 % * 1200) / 2400 = 75 %
@@ -206,7 +201,6 @@ class FiltrerUtbetalingstidslinjerTest {
             undersøke(
                 uberegnetTidslinjePerArbeidsgiver = listOf(input),
                 sykepengegrunnlagBegrenset6G = inntekt.daglig,
-                graderteAndreYtelser = { inntektskilde, _ -> if (inntektskilde == a1) 40.prosent else 0.prosent },
             ).single()
 
         result.utbetalingstidslinje.inspektør.also { inspektør ->
@@ -224,7 +218,6 @@ class FiltrerUtbetalingstidslinjerTest {
             undersøke(
                 uberegnetTidslinjePerArbeidsgiver = listOf(input),
                 sykepengegrunnlagBegrenset6G = inntekt.daglig,
-                graderteAndreYtelser = { inntektskilde, _ -> if (inntektskilde == a2) 50.prosent else 0.prosent },
             ).single()
 
         result.utbetalingstidslinje.inspektør.also { inspektør ->
@@ -268,7 +261,6 @@ class FiltrerUtbetalingstidslinjerTest {
         erUnderMinsteinntektEtterFylte67: Boolean = false,
         regler: MaksimumSykepengedagerregler = MaksimumSykepengedagerregler.Companion.NormalArbeidstaker,
         historiskTidslinje: Utbetalingstidslinje = Utbetalingstidslinje(),
-        graderteAndreYtelser: GraderteAndreYtelser = IngenGraderteAndreYtelser,
     ): List<BeregnetPeriode> {
         val result =
             filtrerUtbetalingstidslinjer(
@@ -284,7 +276,6 @@ class FiltrerUtbetalingstidslinjerTest {
                 historisktidslinje = historiskTidslinje,
                 perioderMedMinimumSykdomsgradVurdertOK = emptySet(),
                 regler = regler,
-                graderteAndreYtelser = graderteAndreYtelser,
             )
         return result
     }
