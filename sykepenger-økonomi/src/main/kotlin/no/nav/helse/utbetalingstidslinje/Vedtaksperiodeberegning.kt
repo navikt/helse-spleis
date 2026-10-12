@@ -33,7 +33,6 @@ fun filtrerUtbetalingstidslinjer(
     historisktidslinje: Utbetalingstidslinje,
     perioderMedMinimumSykdomsgradVurdertOK: Set<Periode>,
     regler: MaksimumSykepengedagerregler,
-    graderteAndreYtelser: GraderteAndreYtelser,
     avslåttDag: (dato: LocalDate, begrunnelse: Begrunnelse) -> Unit = { _, _ -> },
 ): List<BeregnetPeriode> {
     val maksdatoberegning =
@@ -48,7 +47,7 @@ fun filtrerUtbetalingstidslinjer(
 
     val beregnetTidslinjePerArbeidsgiver =
         uberegnetTidslinjePerArbeidsgiver
-            .sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK, graderteAndreYtelser)
+            .sykdomsgradsberegning(perioderMedMinimumSykdomsgradVurdertOK)
             .avvisMinsteinntekt(
                 sekstisyvårsdagen = sekstisyvårsdagen,
                 erUnderMinsteinntektskravTilFylte67 = erUnderMinsteinntektskravTilFylte67,
@@ -56,7 +55,7 @@ fun filtrerUtbetalingstidslinjer(
             ).avvisMedlemskap(erMedlemAvFolketrygden)
             .avvisOpptjening(harOpptjening)
             .avvisMaksimumSykepengerdager(maksdatoberegning)
-            .maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G, graderteAndreYtelser)
+            .maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G)
 
     return beregnetTidslinjePerArbeidsgiver
         .flatMap {

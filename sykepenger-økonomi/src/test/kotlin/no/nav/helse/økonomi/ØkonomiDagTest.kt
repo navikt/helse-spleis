@@ -5,13 +5,7 @@ import no.nav.helse.testhelpers.ARB
 import no.nav.helse.testhelpers.AVV
 import no.nav.helse.testhelpers.NAV
 import no.nav.helse.testhelpers.tidslinjeOf
-import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
-import no.nav.helse.utbetalingstidslinje.Begrunnelse
-import no.nav.helse.utbetalingstidslinje.GraderteAndreYtelser
-import no.nav.helse.utbetalingstidslinje.IngenGraderteAndreYtelser
-import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import no.nav.helse.utbetalingstidslinje.Vedtaksperiodeberegning
-import no.nav.helse.utbetalingstidslinje.maksimumUtbetalingsberegning
+import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -135,7 +129,6 @@ internal class ØkonomiDagTest {
 
     private fun List<Utbetalingstidslinje>.betal(
         sykepengegrunnlagBegrenset6G: Inntekt,
-        andreYtelser: GraderteAndreYtelser = IngenGraderteAndreYtelser,
     ): List<Utbetalingstidslinje> {
         val input =
             mapIndexed { index, it ->
@@ -152,6 +145,6 @@ internal class ØkonomiDagTest {
                 )
             }
 
-        return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G, andreYtelser).map { it.vedtaksperioder.single().utbetalingstidslinje }
+        return input.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G).map { it.vedtaksperioder.single().utbetalingstidslinje }
     }
 }

@@ -11,11 +11,8 @@ import no.nav.helse.etterlevelse.UtbetalingstidslinjeBuilder.Companion.subsumsjo
 import no.nav.helse.forrigeDag
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.*
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig.somArbeidstakerOrThrow
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
@@ -45,12 +42,7 @@ import no.nav.helse.person.beløp.Beløpsdag
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.Kilde
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
-import no.nav.helse.person.infotrygdhistorikk.AvslåtteDagerUtbetaltIInfotrygdObservatør
-import no.nav.helse.person.infotrygdhistorikk.Friperiode
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
-import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
-import no.nav.helse.person.infotrygdhistorikk.PersonUtbetalingsperiode
+import no.nav.helse.person.infotrygdhistorikk.*
 import no.nav.helse.person.inntekt.*
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
@@ -1708,6 +1700,7 @@ internal class Vedtaksperiode private constructor(
                 vilkårsgrunnlag = grunnlagsdata,
                 inntektsperioder = inntektsperioder,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
+                graderteAndreYtelserTidslinjer = ytelser.graderteAndreYtelser(),
             )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = ytelser.opptjeningsvurderingResultatOk
@@ -1730,7 +1723,6 @@ internal class Vedtaksperiode private constructor(
 
         val avslåtteDagerUtbetaltIInfotrygdObservatør = AvslåtteDagerUtbetaltIInfotrygdObservatør(infotrygdtidslinje)
 
-        val graderteAndreYtelserPerYrkesaktivitet = ytelser.graderteAndreYtelser()
         val beregnetTidslinjePerVedtaksperiode =
             filtrerUtbetalingstidslinjer(
                 uberegnetTidslinjePerArbeidsgiver = uberegnetTidslinjePerArbeidsgiver,
@@ -1745,11 +1737,6 @@ internal class Vedtaksperiode private constructor(
                 historisktidslinje = historisktidslinje,
                 perioderMedMinimumSykdomsgradVurdertOK = person.minimumSykdomsgradsvurdering.perioder,
                 regler = person.regler,
-                graderteAndreYtelser = { inntektskilde, dato ->
-                    graderteAndreYtelserPerYrkesaktivitet[inntektskilde]?.get(
-                        dato,
-                    ) ?: 0.prosent
-                },
                 avslåttDag = avslåtteDagerUtbetaltIInfotrygdObservatør::avslåttDag,
             )
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)
@@ -4249,24 +4236,28 @@ internal fun lagArbeidsgiverberegning(
     vilkårsgrunnlag: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement? = null,
     inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
     forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
+    graderteAndreYtelserTidslinjer: Map<Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet, GraderteAndreYtelserTidslinje>,
 ): List<Arbeidsgiverberegning> =
     with(ArbeidsgiverberegningBuilder(beregningsperiode)) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
-            fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
+            this.fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), it.fastsattÅrsinntekt)
         }
         vilkårsgrunnlag?.inntektsgrunnlag?.deaktiverteArbeidsforhold?.forEach {
-            fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
+            this.fastsattÅrsinntekt(Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(it.orgnummer), INGEN)
         }
         vilkårsgrunnlag?.inntektsgrunnlag?.selvstendigInntektsopplysning?.also {
-            selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
+            this.selvstendigNæringsdrivende(it.fastsattÅrsinntekt)
         }
         vilkårsgrunnlag?.inntektsgrunnlag?.sykepengegrunnlag?.also {
-            sykepengegrunnlag(it)
+            this.sykepengegrunnlag(it)
         }
         inntektsperioder.forEach { (inntektskilde, inntektsjusteringer) ->
-            inntektsjusteringer(inntektskilde, inntektsjusteringer)
+            this.inntektsjusteringer(inntektskilde, inntektsjusteringer)
         }
         vedtaksperioder.forEach { it.medVedtaksperiode(this, forsikringsvurderingResultat) }
+        graderteAndreYtelserTidslinjer.forEach { (inntektskilde, tidslinje) ->
+            this.graderteAndreYtelser(inntektskilde, tidslinje)
+        }
         build()
     }
 
