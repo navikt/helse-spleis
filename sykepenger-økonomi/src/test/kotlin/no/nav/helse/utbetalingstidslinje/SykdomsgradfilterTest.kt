@@ -4,12 +4,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.testhelpers.AP
-import no.nav.helse.testhelpers.ARB
-import no.nav.helse.testhelpers.AVV
-import no.nav.helse.testhelpers.FRI
-import no.nav.helse.testhelpers.NAV
-import no.nav.helse.testhelpers.tidslinjeOf
+import no.nav.helse.testhelpers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -135,7 +130,7 @@ internal class SykdomsgradfilterTest {
 
         val resultat =
             input
-                .sykdomsgradsberegning(emptySet(), IngenGraderteAndreYtelser)
+                .sykdomsgradsberegning(emptySet())
                 .map { it.samletVedtaksperiodetidslinje }
         inspektør = resultat.inspektør(0)
         return resultat

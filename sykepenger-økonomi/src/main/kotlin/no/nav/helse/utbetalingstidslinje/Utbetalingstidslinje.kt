@@ -10,7 +10,6 @@ import no.nav.helse.nesteDag
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.summer
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.betal
 import no.nav.helse.økonomi.Økonomi
 import java.time.DayOfWeek
@@ -60,23 +59,21 @@ class Utbetalingstidslinje private constructor(
         fun betale(
             sykepengegrunnlagBegrenset6G: Inntekt,
             tidslinjer: List<Utbetalingstidslinje>,
-            graderteAndreYtelser: (dato: LocalDate) -> List<Prosentdel> = { emptyList() },
         ): List<Utbetalingstidslinje> =
-            beregnDagForDag(tidslinjer) { dato, økonomiList ->
-                økonomiList.betal(sykepengegrunnlagBegrenset6G, graderteAndreYtelser(dato))
+            beregnDagForDag(tidslinjer) { økonomiList ->
+                økonomiList.betal(sykepengegrunnlagBegrenset6G)
             }
 
         fun totalSykdomsgrad(
             tidslinjer: List<Utbetalingstidslinje>,
-            graderteAndreYtelser: (dato: LocalDate) -> List<Prosentdel> = { emptyList() },
         ): List<Utbetalingstidslinje> =
-            beregnDagForDag(tidslinjer) { dato, økonomiList ->
-                Økonomi.totalSykdomsgrad(økonomiList, graderteAndreYtelser(dato))
+            beregnDagForDag(tidslinjer) { økonomiList ->
+                Økonomi.totalSykdomsgrad(økonomiList)
             }
 
         fun beregnDagForDag(
             tidslinjer: List<Utbetalingstidslinje>,
-            operasjon: (dato: LocalDate, List<Økonomi>) -> List<Økonomi>,
+            operasjon: (List<Økonomi>) -> List<Økonomi>,
         ): List<Utbetalingstidslinje> {
             /**
              * beregn dag-for-dag, lagre resultatet tilbake i listen
@@ -87,7 +84,7 @@ class Utbetalingstidslinje private constructor(
             val result = tidslinjer.map { it.utbetalingsdager.toSortedMap() }
             samletPeriode.forEach { dato ->
                 val uberegnet = tidslinjer.map { it[dato].økonomi }
-                val beregnet = operasjon(dato, uberegnet)
+                val beregnet = operasjon(uberegnet)
                 // modifiserer kopien
                 result.forEachIndexed { index, utbetalingsdager ->
                     val økonomi = beregnet[index]

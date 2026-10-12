@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.Avslagstidslinje
 import no.nav.helse.person.DagerUtenNavAnsvaravklaring
@@ -31,6 +32,7 @@ internal interface UtbetalingstidslinjeBuilder {
         sykdomstidslinje: Sykdomstidslinje,
         inntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ): Utbetalingstidslinje
 }
 
@@ -45,13 +47,15 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-    ): Økonomi = medInntekt(dato, grad, fastsattÅrsinntekt, inntektjusteringer)
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje = GraderteAndreYtelserTidslinje(),
+    ): Økonomi = medInntekt(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
 
     private fun medInntekt(
         dato: LocalDate,
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ): Økonomi =
         Økonomi.inntekt(
             sykdomsgrad = grad,
@@ -59,6 +63,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = 100.prosent,
             refusjonsbeløp = (refusjonstidslinje[dato] as? Beløpsdag)?.beløp ?: INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
+            andreYtelserGrad = graderteAndreYtelserTidslinje[dato] ?: Prosentdel.NullProsent,
         )
 
     private fun Utbetalingstidslinje.Builder.avslagsdagEller(
@@ -88,6 +93,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         sykdomstidslinje: Sykdomstidslinje,
         inntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ): Utbetalingstidslinje {
         val builder = Utbetalingstidslinje.Builder()
         sykdomstidslinje.forEach { dag ->
@@ -115,9 +121,9 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                 is Dag.Sykedag ->
                     builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                         if (erAGP(dag.dato)) {
-                            arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                            arbeidsgiverperiodedagEllerNavAnsvar(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
                         } else {
-                            navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                            navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
                         }
                     }
 
@@ -233,9 +239,10 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ) {
         if (erAGPNavAnsvar(dato) && !dato.erHelg()) {
-            return builder.addArbeidsgiverperiodedagNav(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer))
+            return builder.addArbeidsgiverperiodedagNav(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje))
         }
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt())
     }
@@ -277,8 +284,9 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
     ) {
-        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer))
+        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserTidslinje))
     }
 
     private fun fridag(

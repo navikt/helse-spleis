@@ -29,7 +29,7 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg,
     ) {
         val utbetalingstidslinje =
-            lagArbeidsgiverberegning(vedtaksperiode.periode, listOf(vedtaksperiode))
+            lagArbeidsgiverberegning(vedtaksperiode.periode, listOf(vedtaksperiode), graderteAndreYtelserTidslinjer = emptyMap())
                 .single {
                     val vedtaksperiodeYrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
                     when (val ya = it.inntektskilde) {

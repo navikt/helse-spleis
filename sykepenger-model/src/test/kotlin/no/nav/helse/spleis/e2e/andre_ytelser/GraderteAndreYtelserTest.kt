@@ -1,17 +1,8 @@
 package no.nav.helse.spleis.e2e.andre_ytelser
 
-import no.nav.helse.dsl.AbstractDslTest
-import no.nav.helse.dsl.a1
-import no.nav.helse.dsl.a2
-import no.nav.helse.dsl.assertInntektsgrunnlag
-import no.nav.helse.dsl.nyttVedtak
-import no.nav.helse.dsl.selvstendig
-import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
+import no.nav.helse.dsl.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
-import no.nav.helse.hendelser.GraderteAndreYtelserType
-import no.nav.helse.hendelser.InntekterForBeregning
-import no.nav.helse.hendelser.somPeriode
-import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
@@ -435,10 +426,71 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             håndterUtbetalt(Oppdragstatus.AKSEPTERT)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
 
-            // a1: 100 % - 30 % = 70 %, a2: 100 % => (70 % * 1000 + 100 % * 1000) / 2000 = 85 %
+            // a1AndelAvSykepengegrunnlaget: 50 %
+            // a2AndelAvSykepengegrunnlaget: 50 %
+            // a1: 100 % - 30 % = 70 %
+            // a2: 100 %
+            // total sykdomsgrad: (70 % * a1AndelAvTotalgrad + 100 % * a2AndelAvTotalgrad) = 85 %
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 700, 1000, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+
+        a2 {
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepengerMotA1)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(100.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `annen ytelse graderes kun mot yrkesaktiviteten den gjelder for 2`() {
+        val inntektPerArbeidsgiver = 260_000.årlig
+        val gradertePleiepengerMotA1 =
+            listOf(
+                GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 15)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                    yrkesaktivitet = Arbeidstaker(a1),
+                ),
+                GraderteAndreYtelserForBeregning(
+                    graderteAndreYtelserForBeregningPeriodeList = listOf(GraderteAndreYtelserForBeregningPeriode(20.januar, 30.januar, 15)),
+                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                    yrkesaktivitet = Arbeidstaker(a2),
+                ),
+            )
+
+        listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
+
+        a1 {
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = gradertePleiepengerMotA1)
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+
+            // a1AndelAvTotalgrad: 50 %
+            // a2AndelAvTotalgrad: 50 %
+            // a1: 100 % - 15 % = 85 %
+            // a2: 100 % - 15 % = 85 %
+            // total sykdomsgrad: (85 % * a1AndelAvTotalgrad + 85 % * a2AndelAvTotalgrad) => 85 % / 100 % = 85 %
             assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 850, 1000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
             assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
             assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
@@ -450,8 +502,12 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             håndterUtbetalt(Oppdragstatus.AKSEPTERT)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
 
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 850, 1000, subset = 20.januar til 30.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
+            assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
             assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
+            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
     }

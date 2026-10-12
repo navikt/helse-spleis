@@ -1,6 +1,7 @@
 package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.GraderteAndreYtelserTidslinje
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.UtbetalingstidslinjeInspektør
 import no.nav.helse.inspectors.inspektør
@@ -10,19 +11,14 @@ import no.nav.helse.person.DagerUtenNavAnsvaravklaring
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser.AnnenYtelse.Pleiepenger
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.testhelpers.A
-import no.nav.helse.testhelpers.M
-import no.nav.helse.testhelpers.S
-import no.nav.helse.testhelpers.YF
-import no.nav.helse.testhelpers.assertNotNull
-import no.nav.helse.testhelpers.resetSeed
+import no.nav.helse.testhelpers.*
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.riktigProsent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.util.UUID
+import java.util.*
 
 internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     @Test
@@ -146,7 +142,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
                 avslagstidslinje = avslagstidslinje,
             )
 
-        utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje())
+        utbetalingstidslinje = builder.result(tidslinje, 31000.månedlig, Beløpstidslinje(), GraderteAndreYtelserTidslinje())
         inspektør = utbetalingstidslinje.inspektør
     }
 
