@@ -222,8 +222,9 @@ data class Økonomi(
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalSykdomsgrad.toDouble().toInt())
 
     private fun reserver(): Økonomi {
-        val total = aktuellDagsinntekt * utbetalingsgrad
-        val gradertArbeidsgiverRefusjonsbeløp = refusjonsbeløp * utbetalingsgrad
+        val egenUtbetalingsgrad = utbetalingsgrad - andreYtelserGrad
+        val total = aktuellDagsinntekt * egenUtbetalingsgrad
+        val gradertArbeidsgiverRefusjonsbeløp = refusjonsbeløp * egenUtbetalingsgrad
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
             reservertArbeidsgiverbeløp = arbeidsgiverbeløp,

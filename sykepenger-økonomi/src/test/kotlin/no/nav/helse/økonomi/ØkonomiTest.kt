@@ -12,73 +12,76 @@ import no.nav.helse.økonomi.Økonomi.Companion.totalSykdomsgrad
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 
 internal class ØkonomiTest {
     @Test
-    fun `50 prosent sykepenger og 50 prosent foreldrepenger`() {
-        val økonomiEnArbeidsgiver = listOf(50.prosent.inntekt(2000.daglig))
-        assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
-        // Graderingen trekkes direkte fra sykdomsgraden, uavhengig av om det er "rom" pga. arbeid
+    fun `50 prosent sykepenger og 50 prosent andre ytelser`() {
+        val økonomiEnArbeidsgiver = listOf(50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 50.prosent))
         assertEquals(0.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
     }
 
-    @Test
-    fun `total utbetalingsgrad hensyntatt andre ytelser`() {
-        val økonomiEnArbeidsgiver = listOf(100.prosent.inntekt(30000.månedlig))
-        assertEquals(100.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
-        assertEquals(45.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
-
+    // (100% * 2000 + 50% * 2000) / 4000 = 75%
+    // (75% * 2000 + 50% * 2000) / 4000 = 62.5%
+    // (100% * 2000 + 25% * 2000) / 4000 = 62.5%
+    // (45% * 2000 + 0% * 2000) / 4000 = 22.5%
+    @ParameterizedTest
+    @CsvSource(
+        "0, 0, 75",
+        "25, 0, 62.5",
+        "0, 25, 62.5",
+        "55, 55, 22.5",
+    )
+    fun `total utbetalingsgrad hensyntatt andre ytelser`(
+        arbeidsgiverEnGrad: Int,
+        arbeidsgiverToGrad: Int,
+        totalUtbetalingsgrad: Double,
+    ) {
         val økonomiToArbeidsgivere =
             listOf(
-                100.prosent.inntekt(2000.daglig),
-                50.prosent.inntekt(2000.daglig),
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverEnGrad.prosent),
+                50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverToGrad.prosent),
             )
-        assertEquals(75.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
-        assertEquals(75.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
-        // (75% * 2000 + 50% * 2000) / 4000
-        assertEquals(62.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
-        // (100% * 2000 + 25% * 2000) / 4000
-        assertEquals(62.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
-        // (45% * 2000 + 0% * 2000) / 4000
-        assertEquals(22.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
-    }
-
-    @Test
-    fun `graderte andre ytelser må ha like mange elementer som økonomiList`() {
-        val økonomiToArbeidsgivere =
-            listOf(
-                100.prosent.inntekt(2000.daglig),
-                50.prosent.inntekt(2000.daglig),
-            )
-        assertThrows<IllegalStateException> { Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere) }
+        assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
     }
 
     @Test
     fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos kjent arbeidsgiver`() {
-        val økonomiEnArbeidsgiver = listOf(100.prosent.inntekt(2000.daglig, inntektjustering = 250.daglig))
-        assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
+        val økonomiEnArbeidsgiver =
+            listOf(
+                100.prosent.inntekt(
+                    2000.daglig,
+                    inntektjustering = 250.daglig,
+                    graderteAndreYtelserGrad = 50.prosent,
+                ),
+            )
         // (50% * 2000 - 250) / 2000
         assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
 
         val økonomiToArbeidsgivere =
             listOf(
-                100.prosent.inntekt(2000.daglig),
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent),
                 50.prosent.inntekt(2000.daglig, inntektjustering = 500.daglig),
             )
-        assertEquals(62.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
         // (75% * 2000 + 50% * 2000 - 500) / 4000
         assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
     }
 
     @Test
     fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos ukjent arbeidsgiver`() {
-        val økonomi =
+        val økonomiUtenGraderteAndreYtelser =
             listOf(
                 100.prosent.inntekt(2000.daglig),
                 Økonomi.ikkeBetalt(0.daglig, inntektjustering = 250.daglig),
             )
-        assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomi))
-        assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomi))
+        assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiUtenGraderteAndreYtelser))
+        val økonomiMedGraderteAndreYtelser =
+            listOf(
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 50.prosent),
+                Økonomi.ikkeBetalt(0.daglig, inntektjustering = 250.daglig),
+            )
+        assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiMedGraderteAndreYtelser))
     }
 
     @Test
@@ -504,7 +507,15 @@ internal class ØkonomiTest {
         aktuellDagsinntekt: Inntekt,
         refusjonsbeløp: Inntekt = aktuellDagsinntekt,
         inntektjustering: Inntekt = INGEN,
-    ) = Økonomi.inntekt(this, aktuellDagsinntekt, 100.prosent, refusjonsbeløp, inntektjustering, Prosentdel.NullProsent)
+        graderteAndreYtelserGrad: Prosentdel = Prosentdel.NullProsent,
+    ) = Økonomi.inntekt(
+        this,
+        aktuellDagsinntekt,
+        100.prosent,
+        refusjonsbeløp,
+        inntektjustering,
+        graderteAndreYtelserGrad,
+    )
 }
 
 private const val ØnsketOppførsel =

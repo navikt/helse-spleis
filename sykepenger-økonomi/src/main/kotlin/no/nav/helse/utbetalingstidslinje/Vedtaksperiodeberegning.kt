@@ -2,7 +2,6 @@ package no.nav.helse.utbetalingstidslinje
 
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.økonomi.Inntekt
-import no.nav.helse.økonomi.Prosentdel
 import java.time.LocalDate
 import java.util.*
 
@@ -12,13 +11,6 @@ data class Vedtaksperiodeberegning(
 ) {
     val periode = utbetalingstidslinje.periode()
 }
-
-/**
- * Gradering av andre ytelser for en gitt inntektskilde (yrkesaktivitet) på en gitt dato
- */
-typealias GraderteAndreYtelser = (inntektskilde: Arbeidsgiverberegning.Inntektskilde, dato: LocalDate) -> Prosentdel
-
-val IngenGraderteAndreYtelser: GraderteAndreYtelser = { _, _ -> Prosentdel.NullProsent }
 
 fun filtrerUtbetalingstidslinjer(
     uberegnetTidslinjePerArbeidsgiver: List<Arbeidsgiverberegning>,
