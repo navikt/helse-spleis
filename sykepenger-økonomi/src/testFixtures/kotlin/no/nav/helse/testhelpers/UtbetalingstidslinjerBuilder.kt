@@ -8,7 +8,6 @@ import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Økonomi
 import java.time.LocalDate
@@ -24,11 +23,19 @@ fun tidslinjeOf(
 ) = Utbetalingstidslinje
     .Builder()
     .apply {
-        utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, grad, arbeidsgiverbeløp) ->
+        utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, graderteAndreYtelserGrad, grad, arbeidsgiverbeløp) ->
             var dato = startDato
             val antallDager = antallDagerFun(startDato)
             repeat(antallDager) {
-                val økonomi = Økonomi.inntekt(grad.prosent, dekningsgrunnlag, 100.prosent, inntektjustering = INGEN, refusjonsbeløp = arbeidsgiverbeløp, andreYtelserGrad = Prosentdel.NullProsent)
+                val økonomi =
+                    Økonomi.inntekt(
+                        grad.prosent,
+                        dekningsgrunnlag,
+                        100.prosent,
+                        inntektjustering = INGEN,
+                        refusjonsbeløp = arbeidsgiverbeløp,
+                        andreYtelserGrad = graderteAndreYtelserGrad.prosent,
+                    )
                 if (helgedag != null && dato.erHelg()) {
                     this.helgedag(dato, økonomi)
                 } else {
@@ -68,19 +75,22 @@ val Int.NAV get() = this.NAV(1200)
 fun Int.NAV(
     dekningsgrunnlag: Number,
     grad: Number = 100.0,
+    graderteAndreYtelserGrad: Number = 0.0,
     refusjonsbeløp: Number = dekningsgrunnlag,
-) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
+) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig, graderteAndreYtelserGrad)
 
 private fun NAV(
     antallDager: (LocalDate) -> Int,
     dekningsgrunnlag: Inntekt,
     grad: Number = 100.0,
     refusjonsbeløp: Inntekt = dekningsgrunnlag,
+    graderteAndreYtelserGrad: Number = 0.0,
 ) = Utbetalingsdager(
     antallDager = antallDager,
     addDagFun = Utbetalingstidslinje.Builder::addNAVdag,
     addHelgFun = Utbetalingstidslinje.Builder::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
+    graderteAndreYtelserGrad = graderteAndreYtelserGrad,
     grad = grad,
     arbeidsgiverbeløp = refusjonsbeløp,
 )
@@ -172,6 +182,7 @@ data class Utbetalingsdager(
     val addDagFun: Utbetalingstidslinje.Builder.(LocalDate, Økonomi) -> Unit,
     val addHelgFun: (Utbetalingstidslinje.Builder.(LocalDate, Økonomi) -> Unit)? = null,
     val dekningsgrunnlag: Inntekt = 1200.daglig,
+    val graderteAndreYtelserGrad: Number = 0.0,
     val grad: Number = 0.0,
     val arbeidsgiverbeløp: Inntekt = dekningsgrunnlag,
 )
