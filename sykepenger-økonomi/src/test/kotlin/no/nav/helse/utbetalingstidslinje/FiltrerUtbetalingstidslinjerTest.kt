@@ -173,7 +173,7 @@ class FiltrerUtbetalingstidslinjerTest {
         val inntekt = 1200
         val input =
             listOf(
-                beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt)), a1),
+                beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt, graderteAndreYtelserGrad = 50.0)), a1),
                 beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt)), a2),
             )
         val result =
@@ -196,7 +196,7 @@ class FiltrerUtbetalingstidslinjerTest {
     @Test
     fun `graderte andre ytelser trekkes direkte fra sykdomsgraden uten hensyn til arbeid`() {
         val inntekt = 1200
-        val input = beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt, 50.0)), a1)
+        val input = beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt, 50.0, graderteAndreYtelserGrad = 40.0)), a1)
         val result =
             undersøke(
                 uberegnetTidslinjePerArbeidsgiver = listOf(input),
