@@ -87,15 +87,23 @@ data class Økonomi(
 
         internal fun totalUtbetalingsgrad(
             økonomiList: List<Økonomi>,
-        ) = totalGrad(økonomiList, { it.utbetalingsgrad - it.andreYtelserGrad })
+            inntektjustering: Inntekt = økonomiList.inntektjustering(),
+        ) = totalGrad(økonomiList, { it.utbetalingsgrad }, inntektjustering)
 
         fun betal(
             sykepengegrunnlagBegrenset6G: Inntekt,
             økonomiList: List<Økonomi>,
         ): List<Økonomi> {
-            val utbetalingsgrad = totalUtbetalingsgrad(økonomiList)
             val foreløpig = delteUtbetalinger(økonomiList)
-            val fordelt = fordelBeløp(foreløpig, sykepengegrunnlagBegrenset6G, utbetalingsgrad)
+            val utbetalingsgradHensyntattInntektsjustering = totalUtbetalingsgrad(foreløpig)
+            val justertForGraderteAndreYtelser = foreløpig.map { it.copy(utbetalingsgrad = utbetalingsgradHensyntattInntektsjustering - it.andreYtelserGrad) }
+            val utbetalingsgradHensyntattGraderteAndreYtelser = totalUtbetalingsgrad(justertForGraderteAndreYtelser, inntektjustering = INGEN)
+            val fordelt =
+                fordelBeløp(
+                    økonomiList = justertForGraderteAndreYtelser,
+                    sykepengegrunnlagBegrenset6G = sykepengegrunnlagBegrenset6G,
+                    utbetalingsgrad = utbetalingsgradHensyntattGraderteAndreYtelser,
+                )
             return fordelt.map { it.betal() }
         }
 
@@ -114,21 +122,20 @@ data class Økonomi(
             val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * utbetalingsgrad)
 
             return økonomiList
-                .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV, utbetalingsgrad)
-                .fordelBruker(totalArbeidsgiverFør6GBegrensning, total, inntektstapSomSkalDekkesAvNAV, utbetalingsgrad)
+                .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV)
+                .fordelBruker(totalArbeidsgiverFør6GBegrensning, total, inntektstapSomSkalDekkesAvNAV)
                 .sjekkRestbeløp(inntektstapSomSkalDekkesAvNAV)
         }
 
         private fun List<Økonomi>.fordelRefusjon(
             totalArbeidsgiverFør6GBegrensning: Inntekt,
             inntektstapSomSkalDekkesAvNAV: Inntekt,
-            utbetalingsgrad: Prosentdel,
         ): List<Økonomi> =
             reduserBeløpTilTotal(
                 økonomiList = this,
                 total = totalArbeidsgiverFør6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV,
-                setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
+                setter = { økonomi, inntekt -> økonomi.copy(reservertArbeidsgiverbeløp = inntekt) },
                 getter = { it.reservertArbeidsgiverbeløp!! },
             )
 
@@ -136,7 +143,6 @@ data class Økonomi(
             totalArbeidsgiverFør6GBegrensning: Inntekt,
             total: Inntekt,
             inntektstapSomSkalDekkesAvNAV: Inntekt,
-            utbetalingsgrad: Prosentdel,
         ): List<Økonomi> {
             val ratio = reduksjon(inntektstapSomSkalDekkesAvNAV, totalArbeidsgiverFør6GBegrensning)
             val totalArbeidsgiverEtter6GBegrensning = totalArbeidsgiverFør6GBegrensning * ratio
@@ -145,7 +151,7 @@ data class Økonomi(
                 økonomiList = this,
                 total = total - totalArbeidsgiverEtter6GBegrensning,
                 grense = inntektstapSomSkalDekkesAvNAV - totalArbeidsgiverEtter6GBegrensning,
-                setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt, utbetalingsgrad = utbetalingsgrad) },
+                setter = { økonomi, inntekt -> økonomi.copy(reservertPersonbeløp = inntekt) },
                 getter = { it.reservertPersonbeløp!! },
             )
         }
