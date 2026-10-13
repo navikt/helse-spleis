@@ -470,6 +470,7 @@
                                 }
                             ],
                             "pensjonsgivendeInntekter": [],
+                            "grunnbeløpsjustertGjennomsnitt": null,
                             "beregningId": "00000000-0000-0000-0000-000000000000",
                             "gjenstaendeSykedager": 238,
                             "forbrukteSykedager": 10,

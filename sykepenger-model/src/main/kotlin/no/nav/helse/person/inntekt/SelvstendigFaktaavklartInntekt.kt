@@ -43,7 +43,7 @@ internal data class SelvstendigFaktaavklartInntekt(
             anvendtGrunnbeløp = nyttGrunnbeløp,
         )
 
-    val normalinntekt = normalinntekt(anvendtGrunnbeløp)
+    val grunnbeløpsjustertGjennomsnitt = grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp)
     val beregningsgrunnlag = beregningsgrunnlag(anvendtGrunnbeløp)
 
     internal fun dto() =
@@ -57,7 +57,7 @@ internal data class SelvstendigFaktaavklartInntekt(
             anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto(),
         )
 
-    fun normalinntekt(anvendtGrunnbeløp: Inntekt): Inntekt = normalinntekt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
+    fun grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp: Inntekt): Inntekt = grunnbeløpsjustertGjennomsnitt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
     fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt) = beregningsgrunnlag(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
@@ -73,11 +73,11 @@ internal data class SelvstendigFaktaavklartInntekt(
                 anvendtGrunnbeløp = Inntekt.gjenopprett(dto.anvendtGrunnbeløp),
             )
 
-        fun normalinntekt(
+        fun grunnbeløpsjustertGjennomsnitt(
             inntekter: List<PensjonsgivendeInntekt>,
             anvendtGrunnbeløp: Inntekt,
         ) = inntekter
-            .map { it.normalinntekt(anvendtGrunnbeløp) }
+            .map { it.grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp) }
             .summer()
             .årlig
             .toInt()
@@ -121,7 +121,7 @@ internal data class SelvstendigFaktaavklartInntekt(
         // alle intekter opp til 6g, 1/3 av inntekter mellom 6g og 12g, ingenting over 12g
         private val antallGKompensert = antallG - inntekterOver12g - toTredjedelAvInntekterMellom6gOg12g
 
-        // normalinntekt basert på antall G over  tre år
+        // grunnbeløpsjustert gjennomsnitt basert på antall G over  tre år
         private val P = antallG / 3.0
 
         // snitter antall kompenserte G over tre år
@@ -131,7 +131,7 @@ internal data class SelvstendigFaktaavklartInntekt(
             check(antallGKompensert <= 8) { "antall kompenserte G kan ikke være over 8, var $antallGKompensert" }
         }
 
-        fun normalinntekt(anvendtGrunnbeløp: Inntekt): Inntekt = anvendtGrunnbeløp * P
+        fun grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp: Inntekt): Inntekt = anvendtGrunnbeløp * P
 
         fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt): Inntekt = anvendtGrunnbeløp * Q
 

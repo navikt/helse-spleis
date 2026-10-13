@@ -10,7 +10,7 @@ internal data class SelvstendigInntektsopplysning(
     val faktaavklartInntekt: SelvstendigFaktaavklartInntekt,
     val skjønnsmessigFastsatt: SkjønnsmessigFastsatt?,
 ) {
-    val fastsattÅrsinntekt = faktaavklartInntekt.normalinntekt
+    val fastsattÅrsinntekt = faktaavklartInntekt.grunnbeløpsjustertGjennomsnitt
     val beregningsgrunnlag = faktaavklartInntekt.beregningsgrunnlag
 
     internal fun medAnvendtGrunnbeløp(grunnbeløp: Inntekt) =

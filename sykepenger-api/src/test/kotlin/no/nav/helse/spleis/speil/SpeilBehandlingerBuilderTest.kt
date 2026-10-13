@@ -29,6 +29,9 @@ import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.september
+import no.nav.helse.spleis.objectMapper
+import no.nav.helse.spleis.rest.dto.ApiBeregnetPeriode
+import no.nav.helse.spleis.rest.mapTidslinjeperiode
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverinntekt
 import no.nav.helse.spleis.speil.dto.Arbeidsgiverrefusjon
@@ -345,6 +348,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 uberegnetPeriode(0).also {
                     assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
+                    assertEquals(460589.0, it.grunnbeløpsjustertGjennomsnitt)
                 }
             }
         }
@@ -427,6 +431,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 beregnetPeriode(0).also {
                     assertEquals(460589.0, it.vilkårsgrunnlag().beregningsgrunnlag)
                     assertEquals(460589.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    assertEquals(460589.0, it.grunnbeløpsjustertGjennomsnitt)
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
                     assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
@@ -464,6 +469,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 beregnetPeriode(0).also {
                     assertEquals(715713.0, it.vilkårsgrunnlag().beregningsgrunnlag)
                     assertEquals(561804.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    val grunnbeløpsjustertGjennomsnitt = requireNotNull(it.grunnbeløpsjustertGjennomsnitt)
+                    assertTrue(grunnbeløpsjustertGjennomsnitt > it.vilkårsgrunnlag().beregningsgrunnlag)
+                    val apiPeriode = mapTidslinjeperiode(it, emptyList()) as ApiBeregnetPeriode
+                    assertEquals(grunnbeløpsjustertGjennomsnitt, apiPeriode.grunnbeløpsjustertGjennomsnitt)
+                    assertEquals(grunnbeløpsjustertGjennomsnitt, objectMapper.readTree(objectMapper.writeValueAsString(apiPeriode))["grunnbeløpsjustertGjennomsnitt"].asDouble())
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
                     assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)

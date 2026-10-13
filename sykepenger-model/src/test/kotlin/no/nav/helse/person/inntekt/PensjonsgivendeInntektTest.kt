@@ -21,9 +21,9 @@ internal class PensjonsgivendeInntektTest {
             )
 
         val anvendtGrunnbeløp = `1G`.beløp(16.juni)
-        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val grunnbeløpsjustertGjennomsnitt = SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(inntekter, anvendtGrunnbeløp)
         val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
-        assertEquals(478906.årlig, normalinntekt)
+        assertEquals(478906.årlig, grunnbeløpsjustertGjennomsnitt)
         assertEquals(478906.årlig, selvstendigGrunnlag)
     }
 
@@ -37,9 +37,9 @@ internal class PensjonsgivendeInntektTest {
             )
 
         val anvendtGrunnbeløp = `1G`.beløp(12.mai)
-        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val grunnbeløpsjustertGjennomsnitt = SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(inntekter, anvendtGrunnbeløp)
         val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
-        assertEquals(629943.årlig, normalinntekt)
+        assertEquals(629943.årlig, grunnbeløpsjustertGjennomsnitt)
         assertEquals(589138.årlig, selvstendigGrunnlag)
     }
 
@@ -55,9 +55,9 @@ internal class PensjonsgivendeInntektTest {
         val skjæringstidspunkt = 12.mai
         val anvendtGrunnbeløp = `1G`.beløp(skjæringstidspunkt)
         val expected = (`2G`.beløp(skjæringstidspunkt) + `2G`.beløp(skjæringstidspunkt) / 3).årlig.toInt().årlig
-        val normalinntekt = SelvstendigFaktaavklartInntekt.normalinntekt(inntekter, anvendtGrunnbeløp)
+        val grunnbeløpsjustertGjennomsnitt = SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(inntekter, anvendtGrunnbeløp)
         val selvstendigGrunnlag = SelvstendigFaktaavklartInntekt.beregningsgrunnlag(inntekter, anvendtGrunnbeløp)
-        assertEquals(528030.årlig, normalinntekt)
+        assertEquals(528030.årlig, grunnbeløpsjustertGjennomsnitt)
         assertEquals(expected, selvstendigGrunnlag)
     }
 }

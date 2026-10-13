@@ -103,6 +103,7 @@ internal class SpeilGenerasjonerBuilder(
                 sisteEndring.avslagstidslinje,
             ).build()
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
+        val selvstendigFaktaavklartInntekt = sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto
         return UberegnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
@@ -116,7 +117,13 @@ internal class SpeilGenerasjonerBuilder(
             oppdatert = sisteEndring.tidsstempel,
             skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
-            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = selvstendigFaktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
+            grunnbeløpsjustertGjennomsnitt =
+                selvstendigFaktaavklartInntekt
+                    ?.inntektsdata
+                    ?.beløp
+                    ?.årlig
+                    ?.beløp,
             periodetilstand =
                 periodetilstand ?: generasjon.avsluttet?.let { Periodetilstand.IngenUtbetaling } ?: when (vedtaksperiode.tilstand) {
                     is VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING -> Periodetilstand.VenterPåAnnenPeriode
@@ -177,6 +184,7 @@ internal class SpeilGenerasjonerBuilder(
             sisteEndring.vilkårsgrunnlagId?.let {
                 vilkårsgrunnlaghistorikk.finnSpleisVilkårsgrunnlag(it) ?.pensjonsgivendeInntekter
             } ?: emptyList()
+        val selvstendigFaktaavklartInntekt = sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto
 
         return BeregnetPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
@@ -203,6 +211,12 @@ internal class SpeilGenerasjonerBuilder(
             refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             annulleringskandidater = vedtaksperiode.annulleringskandidater,
+            grunnbeløpsjustertGjennomsnitt =
+                selvstendigFaktaavklartInntekt
+                    ?.inntektsdata
+                    ?.beløp
+                    ?.årlig
+                    ?.beløp,
         )
     }
 
@@ -212,6 +226,7 @@ internal class SpeilGenerasjonerBuilder(
     ): AnnullertPeriode {
         val sisteEndring = generasjon.endringer.last()
         val annulleringen = annulleringer.single { it.id == sisteEndring.utbetalingId }
+        val selvstendigFaktaavklartInntekt = sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto
         return AnnullertPeriode(
             vedtaksperiodeId = vedtaksperiode.id,
             behandlingId = generasjon.id,
@@ -234,7 +249,13 @@ internal class SpeilGenerasjonerBuilder(
             periodetilstand = annulleringen.periodetilstand,
             hendelser = dokumenterTilOgMedDenneGenerasjonen(vedtaksperiode, generasjon),
             beregningId = annulleringen.id,
-            pensjonsgivendeInntekter = (sisteEndring.faktaavklartInntekt as? SelvstendigFaktaavklartInntektUtDto)?.pensjonsgivendeInntekter ?: emptyList(),
+            pensjonsgivendeInntekter = selvstendigFaktaavklartInntekt?.pensjonsgivendeInntekter ?: emptyList(),
+            grunnbeløpsjustertGjennomsnitt =
+                selvstendigFaktaavklartInntekt
+                    ?.inntektsdata
+                    ?.beløp
+                    ?.årlig
+                    ?.beløp,
             utbetaling =
                 Utbetaling(
                     annulleringen.id,

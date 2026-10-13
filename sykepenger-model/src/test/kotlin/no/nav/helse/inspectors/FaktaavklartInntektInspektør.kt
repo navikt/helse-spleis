@@ -19,12 +19,12 @@ internal class FaktaavklartInntektInspektør(
 }
 
 // Speiler beløpet slik det ble presentert av det tidligere view-laget: for arbeidstakere er det
-// den faktaavklarte inntekten, for selvstendig næringsdrivende er det normalinntekten.
+// den faktaavklarte inntekten, for selvstendig næringsdrivende er det grunnbeløpsjustert gjennomsnitt.
 internal val FaktaavklartInntekt.beløp: Inntekt
     get() =
         when (this) {
             is ArbeidstakerFaktaavklartInntekt -> inntektsdata.beløp
-            is SelvstendigFaktaavklartInntekt -> normalinntekt
+            is SelvstendigFaktaavklartInntekt -> grunnbeløpsjustertGjennomsnitt
         }
 
 internal val FaktaavklartInntekt.hendelseId: UUID get() = inntektsdata.hendelseId.id

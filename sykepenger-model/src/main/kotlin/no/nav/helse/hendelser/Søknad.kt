@@ -267,7 +267,7 @@ class Søknad(
                             Inntektsdata(
                                 hendelseId = metadata.meldingsreferanseId,
                                 dato = sykdomsperiode.start,
-                                beløp = SelvstendigFaktaavklartInntekt.normalinntekt(avklartePensjonsgivendeInntekter, anvendtGrunnbeløp),
+                                beløp = SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(avklartePensjonsgivendeInntekter, anvendtGrunnbeløp),
                                 tidsstempel = LocalDateTime.now(),
                             ),
                         pensjonsgivendeInntekter = avklartePensjonsgivendeInntekter,

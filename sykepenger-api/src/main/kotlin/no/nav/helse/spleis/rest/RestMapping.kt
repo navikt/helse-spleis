@@ -376,6 +376,7 @@ internal fun mapTidslinjeperiode(
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             hendelser = periode.hendelser.tilHendelseDto(hendelser),
             pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
+            grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
         )
 }
 
@@ -404,6 +405,7 @@ private fun mapBeregnetPeriode(
     vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
     pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
     annulleringskandidater = mapAnnulleringskandidater(periode.annulleringskandidater),
+    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
 )
 
 private fun mapAnnulleringskandidater(annulleringskandidater: List<AnnulleringskandidatDto>) =
@@ -456,6 +458,7 @@ private fun mapAnnullertPeriode(
     vilkarsgrunnlagId = null,
     pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
     annulleringskandidater = emptyList(),
+    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
 )
 
 private fun Set<UUID>.tilHendelseDto(hendelser: List<HendelseDTO>): List<ApiHendelse> =
