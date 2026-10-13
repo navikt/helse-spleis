@@ -67,7 +67,6 @@ sealed class SpeilTidslinjeperiode : Comparable<SpeilTidslinjeperiode> {
     abstract val skjæringstidspunkt: LocalDate
     abstract val hendelser: Set<UUID>
     abstract val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>
-    abstract val normalinntekt: Double?
 
     internal open fun registrerBruk(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
@@ -118,7 +117,6 @@ data class UberegnetPeriode(
     override val skjæringstidspunkt: LocalDate,
     override val hendelser: Set<UUID>,
     override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>,
-    override val normalinntekt: Double? = null,
 ) : SpeilTidslinjeperiode() {
     override fun toString(): String = "${fom.format()}-${tom.format()} - $periodetilstand"
 
@@ -163,7 +161,6 @@ data class BeregnetPeriode(
     val refusjonstidslinje: BeløpstidslinjeDto, // TODO: Legge til denne i GraphQL
     override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>,
     val annulleringskandidater: List<AnnulleringskandidatDto>,
-    override val normalinntekt: Double? = null,
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,
@@ -210,7 +207,6 @@ data class AnnullertPeriode(
     override val periodetilstand: Periodetilstand,
     override val hendelser: Set<UUID>,
     override val pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>,
-    override val normalinntekt: Double? = null,
     // todo: feltet brukes så og si ikke i speil, kan fjernes fra graphql
     // verdien av ID-en brukes ifm. å lage en unik ID for notatet om utbetalingene.
     val beregningId: UUID,
