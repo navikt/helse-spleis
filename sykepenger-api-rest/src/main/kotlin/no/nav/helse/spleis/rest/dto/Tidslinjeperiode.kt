@@ -192,6 +192,7 @@ sealed interface ApiTidslinjeperiode {
     val periodetilstand: ApiPeriodetilstand
     val skjaeringstidspunkt: LocalDate
     val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>
+    val normalinntekt: Double?
 }
 
 data class ApiUberegnetPeriode(
@@ -208,6 +209,7 @@ data class ApiUberegnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<ApiHendelse>,
     override val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
+    override val normalinntekt: Double? = null,
 ) : ApiTidslinjeperiode {
     override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }
@@ -234,6 +236,7 @@ data class ApiBeregnetPeriode(
     val periodevilkar: ApiPeriodevilkar,
     val vilkarsgrunnlagId: UUID?,
     val annulleringskandidater: List<ApiAnnulleringskandidat>,
+    override val normalinntekt: Double? = null,
 ) : ApiTidslinjeperiode {
     override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }

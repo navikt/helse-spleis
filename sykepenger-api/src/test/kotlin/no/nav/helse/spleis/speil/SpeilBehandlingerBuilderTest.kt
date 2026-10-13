@@ -345,6 +345,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 uberegnetPeriode(0).also {
                     assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
+                    assertEquals(460589.0, it.normalinntekt)
                 }
             }
         }
@@ -427,6 +428,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 beregnetPeriode(0).also {
                     assertEquals(460589.0, it.vilkårsgrunnlag().beregningsgrunnlag)
                     assertEquals(460589.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    assertEquals(460589.0, it.normalinntekt)
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
                     assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
@@ -464,6 +466,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                 beregnetPeriode(0).also {
                     assertEquals(715713.0, it.vilkårsgrunnlag().beregningsgrunnlag)
                     assertEquals(561804.0, it.vilkårsgrunnlag().sykepengegrunnlag)
+                    assertTrue(it.normalinntekt!! > it.vilkårsgrunnlag().beregningsgrunnlag)
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
                     assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
