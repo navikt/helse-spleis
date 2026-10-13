@@ -487,9 +487,9 @@ internal class TestPerson(
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> =
                 listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2017, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2016, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2015, 12, 31)),
                 ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             harOppgittAvvikling: Boolean? = null,
@@ -516,9 +516,9 @@ internal class TestPerson(
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> =
                 listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2017, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2016, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2015, 12, 31)),
                 ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             harOppgittAvvikling: Boolean? = null,
@@ -546,9 +546,9 @@ internal class TestPerson(
             arbeidssituasjon: Søknad.Arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE,
             pensjonsgivendeInntekter: List<Søknad.PensjonsgivendeInntekt> =
                 listOf(
-                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2017, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2016, 12, 31)),
+                    Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, LocalDate.of(2015, 12, 31)),
                 ),
             sendtTilNAVEllerArbeidsgiver: Temporal? = null,
             harOppgittAvvikling: Boolean? = null,

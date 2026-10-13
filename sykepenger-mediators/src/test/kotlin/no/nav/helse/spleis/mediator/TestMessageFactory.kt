@@ -14,9 +14,10 @@ import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektsAarDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektPerSkatteordningDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
+import no.nav.helse.flex.sykepengesoknad.kafka.SkatteordningDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
@@ -448,32 +449,47 @@ internal class TestMessageFactory(
                         listOf(
                             InntektsAarDTO(
                                 aar = "2017",
-                                pensjonsgivendeInntekt =
-                                    PensjonsgivendeInntektDTO(
-                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                                        pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
-                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                pensjonsgivendeInntekt = null,
+                                pensjonsgivendeInntektPerSkatteordning =
+                                    listOf(
+                                        PensjonsgivendeInntektPerSkatteordningDTO(
+                                            pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                            pensjonsgivendeInntektAvNaeringsinntekt = 400_000,
+                                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                            datoForFastsetting = LocalDate.of(2017, 12, 31),
+                                            skatteordning = SkatteordningDTO.FASTLAND,
+                                        ),
                                     ),
                             ),
                             InntektsAarDTO(
                                 aar = "2016",
-                                pensjonsgivendeInntekt =
-                                    PensjonsgivendeInntektDTO(
-                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
-                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                pensjonsgivendeInntekt = null,
+                                pensjonsgivendeInntektPerSkatteordning =
+                                    listOf(
+                                        PensjonsgivendeInntektPerSkatteordningDTO(
+                                            pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                            pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
+                                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                            datoForFastsetting = LocalDate.of(2016, 12, 31),
+                                            skatteordning = SkatteordningDTO.FASTLAND,
+                                        ),
                                     ),
                             ),
                             InntektsAarDTO(
                                 aar = "2015",
-                                pensjonsgivendeInntekt =
-                                    PensjonsgivendeInntektDTO(
-                                        pensjonsgivendeInntektAvLoennsinntekt = 0,
-                                        pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
-                                        pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
-                                        pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                pensjonsgivendeInntekt = null,
+                                pensjonsgivendeInntektPerSkatteordning =
+                                    listOf(
+                                        PensjonsgivendeInntektPerSkatteordningDTO(
+                                            pensjonsgivendeInntektAvLoennsinntekt = 0,
+                                            pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel = 0,
+                                            pensjonsgivendeInntektAvNaeringsinntekt = 800_000,
+                                            pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage = 0,
+                                            datoForFastsetting = LocalDate.of(2015, 12, 31),
+                                            skatteordning = SkatteordningDTO.FASTLAND,
+                                        ),
                                     ),
                             ),
                         ),

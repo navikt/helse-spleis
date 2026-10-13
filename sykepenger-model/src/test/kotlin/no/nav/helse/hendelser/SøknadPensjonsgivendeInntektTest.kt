@@ -5,6 +5,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import java.time.LocalDate
 import java.time.Year
 
 class SøknadPensjonsgivendeInntektTest {
@@ -40,9 +41,9 @@ class SøknadPensjonsgivendeInntektTest {
     ) {
         val pensjonsgivendeInntekter =
             listOf(
-                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år1), næringsinntekt = næringsinntekt1.årlig, lønnsinntekt = lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
-                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år2), næringsinntekt = næringsinntekt2.årlig, lønnsinntekt = lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
-                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år3), næringsinntekt = næringsinntekt3.årlig, lønnsinntekt = lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true),
+                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år1), næringsinntekt = næringsinntekt1.årlig, lønnsinntekt = lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år1.toInt(), 12, 31)),
+                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år2), næringsinntekt = næringsinntekt2.årlig, lønnsinntekt = lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år2.toInt(), 12, 31)),
+                Søknad.PensjonsgivendeInntekt(inntektsår = Year.parse(år3), næringsinntekt = næringsinntekt3.årlig, lønnsinntekt = lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel = lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage = næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år3.toInt(), 12, 31)),
             )
         assertEquals(forventet, pensjonsgivendeInntekter.harFlereTyperPensjonsgivendeInntekt())
     }

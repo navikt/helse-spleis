@@ -510,6 +510,7 @@ class Søknad(
         val lønnsinntektBarePensjonsdel: Inntekt,
         val næringsinntektFraFiskeFangstEllerFamiliebarnehage: Inntekt,
         val erFerdigLignet: Boolean,
+        val datoForFastsetting: LocalDate,
     ) {
         companion object {
             fun List<PensjonsgivendeInntekt>.harFlereTyperPensjonsgivendeInntekt(): Boolean {

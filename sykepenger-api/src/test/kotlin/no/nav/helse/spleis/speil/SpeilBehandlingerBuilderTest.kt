@@ -362,6 +362,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             lønnsinntektBarePensjonsdel = INGEN,
             næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
             erFerdigLignet = true,
+            datoForFastsetting = LocalDate.of(år, 12, 31),
         )
 
         håndterSøknadSelvstendig(
@@ -443,9 +444,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             1.januar til 16.januar,
             pensjonsgivendeInntekter =
                 listOf(
-                    PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                    PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                    PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                    PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                    PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                 ),
         )
         håndterVilkårsgrunnlag()

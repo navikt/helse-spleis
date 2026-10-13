@@ -21,6 +21,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.Year
 
 @Disabled
@@ -107,8 +108,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
                     ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
@@ -124,9 +125,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = false),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = false, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
@@ -188,9 +189,9 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER,
                 pensjonsgivendeInntekter =
                     listOf( // TODO Inntekt for barnepasser er ikke vanlig næringsinntekt, men i næringsinntektFraFiskeFangstEllerFamiliebarnehage
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

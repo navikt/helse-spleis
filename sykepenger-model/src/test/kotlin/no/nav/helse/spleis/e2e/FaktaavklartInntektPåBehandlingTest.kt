@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
+import java.time.LocalDate
 import java.time.Year
 import java.util.*
 
@@ -253,9 +254,9 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 søknadId = korrigerendeSøknadId,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 500000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 500000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
 

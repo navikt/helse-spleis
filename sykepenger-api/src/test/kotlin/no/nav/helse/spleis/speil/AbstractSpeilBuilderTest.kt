@@ -158,6 +158,7 @@ internal abstract class AbstractSpeilBuilderTest {
                     lønnsinntektBarePensjonsdel = INGEN,
                     næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
                     erFerdigLignet = true,
+                    datoForFastsetting = LocalDate.of(2017, 12, 31),
                 ),
                 PensjonsgivendeInntekt(
                     inntektsår = Year.of(2016),
@@ -166,6 +167,7 @@ internal abstract class AbstractSpeilBuilderTest {
                     lønnsinntektBarePensjonsdel = INGEN,
                     næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
                     erFerdigLignet = true,
+                    datoForFastsetting = LocalDate.of(2016, 12, 31),
                 ),
                 PensjonsgivendeInntekt(
                     inntektsår = Year.of(2015),
@@ -174,6 +176,7 @@ internal abstract class AbstractSpeilBuilderTest {
                     lønnsinntektBarePensjonsdel = INGEN,
                     næringsinntektFraFiskeFangstEllerFamiliebarnehage = INGEN,
                     erFerdigLignet = true,
+                    datoForFastsetting = LocalDate.of(2015, 12, 31),
                 ),
             ),
     ): UUID {

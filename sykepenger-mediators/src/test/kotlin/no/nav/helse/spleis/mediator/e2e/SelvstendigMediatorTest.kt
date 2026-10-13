@@ -378,6 +378,7 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
             meldingTilNavDager = listOf(PeriodeDTO(fom = 1.januar, tom = 3.januar)),
         )
+        assertTilstand(0, "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING")
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(

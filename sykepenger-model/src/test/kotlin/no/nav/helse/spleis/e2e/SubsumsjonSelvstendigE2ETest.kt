@@ -238,9 +238,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 periode = januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -277,9 +277,9 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                 periode = januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 100_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

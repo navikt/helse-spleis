@@ -68,7 +68,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 periode = januar,
                 pensjonsgivendeInntekter =
                     (2014..2016).map { år ->
-                        Søknad.PensjonsgivendeInntekt(Year.of(år), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true)
+                        Søknad.PensjonsgivendeInntekt(Year.of(år), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år, 12, 31))
                     },
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
@@ -97,9 +97,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 periode = februar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 600000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 300000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 600000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
                     ),
             )
             håndterYtelserSelvstendig(2.vedtaksperiode)
@@ -536,9 +536,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
 
@@ -553,9 +553,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 februar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
 
@@ -570,9 +570,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
 
@@ -580,9 +580,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 februar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, 1.årlig, 2.årlig, 3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 450000.årlig, 2.årlig, 3.årlig, 4.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
 
@@ -633,9 +633,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år1, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år2, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år3, 12, 31)),
                     ),
             )
             if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
@@ -716,9 +716,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år1, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år2, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år3, 12, 31)),
                     ),
             )
             if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
@@ -869,8 +869,8 @@ internal class SelvstendigTest : AbstractDslTest() {
                 periode = januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 450000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
                     ),
             )
             assertFunksjonelleFeil(1.vedtaksperiode.filter())
@@ -931,9 +931,9 @@ internal class SelvstendigTest : AbstractDslTest() {
                 periode = januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2017), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2017, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2016), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2016, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(2015), 1_000_000.årlig, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(2015, 12, 31)),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

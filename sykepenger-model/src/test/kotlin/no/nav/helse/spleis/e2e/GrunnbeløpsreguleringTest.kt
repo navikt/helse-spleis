@@ -19,6 +19,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.Year
 
 internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
@@ -323,9 +324,9 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
                 1.mai(år) til 31.mai(år),
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 1), pensjonsgivendeInntektÅr3, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 2), pensjonsgivendeInntektÅr2, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 3), pensjonsgivendeInntektÅr1, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år - 1), pensjonsgivendeInntektÅr3, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år - 1, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år - 2), pensjonsgivendeInntektÅr2, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år - 2, 12, 31)),
+                        Søknad.PensjonsgivendeInntekt(Year.of(år - 3), pensjonsgivendeInntektÅr1, INGEN, INGEN, INGEN, erFerdigLignet = true, datoForFastsetting = LocalDate.of(år - 3, 12, 31)),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
