@@ -15,6 +15,7 @@ data class Økonomi(
     val inntektjustering: Inntekt,
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
+    val totalUtbetalingsgrad: Prosentdel = utbetalingsgrad,
     val andreYtelserGrad: Prosentdel = NullProsent,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
@@ -31,7 +32,7 @@ data class Økonomi(
             andreYtelserGrad: Prosentdel,
         ) = Økonomi(
             sykdomsgrad = sykdomsgrad,
-            utbetalingsgrad = sykdomsgrad,
+            utbetalingsgrad = sykdomsgrad - andreYtelserGrad,
             refusjonsbeløp = refusjonsbeløp,
             aktuellDagsinntekt = aktuellDagsinntekt,
             inntektjustering = inntektjustering,
@@ -88,19 +89,22 @@ data class Økonomi(
         internal fun totalUtbetalingsgrad(
             økonomiList: List<Økonomi>,
             inntektjustering: Inntekt = økonomiList.inntektjustering(),
-        ) = totalGrad(økonomiList, { it.utbetalingsgrad }, inntektjustering)
+        ): Prosentdel {
+            val totalGrad = totalGrad(økonomiList, { it.utbetalingsgrad }, inntektjustering)
+            return totalGrad
+        }
+
 
         fun betal(
             sykepengegrunnlagBegrenset6G: Inntekt,
             økonomiList: List<Økonomi>,
         ): List<Økonomi> {
             val foreløpig = delteUtbetalinger(økonomiList)
-            val utbetalingsgradHensyntattInntektsjustering = totalUtbetalingsgrad(foreløpig)
-            val justertForGraderteAndreYtelser = foreløpig.map { it.copy(utbetalingsgrad = utbetalingsgradHensyntattInntektsjustering - it.andreYtelserGrad) }
-            val utbetalingsgradHensyntattGraderteAndreYtelser = totalUtbetalingsgrad(justertForGraderteAndreYtelser, inntektjustering = INGEN)
+            val utbetalingsgradHensyntattGraderteAndreYtelser =
+                totalUtbetalingsgrad(foreløpig)
             val fordelt =
                 fordelBeløp(
-                    økonomiList = justertForGraderteAndreYtelser,
+                    økonomiList = foreløpig.map { it.copy(totalUtbetalingsgrad = utbetalingsgradHensyntattGraderteAndreYtelser) },
                     sykepengegrunnlagBegrenset6G = sykepengegrunnlagBegrenset6G,
                     utbetalingsgrad = utbetalingsgradHensyntattGraderteAndreYtelser,
                 )
@@ -228,9 +232,8 @@ data class Økonomi(
     fun <R> brukTotalGrad(block: (totalGrad: Int) -> R) = block(totalSykdomsgrad.toDouble().toInt())
 
     private fun reserver(): Økonomi {
-        val egenUtbetalingsgrad = utbetalingsgrad - andreYtelserGrad
-        val total = aktuellDagsinntekt * egenUtbetalingsgrad
-        val gradertArbeidsgiverRefusjonsbeløp = refusjonsbeløp * egenUtbetalingsgrad
+        val total = aktuellDagsinntekt * utbetalingsgrad
+        val gradertArbeidsgiverRefusjonsbeløp = refusjonsbeløp * utbetalingsgrad
         val arbeidsgiverbeløp = gradertArbeidsgiverRefusjonsbeløp.coerceAtMost(total)
         return copy(
             reservertArbeidsgiverbeløp = arbeidsgiverbeløp,

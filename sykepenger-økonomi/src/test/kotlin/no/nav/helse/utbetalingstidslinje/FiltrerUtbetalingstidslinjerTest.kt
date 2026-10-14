@@ -41,7 +41,10 @@ class FiltrerUtbetalingstidslinjerTest {
             (17.januar til 31.januar)
                 .filter { !it.erHelg() }
                 .forEach {
-                    assertEquals(listOf(MinimumInntekt, ManglerMedlemskap, ManglerOpptjening, SykepengedagerOppbrukt), inspektør.begrunnelse(it))
+                    assertEquals(
+                        listOf(MinimumInntekt, ManglerMedlemskap, ManglerOpptjening, SykepengedagerOppbrukt),
+                        inspektør.begrunnelse(it),
+                    )
                 }
         }
     }
@@ -88,7 +91,11 @@ class FiltrerUtbetalingstidslinjerTest {
         val input =
             listOf(
                 beregning(tidslinjeOf(16.AP(inntekt), 15.NAV(inntekt)), a1),
-                beregning(null, ghostsOgAndreInntektskilder = listOf(tidslinjeOf(31.ARB(inntekt))), yrkesaktivitet = a2),
+                beregning(
+                    null,
+                    ghostsOgAndreInntektskilder = listOf(tidslinjeOf(31.ARB(inntekt))),
+                    yrkesaktivitet = a2,
+                ),
             )
         val result = undersøke(input, sykepengegrunnlagBegrenset6G = inntekt.daglig)
 
@@ -182,14 +189,23 @@ class FiltrerUtbetalingstidslinjerTest {
                 sykepengegrunnlagBegrenset6G = (2 * inntekt).daglig,
             )
 
-        // a1: 100 % - 50 % = 50 %, a2: 100 % => (50 % * 1200 + 100 % * 1200) / 2400 = 75 %
-        result.forEach { beregnetPeriode ->
-            beregnetPeriode.utbetalingstidslinje.inspektør.also { inspektør ->
-                assertEquals(11, inspektør.navdager.size)
-                assertEquals(75.prosent, inspektør.totalSykdomsgrad(17.januar))
-                assertEquals(75.prosent, inspektør.utbetalingsgrad(17.januar))
-                assertEquals(900 * 11, inspektør.totalUtbetaling)
-            }
+        // a1: 100 % - 50 % = 50 %, a2: 100 % => (50 % * 1200 + 100 % * 1200) / 2400 = 75 % totalsykdomsgrad
+        //
+        val førsteArbeidsgiverberegning = result[0]
+        val andreArbeidsgiverberegning = result[1]
+        førsteArbeidsgiverberegning.utbetalingstidslinje.inspektør.also { inspektør ->
+            assertEquals(11, inspektør.navdager.size)
+            assertEquals(75.prosent, inspektør.totalSykdomsgrad(17.januar))
+            assertEquals(50.prosent, inspektør.utbetalingsgrad(17.januar))
+            assertEquals(75.prosent, inspektør.totalUtbetalingsgrad(17.januar))
+            assertEquals(600 * 11, inspektør.totalUtbetaling)
+        }
+        andreArbeidsgiverberegning.utbetalingstidslinje.inspektør.also { inspektør ->
+            assertEquals(11, inspektør.navdager.size)
+            assertEquals(75.prosent, inspektør.totalSykdomsgrad(17.januar))
+            assertEquals(100.prosent, inspektør.utbetalingsgrad(17.januar))
+            assertEquals(75.prosent, inspektør.totalUtbetalingsgrad(17.januar))
+            assertEquals(1200 * 11, inspektør.totalUtbetaling)
         }
     }
 
