@@ -3,15 +3,7 @@ package no.nav.helse.inspectors
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Arbeidsdag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodeDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ArbeidsgiverperiodedagNav
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.ForeldetDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.Fridag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.NavHelgDag
-import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.UkjentDag
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.*
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.inspectors.inspektør
@@ -168,6 +160,8 @@ class UtbetalingstidslinjeInspektør(
     fun dekningsgrad(dag: LocalDate) = økonomi.getValue(dag).dekningsgrad
 
     fun utbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).utbetalingsgrad
+
+    fun totalUtbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).totalUtbetalingsgrad
 
     fun totalSykdomsgrad(dag: LocalDate) = økonomi.getValue(dag).totalSykdomsgrad
 

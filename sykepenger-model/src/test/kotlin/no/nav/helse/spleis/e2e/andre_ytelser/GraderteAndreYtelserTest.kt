@@ -352,7 +352,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             assertEquals(
                 37.5.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar),
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(22.januar),
             )
             assertEquals(
                 37.5.prosent,
@@ -361,7 +361,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             assertEquals(
                 87.5.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(30.januar),
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(30.januar),
             )
             assertEquals(
                 87.5.prosent,
@@ -370,7 +370,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             assertEquals(
                 100.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(31.januar),
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(31.januar),
             )
             assertEquals(
                 100.prosent,
@@ -590,8 +590,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 700, 1000, subset = 20.januar til 30.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1000, 1000, subset = 31.januar til 31.januar)
             assertEquals(100, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.grad(22.januar))
-            assertEquals(85.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar))
-            assertEquals(70.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar))
+            assertEquals(
+                85.prosent,
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar),
+            )
+            assertEquals(
+                70.prosent,
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar),
+            )
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
 
