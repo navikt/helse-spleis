@@ -46,19 +46,7 @@ internal class ØkonomiTest {
                 100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverEnGrad.prosent),
                 50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverToGrad.prosent),
             )
-        val h = Økonomi.betal(96883.årlig, økonomiToArbeidsgivere)
-        assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(h))
-    }
-
-    @Test
-    fun `total utbetalingsgrad sdsd andre ytelser`() {
-        val økonomiToArbeidsgivere =
-            listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 55.prosent),
-                50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 55.prosent),
-            )
-        val h = Økonomi.betal(96883.årlig, økonomiToArbeidsgivere)
-        assertEquals(22.5.prosent, Økonomi.totalUtbetalingsgrad(h))
+        assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
     }
 
     @Test
@@ -502,7 +490,10 @@ internal class ØkonomiTest {
                 // assertUtbetaling(betalte[0], 0.0, 0.0)
                 // assertUtbetaling(betalte[1], 462.0, 969.0)
             }
-        assertEquals("Det er et restbeløp på kr [Årlig: 252000.0, Månedlig: 21000.0, Daglig: 969.2307692307693] etter all fordeling", m.message)
+        assertEquals(
+            "Det er et restbeløp på kr [Årlig: 252000.0, Månedlig: 21000.0, Daglig: 969.2307692307693] etter all fordeling",
+            m.message,
+        )
     }
 
     @Test
