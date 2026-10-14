@@ -161,8 +161,6 @@ class UtbetalingstidslinjeInspektør(
 
     fun utbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).utbetalingsgrad
 
-    fun totalUtbetalingsgrad(dag: LocalDate) = økonomi.getValue(dag).totalUtbetalingsgrad
-
     fun totalSykdomsgrad(dag: LocalDate) = økonomi.getValue(dag).totalSykdomsgrad
 
     fun totalUtbetaling() = totalUtbetaling

@@ -352,26 +352,14 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
             assertEquals(
                 37.5.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(22.januar),
-            )
-            assertEquals(
-                37.5.prosent,
                 inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(22.januar),
             ) // begge
 
             assertEquals(
                 87.5.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(30.januar),
-            )
-            assertEquals(
-                87.5.prosent,
                 inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(30.januar),
             ) // tilkommen
 
-            assertEquals(
-                100.prosent,
-                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalUtbetalingsgrad(31.januar),
-            )
             assertEquals(
                 100.prosent,
                 inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(31.januar),
