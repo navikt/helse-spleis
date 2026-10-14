@@ -60,26 +60,24 @@ internal class ØkonomiTest {
                 ),
             )
         // (50% * 2000 - 250) / 2000
-        assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
+        assertEquals(37.5.prosent, økonomiEnArbeidsgiver.first().utbetalingsgrad)
 
         val økonomiToArbeidsgivere =
             listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent, inntektjustering = 250.daglig),
-                50.prosent.inntekt(2000.daglig, inntektjustering = 250.daglig),
+                100.prosent.inntekt(
+                    2000.daglig,
+                    graderteAndreYtelserGrad = 25.prosent,
+                    inntektjustering = 250.daglig,
+                ), // 0.625
+                50.prosent.inntekt(
+                    2000.daglig,
+                    inntektjustering = 250.daglig,
+                ), // 0.375
             )
-        // (75% * 2000 + 50% * 2000 - 500) / 4000
-        assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
+        // (0.75 * 2000 + 0.5 * 2000 - 500) / 4000 = (2000*(0.75+0.5) - 500) / 4000 = (2000*1.25 - 500) / 4000 = 2000-4000
 
-        val alternativØkonomiToArbeidsgivere =
-            listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent),
-                50.prosent.inntekt(2000.daglig),
-            )
-
-        assertEquals(
-            50.prosent,
-            Økonomi.totalUtbetalingsgrad(alternativØkonomiToArbeidsgivere, inntektjustering = 500.daglig),
-        )
+        assertEquals(62.5.prosent, økonomiToArbeidsgivere[0].utbetalingsgrad)
+        assertEquals(37.5.prosent, økonomiToArbeidsgivere[1].utbetalingsgrad)
     }
 
     @Test
