@@ -25,7 +25,10 @@ internal class ØkonomiTest {
     // (100% * 2000 + 50% * 2000) / 4000 = 75%
     // (75% * 2000 + 50% * 2000) / 4000 = 62.5%
     // (100% * 2000 + 25% * 2000) / 4000 = 62.5%
-    // (45% * 2000 + 0% * 2000) / 4000 = 22.5%
+    // ((100% - 55%) * 2000 + (50%-55) * 2000) / 4000 = 22.5%
+
+    // (100% + 50%)/2 = 75%
+    // 75% - 55% = 20%
     @ParameterizedTest
     @CsvSource(
         "0, 0, 75",
@@ -43,7 +46,19 @@ internal class ØkonomiTest {
                 100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverEnGrad.prosent),
                 50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverToGrad.prosent),
             )
-        assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
+        val h = Økonomi.betal(96883.årlig, økonomiToArbeidsgivere)
+        assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(h))
+    }
+
+    @Test
+    fun `total utbetalingsgrad sdsd andre ytelser`() {
+        val økonomiToArbeidsgivere =
+            listOf(
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 55.prosent),
+                50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 55.prosent),
+            )
+        val h = Økonomi.betal(96883.årlig, økonomiToArbeidsgivere)
+        assertEquals(22.5.prosent, Økonomi.totalUtbetalingsgrad(h))
     }
 
     @Test
@@ -61,11 +76,22 @@ internal class ØkonomiTest {
 
         val økonomiToArbeidsgivere =
             listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent),
-                50.prosent.inntekt(2000.daglig, inntektjustering = 500.daglig),
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent, inntektjustering = 250.daglig),
+                50.prosent.inntekt(2000.daglig, inntektjustering = 250.daglig),
             )
         // (75% * 2000 + 50% * 2000 - 500) / 4000
         assertEquals(50.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
+
+        val alternativØkonomiToArbeidsgivere =
+            listOf(
+                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 25.prosent),
+                50.prosent.inntekt(2000.daglig),
+            )
+
+        assertEquals(
+            50.prosent,
+            Økonomi.totalUtbetalingsgrad(alternativØkonomiToArbeidsgivere, inntektjustering = 500.daglig),
+        )
     }
 
     @Test
