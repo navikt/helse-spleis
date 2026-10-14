@@ -1547,6 +1547,8 @@ internal class SelvstendigTest : AbstractDslTest() {
         }
     }
 
+    // Dette er en case som ikke bør skje. En selvstendig kan ikke ha en tilkommen fra en annen selvstendig
+    // da burde de bare ha en lavere sykdomsgrad.
     @Test
     fun `tilkommet inntekt - tilkommet på en selvstendig`() {
         selvstendig {
@@ -1560,14 +1562,20 @@ internal class SelvstendigTest : AbstractDslTest() {
                         InntekterForBeregning.Inntektsperiode(
                             inntektskilde = "SELVSTENDIG",
                             periode = 1.januar til 31.januar,
-                            beløp = 1000.daglig,
+                            beløp = 250.daglig,
                         ),
                     ),
             )
             håndterSimulering(1.vedtaksperiode)
 
             assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
-            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 0,
+                forventetArbeidsgiverRefusjonsbeløp = 0,
+                forventetPersonbeløp = 1017,
+                subset = 17.januar til 31.januar,
+            )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
                 assertSelvstendigInntektsgrunnlag(460589.0.årlig)
                 assertBeregningsgrunnlag(460589.0.årlig)
