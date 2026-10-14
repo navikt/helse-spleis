@@ -197,14 +197,12 @@ class FiltrerUtbetalingstidslinjerTest {
             assertEquals(11, inspektør.navdager.size)
             assertEquals(75.prosent, inspektør.totalSykdomsgrad(17.januar))
             assertEquals(50.prosent, inspektør.utbetalingsgrad(17.januar))
-            assertEquals(75.prosent, inspektør.totalUtbetalingsgrad(17.januar))
             assertEquals(600 * 11, inspektør.totalUtbetaling)
         }
         andreArbeidsgiverberegning.utbetalingstidslinje.inspektør.also { inspektør ->
             assertEquals(11, inspektør.navdager.size)
             assertEquals(75.prosent, inspektør.totalSykdomsgrad(17.januar))
             assertEquals(100.prosent, inspektør.utbetalingsgrad(17.januar))
-            assertEquals(75.prosent, inspektør.totalUtbetalingsgrad(17.januar))
             assertEquals(1200 * 11, inspektør.totalUtbetaling)
         }
     }

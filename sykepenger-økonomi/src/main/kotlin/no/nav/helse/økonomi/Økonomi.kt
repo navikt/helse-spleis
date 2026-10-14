@@ -15,7 +15,6 @@ data class Økonomi(
     val inntektjustering: Inntekt,
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
-    val totalUtbetalingsgrad: Prosentdel = utbetalingsgrad,
     val andreYtelserGrad: Prosentdel = NullProsent,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
@@ -94,19 +93,16 @@ data class Økonomi(
             return totalGrad
         }
 
-
         fun betal(
             sykepengegrunnlagBegrenset6G: Inntekt,
             økonomiList: List<Økonomi>,
         ): List<Økonomi> {
             val foreløpig = delteUtbetalinger(økonomiList)
-            val utbetalingsgradHensyntattGraderteAndreYtelser =
-                totalUtbetalingsgrad(foreløpig)
             val fordelt =
                 fordelBeløp(
-                    økonomiList = foreløpig.map { it.copy(totalUtbetalingsgrad = utbetalingsgradHensyntattGraderteAndreYtelser) },
+                    økonomiList = foreløpig,
                     sykepengegrunnlagBegrenset6G = sykepengegrunnlagBegrenset6G,
-                    utbetalingsgrad = utbetalingsgradHensyntattGraderteAndreYtelser,
+                    totalUtbetalingsgrad = totalUtbetalingsgrad(foreløpig),
                 )
             return fordelt.map { it.betal() }
         }
@@ -116,14 +112,14 @@ data class Økonomi(
         private fun fordelBeløp(
             økonomiList: List<Økonomi>,
             sykepengegrunnlagBegrenset6G: Inntekt,
-            utbetalingsgrad: Prosentdel,
+            totalUtbetalingsgrad: Prosentdel,
         ): List<Økonomi> {
             val totalArbeidsgiverFør6GBegrensning = totalArbeidsgiver(økonomiList)
             val totalPersonFør6GBegrensning = totalPerson(økonomiList)
             val total = totalArbeidsgiverFør6GBegrensning + totalPersonFør6GBegrensning
             if (total == INGEN) return økonomiList
 
-            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * utbetalingsgrad)
+            val inntektstapSomSkalDekkesAvNAV = maxOf(INGEN, sykepengegrunnlagBegrenset6G * totalUtbetalingsgrad)
 
             return økonomiList
                 .fordelRefusjon(totalArbeidsgiverFør6GBegrensning, inntektstapSomSkalDekkesAvNAV)
