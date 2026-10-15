@@ -878,4 +878,453 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 500, subset = 17.januar til 22.januar)
         }
     }
+
+    @Test
+    fun `fordeling av refusjon over 6G`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        50,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // 1000 + 1500 = 2500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 1000/2500 = 0.4
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1500/2500 = 0.6
+            // a1: 2160*0.4 = 864 => med gradering på 50% 2160*0.4*(1-0.5) => 432
+            // a2: 2160*0.6 = 1296
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad-gradertGrad)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 432, 1000, 0, subset = 17.januar til 22.januar)
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 1296, 1500, 0, subset = 17.januar til 22.januar)
+        }
+    }
+
+    @Test
+    fun `fordeling av refusjon under 6G og begge har graderte andre ytelser`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a2),
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1000/1500 = 2/3
+            // a1: 1500*(1/3)*(1-0.6) = 200
+            // a2: 1500*(2/3)*(1-0.6) = 400
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad-gradertGrad)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 200, 500, 0, subset = 17.januar til 22.januar)
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 400, 1000, 0, subset = 17.januar til 22.januar)
+        }
+    }
+
+    @Test
+    fun `fordeling av refusjon over 6G og begge har graderte andre ytelser`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a2),
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 1000/2500 = 2/5
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1500/2500 = 3/5
+            // a1: 2160*(2/5)*(1-0.6) = 345.6
+            // a2: 2160*(3/5)*(1-0.6) = 518.4
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad-gradertGrad)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 346, 1000, 0, subset = 17.januar til 22.januar)
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 519, 1500, 0, subset = 17.januar til 22.januar)
+        }
+    }
+
+    @Test
+    fun `fordeling av refusjon under 6G og begge har graderte andre ytelser + tilkommen`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a2),
+                        ),
+                    ),
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(
+                            "a3",
+                            januar,
+                            200.daglig,
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1000/1500 = 2/3
+            // andelTilkommenInntekt: 200/1500
+            // a1: 1500*(1/3)*(1-0.6-200/1500) = 133.33 =~ 133
+            // a2: 1500*(2/3)*(1-0.6-200/1500) = 266.66 =~ 267
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad - tilkommeninntekt/totalInntekter)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 133, 500, 0, subset = 17.januar til 22.januar)
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 267, 1000, 0, subset = 17.januar til 22.januar)
+        }
+    }
+
+    @Test
+    fun `fordeling av refusjon over 6G og begge har graderte andre ytelser + tilkommen inntekt`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
+                            yrkesaktivitet = Arbeidstaker(a2),
+                        ),
+                    ),
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(
+                            "a3",
+                            januar,
+                            200.daglig,
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 1000/2500 = 2/5
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1500/2500 = 3/5
+            // andel tilkommenInntekt: 200 / 2500
+            // a1: 2160*(2/5)*(1-0.6-200/2500) = 276.48
+            // a2: 2160*(3/5)*(1-0.6-200/2500) = 414.72
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad - tilkommeninntekt/totalInntekter)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 277, 1000, 0, subset = 17.januar til 22.januar)
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 415, 1500, 0, subset = 17.januar til 22.januar)
+        }
+    }
+
+/*
+    @Test
+    fun `fordeling av refusjon under 6G  graderteAnnenYtelse_grad + tilkommen inntekt_grad er større enn 1 `() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        60,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+                inntekterForBeregning = listOf(
+                    InntekterForBeregning.Inntektsperiode(
+                        "a3",
+                        januar,
+                        1100.daglig
+                    )
+                )
+            )
+            //2160 =~ 6G.daglig
+            // 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1000/1500 = 2/3
+            // andel tilkommenInntekt: 1100 / 1500 = 11/15
+            // a1: 1500*(2/5)*(1-0.6-1100/1500) = -200 => 0
+            // a2: 1500*(3/5)*(1-1100/1500) = 240
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad - tilkommeninntekt/totalInntekter)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 500, 0, subset = 17.januar til 22.januar)
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 240, 1000, 0, subset = 17.januar til 22.januar)
+        }
+    }
+*/
 }
