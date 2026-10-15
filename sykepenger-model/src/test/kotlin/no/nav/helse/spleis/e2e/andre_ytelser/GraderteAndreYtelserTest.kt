@@ -12,6 +12,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
+import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -756,6 +757,125 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 60.prosent,
                 inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.utbetalingsgrad(22.januar),
             )
+        }
+    }
+
+    @Test
+    fun `fordeling av refusjon`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        50,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+            )
+            assertUtbetalingsbeløp(1.vedtaksperiode, 250, 500, 0, subset = 17.januar til 22.januar)
+
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 500, subset = 17.januar til 22.januar)
+        }
+    }
+
+    @Test
+    fun `fordeling av delvis refusjons - arbeidsgivere burde altid etterspørre full refusjon`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                refusjon = Inntektsmelding.Refusjon(250.daglig, null),
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+                refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null),
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        50,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+            )
+            assertUtbetalingsbeløp(1.vedtaksperiode, 125, 250, 125, subset = 17.januar til 22.januar)
+
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, 500, subset = 17.januar til 22.januar)
         }
     }
 }
