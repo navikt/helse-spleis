@@ -2,6 +2,7 @@ package no.nav.helse.spleis.rest.dto
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -192,7 +193,7 @@ sealed interface ApiTidslinjeperiode {
     val periodetilstand: ApiPeriodetilstand
     val skjaeringstidspunkt: LocalDate
     val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>
-    val grunnbeløpsjustertGjennomsnitt: Double?
+    val grunnbeløpsjustertGjennomsnitt: BigDecimal?
 }
 
 data class ApiUberegnetPeriode(
@@ -209,7 +210,7 @@ data class ApiUberegnetPeriode(
     override val skjaeringstidspunkt: LocalDate,
     override val hendelser: List<ApiHendelse>,
     override val pensjonsgivendeInntekter: List<ApiPensjonsgivendeInntekt>,
-    override val grunnbeløpsjustertGjennomsnitt: Double? = null,
+    override val grunnbeløpsjustertGjennomsnitt: BigDecimal? = null,
 ) : ApiTidslinjeperiode {
     override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }
@@ -236,7 +237,7 @@ data class ApiBeregnetPeriode(
     val periodevilkar: ApiPeriodevilkar,
     val vilkarsgrunnlagId: UUID?,
     val annulleringskandidater: List<ApiAnnulleringskandidat>,
-    override val grunnbeløpsjustertGjennomsnitt: Double? = null,
+    override val grunnbeløpsjustertGjennomsnitt: BigDecimal? = null,
 ) : ApiTidslinjeperiode {
     override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }

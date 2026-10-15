@@ -76,6 +76,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.Year
@@ -472,7 +473,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                     val grunnbeløpsjustertGjennomsnitt = requireNotNull(it.grunnbeløpsjustertGjennomsnitt)
                     assertTrue(grunnbeløpsjustertGjennomsnitt > it.vilkårsgrunnlag().beregningsgrunnlag)
                     val apiPeriode = mapTidslinjeperiode(it, emptyList()) as ApiBeregnetPeriode
-                    assertEquals(grunnbeløpsjustertGjennomsnitt, apiPeriode.grunnbeløpsjustertGjennomsnitt)
+                    assertEquals(BigDecimal(grunnbeløpsjustertGjennomsnitt), apiPeriode.grunnbeløpsjustertGjennomsnitt)
                     assertEquals(grunnbeløpsjustertGjennomsnitt, objectMapper.readTree(objectMapper.writeValueAsString(apiPeriode))["grunnbeløpsjustertGjennomsnitt"].asDouble())
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
                     assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)

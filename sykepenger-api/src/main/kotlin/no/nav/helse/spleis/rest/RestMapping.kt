@@ -58,6 +58,7 @@ import no.nav.helse.spleis.speil.dto.Utbetalingstatus
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.Utbetalingtype
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.helse.spleis.rest.dto.ApiArbeidsgiverinntekt as ArbeidsgiverinntektDto
@@ -376,7 +377,7 @@ internal fun mapTidslinjeperiode(
             skjaeringstidspunkt = periode.skjæringstidspunkt,
             hendelser = periode.hendelser.tilHendelseDto(hendelser),
             pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
-            grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
+            grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt?.let(::BigDecimal),
         )
 }
 
@@ -405,7 +406,7 @@ private fun mapBeregnetPeriode(
     vilkarsgrunnlagId = periode.vilkårsgrunnlagId,
     pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
     annulleringskandidater = mapAnnulleringskandidater(periode.annulleringskandidater),
-    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
+    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt?.let(::BigDecimal),
 )
 
 private fun mapAnnulleringskandidater(annulleringskandidater: List<AnnulleringskandidatDto>) =
@@ -458,7 +459,7 @@ private fun mapAnnullertPeriode(
     vilkarsgrunnlagId = null,
     pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
     annulleringskandidater = emptyList(),
-    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt,
+    grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt?.let(::BigDecimal),
 )
 
 private fun Set<UUID>.tilHendelseDto(hendelser: List<HendelseDTO>): List<ApiHendelse> =
