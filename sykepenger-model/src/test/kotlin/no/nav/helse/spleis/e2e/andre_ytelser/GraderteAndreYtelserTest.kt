@@ -12,12 +12,14 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
+import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
 import no.nav.helse.økonomi.Inntekt
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.test.assertIs
 
 internal class GraderteAndreYtelserTest : AbstractDslTest() {
     // @OpenInSpanner
@@ -304,7 +306,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `foreldrepenger og tilkommen inntekt`() {
+    fun `ett arbeidsforhold, foreldrepenger og tilkommen inntekt`() {
         a1 {
             nyttVedtak(januar, beregnetInntekt = 520_000.årlig)
             assertInntektsgrunnlag(1.januar, 1) {
@@ -611,7 +613,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `annen ytelse graderes kun mot yrkesaktiviteten den gjelder for 2`() {
+    fun `to arbeidsforhold, begge gradert likt med annen ytelse`() {
         val inntektPerArbeidsgiver = 260_000.årlig
         val gradertePleiepengerMotA1 =
             listOf(
@@ -762,6 +764,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -820,7 +823,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
-    fun `fordeling av delvis refusjons - arbeidsgivere burde altid etterspørre full refusjon`() {
+    fun `fordeling av delvis refusjon - arbeidsgivere burde altid etterspørre full refusjon`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -881,6 +885,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon over 6G`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -943,6 +948,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon under 6G og begge har graderte andre ytelser`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1017,6 +1023,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon over 6G og begge har graderte andre ytelser`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1091,6 +1098,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon under 6G og begge har graderte andre ytelser + tilkommen`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1174,6 +1182,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `fordeling av refusjon over 6G og begge har graderte andre ytelser + tilkommen inntekt`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1255,9 +1264,9 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         }
     }
 
-/*
     @Test
-    fun `fordeling av refusjon under 6G  graderteAnnenYtelse_grad + tilkommen inntekt_grad er større enn 1 `() {
+    fun `graderte, andre ytelser og tilkommen inntekt spiser opp sykdomsgrad`() {
+        // TODO: Test med coacher
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -1301,30 +1310,155 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                             yrkesaktivitet = Arbeidstaker(a1),
                         ),
                     ),
-                inntekterForBeregning = listOf(
-                    InntekterForBeregning.Inntektsperiode(
-                        "a3",
-                        januar,
-                        1100.daglig
-                    )
-                )
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(
+                            "a3",
+                            januar,
+                            1100.daglig,
+                        ),
+                    ),
             )
-            //2160 =~ 6G.daglig
-            // 500 + 1000 = 1500
+            // 2160 =~ 6G.daglig
+            // beregningsgrunnlag: 500 + 1000 = 1500
             // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
             // a2 andel av totale inntekter på skjæringstidspunktet: 1000/1500 = 2/3
             // andel tilkommenInntekt: 1100 / 1500 = 11/15
-            // a1: 1500*(2/5)*(1-0.6-1100/1500) = -200 => 0
-            // a2: 1500*(3/5)*(1-1100/1500) = 240
+            // a1: 1500*(1/3)*(1-0.6-1100/1500) = -166.6666666667 => 0
+            // a2: 1500*(2/3)*(1-1100/1500) = 240
             // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad - tilkommeninntekt/totalInntekter)
 
+            // Dette er vel kanskje riktig? Det gir kanskje mening å få avslag fra Nav, fordi du har dekket hele inntektstapet ditt gjennom tilkommen inntekt?
+
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 500, 0, subset = 17.januar til 22.januar)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
+                assertIs<Utbetalingsdag.AvvistDag>(it)
+            }
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         }
 
         a2 {
-            assertUtbetalingsbeløp(1.vedtaksperiode, 240, 1000, 0, subset = 17.januar til 22.januar)
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1000, 0, subset = 17.januar til 22.januar)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
+                assertIs<Utbetalingsdag.AvvistDag>(it)
+            }
         }
     }
-*/
+
+    @Test
+    fun `gradert, annen ytelse spiser opp sykdomsgraden - en arbeidsgiver`() {
+        // TODO: Test med coacher
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        50,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // beregningsgrunnlag: 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
+            // a1: 1500*(1)*(0.5-0.5) = 0
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 500, 0, subset = 17.januar til 22.januar)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
+                assertIs<Utbetalingsdag.AvvistDag>(it)
+            }
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `gradert, annen ytelse spiser opp sykdomsgraden - flere arbeidsgivere`() {
+        // TODO: Test med coacher
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
+        }
+        a2 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
+        }
+
+        a1 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a2 {
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 1000.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+        }
+        a1 {
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterGraderteAndreYtelserEndret(17.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        GraderteAndreYtelserForBeregning(
+                            graderteAndreYtelserForBeregningPeriodeList =
+                                listOf(
+                                    GraderteAndreYtelserForBeregningPeriode(
+                                        17.januar,
+                                        22.januar,
+                                        50,
+                                    ),
+                                ),
+                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
+                            yrkesaktivitet = Arbeidstaker(a1),
+                        ),
+                    ),
+            )
+            // 2160 =~ 6G.daglig
+            // beregningsgrunnlag: 500 + 1000 = 1500
+            // a1 andel av totale inntekter på skjæringstidspunktet: 500/1500 = 1/3
+            // a2 andel av totale inntekter på skjæringstidspunktet: 1000/1500 = 2/3
+            // a1: 1500*(1/3)*(0.5-0.5) = 0
+            // a2: 1500*(2/3)*(0.5) = 500
+            // arbeidsgiverbeløp_n = minOf(6G.daglig,totale_inntker) * (inntekt_n / totale_inntker) * (sykdomsgrad - gradertGrad)
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 500, 0, subset = 17.januar til 22.januar)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
+                // TODO: Vi vet ikke om det skal være avslagsdag eller ikke her. Dagen er 0 %, men totalgraden er over 20 %.
+                // TODO: Avslagsdag her vil vel bety at dagen ikke teller som forbrukt dag.
+//                assertIs<Utbetalingsdag.AvvistDag>(it)
+            }
+//            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        }
+
+        a2 {
+            assertUtbetalingsbeløp(1.vedtaksperiode, 500, 1000, 0, subset = 17.januar til 22.januar)
+            inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
+                assertIs<Utbetalingsdag.NavDag>(it)
+            }
+        }
+    }
 }
