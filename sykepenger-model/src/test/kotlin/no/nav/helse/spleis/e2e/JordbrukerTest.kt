@@ -24,7 +24,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                 håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
                 assertInfo("Har ikke støtte for søknadstypen JORDBRUKER", 1.vedtaksperiode.filter())
                 assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
-                assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+                assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
             }
         }
 
@@ -47,7 +47,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                         ),
                 )
                 håndterSimulering(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
                 inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                     assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
@@ -67,7 +67,7 @@ internal class JordbrukerTest : AbstractDslTest() {
         Toggle.Jordbruker.enable {
             selvstendig {
                 håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-                assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
                 val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
                 assertEquals(listOf("JORDBRUKER"), vilkårsprøvingEvent.spesielleYrkesgrupper)
@@ -93,7 +93,7 @@ internal class JordbrukerTest : AbstractDslTest() {
                         ),
                 )
                 håndterSimulering(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
                 inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                     assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)

@@ -40,12 +40,12 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals(
                 setOf(80),
@@ -62,12 +62,12 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((25.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
         }
@@ -80,11 +80,11 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
             håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals("XXXXXXX XXXXXXX XXXXXXX XXXXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
         }
@@ -112,7 +112,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                     ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
@@ -130,7 +130,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                     ),
             )
             assertFunksjonellFeil(Varselkode.RV_IV_12, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
@@ -166,15 +166,15 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -219,15 +219,15 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -239,8 +239,8 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterFørstegangssøknadSelvstendig(mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
         }

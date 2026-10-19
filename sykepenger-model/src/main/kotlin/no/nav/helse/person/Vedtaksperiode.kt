@@ -102,13 +102,7 @@ internal class Vedtaksperiode private constructor(
         person = person,
         yrkesaktivitet = yrkesaktivitet,
         id = UUID.randomUUID(),
-        tilstand =
-            when (yrkesaktivitet.yrkesaktivitetstype) {
-                Selvstendig -> SelvstendigStart
-                Arbeidsledig -> Start
-                is Arbeidstaker -> Start
-                Frilans -> Start
-            },
+        tilstand = Start,
         behandlinger = Behandlinger(),
         opprettet = LocalDateTime.now(),
         regelverkslogg = regelverkslogg,
@@ -4167,7 +4161,14 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     Start ->
         when {
             !infotrygdhistorikk.harHistorikk() -> AvventerInfotrygdHistorikk
-            else -> AvventerInntektsmelding
+            else ->
+                when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+                    is Arbeidstaker -> AvventerInntektsmelding
+                    Selvstendig -> AvventerBlokkerendePeriode
+                    Frilans,
+                    Arbeidsledig,
+                    -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $tilstand")
+                }
         }
 
     SelvstendigAvventerBlokkerendePeriode,

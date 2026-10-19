@@ -8,8 +8,6 @@ import no.nav.helse.januar
 import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVSLUTTET
-import no.nav.helse.person.tilstandsmaskin.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -55,7 +53,7 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             val nyForsikringsvurderingId = UUID.randomUUID()
             håndterEndretForsikringsvurdering(1.januar, nyForsikringsvurderingId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(nyForsikringsvurderingId, (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)!!.forsikringsvurderingId)
             assertEquals(nyForsikringsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().forsikringsvurderingId)
         }
@@ -78,7 +76,7 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             håndterEndretForsikringsvurdering(1.januar, forsikringsvurderingId)
 
             assertInfo("Forsikringsvurderingen er allerede lagt til grunn")
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         }
     }

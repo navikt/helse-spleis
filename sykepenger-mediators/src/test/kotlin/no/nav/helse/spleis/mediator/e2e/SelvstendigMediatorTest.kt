@@ -20,14 +20,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         nyttVedtak(3.januar til 26.januar)
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -38,14 +38,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
             "AVVENTER_ANNULLERING",
             "TIL_ANNULLERING",
             "TIL_INFOTRYGD",
@@ -69,9 +69,9 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
             assertTilstander(
                 0,
-                "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-                "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-                "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
+                "AVVENTER_INFOTRYGDHISTORIKK",
+                "AVVENTER_BLOKKERENDE_PERIODE",
+                "AVVENTER_VILKÅRSPRØVING",
             )
         }
 
@@ -108,12 +108,12 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0)
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
         )
 
         sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
@@ -129,18 +129,18 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "FORKASTET")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -166,12 +166,12 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0)
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
         )
 
         sendOverstyringTidslinjeSelvstendig((1.januar til 2.januar).map { ManuellOverskrivingDag(it, Dagtype.MeldingTilNavdag) })
@@ -198,19 +198,19 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "FORKASTET")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -239,14 +239,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -273,12 +273,12 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
         )
 
         sendOverstyringTidslinjeSelvstendig((3.januar til 26.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) }, orgnummer = "SELVSTENDIG")
@@ -293,18 +293,18 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         assertUtbetalingTilstander(0, "NY", "IKKE_UTBETALT", "FORKASTET")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -360,12 +360,12 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
         )
     }
 
@@ -398,14 +398,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
@@ -438,14 +438,14 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
         sendUtbetaling()
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
-            "SELVSTENDIG_TIL_UTBETALING",
-            "SELVSTENDIG_AVSLUTTET",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+            "TIL_UTBETALING",
+            "AVSLUTTET",
         )
     }
 
