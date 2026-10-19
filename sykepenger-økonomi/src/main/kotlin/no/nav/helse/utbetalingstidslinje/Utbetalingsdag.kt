@@ -270,7 +270,7 @@ sealed class Utbetalingsdag(
                 is UtbetalingsdagInnDto.UkjentDagDto -> UkjentDag.gjenopprett(dto)
                 is UtbetalingsdagInnDto.VentetidsdagDto -> Ventetidsdag.gjenopprett(dto)
             }
-    } // /Users/h131243/src/tbd-spleiselaget-meta/meta-helse-spleis/sykepenger-model/src/main/kotlin/no/nav/helse/utbetalingstidslinje/ArbeidstakerUtbetalingstidslinjeBuilder.kt
+    }
 
     fun dto() = dto(this.dato, this.økonomi.dto())
 
