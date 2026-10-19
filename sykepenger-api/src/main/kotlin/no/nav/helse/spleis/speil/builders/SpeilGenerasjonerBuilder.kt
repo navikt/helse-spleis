@@ -341,14 +341,6 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET,
                 -> Periodetilstand.Utbetalt
 
-                VedtaksperiodetilstandDto.FRILANS_START,
-                VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
-                VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE,
-
-                VedtaksperiodetilstandDto.ARBEIDSLEDIG_START,
-                VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE,
-
                 VedtaksperiodetilstandDto.AVSLUTTET_UTEN_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,

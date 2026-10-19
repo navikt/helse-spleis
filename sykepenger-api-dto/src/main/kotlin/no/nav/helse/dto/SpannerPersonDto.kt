@@ -432,14 +432,6 @@ data class SpannerPersonDto(
                 AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
 
-                FRILANS_START,
-                FRILANS_AVVENTER_INFOTRYGDHISTORIKK,
-                FRILANS_AVVENTER_BLOKKERENDE_PERIODE,
-
-                ARBEIDSLEDIG_START,
-                ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE,
-
                 SELVSTENDIG_START,
                 SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
                 SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
@@ -1273,14 +1265,6 @@ private fun VedtaksperiodeUtDto.tilPersonData(
             VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING
             VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
             VedtaksperiodetilstandDto.TIL_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_ANNULLERING
-
-            VedtaksperiodetilstandDto.FRILANS_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_START
-            VedtaksperiodetilstandDto.FRILANS_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_AVVENTER_INFOTRYGDHISTORIKK
-            VedtaksperiodetilstandDto.FRILANS_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.FRILANS_AVVENTER_BLOKKERENDE_PERIODE
-
-            VedtaksperiodetilstandDto.ARBEIDSLEDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_START
-            VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_AVVENTER_INFOTRYGDHISTORIKK
-            VedtaksperiodetilstandDto.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.ARBEIDSLEDIG_AVVENTER_BLOKKERENDE_PERIODE
 
             VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVSLUTTET
             VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE

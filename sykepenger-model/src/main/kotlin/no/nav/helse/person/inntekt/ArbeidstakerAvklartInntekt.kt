@@ -1,9 +1,6 @@
 package no.nav.helse.person.inntekt
 
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.ArbeidsledigStart
 import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
@@ -26,9 +23,6 @@ import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
 import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.FrilansAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.FrilansStart
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
@@ -97,18 +91,6 @@ private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
         TilAnnullering,
         TilUtbetaling,
         -> true
-
-        // Arbeidsledig
-        ArbeidsledigAvventerBlokkerendePeriode,
-        ArbeidsledigAvventerInfotrygdHistorikk,
-        ArbeidsledigStart,
-        -> error("Disse tilstandende hører til Arbeidsledig!! Hva er det du holder på med??")
-
-        // Frilans
-        FrilansAvventerBlokkerendePeriode,
-        FrilansAvventerInfotrygdHistorikk,
-        FrilansStart,
-        -> error("Disse tilstandende hører til Frilans!! Hva er det du holder på med??")
 
         // Selvstendig
         SelvstendigAvsluttet,
