@@ -1,5 +1,9 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -21,12 +25,21 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
     }
 
     fun venterpå(vedtaksperiode: Vedtaksperiode) =
-        when (val t = tilstand(vedtaksperiode)) {
-            is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker ->
+                when (val t = tilstand(vedtaksperiode)) {
+                    is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
 
-            KlarForVilkårsprøving,
-            KlarForBeregning,
-            -> VenterPå.Nestemann
+                    KlarForVilkårsprøving,
+                    KlarForBeregning,
+                    -> VenterPå.Nestemann
+                }
+
+            Selvstendig -> VenterPå.Nestemann
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
         }
 
     override fun gjenopptaBehandling(
@@ -35,7 +48,21 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, aktivitetslogg)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> tilstand(vedtaksperiode).gjenopptaBehandling(vedtaksperiode, eventBus, aktivitetslogg)
+
+            Selvstendig -> {
+                aktivitetslogg.info("Gjenopptar behandling for revurdering")
+                when (vedtaksperiode.vilkårsgrunnlag) {
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøvingRevurdering)
+                    else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikkRevurdering)
+                }
+            }
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
+        }
     }
 
     override fun håndterPåminnelse(
@@ -44,7 +71,15 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         påminnelse: Påminnelse,
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
-        vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+
+            Selvstendig -> {}
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
+        }
         return null
     }
 

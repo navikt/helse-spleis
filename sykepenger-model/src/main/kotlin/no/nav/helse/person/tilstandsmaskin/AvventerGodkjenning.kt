@@ -1,5 +1,9 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.Behandlinger.Behandling.Endring.Companion.bestemSkjæringstidspunkt
@@ -25,7 +29,15 @@ internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
         påminnelse: Påminnelse,
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
-        loggEventuellSkattPåDirekten(vedtaksperiode, aktivitetslogg)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> loggEventuellSkattPåDirekten(vedtaksperiode, aktivitetslogg)
+
+            Selvstendig -> {}
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
+        }
         vedtaksperiode.trengerGodkjenning(eventBus, aktivitetslogg)
         return null
     }

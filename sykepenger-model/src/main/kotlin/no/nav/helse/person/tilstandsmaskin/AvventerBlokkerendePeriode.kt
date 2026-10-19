@@ -1,5 +1,9 @@
 package no.nav.helse.person.tilstandsmaskin
 
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -34,10 +38,20 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
-        check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
-        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg) {
-            aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!")
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> {
+                bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
+                check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
+                vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg) {
+                    aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!")
+                }
+            }
+
+            Selvstendig -> {}
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
         }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
@@ -48,11 +62,25 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
-        when {
-            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-            vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
-            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> {
+                val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+                when {
+                    nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+                    vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+                    else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
+                }
+            }
+
+            Selvstendig ->
+                when (vedtaksperiode.vilkårsgrunnlag) {
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+                    else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
+                }
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
         }
     }
 
@@ -62,11 +90,21 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
         påminnelse: Påminnelse,
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
-        vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
-        val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
-        when {
-            nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-            else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker -> {
+                vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg)
+                val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
+                when {
+                    nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
+                    else -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+                }
+            }
+
+            Selvstendig -> vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $this")
         }
         return null
     }

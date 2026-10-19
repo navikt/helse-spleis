@@ -1501,7 +1501,15 @@ internal class Vedtaksperiode private constructor(
         if (hendelse.vedtaksperiodeId != this.id) return
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         when (tilstand) {
-            AvventerInfotrygdHistorikk -> tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+            AvventerInfotrygdHistorikk ->
+                when (yrkesaktivitet.yrkesaktivitetstype) {
+                    is Arbeidstaker -> tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerInntektsmelding)
+                    Selvstendig -> tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerBlokkerendePeriode)
+                    Frilans,
+                    Arbeidsledig,
+                    -> error("Forventer ikke ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $tilstand")
+                }
+
             SelvstendigAvventerInfotrygdHistorikk -> tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, SelvstendigAvventerBlokkerendePeriode)
 
             Avsluttet,
@@ -4229,9 +4237,18 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerSimulering,
     AvventerVilkårsprøving,
     ->
-        when {
-            vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> nesteTilstandEtterInntekt(vedtaksperiode)
-            else -> AvventerAvsluttetUtenUtbetaling
+        when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
+            is Arbeidstaker ->
+                when {
+                    vedtaksperiode.skalArbeidstakerBehandlesISpeil() -> nesteTilstandEtterInntekt(vedtaksperiode)
+                    else -> AvventerAvsluttetUtenUtbetaling
+                }
+
+            Selvstendig -> AvventerBlokkerendePeriode
+
+            Frilans,
+            Arbeidsledig,
+            -> error("Forventer ikke ${vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype::class.simpleName} i $tilstand")
         }
 
     TilInfotrygd -> error("Revurdering håndteres av en periode i til_infotrygd")
