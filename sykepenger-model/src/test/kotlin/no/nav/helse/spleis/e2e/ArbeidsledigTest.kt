@@ -27,7 +27,7 @@ internal class ArbeidsledigTest : AbstractDslTest() {
         arbeidsledig {
             håndterSøknad(januar)
             assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, ARBEIDSLEDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 

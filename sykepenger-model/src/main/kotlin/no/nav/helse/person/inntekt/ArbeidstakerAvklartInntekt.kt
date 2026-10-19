@@ -4,7 +4,7 @@ import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerBlokkerendePeriode
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigAvventerInfotrygdHistorikk
 import no.nav.helse.person.tilstandsmaskin.ArbeidsledigStart
-import no.nav.helse.person.tilstandsmaskin.ArbeidstakerStart
+import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
@@ -65,7 +65,7 @@ private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
     when (this) {
         // Om vi ikke har kommet oss "forbi" AvventerInntektsmelding
         // så indikrerer tilstanden at vi _ikke_ har avklart inntekt
-        ArbeidstakerStart,
+        Start,
         AvventerInfotrygdHistorikk,
         AvventerInntektsmelding,
         AvventerAvsluttetUtenUtbetaling,

@@ -25,7 +25,7 @@ internal class FrilanserTest : AbstractDslTest() {
         frilans {
             håndterSøknad(januar)
             assertFunksjonelleFeil()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, FRILANS_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
