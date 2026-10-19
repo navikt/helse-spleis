@@ -127,7 +127,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                                 dag.grad,
                                 inntekt,
                                 inntektjusteringer,
-                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent
+                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
                             )
                         } else {
                             navDag(
@@ -136,7 +136,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                                 dag.grad,
                                 inntekt,
                                 inntektjusteringer,
-                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent
+                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
                             )
                         }
                     }
@@ -258,7 +258,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         if (erAGPNavAnsvar(dato) && !dato.erHelg()) {
             return builder.addArbeidsgiverperiodedagNav(
                 dato,
-                medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad)
+                medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad),
             )
         }
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt())
@@ -305,7 +305,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
     ) {
         builder.addNAVdag(
             dato,
-            medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad)
+            medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad),
         )
     }
 
