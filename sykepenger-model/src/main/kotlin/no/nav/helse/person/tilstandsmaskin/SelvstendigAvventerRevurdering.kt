@@ -24,8 +24,8 @@ internal data object SelvstendigAvventerRevurdering : Vedtaksperiodetilstand {
     ) {
         aktivitetslogg.info("Gjenopptar behandling for revurdering")
         when (vedtaksperiode.vilkårsgrunnlag) {
-            null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøvingRevurdering)
-            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikkRevurdering)
+            null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøvingRevurdering)
+            else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikkRevurdering)
         }
     }
 }

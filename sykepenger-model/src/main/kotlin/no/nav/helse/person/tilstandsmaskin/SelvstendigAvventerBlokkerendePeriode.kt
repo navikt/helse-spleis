@@ -24,9 +24,9 @@ internal data object SelvstendigAvventerBlokkerendePeriode : Vedtaksperiodetilst
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
     ) = if (vedtaksperiode.vilkårsgrunnlag == null) {
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerVilkårsprøving)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
     } else {
-        vedtaksperiode.tilstand(eventBus, aktivitetslogg, SelvstendigAvventerHistorikk)
+        vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
     }
 
     override fun håndterPåminnelse(
