@@ -729,6 +729,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
 
     @Test
     fun `annen ytelse graderes mot selvstendig næringsdrivende`() {
+        // TODO: Utvide med beløp
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
