@@ -108,4 +108,5 @@ internal fun Application.lagApplikasjonsmodul(
         meterRegistry = meterRegistry,
     )
     opptjeningApi(personDao)
+    behandlingApi(personDao)
 }

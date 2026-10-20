@@ -1,11 +1,9 @@
 package no.nav.helse.person.builders
 
+import no.nav.helse.dto.SykdomstidslinjeDto
+import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.AndreYtelser
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.ArbeidIkkeGjenopptattDag
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.Feriedag
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.Fridag
-import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.Permisjonsdag
+import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag
@@ -20,7 +18,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.Arbeidsdag ->
                     EventSubscription.Utbetalingsdag(
                         dag.dato,
-                        EventSubscription.Utbetalingsdag.Dagtype.Arbeidsdag,
+                        Arbeidsdag,
                         dag.økonomi.dekningsgrad
                             .toDouble()
                             .toInt(),
@@ -30,7 +28,7 @@ internal class UtbetalingsdagerBuilder(
                 ->
                     EventSubscription.Utbetalingsdag(
                         dato = dag.dato,
-                        type = EventSubscription.Utbetalingsdag.Dagtype.ArbeidsgiverperiodeDag,
+                        type = ArbeidsgiverperiodeDag,
                         beløpTilArbeidsgiver = dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0,
                         beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                         sykdomsgrad =
@@ -47,7 +45,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.Ventetidsdag ->
                     EventSubscription.Utbetalingsdag(
                         dato = dag.dato,
-                        type = EventSubscription.Utbetalingsdag.Dagtype.Ventetidsdag,
+                        type = Ventetidsdag,
                         beløpTilArbeidsgiver = 0,
                         beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                         sykdomsgrad =
@@ -64,7 +62,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.NavDag ->
                     EventSubscription.Utbetalingsdag(
                         dato = dag.dato,
-                        type = EventSubscription.Utbetalingsdag.Dagtype.NavDag,
+                        type = NavDag,
                         beløpTilArbeidsgiver = dag.økonomi.arbeidsgiverbeløp?.dagligInt ?: 0,
                         beløpTilBruker = dag.økonomi.personbeløp?.dagligInt ?: 0,
                         sykdomsgrad =
@@ -81,7 +79,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.NavHelgDag ->
                     EventSubscription.Utbetalingsdag(
                         dato = dag.dato,
-                        type = EventSubscription.Utbetalingsdag.Dagtype.NavHelgDag,
+                        type = NavHelgDag,
                         beløpTilArbeidsgiver = 0,
                         beløpTilBruker = 0,
                         sykdomsgrad =
@@ -158,7 +156,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.AvvistDag ->
                     EventSubscription.Utbetalingsdag(
                         dato = dag.dato,
-                        type = EventSubscription.Utbetalingsdag.Dagtype.AvvistDag,
+                        type = AvvistDag,
                         beløpTilArbeidsgiver = 0,
                         beløpTilBruker = 0,
                         sykdomsgrad =
@@ -178,7 +176,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.ForeldetDag ->
                     EventSubscription.Utbetalingsdag(
                         dag.dato,
-                        EventSubscription.Utbetalingsdag.Dagtype.ForeldetDag,
+                        ForeldetDag,
                         dag.økonomi.dekningsgrad
                             .toDouble()
                             .toInt(),
@@ -186,7 +184,7 @@ internal class UtbetalingsdagerBuilder(
                 is Utbetalingsdag.UkjentDag ->
                     EventSubscription.Utbetalingsdag(
                         dag.dato,
-                        EventSubscription.Utbetalingsdag.Dagtype.UkjentDag,
+                        UkjentDag,
                         dag.økonomi.dekningsgrad
                             .toDouble()
                             .toInt(),
@@ -194,3 +192,13 @@ internal class UtbetalingsdagerBuilder(
             }
         }
 }
+
+/**
+ * Gir de samme utbetalingsdagene som sendes i godkjenningsbehovet, men bygget fra en lagret behandlingsendring.
+ */
+fun utbetalingsdagerSomIGodkjenningsbehov(
+    sykdomstidslinje: SykdomstidslinjeDto,
+    utbetalingstidslinje: UtbetalingstidslinjeInnDto,
+): List<EventSubscription.Utbetalingsdag> =
+    UtbetalingsdagerBuilder(Sykdomstidslinje.gjenopprett(sykdomstidslinje))
+        .result(Utbetalingstidslinje.gjenopprett(utbetalingstidslinje))

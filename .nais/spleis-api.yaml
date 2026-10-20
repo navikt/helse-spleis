@@ -39,6 +39,7 @@ spec:
         - application: sporing
         - application: sp-vilkarsproving
         - application: speil
+        - application: sporbar
     outbound:
       rules:
         - application: logging
