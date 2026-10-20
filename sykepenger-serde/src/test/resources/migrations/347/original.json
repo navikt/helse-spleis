@@ -1,0 +1,14 @@
+{
+  "arbeidsgivere": [
+    {
+      "vedtaksperioder": [
+        {
+          "tilstand": "SELVSTENDIG_AVSLUTTET"
+        },
+        {
+          "tilstand": "AVVENTER_BLOKKERENDE_PERIODE"
+        }
+      ]
+    }
+  ]
+}

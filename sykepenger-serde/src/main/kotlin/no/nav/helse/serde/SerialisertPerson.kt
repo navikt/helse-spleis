@@ -69,6 +69,7 @@ import no.nav.helse.serde.migration.V343JordbrukerTilSelvstendigYrkesaktivitetst
 import no.nav.helse.serde.migration.V344LeggeTilBeregningId
 import no.nav.helse.serde.migration.V345LeggeTilOpptjeningsvurderingId
 import no.nav.helse.serde.migration.V346OverskrivOpptjeningsvurderingId
+import no.nav.helse.serde.migration.V347RenameSelvstendigAvsluttetTilAvsluttet
 import no.nav.helse.serde.migration.migrate
 
 class SerialisertPerson(
@@ -142,6 +143,7 @@ class SerialisertPerson(
                 V344LeggeTilBeregningId(),
                 V345LeggeTilOpptjeningsvurderingId(),
                 V346OverskrivOpptjeningsvurderingId(),
+                V347RenameSelvstendigAvsluttetTilAvsluttet(),
             )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)
