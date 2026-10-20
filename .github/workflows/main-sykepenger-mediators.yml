@@ -74,15 +74,15 @@ jobs:
       contents: read
       id-token: write # for nais login
 
-  deploy-prod:
-    name: Deploy til prod
-    needs: bygg-image
-    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
-    with:
-      manifest: .nais/spleis.yaml
-      environment: prod-gcp
-      image: ${{ needs.bygg-image.outputs.image_ref }}
-      extra_manifests: .nais/spleis-db-policy.yaml
-    permissions:
-      contents: read
-      id-token: write # for nais login
+#  deploy-prod:
+#    name: Deploy til prod
+#    needs: bygg-image
+#    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+#    with:
+#      manifest: .nais/spleis.yaml
+#      environment: prod-gcp
+#      image: ${{ needs.bygg-image.outputs.image_ref }}
+#      extra_manifests: .nais/spleis-db-policy.yaml
+#    permissions:
+#      contents: read
+#      id-token: write # for nais login
