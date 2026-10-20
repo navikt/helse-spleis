@@ -91,7 +91,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             håndterForlengelsessøknadSelvstendig(
                 periode = februar,
@@ -148,14 +148,14 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelserSelvstendig(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
 
             håndterFørstegangssøknadSelvstendig(11.januar til 31.januar)
             håndterYtelserSelvstendig(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstand(2.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVSLUTTET)
 
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, forventetPersonbeløp = 0, subset = 1.januar til 10.januar)
             assertUtbetalingsbeløp(2.vedtaksperiode, 0, 0, forventetPersonbeløp = 0, subset = 11.januar til 16.januar)
@@ -243,7 +243,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             forklaring = "Selvstendig venter ikke på tur!",
             nå = {
                 selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
                 }
             },
             ønsket = {
@@ -257,7 +257,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                 }
 
                 selvstendig {
-                    assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+                    assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
                 }
             },
         )
@@ -283,15 +283,15 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET)
-            assertTilstand(2.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
         }
     }
@@ -312,7 +312,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
@@ -333,7 +333,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
@@ -355,7 +355,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
@@ -378,7 +378,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 90) })
 
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
         }
     }
 
@@ -400,9 +400,9 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
             håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING)
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
 
@@ -432,17 +432,17 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING)
-            assertTilstander(3.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
+            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             nullstillTilstandsendringer()
 
             håndterOverstyrTidslinje((31.januar.somPeriode()).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 100) })
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING)
-            assertTilstander(3.vedtaksperiode, SELVSTENDIG_AVVENTER_REVURDERING)
+            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
+            assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }
 
@@ -469,11 +469,11 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             nullstillTilstandsendringer()
 
-            håndterPåminnelse(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, flagg = setOf("ønskerReberegning"))
+            håndterPåminnelse(1.vedtaksperiode, AVSLUTTET, flagg = setOf("ønskerReberegning"))
             håndterYtelser(1.vedtaksperiode)
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, SELVSTENDIG_AVVENTER_REVURDERING, SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING, SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
 
@@ -489,7 +489,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
         }
     }
 
@@ -499,7 +499,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.FISKER)
             assertInfo("Har ikke støtte for søknadstypen FISKER", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
@@ -509,7 +509,7 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.ANNET)
             assertInfo("Har ikke støtte for søknadstypen ANNET", 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
@@ -525,7 +525,7 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
         }
     }
 
@@ -667,15 +667,15 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -750,15 +750,15 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -779,11 +779,11 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_IV_3), 1.vedtaksperiode.filter())
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
             )
         }
     }
@@ -803,12 +803,12 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, grad = 80) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals(
                 setOf(80),
@@ -825,12 +825,12 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((25.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals("VVVVVVV VVVVVVV VVNNNHH NNNXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
         }
@@ -843,11 +843,11 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             håndterOverstyrTidslinje((1.januar til 31.januar).map { ManuellOverskrivingDag(it, Dagtype.Foreldrepengerdag) })
             håndterYtelser(1.vedtaksperiode)
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_GODKJENNING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
 
             assertEquals("XXXXXXX XXXXXXX XXXXXXX XXXXXXX XXX", inspektør.utbetalingstidslinjer(1.vedtaksperiode).toString())
         }
@@ -874,7 +874,7 @@ internal class SelvstendigTest : AbstractDslTest() {
                     ),
             )
             assertFunksjonelleFeil(1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, SELVSTENDIG_START, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
 
@@ -910,15 +910,15 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -964,15 +964,15 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -984,8 +984,8 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar)
             håndterFørstegangssøknadSelvstendig(mars)
 
-            assertTilstander(1.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
-            assertTilstander(2.vedtaksperiode, SELVSTENDIG_START, SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))
         }
@@ -1010,13 +1010,13 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_AVSLUTTET,
-                SELVSTENDIG_AVVENTER_REVURDERING,
-                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
             assertEquals(
@@ -1046,13 +1046,13 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt()
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_AVSLUTTET,
-                SELVSTENDIG_AVVENTER_REVURDERING,
-                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
             assertEquals(
@@ -1085,13 +1085,13 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 0, forventetPersonbeløp = 617, subset = 20.januar til 31.januar)
             assertTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_AVSLUTTET,
-                SELVSTENDIG_AVVENTER_REVURDERING,
-                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
             )
             assertEquals(Utbetalingtype.REVURDERING, inspektør.utbetalinger(1.vedtaksperiode)[1].type)
         }
@@ -1157,7 +1157,7 @@ internal class SelvstendigTest : AbstractDslTest() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, harOppgittOpprettholdtInntekt = true)
             assertVarsel(Varselkode.RV_SØ_51, 1.vedtaksperiode.filter())
-            assertSisteTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -1288,11 +1288,11 @@ internal class SelvstendigTest : AbstractDslTest() {
             assertFunksjonellFeil(Varselkode.RV_AN_9, 1.vedtaksperiode.filter())
             assertForkastetPeriodeTilstander(
                 1.vedtaksperiode,
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
                 TIL_INFOTRYGD,
                 varselkode = Varselkode.RV_AN_9,
             )
@@ -1590,7 +1590,7 @@ internal class SelvstendigTest : AbstractDslTest() {
     fun `selvstendig næringsdrivende får tom liste i spesielleYrkesgrupper`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE)
-            assertTilstand(1.vedtaksperiode, SELVSTENDIG_AVVENTER_VILKÅRSPRØVING)
+            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
 
             val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
             assertEquals(emptyList<String>(), vilkårsprøvingEvent.spesielleYrkesgrupper)

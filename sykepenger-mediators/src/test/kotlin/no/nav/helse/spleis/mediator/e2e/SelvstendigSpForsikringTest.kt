@@ -32,12 +32,12 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
         assertTilstander(
             0,
-            "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-            "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-            "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-            "SELVSTENDIG_AVVENTER_HISTORIKK",
-            "SELVSTENDIG_AVVENTER_SIMULERING",
-            "SELVSTENDIG_AVVENTER_GODKJENNING",
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
         )
     }
 
@@ -64,12 +64,12 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
             assertTilstander(
                 0,
-                "SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK",
-                "SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE",
-                "SELVSTENDIG_AVVENTER_VILKÅRSPRØVING",
-                "SELVSTENDIG_AVVENTER_HISTORIKK",
-                "SELVSTENDIG_AVVENTER_SIMULERING",
-                "SELVSTENDIG_AVVENTER_GODKJENNING",
+                "AVVENTER_INFOTRYGDHISTORIKK",
+                "AVVENTER_BLOKKERENDE_PERIODE",
+                "AVVENTER_VILKÅRSPRØVING",
+                "AVVENTER_HISTORIKK",
+                "AVVENTER_SIMULERING",
+                "AVVENTER_GODKJENNING",
             )
         }
 }

@@ -322,7 +322,7 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
+                uberegnetPeriode(0) medTilstand UtbetaltVenterPåAnnenPeriode
                 uberegnetPeriode(1) medTilstand ForberederGodkjenning
             }
             1.generasjon {
