@@ -60,8 +60,6 @@ class Prosentdel private constructor(
 
     operator fun plus(other: Prosentdel) = Prosentdel((this.brøkdel + other.brøkdel).coerceAtMost(BigDecimal.ONE))
 
-    operator fun times(other: Prosentdel) = Prosentdel((this.brøkdel * other.brøkdel).coerceAtMost(BigDecimal.ONE))
-
     override fun compareTo(other: Prosentdel) = if (this.equals(other)) 0 else this.brøkdel.compareTo(other.brøkdel)
 
     override fun toString(): String = "${(toDouble())} %"
