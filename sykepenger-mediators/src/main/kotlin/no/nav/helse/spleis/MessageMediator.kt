@@ -163,7 +163,6 @@ internal class MessageMediator(
             is PåminnelseMessage,
             is SkjønnsmessigFastsettelseMessage,
             is GjenopptaBehandlingMessage,
-            is EndretVurderingPåSkjæringstidspunktMessage,
             is EndretGrunnlagForBeregningMessage,
             is InntektsopplysningerFraLagretInntektsmeldingMessage,
             -> false
@@ -191,6 +190,7 @@ internal class MessageMediator(
             is SendtSøknadFiskerMessage,
             is SendtSøknadAnnetMessage,
             is SendtSøknadSelvstendigMessage,
+            is EndretVurderingPåSkjæringstidspunktMessage,
             -> true
         }
 
