@@ -18,6 +18,7 @@ import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
 import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
 import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
+import no.nav.helse.spleis.Behov.Behovstype.MedlemskapsvurderingResultat
 import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
 import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
 import no.nav.helse.spleis.Behov.Behovstype.OpptjeningsvurderingResultat
@@ -140,6 +141,32 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertPleiepengerdetaljer(behov)
         assertInntekterForBeregning(behov)
     }
+
+    @Test
+    fun `ytelser med toggle for medlemskapsvurderingresultat`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            sendVilkårsgrunnlag(0)
+            val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
+            assertVedtaksperiodeBehov(
+                behov,
+                Arbeidsavklaringspenger,
+                Dagpenger,
+                Foreldrepenger,
+                Institusjonsopphold,
+                Omsorgspenger,
+                Opplæringspenger,
+                Pleiepenger,
+                InntekterForBeregning,
+                OpptjeningsvurderingResultat,
+                MedlemskapsvurderingResultat,
+            )
+            assertDoesNotThrow { UUID.fromString(behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asText()) }
+        }
 
     @Test
     fun simulering() {

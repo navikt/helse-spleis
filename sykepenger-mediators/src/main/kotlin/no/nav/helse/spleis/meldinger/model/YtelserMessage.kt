@@ -131,6 +131,19 @@ internal class YtelserMessage(
 
     internal val opptjeningsvurderingResultatOk: Boolean = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].asBoolean()
 
+    internal val medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? =
+        packet["@løsning.${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}.svar"]
+            .takeUnless { it.isMissingOrNull() }
+            ?.let { svar ->
+                when (svar.asText()) {
+                    "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
+                    "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
+                    "UAVKLART" -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
+                    "UAVKLART_MED_BRUKERSPORSMAAL" -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
+                    else -> error("Ukjent svar på ${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}: ${svar.asText()}")
+                }
+            }
+
     internal val dagpengerV2 =
         Dagpenger(
             packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
@@ -163,6 +176,7 @@ internal class YtelserMessage(
                 graderteAndreYtelser = graderteAndreYtelser,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+                medlemskapsvurderingResultat = medlemskapsvurderingResultat,
             )
 
     override fun behandle(

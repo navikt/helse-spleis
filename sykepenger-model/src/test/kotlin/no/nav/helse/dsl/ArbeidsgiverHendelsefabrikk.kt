@@ -260,6 +260,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         opptjeningsvurderingResultatOk: Boolean,
+        medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -296,6 +297,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             graderteAndreYtelser = graderteAndreYtelser,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+            medlemskapsvurderingResultat = medlemskapsvurderingResultat,
         )
     }
 

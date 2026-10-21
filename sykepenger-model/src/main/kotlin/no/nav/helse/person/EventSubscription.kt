@@ -758,6 +758,7 @@ interface EventSubscription {
         val graderteAndreYtelserPeriode: Periode,
         val forsikringsvurderingId: UUID?,
         val opptjeningsvurderingId: UUID,
+        val medlemskapsvurderingId: UUID,
     ) : Event
 
     data class TrengerInitiellHistorikkFraInfotrygdEvent(

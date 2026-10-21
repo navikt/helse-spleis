@@ -71,6 +71,8 @@ internal class YtelserRiver(
 
         message.requireKey("@løsning.${OpptjeningsvurderingResultat.utgåendeNavn}.ok")
 
+        message.interestedIn("@løsning.${MedlemskapsvurderingResultat.utgåendeNavn}.svar")
+
         // Dagpenger & AAP
         message.requireArray("@løsning.${Dagpenger.utgåendeNavn}.meldekortperioder") {
             require("fom", JsonNode::asLocalDate)

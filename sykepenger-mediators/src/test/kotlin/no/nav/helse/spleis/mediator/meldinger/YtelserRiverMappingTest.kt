@@ -49,6 +49,27 @@ internal class YtelserRiverMappingTest :
     }
 
     @Test
+    fun `Mapping uten løsning på medlemskapsvurderingresultat`() {
+        assertNull(sendJson(medObject).medlemskapsvurderingResultat)
+    }
+
+    @Test
+    fun `Mapping av løsning på medlemskapsvurderingresultat`() {
+        mapOf(
+            "JA" to Medlemskapsvurdering.Medlemskapstatus.Ja,
+            "NEI" to Medlemskapsvurdering.Medlemskapstatus.Nei,
+            "UAVKLART" to Medlemskapsvurdering.Medlemskapstatus.VetIkke,
+            "UAVKLART_MED_BRUKERSPORSMAAL" to Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål,
+        ).forEach { (svar, forventet) ->
+            val json = medMedlemskapsvurderingResultat(medObject, svar)
+            sendJson(json).apply {
+                assertForventetInnhold()
+                assertEquals(forventet, medlemskapsvurderingResultat)
+            }
+        }
+    }
+
+    @Test
     fun `Mapping av graderte andre ytelser med yrkesaktivitet`() =
         Toggle.GraderteAndreYtelser.enable {
             val json =
@@ -172,6 +193,18 @@ internal class YtelserRiverMappingTest :
         assertEquals(forventetDagpenger, this.dagpengerV2)
         assertEquals(forsikring, this.forsikringsvurderingResultat)
         assertEquals(forventetOpptjeningsvurderingResultatOk, this.opptjeningsvurderingResultatOk)
+    }
+
+    private fun medMedlemskapsvurderingResultat(
+        json: String,
+        svar: String,
+    ): String {
+        val json = jacksonObjectMapper().readTree(json)
+        (json.path("@løsning") as ObjectNode).putObject("MedlemskapsvurderingResultat").apply {
+            put("svar", svar)
+            put("ok", svar != "NEI")
+        }
+        return json.toString()
     }
 
     private fun fjernLøsninger(

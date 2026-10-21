@@ -745,6 +745,16 @@ internal class EventBusOversetter(
                         "opptjeningsvurderingId" to event.opptjeningsvurderingId,
                     ),
                 ),
+                if (Toggle.MedlemskapsvurderingResultatBehov.enabled) {
+                    Behov(
+                        Behov.Behovstype.MedlemskapsvurderingResultat,
+                        mapOf(
+                            "medlemskapsvurderingId" to event.medlemskapsvurderingId,
+                        ),
+                    )
+                } else {
+                    null
+                },
                 event.forsikringsvurderingId?.let { forsikringsvurderingId ->
                     Behov(
                         Behov.Behovstype.ForsikringsvurderingResultat,

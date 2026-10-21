@@ -825,6 +825,7 @@ internal class TestPerson(
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
             graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
             opptjeningsvurderingResultatOk: Boolean? = null,
+            medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
         ) {
             val opptjeningsvurderingResultatOk =
                 opptjeningsvurderingResultatOk ?: if (inspektør.orgnummer == "SELVSTENDIG") {
@@ -840,7 +841,7 @@ internal class TestPerson(
 
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
-                .lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk)
+                .lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk, medlemskapsvurderingResultat = medlemskapsvurderingResultat)
                 .håndter(Person::håndterYtelser)
         }
 

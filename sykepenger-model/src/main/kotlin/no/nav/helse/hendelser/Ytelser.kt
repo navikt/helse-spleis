@@ -31,6 +31,7 @@ class Ytelser(
     val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
     val opptjeningsvurderingResultatOk: Boolean,
     private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+    val medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
 ) : Hendelse {
     override val metadata =
         LocalDateTime.now().let { nå ->

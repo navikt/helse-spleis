@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.dto.VedtaksperiodetilstandDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
@@ -1425,6 +1426,24 @@ internal class Vedtaksperiode private constructor(
         håndterYtelser(eventBus, ytelser, aktivitetsloggMedVedtaksperiodekontekst.medFeilSomVarslerHvisNødvendig(), infotrygdhistorikk, nesteSimuleringtilstand, nesteGodkjenningtilstand)
     }
 
+    private fun medlemskapstatus(
+        ytelser: Ytelser,
+        grunnlagsdata: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement,
+        aktivitetslogg: IAktivitetslogg,
+    ): Medlemskapsvurdering.Medlemskapstatus? {
+        val fraVilkårsgrunnlag = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
+        val fraMedlemskapsvurderingResultat = ytelser.medlemskapsvurderingResultat
+        if (fraVilkårsgrunnlag != null && fraMedlemskapsvurderingResultat != null && fraMedlemskapsvurderingResultat != fraVilkårsgrunnlag) {
+            aktivitetslogg.info("Medlemskapsvurderingresultat ($fraMedlemskapsvurderingResultat) er ulikt medlemskapstatus på vilkårsgrunnlaget ($fraVilkårsgrunnlag)")
+        }
+        val medlemskapstatus = fraMedlemskapsvurderingResultat ?: fraVilkårsgrunnlag
+        // Med togglen på gir ikke vilkårsprøvingen varsler om medlemskap, så de må komme her
+        if (Toggle.MedlemskapsvurderingResultatBehov.enabled && medlemskapstatus != null) {
+            Medlemskapsvurdering.varsle(medlemskapstatus, aktivitetslogg)
+        }
+        return medlemskapstatus
+    }
+
     private fun håndterYtelser(
         eventBus: EventBus,
         ytelser: Ytelser,
@@ -1454,7 +1473,7 @@ internal class Vedtaksperiode private constructor(
         val harOpptjening = ytelser.opptjeningsvurderingResultatOk
         val sykepengegrunnlag = grunnlagsdata.inntektsgrunnlag.sykepengegrunnlag
         val beregningsgrunnlag = grunnlagsdata.inntektsgrunnlag.beregningsgrunnlag
-        val medlemskapstatus = (grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.medlemskapstatus
+        val medlemskapstatus = medlemskapstatus(ytelser, grunnlagsdata, aktivitetslogg)
         val minsteinntektsvurdering = lagMinsteinntektsvurdering(skjæringstidspunkt, sykepengegrunnlag)
         // grunnlaget for maksdatoberegning er alt som har skjedd før
         // - alle vedtaksperioder som slutter før vedtaksperioden som beregnes
@@ -2861,6 +2880,7 @@ internal class Vedtaksperiode private constructor(
                 graderteAndreYtelserPeriode = beregningsperiode,
                 forsikringsvurderingId = (grunnlag as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId,
                 opptjeningsvurderingId = grunnlag.opptjeningsvurderingId,
+                medlemskapsvurderingId = grunnlag.medlemskapsvurderingId,
             )
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)

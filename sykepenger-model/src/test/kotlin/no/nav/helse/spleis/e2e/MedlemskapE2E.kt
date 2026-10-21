@@ -1,13 +1,17 @@
 package no.nav.helse.spleis.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
+import no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Ja
 import no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.Nei
+import no.nav.helse.hendelser.Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -15,6 +19,7 @@ import no.nav.helse.utbetalingstidslinje.Begrunnelse.ManglerMedlemskap
 import no.nav.helse.utbetalingstidslinje.Utbetalingsdag.AvvistDag
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -56,4 +61,82 @@ internal class MedlemskapE2E : AbstractDslTest() {
             }
         }
     }
+
+    @Test
+    fun `medlemskapsvurderingresultat nei ved beregning avslår dager og gir varsel selv om vilkårsgrunnlaget sier ja`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Nei)
+                assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
+                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+                val utbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
+                assertTrue(utbetalingsdager.isNotEmpty())
+                utbetalingsdager.forEach { utbetalingsdag ->
+                    assertTrue(utbetalingsdag is AvvistDag)
+                    assertEquals(ManglerMedlemskap, (utbetalingsdag as AvvistDag).begrunnelser.single())
+                }
+            }
+        }
+
+    @Test
+    fun `medlemskapsvurderingresultat ja ved beregning gir utbetaling og ikke varsel selv om vilkårsgrunnlaget sier nei`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
+                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Ja)
+
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
+            }
+        }
+
+    @Test
+    fun `medlemskapsvurderingresultat uavklart med brukerspørsmål ved beregning gir varsel`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
+                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
+
+                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+                assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
+            }
+        }
+
+    @Test
+    fun `uten svar fra sp-medlemskap gir statusen Nei på vilkårsgrunnlaget varsel ved beregning`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                håndterYtelser(1.vedtaksperiode)
+
+                assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
+            }
+        }
+
+    @Test
+    fun `uten svar fra sp-medlemskap gir statusen UavklartMedBrukerspørsmål på vilkårsgrunnlaget varsel ved beregning`() =
+        Toggle.MedlemskapsvurderingResultatBehov.enable {
+            a1 {
+                håndterSøknad(januar)
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
+                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                håndterYtelser(1.vedtaksperiode)
+
+                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+            }
+        }
 }
