@@ -17,6 +17,7 @@ import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.SendtDao
+import no.nav.helse.spleis.medlemskap.medlemskapApi
 import no.nav.helse.spleis.opptjening.opptjeningApi
 import no.nav.helse.spleis.rest.personApi
 import org.slf4j.LoggerFactory
@@ -108,5 +109,6 @@ internal fun Application.lagApplikasjonsmodul(
         meterRegistry = meterRegistry,
     )
     opptjeningApi(personDao)
+    medlemskapApi(personDao)
     behandlingApi(personDao)
 }
