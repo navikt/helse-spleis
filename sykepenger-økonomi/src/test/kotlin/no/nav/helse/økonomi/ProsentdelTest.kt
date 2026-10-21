@@ -1,13 +1,10 @@
 package no.nav.helse.økonomi
 
 import no.nav.helse.økonomi.Inntekt.Companion.daglig
-import no.nav.helse.økonomi.Prosentdel.Companion.average
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.Prosentdel.Companion.ratio
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.økonomi.Prosentdel.Companion.vektlagtGjennomsnitt
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -30,10 +27,10 @@ internal class ProsentdelTest {
     fun `total sykdomsgrad - flyttall`() {
         val inntekter =
             listOf(
-                100.prosent to 502400.04,
-                100.prosent to 70065.12,
+                Triple(100.prosent, 502400.04, 0.0),
+                Triple(100.prosent, 70065.12, 0.0),
             )
-        val result = inntekter.average(0.0)
+        val result = inntekter.vektlagtGjennomsnitt()
         assertEquals(100.prosent, result)
     }
 

@@ -29,14 +29,13 @@ class Prosentdel private constructor(
             b: Double,
         ) = Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
 
-        internal fun Collection<Pair<Prosentdel, Double>>.average(inntektjustering: Double): Prosentdel = map { it.first to it.second.toBigDecimal(mc) }.average(inntektjustering.toBigDecimal(mc))
+        internal fun Collection<Triple<Prosentdel, Double, Double>>.vektlagtGjennomsnitt(): Prosentdel = map { Triple(it.first, it.second.toBigDecimal(mc), it.third.toBigDecimal(mc)) }.vektlagtGjennomsnitt()
 
-        private fun Collection<Pair<Prosentdel, BigDecimal>>.average(inntektjustering: BigDecimal): Prosentdel {
+        private fun Collection<Triple<Prosentdel, BigDecimal, BigDecimal>>.vektlagtGjennomsnitt(): Prosentdel {
             val total = this.sumOf { it.second }
             require(total > BigDecimal.ZERO) { "Kan ikke dele på 0" }
-            val inntekter = this.sumOf { it.first.brøkdel.multiply(it.second, mc) }
-            val teller = inntekter - inntektjustering.coerceAtMost(inntekter)
-            val ratio = teller.divide(total, mc)
+            val teller = this.sumOf { it.first.brøkdel.multiply(it.second, mc) - it.third }
+            val ratio = teller.divide(total, mc).coerceAtLeast(BigDecimal.ZERO)
             return Prosentdel(ratio)
         }
 

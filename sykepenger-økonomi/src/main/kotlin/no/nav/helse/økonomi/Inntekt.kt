@@ -2,7 +2,6 @@ package no.nav.helse.økonomi
 
 import no.nav.helse.dto.InntektDto
 import no.nav.helse.dto.InntektbeløpDto
-import no.nav.helse.økonomi.Prosentdel.Companion.average
 import kotlin.math.roundToInt
 
 class Inntekt private constructor(
@@ -30,11 +29,6 @@ class Inntekt private constructor(
     companion object {
         // 8-10 ledd 3
         private const val ARBEIDSDAGER_PER_ÅR = 260
-
-        fun vektlagtGjennomsnitt(
-            parene: List<Pair<Prosentdel, Inntekt>>,
-            inntektjustering: Inntekt,
-        ): Prosentdel = parene.map { it.first to it.second.årlig }.average(inntektjustering.årlig)
 
         fun fraGradert(
             inntekt: Inntekt,
