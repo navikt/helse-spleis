@@ -10,6 +10,7 @@ sealed class VilkårsgrunnlagUtDto {
     abstract val skjæringstidspunkt: LocalDate
     abstract val inntektsgrunnlag: InntektsgrunnlagUtDto
     abstract val opptjeningsvurderingId: UUID
+    abstract val medlemskapsvurderingId: UUID
 
     data class Spleis(
         override val vilkårsgrunnlagId: UUID,
@@ -20,6 +21,7 @@ sealed class VilkårsgrunnlagUtDto {
         val meldingsreferanseId: MeldingsreferanseDto?,
         val forsikringsvurderingId: UUID?,
         override val opptjeningsvurderingId: UUID,
+        override val medlemskapsvurderingId: UUID,
     ) : VilkårsgrunnlagUtDto()
 
     data class Infotrygd(
@@ -27,5 +29,6 @@ sealed class VilkårsgrunnlagUtDto {
         override val skjæringstidspunkt: LocalDate,
         override val inntektsgrunnlag: InntektsgrunnlagUtDto,
         override val opptjeningsvurderingId: UUID,
+        override val medlemskapsvurderingId: UUID,
     ) : VilkårsgrunnlagUtDto()
 }

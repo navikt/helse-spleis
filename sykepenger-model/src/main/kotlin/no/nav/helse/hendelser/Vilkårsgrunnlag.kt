@@ -124,6 +124,7 @@ class Vilkårsgrunnlag(
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når vi alltid får
+                medlemskapsvurderingId = UUID.randomUUID(),
             )
         return aktivitetslogg
     }

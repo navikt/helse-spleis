@@ -995,6 +995,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() =
                 is VilkårsgrunnlagUtDto.Infotrygd -> null
             },
         opptjeningsvurderingId = this.opptjeningsvurderingId,
+        medlemskapsvurderingId = this.medlemskapsvurderingId,
     )
 
 private fun OpptjeningUtDto.tilPersonData() =

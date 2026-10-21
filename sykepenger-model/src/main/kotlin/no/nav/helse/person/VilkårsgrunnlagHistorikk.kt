@@ -110,6 +110,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         val skjæringstidspunkt: LocalDate,
         val inntektsgrunnlag: Inntektsgrunnlag,
         val opptjeningsvurderingId: UUID,
+        val medlemskapsvurderingId: UUID,
     ) : Aktivitetskontekst {
         internal open fun valider(
             aktivitetslogg: IAktivitetslogg,
@@ -236,7 +237,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
         opptjeningsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
+        medlemskapsvurderingId: UUID,
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId, medlemskapsvurderingId) {
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
             if (opptjening != null) inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
         }
@@ -302,6 +304,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = nyForsikringsvurderingId ?: forsikringsvurderingId,
                 opptjeningsvurderingId = nyOpptjeningsvurderingId ?: opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
         }
 
@@ -321,6 +324,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 meldingsreferanseId = meldingsreferanseId?.dto(),
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
 
         internal companion object {
@@ -340,6 +344,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     meldingsreferanseId = dto.meldingsreferanseId?.let { MeldingsreferanseId.gjenopprett(it) },
                     forsikringsvurderingId = dto.forsikringsvurderingId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
+                    medlemskapsvurderingId = dto.medlemskapsvurderingId,
                 )
         }
     }
@@ -349,7 +354,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         inntektsgrunnlag: Inntektsgrunnlag,
         vilkårsgrunnlagId: UUID,
         opptjeningsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId) {
+        medlemskapsvurderingId: UUID,
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId, medlemskapsvurderingId) {
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
         override fun dto() =
@@ -358,6 +364,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag.dto(),
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
 
         internal companion object {
@@ -367,6 +374,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     inntektsgrunnlag = Inntektsgrunnlag.gjenopprett(dto.skjæringstidspunkt, dto.inntektsgrunnlag),
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
+                    medlemskapsvurderingId = dto.medlemskapsvurderingId,
                 )
         }
     }
