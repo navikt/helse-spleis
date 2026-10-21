@@ -5,9 +5,13 @@ import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,6 +27,29 @@ internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
             håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a1, deaktivert = true, "test"))
             val medlemskapsvurderingIdEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId
             assertEquals(medlemskapsvurderingIdFør, medlemskapsvurderingIdEtter)
+        }
+    }
+
+    @Test
+    fun `nytt skjæringstidspunkt gir ny medlemskapsvurderingId`() {
+        a1 {
+            nyttVedtak(januar)
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            val grunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
+
+            håndterOverstyrTidslinje(
+                listOf(
+                    ManuellOverskrivingDag(1.januar, Dagtype.Arbeidsdag, 100),
+                    ManuellOverskrivingDag(4.januar, Dagtype.Arbeidsdag, 100),
+                ),
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            assertVarsel(RV_IV_7, 1.vedtaksperiode.filter())
+
+            assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
+            val grunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
+            assertNotEquals(grunnlagFør.vilkårsgrunnlagId, grunnlagEtter.vilkårsgrunnlagId)
+            assertNotEquals(grunnlagFør.medlemskapsvurderingId, grunnlagEtter.medlemskapsvurderingId)
         }
     }
 
