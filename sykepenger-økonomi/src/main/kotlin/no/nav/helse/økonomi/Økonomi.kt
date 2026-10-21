@@ -6,6 +6,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.summer
 import no.nav.helse.økonomi.Prosentdel.Companion.NullProsent
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
+import no.nav.helse.økonomi.Prosentdel.Companion.vektlagtGjennomsnitt
 
 data class Økonomi(
     val sykdomsgrad: Prosentdel,
@@ -53,8 +54,6 @@ data class Økonomi(
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
 
-        private fun List<Økonomi>.inntektjustering() = map { it.inntektjustering }.summer()
-
         /**
          * graderteAndreYtelser er indeksert likt som økonomiList: graderingen for en yrkesaktivitet
          * trekkes direkte fra yrkesaktivitetens egen grad før det inntektsvektede gjennomsnittet beregnes
@@ -62,16 +61,17 @@ data class Økonomi(
         private fun totalGrad(
             økonomiList: List<Økonomi>,
             gradStrategi: (Økonomi) -> Prosentdel,
-            inntektjustering: Inntekt = økonomiList.inntektjustering(),
         ): Prosentdel {
             val aktuellDagsinntekt = økonomiList.aktuellDagsinntekt()
             if (aktuellDagsinntekt == INGEN) return NullProsent
-            return Inntekt.vektlagtGjennomsnitt(
-                økonomiList.map { økonomi ->
-                    gradStrategi(økonomi) to økonomi.aktuellDagsinntekt
-                },
-                inntektjustering,
-            )
+            return økonomiList
+                .map { økonomi ->
+                    Triple(
+                        gradStrategi(økonomi),
+                        økonomi.aktuellDagsinntekt.årlig,
+                        økonomi.inntektjustering.årlig,
+                    )
+                }.vektlagtGjennomsnitt()
         }
 
         fun totalSykdomsgrad(
@@ -87,9 +87,8 @@ data class Økonomi(
 
         internal fun totalUtbetalingsgrad(
             økonomiList: List<Økonomi>,
-            inntektjustering: Inntekt = økonomiList.inntektjustering(),
         ): Prosentdel {
-            val totalGrad = totalGrad(økonomiList, { it.utbetalingsgrad }, inntektjustering)
+            val totalGrad = totalGrad(økonomiList, { it.utbetalingsgrad })
             return totalGrad
         }
 
