@@ -30,5 +30,4 @@ enum class TilstandType {
     TIL_INFOTRYGD,
     AVSLUTTET,
     AVSLUTTET_UTEN_UTBETALING,
-
 }

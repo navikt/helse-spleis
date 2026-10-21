@@ -2,7 +2,6 @@ package no.nav.helse.person.inntekt
 
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
 import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
@@ -24,6 +23,7 @@ import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
 import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
+import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
 import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
 import no.nav.helse.person.tilstandsmaskin.TilUtbetaling

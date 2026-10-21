@@ -446,7 +446,6 @@ private fun VedtaksperiodeUtDto.tilPersonData() =
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AVVENTER_ANNULLERING
                 VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> AVVENTER_ANNULLERING_TIL_UTBETALING
                 VedtaksperiodetilstandDto.TIL_ANNULLERING -> TIL_ANNULLERING
-
             },
         skjæringstidspunkt = skjæringstidspunkt,
         behandlinger = behandlinger.behandlinger.map { it.tilPersonData() },

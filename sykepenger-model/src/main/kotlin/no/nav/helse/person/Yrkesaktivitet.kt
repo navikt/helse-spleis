@@ -844,8 +844,11 @@ internal class Yrkesaktivitet private constructor(
         val arbeidsgiverperiode =
             vedtaksperiodeSomForsøkesAnnullert.behandlinger
                 .ventedager()
-                .dagerUtenNavAnsvar.periode ?: return setOf(vedtaksperiodeSomForsøkesAnnullert)
-        val vedtaksperioder = vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start }
+                .dagerUtenNavAnsvar.periode
+        val vedtaksperioder =
+            arbeidsgiverperiode
+                ?.let { agp -> vedtaksperioderKnyttetTilArbeidsgiverperiode(agp).filter { it.periode.start >= vedtaksperiodeSomForsøkesAnnullert.periode.start } }
+                ?: listOf(vedtaksperiodeSomForsøkesAnnullert)
         return vedtaksperioder.filter { it.behandlinger.harFattetVedtak() }.toSet()
     }
 
@@ -859,9 +862,12 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         aktivitetsloggMedArbeidsgiverkontekst.info("Håndterer annullering")
 
+        val vedtaksperiodeSomForsøkesAnnullert = vedtaksperioder.firstOrNull { it.id == hendelse.vedtaksperiodeId } ?: return null
         val annulleringskandidater = finnAnnulleringskandidater(hendelse.vedtaksperiodeId)
+        check(annulleringskandidater.isNotEmpty()) {
+            "Fant ingen annulleringskandidater for vedtaksperiode ${vedtaksperiodeSomForsøkesAnnullert.id} i tilstand ${vedtaksperiodeSomForsøkesAnnullert.tilstand.type}"
+        }
 
-        if (annulleringskandidater.isEmpty()) return null
         val planlagtAnnullering =
             EventSubscription.PlanlagtAnnulleringEvent(
                 yrkesaktivitetssporing = hendelse.behandlingsporing,

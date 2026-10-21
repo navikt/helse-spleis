@@ -15,6 +15,7 @@ import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
     @Test
@@ -43,7 +44,9 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
     fun `vi sender ikke ut vedtaksperiode annullert-hendelse for vedtaksperioder som ikke er utbetalt`() {
         a1 {
             tilGodkjenning(januar)
-            håndterAnnullering(1.vedtaksperiode)
+            val feil = assertThrows<IllegalStateException> { håndterAnnullering(1.vedtaksperiode) }
+            assertEquals("Fant ingen annulleringskandidater for vedtaksperiode ${1.vedtaksperiode} i tilstand AVVENTER_GODKJENNING", feil.message)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
             assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
         }
     }
