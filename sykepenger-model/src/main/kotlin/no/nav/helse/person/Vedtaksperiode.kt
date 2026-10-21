@@ -2076,14 +2076,14 @@ internal class Vedtaksperiode private constructor(
             TilAnnullering,
             -> null
 
-
             AvventerBlokkerendePeriode,
             AvventerGodkjenning,
             AvventerHistorikk,
             AvventerInfotrygdHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving,
-            TilInfotrygd -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
+            TilInfotrygd,
+            -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
     }
 
@@ -3515,7 +3515,6 @@ internal class Vedtaksperiode private constructor(
                         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> AvventerAnnullering
                         VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> AvventerAnnulleringTilUtbetaling
                         VedtaksperiodetilstandDto.TIL_ANNULLERING -> TilAnnullering
-
                     },
                 behandlinger = Behandlinger.gjenopprett(dto.behandlinger, grunnlagsdata, utbetalinger),
                 opprettet = dto.opprettet,
@@ -3603,7 +3602,6 @@ internal class Vedtaksperiode private constructor(
                     AvventerAnnullering -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
                     AvventerAnnulleringTilUtbetaling -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING
                     TilAnnullering -> VedtaksperiodetilstandDto.TIL_ANNULLERING
-
                 },
             skjæringstidspunkt = this.skjæringstidspunkt,
             fom = this.periode.start,

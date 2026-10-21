@@ -777,7 +777,6 @@ data class PersonData(
                 AVVENTER_ANNULLERING,
                 AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
-
             }
 
             fun tilDto() =
@@ -810,7 +809,6 @@ data class PersonData(
                             TilstandTypeData.AVVENTER_ANNULLERING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
                             TilstandTypeData.AVVENTER_ANNULLERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING
                             TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
-
                         },
                     behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
                     opprettet = opprettet,

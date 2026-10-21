@@ -13,6 +13,7 @@ import no.nav.helse.person.Behandlinger.Behandling.Tilstand
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
+import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.testhelpers.assertNotNull
@@ -107,6 +108,58 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                     .map { it.id }
             assertEquals(listOf(1.vedtaksperiode, 2.vedtaksperiode), annulleringskandidater)
         }
+    }
+
+    @Test
+    fun `Vedtaksperiode uten agp i Spleis skal være med i annulleringskandidater når det er fattet vedtak`() {
+        a1 {
+            nyttVedtakMedAgpIInfotrygd()
+
+            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.februar, emptyList())
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .first()
+                    .inspektør.annulleringskandidater
+                    .map { it.id }
+            assertEquals(listOf(1.vedtaksperiode), annulleringskandidater)
+        }
+    }
+
+    @Test
+    fun `Annullering av vedtaksperiode uten agp i Spleis og uten fattet vedtak er en feilsituasjon`() {
+        a1 {
+            nyttVedtakMedAgpIInfotrygd()
+            håndterSøknad(10.mars til 31.mars)
+            håndterArbeidsgiveropplysninger(emptyList(), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+
+            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.mars, emptyList())
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+            val annulleringskandidater =
+                inspektør.yrkesaktivitet
+                    .vedtaksperioder()
+                    .last()
+                    .inspektør.annulleringskandidater
+            assertEquals(emptySet<Any>(), annulleringskandidater)
+
+            val feil = assertThrows<IllegalStateException> { håndterAnnullering(2.vedtaksperiode) }
+            assertEquals("Fant ingen annulleringskandidater for vedtaksperiode ${2.vedtaksperiode} i tilstand AVVENTER_GODKJENNING", feil.message)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
+        }
+    }
+
+    private fun TestPerson.TestArbeidsgiver.nyttVedtakMedAgpIInfotrygd() {
+        nyttVedtak(10.februar til 28.februar)
+        håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
+        håndterYtelser(1.vedtaksperiode)
+        håndterSimulering(1.vedtaksperiode)
+        håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        håndterUtbetalt()
+        assertVarsler(listOf(Varselkode.RV_IT_37), 1.vedtaksperiode.filter())
     }
 
     @Test
