@@ -74,17 +74,6 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
                   "type": "ARBEIDSTAKER",
                   "skjæringstidspunkt": "2018-04-01",
                   "kilde": "SPLEIS",
-                  "oppfylt": false,
-                  "antallDager": 0,
-                  "opptjeningsperiode": null,
-                  "arbeidsforhold": []
-                },
-                {
-                  "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
-                  "opprettet": "<opprettet>",
-                  "type": "ARBEIDSTAKER",
-                  "skjæringstidspunkt": "2018-04-01",
-                  "kilde": "SPLEIS",
                   "arbeidsforhold": [
                     {
                       "organisasjonsnummer": "987654322",

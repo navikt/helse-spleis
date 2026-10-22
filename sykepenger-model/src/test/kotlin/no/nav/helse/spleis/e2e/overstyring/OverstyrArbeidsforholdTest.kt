@@ -9,6 +9,7 @@ import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.november
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -22,6 +23,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import no.nav.helse.økonomi.inspectors.inspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
@@ -288,7 +290,7 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
     }
 
     @Test
-    fun `vi vilkårsprøver krav om opptjening ved overstyring av arbeidsforhold`() {
+    fun `deaktivering av arbeidsforhold påvirker ikke opptjeningen`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
             håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent))
@@ -313,7 +315,7 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
             håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "forklaring"))
             håndterYtelser(1.vedtaksperiode)
             inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
-                assertEquals(0.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
+                assertEquals(1431.daglig, it.økonomi.inspektør.arbeidsgiverbeløp)
                 assertEquals(0.daglig, it.økonomi.inspektør.personbeløp)
                 assertEquals(31000.månedlig, it.økonomi.inspektør.aktuellDagsinntekt)
             }
@@ -321,8 +323,9 @@ internal class OverstyrArbeidsforholdTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, INNTEKT)
                 assertInntektsgrunnlag(a2, 1000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen, deaktivert = true)
             }
-            assertVarsel(RV_OV_1, 1.vedtaksperiode.filter())
-            assertInstanceOf(Utbetalingsdag.AvvistDag::class.java, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[31.januar])
+            assertVarsler(listOf(RV_VV_2), 1.vedtaksperiode.filter())
+            assertInstanceOf(Utbetalingsdag.NavDag::class.java, inspektør.utbetalingstidslinjer(1.vedtaksperiode)[31.januar])
+            assertTrue((inspektør.vilkårsgrunnlag(1.vedtaksperiode) as VilkårsgrunnlagHistorikk.Grunnlagsdata).opptjening!!.erOppfylt())
         }
     }
 

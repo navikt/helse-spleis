@@ -13,9 +13,7 @@ import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnla
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.opptjeningsperiodeOrNull
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Arbeidsforhold.Companion.toEtterlevelseMap
-import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.aktiver
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.arbeidsforholdForJurist
-import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.deaktiver
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.inngårIOpptjening
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiode
 import no.nav.helse.person.ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag.Companion.opptjeningsperiodeOrNull
@@ -49,10 +47,6 @@ internal class ArbeidstakerOpptjening private constructor(
 
     internal fun startdatoFor(orgnummer: String) = arbeidsforhold.startdatoFor(orgnummer, skjæringstidspunkt)
 
-    internal fun deaktiver(orgnummer: String): ArbeidstakerOpptjening = nyOpptjening(arbeidsforhold.deaktiver(orgnummer), skjæringstidspunkt)
-
-    internal fun aktiver(orgnummer: String): ArbeidstakerOpptjening = nyOpptjening(arbeidsforhold.aktiver(orgnummer), skjæringstidspunkt)
-
     internal data class ArbeidsgiverOpptjeningsgrunnlag(
         val orgnummer: String,
         val ansattPerioder: List<Arbeidsforhold>,
@@ -61,16 +55,6 @@ internal class ArbeidstakerOpptjening private constructor(
             orgnummer: String,
             skjæringstidspunkt: LocalDate,
         ) = this.orgnummer == orgnummer && ansattPerioder.ansattVedSkjæringstidspunkt(skjæringstidspunkt)
-
-        private fun aktiver(orgnummer: String): ArbeidsgiverOpptjeningsgrunnlag {
-            if (orgnummer != this.orgnummer) return this
-            return ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.aktiver() })
-        }
-
-        private fun deaktiver(orgnummer: String): ArbeidsgiverOpptjeningsgrunnlag {
-            if (orgnummer != this.orgnummer) return this
-            return ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.deaktiver() })
-        }
 
         private fun inngårIOpptjening(opptjeningsperiode: Periode): ArbeidsgiverOpptjeningsgrunnlag? {
             val perioder = ansattPerioder.filter { it.inngårIOpptjening(opptjeningsperiode) }.takeUnless { it.isEmpty() } ?: return null
@@ -92,10 +76,6 @@ internal class ArbeidstakerOpptjening private constructor(
                 if (ansettelseperiode.starterEtter(opptjeningsperiode)) return null
                 return ansettelseperiode.subset(opptjeningsperiode)
             }
-
-            internal fun deaktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = true)
-
-            internal fun aktiver() = Arbeidsforhold(ansattFom = ansattFom, ansattTom = ansattTom, deaktivert = false)
 
             internal fun inngårIOpptjening(opptjeningsperiode: Periode): Boolean = deaktivert || this.ansettelseperiode.overlapperMed(opptjeningsperiode)
 
@@ -149,10 +129,6 @@ internal class ArbeidstakerOpptjening private constructor(
         }
 
         companion object {
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.aktiver(orgnummer: String) = map { it.aktiver(orgnummer) }
-
-            internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.deaktiver(orgnummer: String) = map { it.deaktiver(orgnummer) }
-
             internal fun List<ArbeidsgiverOpptjeningsgrunnlag>.startdatoFor(
                 orgnummer: String,
                 skjæringstidspunkt: LocalDate,

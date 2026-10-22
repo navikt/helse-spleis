@@ -263,8 +263,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             subsumsjonslogg: Subsumsjonslogg,
         ) = kopierMed(
             nyttInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
-            nyOpptjening = hendelse.overstyr(opptjening!!).also { subsumsjonslogg.logg(it.subsumsjon) },
-            nyOpptjeningsvurderingId = UUID.randomUUID(),
         )
 
         internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) = kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)

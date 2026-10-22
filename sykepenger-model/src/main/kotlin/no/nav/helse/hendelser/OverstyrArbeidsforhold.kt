@@ -2,7 +2,6 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.hendelser.Avsender.SAKSBEHANDLER
-import no.nav.helse.person.ArbeidstakerOpptjening
 import no.nav.helse.person.inntekt.Inntektsgrunnlag
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -34,11 +33,6 @@ class OverstyrArbeidsforhold(
             overstyring.overstyr(acc, subsumsjonslogg)
         }
 
-    internal fun overstyr(opptjening: ArbeidstakerOpptjening): ArbeidstakerOpptjening =
-        overstyrteArbeidsforhold.fold(opptjening) { acc, overstyring ->
-            overstyring.overstyr(acc)
-        }
-
     class ArbeidsforholdOverstyrt(
         internal val orgnummer: String,
         private val deaktivert: Boolean,
@@ -51,11 +45,5 @@ class OverstyrArbeidsforhold(
             true -> inntektsgrunnlag.deaktiver(orgnummer, forklaring, subsumsjonslogg)
             else -> inntektsgrunnlag.aktiver(orgnummer, forklaring, subsumsjonslogg)
         }
-
-        internal fun overstyr(opptjening: ArbeidstakerOpptjening) =
-            when (deaktivert) {
-                true -> opptjening.deaktiver(orgnummer)
-                else -> opptjening.aktiver(orgnummer)
-            }
     }
 }

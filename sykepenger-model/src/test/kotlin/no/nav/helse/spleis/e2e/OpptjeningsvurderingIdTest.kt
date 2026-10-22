@@ -9,6 +9,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
 import no.nav.helse.januar
 import no.nav.helse.mars
+import no.nav.helse.person.VilkårsgrunnlagHistorikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -29,13 +30,18 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Overstyring av arbeidsforhold skal medføre ny opptjeningsvurderingId`() {
+    fun `Overstyring av arbeidsforhold beholder opptjeningsvurderingen`() {
         a1 {
             nyttVedtak(januar)
-            val opptjeningsvurderingIdFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
+            val vilkårsgrunnlagFør = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
             håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a1, deaktivert = true, "test"))
-            val opptjeningsvurderingIdEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
-            assertNotEquals(opptjeningsvurderingIdFør, opptjeningsvurderingIdEtter)
+            val vilkårsgrunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
+            assertNotEquals(vilkårsgrunnlagFør.vilkårsgrunnlagId, vilkårsgrunnlagEtter.vilkårsgrunnlagId)
+            assertEquals(vilkårsgrunnlagFør.opptjeningsvurderingId, vilkårsgrunnlagEtter.opptjeningsvurderingId)
+            assertEquals(
+                (vilkårsgrunnlagFør as VilkårsgrunnlagHistorikk.Grunnlagsdata).opptjening!!.dto(),
+                (vilkårsgrunnlagEtter as VilkårsgrunnlagHistorikk.Grunnlagsdata).opptjening!!.dto(),
+            )
         }
     }
 
