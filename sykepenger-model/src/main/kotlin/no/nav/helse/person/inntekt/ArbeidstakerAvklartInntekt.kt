@@ -1,5 +1,6 @@
 package no.nav.helse.person.inntekt
 
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.tilstandsmaskin.Avsluttet
 import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
@@ -22,21 +23,6 @@ import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
 import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
 import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvsluttet
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenning
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerGodkjenningRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikk
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerHistorikkRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerRevurderingTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimulering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerSimuleringRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøving
-import no.nav.helse.person.tilstandsmaskin.SelvstendigAvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.SelvstendigStart
-import no.nav.helse.person.tilstandsmaskin.SelvstendigTilUtbetaling
 import no.nav.helse.person.tilstandsmaskin.Start
 import no.nav.helse.person.tilstandsmaskin.TilAnnullering
 import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
@@ -52,6 +38,7 @@ import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 internal fun List<Vedtaksperiode>.harAvklartArbeidstakerinntekt(): Boolean {
     val første = firstOrNull() ?: return false
     check(all { it.yrkesaktivitet === første.yrkesaktivitet && it.skjæringstidspunkt == første.skjæringstidspunkt }) { "Hva holder du på med?" }
+    check(første.yrkesaktivitet.yrkesaktivitetstype != Selvstendig) { "Selvstendig næringsdrivende har ikke arbeidstakerinntekt!! Hva er det du holder på med??" }
     return any { it.tilstand.harAvklartArbeidstakerinntekt() }
 }
 
@@ -91,22 +78,4 @@ private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
         TilAnnullering,
         TilUtbetaling,
         -> true
-
-        // Selvstendig
-        SelvstendigAvsluttet,
-        SelvstendigAvventerBlokkerendePeriode,
-        SelvstendigAvventerGodkjenning,
-        SelvstendigAvventerGodkjenningRevurdering,
-        SelvstendigAvventerHistorikk,
-        SelvstendigAvventerHistorikkRevurdering,
-        SelvstendigAvventerInfotrygdHistorikk,
-        SelvstendigAvventerRevurdering,
-        SelvstendigAvventerRevurderingTilUtbetaling,
-        SelvstendigAvventerSimulering,
-        SelvstendigAvventerSimuleringRevurdering,
-        SelvstendigAvventerVilkårsprøving,
-        SelvstendigAvventerVilkårsprøvingRevurdering,
-        SelvstendigStart,
-        SelvstendigTilUtbetaling,
-        -> error("Disse tilstandende hører til Selvstendig!! Hva er det du holder på med??")
     }

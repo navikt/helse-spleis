@@ -780,24 +780,6 @@ data class PersonData(
                 AVVENTER_ANNULLERING,
                 AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
-
-                SELVSTENDIG_START,
-                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
-                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
-                SELVSTENDIG_AVVENTER_HISTORIKK,
-                SELVSTENDIG_AVVENTER_SIMULERING,
-                SELVSTENDIG_AVVENTER_GODKJENNING,
-
-                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
-                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
-                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
-                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
-                SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING,
-                SELVSTENDIG_AVVENTER_REVURDERING,
-
-                SELVSTENDIG_TIL_UTBETALING,
-                SELVSTENDIG_AVSLUTTET,
             }
 
             fun tilDto() =
@@ -830,23 +812,6 @@ data class PersonData(
                             TilstandTypeData.AVVENTER_ANNULLERING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING
                             TilstandTypeData.AVVENTER_ANNULLERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING
                             TilstandTypeData.TIL_ANNULLERING -> VedtaksperiodetilstandDto.TIL_ANNULLERING
-
-                            TilstandTypeData.SELVSTENDIG_START -> VedtaksperiodetilstandDto.SELVSTENDIG_START
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING
-                            TilstandTypeData.SELVSTENDIG_TIL_UTBETALING -> VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING
-                            TilstandTypeData.SELVSTENDIG_AVSLUTTET -> VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET
-
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
-                            TilstandTypeData.SELVSTENDIG_AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING
                         },
                     behandlinger = BehandlingerInnDto(this.behandlinger.map { it.tilDto() }),
                     opprettet = opprettet,
