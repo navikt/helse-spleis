@@ -203,6 +203,36 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_ANNULLERING_TIL_UTBETALING : VedtaksperiodetilstandDto()
 
     data object TIL_ANNULLERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVSLUTTET : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_GODKJENNING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_HISTORIKK : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_SIMULERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_REVURDERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_START : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_TIL_UTBETALING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING : VedtaksperiodetilstandDto()
+
+    data object SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING : VedtaksperiodetilstandDto()
 }
 
 sealed class BehandlingtilstandDto {

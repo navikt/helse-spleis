@@ -8,6 +8,8 @@ import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
+internal val starttilstander = setOf(Start, SelvstendigStart)
+
 // Gang of four State pattern
 internal sealed interface Vedtaksperiodetilstand {
     val type: TilstandType

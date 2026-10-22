@@ -432,6 +432,24 @@ data class SpannerPersonDto(
                 AVVENTER_ANNULLERING,
                 AVVENTER_ANNULLERING_TIL_UTBETALING,
                 TIL_ANNULLERING,
+
+                SELVSTENDIG_START,
+                SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK,
+                SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING,
+                SELVSTENDIG_AVVENTER_HISTORIKK,
+                SELVSTENDIG_AVVENTER_SIMULERING,
+                SELVSTENDIG_AVVENTER_GODKJENNING,
+
+                SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING,
+                SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING,
+                SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING,
+                SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING,
+                SELVSTENDIG_AVVENTER_REVURDERING,
+
+                SELVSTENDIG_TIL_UTBETALING,
+                SELVSTENDIG_AVSLUTTET,
             }
 
             data class AnnulleringskandidatDto(
@@ -1248,6 +1266,22 @@ private fun VedtaksperiodeUtDto.tilPersonData(
             VedtaksperiodetilstandDto.AVVENTER_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING
             VedtaksperiodetilstandDto.AVVENTER_ANNULLERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_ANNULLERING_TIL_UTBETALING
             VedtaksperiodetilstandDto.TIL_ANNULLERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_ANNULLERING
+
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVSLUTTET -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVSLUTTET
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_BLOKKERENDE_PERIODE
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_INFOTRYGDHISTORIKK
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING
+            VedtaksperiodetilstandDto.SELVSTENDIG_START -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_START
+            VedtaksperiodetilstandDto.SELVSTENDIG_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_TIL_UTBETALING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_GODKJENNING_REVURDERING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_HISTORIKK_REVURDERING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_SIMULERING_REVURDERING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_VILKÅRSPRØVING_REVURDERING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING_TIL_UTBETALING
+            VedtaksperiodetilstandDto.SELVSTENDIG_AVVENTER_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.SELVSTENDIG_AVVENTER_REVURDERING
         },
     skjæringstidspunkt = skjæringstidspunkt,
     fom = fom,
