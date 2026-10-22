@@ -57,10 +57,10 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
 
             val navDag = utbetalingstidslinje.first { it["type"].asText() == "NavDag" }
             assertEquals(1431, navDag["beløpTilArbeidsgiver"].asInt())
-            assertEquals(1431, navDag["forespurtRefusjonsbeløp"].asInt())
-            assertEquals("ARBEIDSGIVER", navDag["kilde"]["avsender"].asText())
-            assertEquals(arbeidsgiveropplysningerId.toString(), navDag["kilde"]["referanse"].asText())
-            assertTrue(utbetalingstidslinje.all { it["kilde"]["referanse"].asText() == arbeidsgiveropplysningerId.toString() })
+            assertEquals(1431, navDag["forespurtRefusjon"]["beløp"].asInt())
+            assertEquals("ARBEIDSGIVER", navDag["forespurtRefusjon"]["avsender"].asText())
+            assertEquals(arbeidsgiveropplysningerId.toString(), navDag["forespurtRefusjon"]["sasInternInntektsmeldingReferanse"].asText())
+            assertTrue(utbetalingstidslinje.all { it["forespurtRefusjon"]["sasInternInntektsmeldingReferanse"].asText() == arbeidsgiveropplysningerId.toString() })
         }
     }
 

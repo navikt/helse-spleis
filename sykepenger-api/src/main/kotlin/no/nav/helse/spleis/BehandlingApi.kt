@@ -93,10 +93,19 @@ private fun Utbetalingsdag.tilResponse(refusjonstidslinje: BeløpstidslinjeDto):
         sykdomsgrad = sykdomsgrad,
         dekningsgrad = dekningsgrad,
         begrunnelser = begrunnelser?.map { it.tilResponse() } ?: emptyList(),
-        forespurtRefusjonsbeløp = refusjon?.dagligBeløp?.roundToInt() ?: 0,
-        kilde =
-            refusjon?.kilde?.let {
-                Kilde(avsender = it.avsender.tilResponse(), referanse = it.meldingsreferanseId.id)
+        forespurtRefusjon =
+            refusjon?.let {
+                ForespurtRefusjon(
+                    beløp = it.dagligBeløp.roundToInt(),
+                    avsender =
+                        when (it.kilde.avsender) {
+                            AvsenderDto.ARBEIDSGIVER -> "ARBEIDSGIVER"
+                            AvsenderDto.SAKSBEHANDLER -> "SAKSBEHANDLER"
+                            AvsenderDto.SYKMELDT -> "SYKMELDT"
+                            AvsenderDto.SYSTEM -> "SYSTEM"
+                        },
+                    sasInternInntektsmeldingReferanse = if (it.kilde.avsender == AvsenderDto.ARBEIDSGIVER) it.kilde.meldingsreferanseId.id else null,
+                )
             },
     )
 }
@@ -171,11 +180,11 @@ private data class UtbetalingsdagResponse(
     val sykdomsgrad: Int,
     val dekningsgrad: Int,
     val begrunnelser: List<String>,
-    val forespurtRefusjonsbeløp: Int,
-    val kilde: Kilde?,
+    val forespurtRefusjon: ForespurtRefusjon?,
 )
 
-private data class Kilde(
+private data class ForespurtRefusjon(
+    val beløp: Int,
     val avsender: String,
-    val referanse: UUID,
+    val sasInternInntektsmeldingReferanse: UUID?, // kun satt hvis avsender er ARBEIDSGIVER, ellers null
 )
