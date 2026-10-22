@@ -635,6 +635,15 @@ internal class EventBusOversetter(
                         "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
                     ),
                 ),
+                // Sendes i tillegg til Medlemskap: statusen kommer fortsatt fra sparkel-medlemskap, id-en fra sp-medlemskap
+                Behov(
+                    Behov.Behovstype.Medlemskapsvurdering,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
+                        "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
+                    ),
+                ).takeIf { Toggle.MedlemskapsvurderingBehov.enabled },
                 Behov(
                     Behov.Behovstype.Forsikringsvurdering,
                     mapOf(

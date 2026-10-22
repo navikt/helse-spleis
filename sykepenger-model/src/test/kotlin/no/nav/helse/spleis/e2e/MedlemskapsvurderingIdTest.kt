@@ -8,6 +8,7 @@ import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
@@ -19,6 +20,17 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
+    @Test
+    fun `medlemskapsvurderingId fra sp-medlemskap blir lagt på`() {
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            val medlemskapsvurderingId = UUID.randomUUID()
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapsvurderingId = medlemskapsvurderingId)
+            assertEquals(medlemskapsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId)
+        }
+    }
+
     @Test
     fun `Overstyring av arbeidsforhold beholder medlemskapsvurderingId`() {
         a1 {

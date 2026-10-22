@@ -146,6 +146,7 @@ internal abstract class AbstractObservableTest {
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = null,
             opptjeningsvurderingId = null,
+            medlemskapsvurderingId = null,
         )
 
     protected fun ytelser(

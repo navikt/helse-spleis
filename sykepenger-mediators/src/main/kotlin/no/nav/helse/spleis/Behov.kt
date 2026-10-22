@@ -80,6 +80,10 @@ data class Behov(
             override val utgåendeNavn = "OpptjeningsvurderingResultat"
         }
 
+        data object Medlemskapsvurdering : Behovstype {
+            override val utgåendeNavn = "Medlemskapsvurdering"
+        }
+
         data object MedlemskapsvurderingResultat : Behovstype {
             override val utgåendeNavn = "MedlemskapsvurderingResultat"
         }

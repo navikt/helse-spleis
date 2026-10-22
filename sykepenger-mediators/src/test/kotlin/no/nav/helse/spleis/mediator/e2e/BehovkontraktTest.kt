@@ -62,6 +62,30 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `vilkårsgrunnlag med toggle for medlemskapsvurdering`() =
+        Toggle.MedlemskapsvurderingBehov.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+            assertVedtaksperiodeBehov(
+                behov,
+                InntekterForSykepengegrunnlag,
+                InntekterForOpptjeningsvurdering,
+                Behov.Behovstype.Opptjeningsvurdering,
+                Medlemskap,
+                Behov.Behovstype.Medlemskapsvurdering,
+                Arbeidsforhold,
+            )
+            assertMedlemskapdetaljer(behov)
+            assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
+            assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeFom").asText())
+            assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeTom").asText())
+        }
+
+    @Test
     fun `vilkårsgrunnlag - selvstendig`() {
         sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
         sendSelvstendigsøknad(

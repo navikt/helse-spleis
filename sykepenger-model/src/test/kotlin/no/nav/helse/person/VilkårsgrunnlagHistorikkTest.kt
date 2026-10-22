@@ -117,6 +117,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -145,6 +146,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
 
         vilkårsgrunnlag.valider(
@@ -170,6 +172,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         val vilkårsgrunnlag2 =
             Vilkårsgrunnlag(
@@ -183,6 +186,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         vilkårsgrunnlag1.valider(
             Aktivitetslogg(),
@@ -223,6 +227,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         val vilkårsgrunnlag2 =
             Vilkårsgrunnlag(
@@ -236,6 +241,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
 
         vilkårsgrunnlag1.valider(
@@ -269,6 +275,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),
@@ -296,6 +303,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = null,
+                medlemskapsvurderingId = null,
             )
         vilkårsgrunnlag.valider(
             Aktivitetslogg(),

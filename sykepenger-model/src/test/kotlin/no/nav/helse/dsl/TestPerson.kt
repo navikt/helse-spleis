@@ -609,12 +609,14 @@ internal class TestPerson(
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             skatteinntekt: Inntekt? = INNTEKT,
             opptjeningsvurderingId: UUID? = null,
+            medlemskapsvurderingId: UUID? = null,
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             skatteinntekt = skatteinntekt,
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
         )
 
         internal fun håndterVilkårsgrunnlag(
@@ -623,6 +625,7 @@ internal class TestPerson(
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             skatteinntekt: Inntekt? = INNTEKT,
             opptjeningsvurderingId: UUID? = null,
+            medlemskapsvurderingId: UUID? = null,
         ) = håndterVilkårsgrunnlag(
             vedtaksperiodeId = vedtaksperiodeId,
             medlemskapstatus = medlemskapstatus,
@@ -630,6 +633,7 @@ internal class TestPerson(
             arbeidsforhold = arbeidsgivere.map { Triple(it.key, LocalDate.EPOCH, null) },
             inntekterForOpptjeningsvurdering = inntekterForOpptjeningsvurdering,
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
         )
 
         /**
@@ -660,6 +664,7 @@ internal class TestPerson(
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             forsikringsvurderingId: UUID? = null,
             opptjeningsvurderingId: UUID? = null,
+            medlemskapsvurderingId: UUID? = null,
         ) {
             val skjæringstidspunkt = inspektør.skjæringstidspunkt(vedtaksperiodeId)
             val opptjeningsinntekter =
@@ -678,6 +683,7 @@ internal class TestPerson(
                 skjæringstidspunkt = skjæringstidspunkt,
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
         }
 
@@ -764,6 +770,7 @@ internal class TestPerson(
             skjæringstidspunkt: LocalDate = inspektør.skjæringstidspunkt(vedtaksperiodeId),
             forsikringsvurderingId: UUID? = null,
             opptjeningsvurderingId: UUID? = null,
+            medlemskapsvurderingId: UUID? = null,
         ) {
             val inntekterForOpptjeningsvurdering =
                 inntekterForOpptjeningsvurdering ?: run {
@@ -789,6 +796,7 @@ internal class TestPerson(
                     inntekterForOpptjeningsvurdering,
                     forsikringsvurderingId,
                     opptjeningsvurderingId = opptjeningsvurderingId,
+                    medlemskapsvurderingId = medlemskapsvurderingId,
                 ).håndter(Person::håndterVilkårsgrunnlag)
         }
 

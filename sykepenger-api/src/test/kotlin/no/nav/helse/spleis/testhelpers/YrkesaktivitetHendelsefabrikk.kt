@@ -269,6 +269,7 @@ internal class YrkesaktivitetHendelsefabrikk(
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = forsikringsvurderingId,
             opptjeningsvurderingId = null,
+            medlemskapsvurderingId = null,
         )
 
     internal fun lagYtelser(

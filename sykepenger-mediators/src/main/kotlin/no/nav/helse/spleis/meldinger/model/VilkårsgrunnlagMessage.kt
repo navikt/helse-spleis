@@ -25,6 +25,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import no.nav.helse.spleis.Behov.Behovstype.Medlemskapsvurdering as MedlemskapsvurderingBehov
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
 internal class VilkårsgrunnlagMessage(
@@ -44,6 +45,8 @@ internal class VilkårsgrunnlagMessage(
     internal val forsikringsvurderingId = packet["@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
 
     internal val opptjeningsvurderingId = packet["@løsning.${Opptjeningsvurdering.utgåendeNavn}.id"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
+
+    internal val medlemskapsvurderingId = packet["@løsning.${MedlemskapsvurderingBehov.utgåendeNavn}.id"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
 
     internal val medlemskapstatus =
         when (packet["@løsning.${Medlemskap.utgåendeNavn}.resultat.svar"].asText()) {
@@ -82,6 +85,7 @@ internal class VilkårsgrunnlagMessage(
                 arbeidsforhold = arbeidsforhold,
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId,
+                medlemskapsvurderingId = medlemskapsvurderingId,
             )
 
     override fun behandle(

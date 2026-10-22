@@ -232,6 +232,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         inntekterForOpptjeningsvurdering: InntekterForOpptjeningsvurdering,
         forsikringsvurderingId: UUID? = null,
         opptjeningsvurderingId: UUID? = null,
+        medlemskapsvurderingId: UUID? = null,
     ): Vilkårsgrunnlag =
         Vilkårsgrunnlag(
             meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
@@ -244,6 +245,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             arbeidsforhold = arbeidsforhold,
             forsikringsvurderingId = forsikringsvurderingId,
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
         )
 
     internal fun lagYtelser(
