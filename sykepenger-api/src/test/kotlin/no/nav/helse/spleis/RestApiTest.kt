@@ -40,12 +40,6 @@ internal class RestApiTest : AbstractApiTest() {
     }
 
     @Test
-    fun sporingapi() =
-        blackboxTestApplication(::opprettTestdata) {
-            "/api/vedtaksperioder".httpGet(HttpStatusCode.OK, mapOf("fnr" to UNG_PERSON_FNR))
-        }
-
-    @Test
     fun `hent personJson med fnr`() =
         blackboxTestApplication(::opprettTestdata) {
             "/api/person-json".httpPost(HttpStatusCode.OK, mapOf("fødselsnummer" to UNG_PERSON_FNR))

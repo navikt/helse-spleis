@@ -19,7 +19,6 @@ import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
-import no.nav.helse.spleis.sporing.serializePersonForSporing
 import java.util.*
 
 internal fun Application.spannerApi(
@@ -92,21 +91,6 @@ internal fun Application.spannerApi(
                     val sendteMeldinger = sendtDao.sendteMeldinger(forarsaketAv)
 
                     call.respondText(sendteMeldinger.responseJson(), ContentType.Application.Json)
-                }
-            }
-        }
-    }
-}
-
-internal fun Application.sporingApi(personDao: PersonDao) {
-    routing {
-        authenticate {
-            get("/api/vedtaksperioder") {
-                withContext(Dispatchers.IO) {
-                    val fnr = call.request.header("fnr")?.toLong() ?: throw BadRequestException("mangler fnr")
-                    val person = personDao.hentPersonFraFnr(fnr) ?: throw NotFoundException("Kunne ikke finne person for fødselsnummer")
-                    val dto = person.tilPersonDto()
-                    call.respond(serializePersonForSporing(Person.gjenopprett(EmptyLog, dto)))
                 }
             }
         }

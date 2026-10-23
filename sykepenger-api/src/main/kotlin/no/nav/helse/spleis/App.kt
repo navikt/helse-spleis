@@ -101,7 +101,6 @@ internal fun Application.lagApplikasjonsmodul(
     val sendtDao = SendtDao(dataSourceProvider)
 
     spannerApi(hendelseDao, personDao, sendtDao)
-    sporingApi(personDao)
     personApi(
         spekematClient = spekematClient,
         hendelseDao = hendelseDao,

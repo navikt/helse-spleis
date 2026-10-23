@@ -36,7 +36,6 @@ spec:
       rules:
         - application: spesialist
         - application: spanner
-        - application: sporing
         - application: sp-vilkarsproving
         - application: sp-medlemskap
         - application: speil
