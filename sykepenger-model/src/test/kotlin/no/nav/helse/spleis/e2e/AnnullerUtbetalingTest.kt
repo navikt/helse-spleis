@@ -45,6 +45,44 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
     }
 
     @Test
+    fun `annullering skal behandles før en senere periode med tidligere skjæringstidspunkt`() {
+        a1 {
+            nyttVedtak(1.januar til 30.januar)
+            nyttVedtak(februar)
+            forlengVedtak(mars)
+            forlengelseTilGodkjenning(april)
+            håndterGraderteAndreYtelserEndret(15.januar)
+            håndterYtelser(1.vedtaksperiode)
+            håndterAnnullering(3.vedtaksperiode)
+            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Sykedag, 100)))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(2.vedtaksperiode))
+            assertEquals(1.februar, inspektør.skjæringstidspunkt(3.vedtaksperiode))
+            assertEquals(1.januar, inspektør.skjæringstidspunkt(4.vedtaksperiode))
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertSisteTilstand(3.vedtaksperiode, AVVENTER_ANNULLERING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+            håndterYtelser(2.vedtaksperiode)
+            håndterSimulering(2.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(2.vedtaksperiode)
+            håndterUtbetalt()
+
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
+            assertSisteTilstand(3.vedtaksperiode, TIL_ANNULLERING)
+            assertSisteTilstand(4.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+
+            håndterUtbetalt()
+
+            assertSisteTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(4.vedtaksperiode, TIL_INFOTRYGD)
+        }
+    }
+
+    @Test
     fun `Etterfølgende, utbetalte vedtaksperioder skal være med i annulleringskandidater`() {
         a1 {
             nyttVedtak(januar)

@@ -62,6 +62,8 @@ import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandling
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.perioder
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.trengerArbeidsgiveropplysninger
 import no.nav.helse.person.Vedtaksperiode.Companion.AUU_SOM_VIL_UTBETALES
+import no.nav.helse.person.Vedtaksperiode.Companion.HAR_PÅGÅENDE_UTBETALING
+import no.nav.helse.person.Vedtaksperiode.Companion.IKKE_FERDIG_BEHANDLET
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SAMME_ARBEIDSGIVERPERIODE
 import no.nav.helse.person.Vedtaksperiode.Companion.aktiv
@@ -69,9 +71,9 @@ import no.nav.helse.person.Vedtaksperiode.Companion.aktiveSkjæringstidspunkter
 import no.nav.helse.person.Vedtaksperiode.Companion.arbeidstakerFaktaavklarteInntekter
 import no.nav.helse.person.Vedtaksperiode.Companion.checkBareEnPeriodeTilGodkjenningSamtidig
 import no.nav.helse.person.Vedtaksperiode.Companion.egenmeldingsperioder
+import no.nav.helse.person.Vedtaksperiode.Companion.førstePeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.igangsettOverstyring
 import no.nav.helse.person.Vedtaksperiode.Companion.medSammeUtbetaling
-import no.nav.helse.person.Vedtaksperiode.Companion.nestePeriodeSomSkalGjenopptas
 import no.nav.helse.person.Vedtaksperiode.Companion.nåværendeVedtaksperiode
 import no.nav.helse.person.Vedtaksperiode.Companion.refusjonstidslinje
 import no.nav.helse.person.Vedtaksperiode.Companion.startdatoerPåSammenhengendeVedtaksperioder
@@ -309,7 +311,9 @@ internal class Yrkesaktivitet private constructor(
 
         internal fun Iterable<Yrkesaktivitet>.nestemann() = periodeSomSkalGjenopptas() ?: førsteAuuSomVilUtbetales()
 
-        private fun Iterable<Yrkesaktivitet>.periodeSomSkalGjenopptas() = flatMap { it.vedtaksperioder }.nestePeriodeSomSkalGjenopptas()
+        private fun Iterable<Yrkesaktivitet>.periodeSomSkalGjenopptas() =
+            flatMap { it.vedtaksperioder }.firstOrNull(HAR_PÅGÅENDE_UTBETALING)
+                ?: nåværendeVedtaksperioder(IKKE_FERDIG_BEHANDLET).førstePeriode()
 
         private fun Iterable<Yrkesaktivitet>.checkBareEnPeriodeTilGodkjenningSamtidig() = flatMap { it.vedtaksperioder }.checkBareEnPeriodeTilGodkjenningSamtidig()
 
