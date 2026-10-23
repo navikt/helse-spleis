@@ -38,7 +38,6 @@ internal class TestObservatør(
     val behandlingLukketEventer = mutableListOf<EventSubscription.BehandlingLukketEvent>()
     val behandlingForkastetEventer = mutableListOf<EventSubscription.BehandlingForkastetEvent>()
     val avsluttetUtenVedtakEventer = mutableMapOf<UUID, MutableList<EventSubscription.AvsluttetUtenVedtakEvent>>()
-    val overstyringIgangsatt = mutableListOf<EventSubscription.OverstyringIgangsatt>()
     val vedtaksperiodeVenter = mutableListOf<EventSubscription.VedtaksperiodeVenterEvent>()
     val inntektsmeldingFørSøknad = mutableListOf<EventSubscription.InntektsmeldingFørSøknadEvent>()
     val inntektsmeldingIkkeHåndtert = mutableListOf<InntektsmeldingId>()
@@ -246,12 +245,6 @@ internal class TestObservatør(
             arbeidsgiverForespørsler[event.vedtaksperiodeId] = Forespørsel(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon, EventSubscription.Arbeidsgiverperiode))
         }
         endrearbeidsgiverForespørselTilstand(event.vedtaksperiodeId, Forespørsel.Tilstand.ForkastetVedtaksperiode)
-    }
-
-    override fun overstyringIgangsatt(
-        event: EventSubscription.OverstyringIgangsatt,
-    ) {
-        overstyringIgangsatt.add(event)
     }
 
     override fun overlappendeInfotrygdperioder(event: EventSubscription.OverlappendeInfotrygdperioder) {

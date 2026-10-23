@@ -34,16 +34,7 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
     }
 
     @Test
-    fun `sendes ut overstyring igangsatt når det kommer inntektsmelding i avventer inntektsmelding`() {
-        a1 {
-            håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-            assertEquals(2, observatør.overstyringIgangsatt.size)
-        }
-    }
-
-    @Test
-    fun `Senere perioder inngår i overstyring igangsatt selv om det er en endring fra saksbehandler`() {
+    fun `endring fra saksbehandler beholder senere perioder i avventer inntektsmelding`() {
         a1 {
             tilGodkjenning(januar)
             håndterSøknad(mars)
@@ -51,14 +42,8 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
                 1.januar,
                 listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2)),
             )
-            val overstyringIgangsatt = observatør.overstyringIgangsatt.last()
-            assertEquals(
-                listOf(
-                    1.vedtaksperiode,
-                    2.vedtaksperiode,
-                ),
-                overstyringIgangsatt.berørtePerioder.map { it.vedtaksperiodeId },
-            )
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+            assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
         }
     }
 

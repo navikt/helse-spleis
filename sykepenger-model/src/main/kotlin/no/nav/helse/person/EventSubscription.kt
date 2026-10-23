@@ -684,29 +684,6 @@ interface EventSubscription {
         val forsikringsvurderingId: UUID?,
     ) : Event
 
-    data class OverstyringIgangsatt(
-        val årsak: String,
-        val skjæringstidspunkt: LocalDate,
-        val periodeForEndring: Periode,
-        val berørtePerioder: List<VedtaksperiodeData>,
-        val meldingsreferanseId: UUID,
-    ) : Event {
-        enum class TypeEndring {
-            OVERSTYRING,
-            REVURDERING,
-        }
-
-        val typeEndring get() = if (berørtePerioder.any { it.typeEndring == TypeEndring.REVURDERING }) TypeEndring.REVURDERING else TypeEndring.OVERSTYRING
-
-        data class VedtaksperiodeData(
-            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
-            val vedtaksperiodeId: UUID,
-            val periode: Periode,
-            val skjæringstidspunkt: LocalDate,
-            val typeEndring: TypeEndring,
-        )
-    }
-
     data class VedtaksperiodeOpprettet(
         val vedtaksperiodeId: UUID,
         val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -896,8 +873,6 @@ interface EventSubscription {
     fun avsluttetUtenVedtak(event: AvsluttetUtenVedtakEvent) {}
 
     fun nyVedtaksperiodeUtbetaling(event: VedtaksperiodeNyUtbetalingEvent) {}
-
-    fun overstyringIgangsatt(event: OverstyringIgangsatt) {}
 
     fun overlappendeInfotrygdperioder(event: OverlappendeInfotrygdperioder) {}
 

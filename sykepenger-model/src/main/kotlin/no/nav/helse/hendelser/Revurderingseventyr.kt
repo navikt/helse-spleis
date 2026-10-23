@@ -17,10 +17,8 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
-import no.nav.helse.person.EventBus
-import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import java.time.LocalDate
+import java.util.UUID
 
 class Revurderingseventyr private constructor(
     private val hvorfor: RevurderingÅrsak,
@@ -189,30 +187,20 @@ class Revurderingseventyr private constructor(
 
     internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean = periodeForEndring.starterEtter(vedtaksperiode)
 
-    internal fun sendOverstyringIgangsattEvent(eventBus: EventBus) {
-        if (vedtaksperioder.isEmpty()) return
-        hvorfor.emitOverstyringIgangsattEvent(eventBus, vedtaksperioder.toList(), skjæringstidspunkt, periodeForEndring, hendelse.metadata.meldingsreferanseId)
+    enum class TypeEndring {
+        OVERSTYRING,
+        REVURDERING,
     }
 
-    private sealed interface RevurderingÅrsak {
-        fun emitOverstyringIgangsattEvent(
-            eventBus: EventBus,
-            vedtaksperioder: List<VedtaksperiodeData>,
-            skjæringstidspunkt: LocalDate,
-            periodeForEndring: Periode,
-            meldingsreferanseId: MeldingsreferanseId,
-        ) {
-            eventBus.emitOverstyringIgangsattEvent(
-                EventSubscription.OverstyringIgangsatt(
-                    årsak = navn(),
-                    berørtePerioder = vedtaksperioder,
-                    skjæringstidspunkt = skjæringstidspunkt,
-                    periodeForEndring = periodeForEndring,
-                    meldingsreferanseId = meldingsreferanseId.id,
-                ),
-            )
-        }
+    data class VedtaksperiodeData(
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val vedtaksperiodeId: UUID,
+        val periode: Periode,
+        val skjæringstidspunkt: LocalDate,
+        val typeEndring: TypeEndring,
+    )
 
+    private sealed interface RevurderingÅrsak {
         fun navn(): String
 
         data object Arbeidsgiverperiode : RevurderingÅrsak {
@@ -288,15 +276,6 @@ class Revurderingseventyr private constructor(
         }
 
         data object Reberegning : RevurderingÅrsak {
-            override fun emitOverstyringIgangsattEvent(
-                eventBus: EventBus,
-                vedtaksperioder: List<VedtaksperiodeData>,
-                skjæringstidspunkt: LocalDate,
-                periodeForEndring: Periode,
-                meldingsreferanseId: MeldingsreferanseId,
-            ) { // trenger ikke fortelle om en reberegning
-            }
-
             override fun navn() = "REBEREGNING"
         }
 

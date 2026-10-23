@@ -3412,15 +3412,15 @@ internal class Vedtaksperiode private constructor(
                 .filterNot { revurdering.erIkkeRelevantFor(it.periode) }
                 .onEach {
                     revurdering.inngå(
-                        EventSubscription.OverstyringIgangsatt.VedtaksperiodeData(
+                        Revurderingseventyr.VedtaksperiodeData(
                             yrkesaktivitetssporing = it.yrkesaktivitet.yrkesaktivitetstype,
                             vedtaksperiodeId = it.id,
                             skjæringstidspunkt = it.skjæringstidspunkt,
                             periode = it.periode,
                             typeEndring =
                                 when {
-                                    it.behandlinger.harFattetVedtak() -> EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
-                                    else -> EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
+                                    it.behandlinger.harFattetVedtak() -> Revurderingseventyr.TypeEndring.REVURDERING
+                                    else -> Revurderingseventyr.TypeEndring.OVERSTYRING
                                 },
                         ),
                     )

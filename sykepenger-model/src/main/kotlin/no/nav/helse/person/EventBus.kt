@@ -163,11 +163,6 @@ class EventBus {
         observers.forEach { it.planlagtAnnullering(planlagtAnnullering) }
     }
 
-    internal fun emitOverstyringIgangsattEvent(event: EventSubscription.OverstyringIgangsatt) {
-        _events.add(event)
-        observers.forEach { it.overstyringIgangsatt(event) }
-    }
-
     internal fun feriepengerUtbetalt(feriepengerUtbetaltEvent: EventSubscription.FeriepengerUtbetaltEvent) {
         _events.add(feriepengerUtbetaltEvent)
         observers.forEach { it.feriepengerUtbetalt(feriepengerUtbetaltEvent) }

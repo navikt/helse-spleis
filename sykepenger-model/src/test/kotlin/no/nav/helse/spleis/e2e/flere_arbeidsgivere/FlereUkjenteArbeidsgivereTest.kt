@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.flere_arbeidsgivere
 
 import no.nav.helse.dsl.*
 import no.nav.helse.februar
-import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
@@ -10,10 +9,6 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.OVERSTYRING
-import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.TypeEndring.REVURDERING
-import no.nav.helse.person.EventSubscription.OverstyringIgangsatt.VedtaksperiodeData
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.beløp.BeløpstidslinjeTest.Companion.arbeidsgiver
@@ -36,94 +31,33 @@ internal class FlereUkjenteArbeidsgivereTest : AbstractDslTest() {
         a1 { forlengVedtak(februar) }
         a1 { forlengVedtak(mars) }
 
-        val im1 =
-            a1 {
-                val id =
-                    håndterKorrigerteArbeidsgiveropplysninger(
-                        arbeidsgiverperioder = listOf(1.januar til 16.januar),
-                        beregnetInntekt = inntektA1,
-                        vedtaksperiodeId = 1.vedtaksperiode,
-                    )
-                assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-                håndterYtelser(1.vedtaksperiode)
-                håndterSimulering(1.vedtaksperiode)
-                id
-            }
+        a1 {
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                beregnetInntekt = inntektA1,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
+            håndterSimulering(1.vedtaksperiode)
+        }
 
         a2 { assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter()) }
 
         nullstillTilstandsendringer()
-        val søknad = UUID.randomUUID()
-        val im2 =
-            a2 {
-                håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent), søknadId = søknad)
-                håndterArbeidsgiveropplysninger(
-                    listOf(1.mars til 16.mars),
-                    beregnetInntekt = inntektA2,
-                )
-            }
+        a2 {
+            håndterSøknad(Sykdom(1.mars, 20.mars, 100.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(1.mars til 16.mars),
+                beregnetInntekt = inntektA2,
+            )
+        }
 
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, inntektA1, inntektA1)
                 assertInntektsgrunnlag(a2, inntektA2, inntektA2)
             }
-        }
-
-        val overstyringerIgangsatt = observatør.overstyringIgangsatt
-        assertEquals(9, overstyringerIgangsatt.size)
-
-        overstyringerIgangsatt[6].also { event ->
-            assertEquals(
-                EventSubscription.OverstyringIgangsatt(
-                    årsak = "REFUSJONSOPPLYSNINGER",
-                    skjæringstidspunkt = 1.januar,
-                    periodeForEndring = 1.januar til 31.januar,
-                    berørtePerioder =
-                        listOf(
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 1.vedtaksperiode(a1), 1.januar til 31.januar, 1.januar, REVURDERING),
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 2.vedtaksperiode(a1), februar, 1.januar, REVURDERING),
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 1.vedtaksperiode(a2), 1.januar til 31.januar, 1.januar, REVURDERING),
-                        ),
-                    meldingsreferanseId = im1,
-                ),
-                event,
-            )
-        }
-
-        overstyringerIgangsatt[7].also { event ->
-            assertEquals(
-                EventSubscription.OverstyringIgangsatt(
-                    årsak = "NY_PERIODE",
-                    skjæringstidspunkt = 1.januar,
-                    periodeForEndring = 1.mars til 20.mars,
-                    berørtePerioder =
-                        listOf(
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 2.vedtaksperiode(a2), 1.mars til 20.mars, 1.januar, OVERSTYRING),
-                        ),
-                    meldingsreferanseId = søknad,
-                ),
-                event,
-            )
-        }
-
-        overstyringerIgangsatt[8].also { event ->
-            assertEquals(
-                EventSubscription.OverstyringIgangsatt(
-                    årsak = "ARBEIDSGIVERPERIODE",
-                    skjæringstidspunkt = 1.januar,
-                    periodeForEndring = 1.mars til 20.mars,
-                    berørtePerioder =
-                        listOf(
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 3.vedtaksperiode(a1), 1.mars til 31.mars, 1.januar, REVURDERING),
-                            VedtaksperiodeData(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a2), 2.vedtaksperiode(a2), 1.mars til 20.mars, 1.januar, OVERSTYRING),
-                        ),
-                    meldingsreferanseId = im2,
-                ),
-                event,
-            )
         }
 
         a1 {

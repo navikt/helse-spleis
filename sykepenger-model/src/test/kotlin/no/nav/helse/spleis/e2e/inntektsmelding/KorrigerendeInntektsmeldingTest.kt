@@ -166,8 +166,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
 
-            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, REFUSJONSOPPLYSNINGER")
-
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
@@ -255,7 +253,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
-            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, NY_PERIODE, NY_PERIODE, REFUSJONSOPPLYSNINGER")
 
             val revurdering1Vedtaksperiode = inspektør.utbetaling(3)
             revurdering1Vedtaksperiode.also { utbetalingInspektør ->
@@ -299,7 +296,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, REFUSJONSOPPLYSNINGER")
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.1)
             }
@@ -320,8 +316,6 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-
-            assertOverstyringIgangsatt("NY_PERIODE, REFUSJONSOPPLYSNINGER, REFUSJONSOPPLYSNINGER")
 
             assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
         }
@@ -430,10 +424,5 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK)
         }
-    }
-
-    private fun assertOverstyringIgangsatt(vararg event: String) {
-        val events = event.flatMap { it.split(", ") }
-        assertEquals(events, observatør.overstyringIgangsatt.map { it.årsak })
     }
 }

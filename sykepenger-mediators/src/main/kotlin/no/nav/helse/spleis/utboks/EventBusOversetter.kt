@@ -18,7 +18,6 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterS
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import java.util.UUID
 
 internal class EventBusOversetter(
     private val eventBus: EventBus,
@@ -42,7 +41,6 @@ internal class EventBusOversetter(
                     is EventSubscription.InntektsmeldingHåndtertEvent -> mapInntektsmeldingHåndtert(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.InntektsmeldingIkkeHåndtertEvent -> mapInntektsmeldingIkkeHåndtert(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.OverlappendeInfotrygdperioder -> mapOverlappendeInfotrygdperioder(event)
-                    is EventSubscription.OverstyringIgangsatt -> mapOverstyringIgangsatt(event)
                     is EventSubscription.PlanlagtAnnulleringEvent -> mapPlanlagtAnnullering(event) // ✅ Legger kun til organisasjonsnummer når det er Arbeidstaker
                     is EventSubscription.SkatteinntekterLagtTilGrunnEvent -> mapSkatteinntekterLagtTilGrunn(event) // ✅ Er arbeidstaker-spesifikk
                     is EventSubscription.SykefraværstilfelleIkkeFunnet -> mapSykefraværstilfelleIkkeFunnet(event) // ✅ Meldingen er på person-nivå, så den er grei
@@ -288,32 +286,6 @@ internal class EventBusOversetter(
                     "vedtaksperiodeId" to event.vedtaksperiodeId,
                     "utbetalingId" to event.utbetalingId,
                 ),
-            ),
-        )
-
-    private fun mapOverstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt): Utboksmelding =
-        utgåendeSomBeholdesEtterSending(
-            "overstyring_igangsatt",
-            mapOf(
-                "revurderingId" to UUID.randomUUID(),
-                "kilde" to message.meldingsporing.id,
-                "skjæringstidspunkt" to event.skjæringstidspunkt,
-                "periodeForEndringFom" to event.periodeForEndring.start,
-                "periodeForEndringTom" to event.periodeForEndring.endInclusive,
-                "årsak" to event.årsak,
-                "typeEndring" to event.typeEndring,
-                "berørtePerioder" to
-                    event.berørtePerioder.map {
-                        mapOf(
-                            "vedtaksperiodeId" to it.vedtaksperiodeId,
-                            "skjæringstidspunkt" to it.skjæringstidspunkt,
-                            "periodeFom" to it.periode.start,
-                            "periodeTom" to it.periode.endInclusive,
-                            "orgnummer" to it.yrkesaktivitetssporing.somOrganisasjonsnummer,
-                            "yrkesaktivitetstype" to it.yrkesaktivitetssporing.somYrkesaktivitetstype,
-                            "typeEndring" to it.typeEndring,
-                        )
-                    },
             ),
         )
 

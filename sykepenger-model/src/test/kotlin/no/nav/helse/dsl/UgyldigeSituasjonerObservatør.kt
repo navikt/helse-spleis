@@ -160,11 +160,6 @@ internal class UgyldigeSituasjonerObservatør(
 
     override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
 
-    override fun overstyringIgangsatt(event: EventSubscription.OverstyringIgangsatt) {
-        check(event.berørtePerioder.isNotEmpty()) { "Forventet ikke en igangsatt overstyring uten berørte perioder." }
-        if (event.årsak == "KORRIGERT_INNTEKTSMELDING") IM.korrigertInntekt(event.meldingsreferanseId)
-    }
-
     private fun EventSubscription.VedtaksperiodeVenterEvent.tilstander() =
         when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
             true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
@@ -466,10 +461,6 @@ internal class UgyldigeSituasjonerObservatør(
             signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.FØR_SØKNAD)
         }
 
-        fun korrigertInntekt(inntektsmeldingId: UUID) {
-            signaler.getOrPut(inntektsmeldingId) { mutableListOf() }.add(Signal.KORRIGERT_INNTEKT)
-        }
-
         fun behandlingUtført() = signaler.clear()
 
         fun bekreftEntydighåndtering() {
@@ -495,7 +486,6 @@ internal class UgyldigeSituasjonerObservatør(
             HÅNDTERT,
             IKKE_HÅNDTERT,
             FØR_SØKNAD,
-            KORRIGERT_INNTEKT,
         }
     }
 

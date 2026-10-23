@@ -786,7 +786,6 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         yrkesaktiviteter.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
-        revurdering.sendOverstyringIgangsattEvent(eventBus)
         ryddOppVilkårsgrunnlag(aktivitetslogg)
     }
 
