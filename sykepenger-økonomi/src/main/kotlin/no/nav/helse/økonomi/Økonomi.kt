@@ -32,7 +32,7 @@ data class Økonomi(
             andreYtelserGrad: Prosentdel,
         ) = Økonomi(
             sykdomsgrad = sykdomsgrad,
-            utbetalingsgrad = sykdomsgrad - andreYtelserGrad - inntektjustering.ratio(aktuellDagsinntekt),
+            utbetalingsgrad = sykdomsgrad - andreYtelserGrad,
             refusjonsbeløp = refusjonsbeløp,
             aktuellDagsinntekt = aktuellDagsinntekt,
             inntektjustering = inntektjustering,

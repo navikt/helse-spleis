@@ -50,37 +50,6 @@ internal class ØkonomiTest {
     }
 
     @Test
-    fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos kjent arbeidsgiver`() {
-        val økonomiEnArbeidsgiver =
-            listOf(
-                100.prosent.inntekt(
-                    2000.daglig,
-                    inntektjustering = 250.daglig,
-                    graderteAndreYtelserGrad = 50.prosent,
-                ),
-            )
-        // (50% * 2000 - 250) / 2000
-        assertEquals(37.5.prosent, økonomiEnArbeidsgiver.first().utbetalingsgrad)
-
-        val økonomiToArbeidsgivere =
-            listOf(
-                100.prosent.inntekt(
-                    2000.daglig,
-                    graderteAndreYtelserGrad = 25.prosent,
-                    inntektjustering = 250.daglig,
-                ), // 0.625
-                50.prosent.inntekt(
-                    2000.daglig,
-                    inntektjustering = 250.daglig,
-                ), // 0.375
-            )
-        // (0.75 * 2000 + 0.5 * 2000 - 500) / 4000 = (2000*(0.75+0.5) - 500) / 4000 = (2000*1.25 - 500) / 4000 = 2000-4000
-
-        assertEquals(62.5.prosent, økonomiToArbeidsgivere[0].utbetalingsgrad)
-        assertEquals(37.5.prosent, økonomiToArbeidsgivere[1].utbetalingsgrad)
-    }
-
-    @Test
     fun `total utbetalingsgrad hensyntatt andre ytelser og tilkommen inntekt hos ukjent arbeidsgiver`() {
         val økonomiUtenGraderteAndreYtelser =
             listOf(
