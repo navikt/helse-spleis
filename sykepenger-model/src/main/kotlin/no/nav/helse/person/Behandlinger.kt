@@ -3,7 +3,11 @@ package no.nav.helse.person
 import no.nav.helse.dto.ArbeidssituasjonDto
 import no.nav.helse.dto.BehandlingkildeDto
 import no.nav.helse.dto.BehandlingtilstandDto
-import no.nav.helse.dto.deserialisering.*
+import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
+import no.nav.helse.dto.deserialisering.BehandlingInnDto
+import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
+import no.nav.helse.dto.deserialisering.BehandlingerInnDto
+import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
 import no.nav.helse.dto.serialisering.BehandlingUtDto
 import no.nav.helse.dto.serialisering.BehandlingendringUtDto
 import no.nav.helse.dto.serialisering.BehandlingerUtDto
@@ -12,9 +16,17 @@ import no.nav.helse.etterlevelse.BehandlingSubsumsjonslogg
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.forrigeDag
 import no.nav.helse.førsteArbeidsdagEtter
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Avsender
+import no.nav.helse.hendelser.Behandlingsavgjørelse
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Periode.Companion.grupperSammenhengendePerioder
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.til
+import no.nav.helse.hendelser.vurdering
 import no.nav.helse.nyUuidv7
 import no.nav.helse.person.Behandlinger.Behandling.Companion.berik
 import no.nav.helse.person.Behandlinger.Behandling.Companion.dokumentsporing
@@ -38,18 +50,43 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_24
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.builders.UtbetalingsdagerBuilder
 import no.nav.helse.person.builders.UtkastTilVedtakBuilder
-import no.nav.helse.person.inntekt.*
+import no.nav.helse.person.inntekt.ArbeidstakerFaktaavklartInntekt
+import no.nav.helse.person.inntekt.Arbeidstakerinntektskilde
+import no.nav.helse.person.inntekt.FaktaavklartInntekt
 import no.nav.helse.person.inntekt.Saksbehandler
+import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
+import no.nav.helse.person.inntekt.VurderbarArbeidstakerFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag
-import no.nav.helse.sykdomstidslinje.Dag.*
+import no.nav.helse.sykdomstidslinje.Dag.AndreYtelser
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidIkkeGjenopptattDag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsdag
+import no.nav.helse.sykdomstidslinje.Dag.ArbeidsgiverHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Arbeidsgiverdag
+import no.nav.helse.sykdomstidslinje.Dag.Feriedag
+import no.nav.helse.sykdomstidslinje.Dag.ForeldetSykedag
+import no.nav.helse.sykdomstidslinje.Dag.FriskHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
+import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
+import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.Sykedag
+import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.utbetalingslinjer.*
-import no.nav.helse.utbetalingstidslinje.*
+import no.nav.helse.utbetalingslinjer.Klassekode
+import no.nav.helse.utbetalingslinjer.Utbetaling
+import no.nav.helse.utbetalingslinjer.Utbetalingkladd
+import no.nav.helse.utbetalingslinjer.UtbetalingkladdBuilder
+import no.nav.helse.utbetalingslinjer.Utbetalingtype
+import no.nav.helse.utbetalingstidslinje.ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.Maksdatoresultat
+import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar
 import no.nav.helse.utbetalingstidslinje.PeriodeUtenNavAnsvar.Companion.finn
+import no.nav.helse.utbetalingstidslinje.SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
+import no.nav.helse.utbetalingstidslinje.VentedagerForVedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 internal class Behandlinger private constructor(
     behandlinger: List<Behandling>,
@@ -861,7 +898,6 @@ internal class Behandlinger private constructor(
             val faktaavklartInntekt: FaktaavklartInntekt?,
             val korrigertInntekt: Saksbehandler?,
             val beregningId: UUID,
-            val graderteAndreYtelserId: UUID?,
         ) {
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
@@ -969,7 +1005,6 @@ internal class Behandlinger private constructor(
                             },
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
                         beregningId = dto.beregningId,
-                        graderteAndreYtelserId = dto.graderteAndreYtelserId,
                     )
                 }
             }
@@ -1143,7 +1178,6 @@ internal class Behandlinger private constructor(
                         },
                     korrigertInntekt = korrigertInntekt?.dto(),
                     beregningId = beregningId,
-                    graderteAndreYtelserId = graderteAndreYtelserId,
                 )
             }
 
@@ -1679,7 +1713,6 @@ internal class Behandlinger private constructor(
                             faktaavklartInntekt = faktaavklartInntekt,
                             korrigertInntekt = null,
                             beregningId = nyUuidv7(),
-                            graderteAndreYtelserId = null,
                         ),
                     ),
                 avsluttet = null,

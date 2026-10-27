@@ -1,9 +1,17 @@
 package no.nav.helse.dto.serialisering
 
-import no.nav.helse.dto.*
+import no.nav.helse.dto.ArbeidssituasjonDto
+import no.nav.helse.dto.AvslagstidslinjeDto
+import no.nav.helse.dto.BeløpstidslinjeDto
+import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
+import no.nav.helse.dto.DokumentsporingDto
+import no.nav.helse.dto.InntektskildeDto
+import no.nav.helse.dto.PeriodeDto
+import no.nav.helse.dto.SykdomstidslinjeDto
+import no.nav.helse.dto.UtbetalingTilstandDto
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class BehandlingendringUtDto(
     val id: UUID,
@@ -29,5 +37,4 @@ data class BehandlingendringUtDto(
     val faktaavklartInntekt: FaktaavklartInntektUtDto?,
     val korrigertInntekt: SaksbehandlerUtDto?,
     val beregningId: UUID,
-    val graderteAndreYtelserId: UUID?,
 )
