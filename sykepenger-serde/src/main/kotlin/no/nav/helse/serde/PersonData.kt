@@ -1,114 +1,18 @@
 package no.nav.helse.serde
 
-import no.nav.helse.dto.AlderDto
-import no.nav.helse.dto.ArbeidsforholdDto
-import no.nav.helse.dto.ArbeidsgiverOpptjeningsgrunnlagDto
-import no.nav.helse.dto.ArbeidssituasjonDto
-import no.nav.helse.dto.AvsenderDto
-import no.nav.helse.dto.AvslagstidslinjeDto
-import no.nav.helse.dto.BegrunnelseDto
-import no.nav.helse.dto.BehandlingkildeDto
-import no.nav.helse.dto.BehandlingtilstandDto
-import no.nav.helse.dto.BeløpstidslinjeDto
-import no.nav.helse.dto.DagerUtenNavAnsvaravklaringDto
-import no.nav.helse.dto.DokumentsporingDto
-import no.nav.helse.dto.DokumenttypeDto
-import no.nav.helse.dto.EndringskodeDto
-import no.nav.helse.dto.FagområdeDto
-import no.nav.helse.dto.FeriepengerendringskodeDto
-import no.nav.helse.dto.FeriepengerfagområdeDto
-import no.nav.helse.dto.FeriepengerklassekodeDto
-import no.nav.helse.dto.HendelseskildeDto
-import no.nav.helse.dto.InfotrygdFerieperiodeDto
-import no.nav.helse.dto.InntektbeløpDto
-import no.nav.helse.dto.InntektskildeDto
-import no.nav.helse.dto.InntekttypeDto
-import no.nav.helse.dto.KlassekodeDto
-import no.nav.helse.dto.MaksdatobestemmelseDto
-import no.nav.helse.dto.MeldingsreferanseDto
-import no.nav.helse.dto.OppdragstatusDto
-import no.nav.helse.dto.PeriodeDto
-import no.nav.helse.dto.PeriodeUtenNavAnsvarDto
-import no.nav.helse.dto.ProsentdelDto
-import no.nav.helse.dto.RefusjonsservitørDto
-import no.nav.helse.dto.SimuleringResultatDto
-import no.nav.helse.dto.SkatteopplysningDto
-import no.nav.helse.dto.SykdomshistorikkDto
-import no.nav.helse.dto.SykdomshistorikkElementDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.AndreYtelserDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidIkkeGjenopptattDagDto
+import no.nav.helse.dto.*
+import no.nav.helse.dto.SykdomstidslinjeDagDto.*
 import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsdagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsgiverHelgedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.ArbeidsgiverdagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.FeriedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.ForeldetSykedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.FriskHelgedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.MeldingTilNavDagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.MeldingTilNavHelgedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.PermisjonsdagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.ProblemDagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.SykHelgedagDto
-import no.nav.helse.dto.SykdomstidslinjeDagDto.SykedagDto
 import no.nav.helse.dto.SykdomstidslinjeDagDto.UkjentDagDto
-import no.nav.helse.dto.SykdomstidslinjeDto
-import no.nav.helse.dto.SykmeldingsperioderDto
-import no.nav.helse.dto.UtbetalingTilstandDto
-import no.nav.helse.dto.UtbetalingVurderingDto
-import no.nav.helse.dto.UtbetalingtypeDto
-import no.nav.helse.dto.VedtaksperiodetilstandDto
-import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
-import no.nav.helse.dto.deserialisering.ArbeidsgiverInntektsopplysningInnDto
-import no.nav.helse.dto.deserialisering.ArbeidstakerFaktaavklartInntektInnDto
-import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto
+import no.nav.helse.dto.deserialisering.*
 import no.nav.helse.dto.deserialisering.ArbeidstakerinntektskildeInnDto.AOrdningenDto
-import no.nav.helse.dto.deserialisering.BehandlingInnDto
-import no.nav.helse.dto.deserialisering.BehandlingendringInnDto
-import no.nav.helse.dto.deserialisering.BehandlingerInnDto
-import no.nav.helse.dto.deserialisering.FaktaavklartInntektInnDto
-import no.nav.helse.dto.deserialisering.FeriepengeInnDto
-import no.nav.helse.dto.deserialisering.FeriepengeoppdragInnDto
-import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto
 import no.nav.helse.dto.deserialisering.FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto
-import no.nav.helse.dto.deserialisering.FeriepengeutbetalingslinjeInnDto
-import no.nav.helse.dto.deserialisering.ForkastetVedtaksperiodeInnDto
-import no.nav.helse.dto.deserialisering.InfotrygdArbeidsgiverutbetalingsperiodeInnDto
-import no.nav.helse.dto.deserialisering.InfotrygdPersonutbetalingsperiodeInnDto
-import no.nav.helse.dto.deserialisering.InfotrygdhistorikkInnDto
-import no.nav.helse.dto.deserialisering.InfotrygdhistorikkelementInnDto
-import no.nav.helse.dto.deserialisering.InntektsdataInnDto
-import no.nav.helse.dto.deserialisering.InntektsgrunnlagInnDto
-import no.nav.helse.dto.deserialisering.InntektshistorikkInnDto
-import no.nav.helse.dto.deserialisering.InntektsmeldingInnDto
-import no.nav.helse.dto.deserialisering.MaksdatoresultatInnDto
-import no.nav.helse.dto.deserialisering.MinimumSykdomsgradVurderingInnDto
-import no.nav.helse.dto.deserialisering.OppdragInnDto
-import no.nav.helse.dto.deserialisering.OpptjeningInnDto
-import no.nav.helse.dto.deserialisering.PersonInnDto
-import no.nav.helse.dto.deserialisering.SaksbehandlerInnDto
-import no.nav.helse.dto.deserialisering.SelvstendigFaktaavklartInntektInnDto
-import no.nav.helse.dto.deserialisering.SelvstendigInntektsopplysningInnDto
-import no.nav.helse.dto.deserialisering.SkjønnsmessigFastsattInnDto
-import no.nav.helse.dto.deserialisering.UtbetalingInnDto
-import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingsdagInnDto.*
-import no.nav.helse.dto.deserialisering.UtbetalingslinjeInnDto
-import no.nav.helse.dto.deserialisering.UtbetalingstidslinjeInnDto
-import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
-import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
-import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnslagInnDto
-import no.nav.helse.dto.deserialisering.VilkårsgrunnlaghistorikkInnDto
-import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
-import no.nav.helse.dto.deserialisering.ØkonomiInnDto
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
 import no.nav.helse.serde.PersonData.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.serde.mapping.JsonMedlemskapstatus
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.Year
-import java.time.YearMonth
-import java.util.UUID
+import java.time.*
+import java.util.*
 import kotlin.streams.asSequence
 
 data class PersonData(
@@ -422,7 +326,12 @@ data class PersonData(
                 forkastede = this.forkastede.map { it.tilDto() },
                 utbetalinger = this.utbetalinger.map { it.tilDto() },
                 feriepengeutbetalinger = this.feriepengeutbetalinger.map { it.tilDto() },
-                ubrukteRefusjonsopplysninger = RefusjonsservitørDto(this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) -> beløpstidslinje.tilDto() }),
+                ubrukteRefusjonsopplysninger =
+                    RefusjonsservitørDto(
+                        this.ubrukteRefusjonsopplysninger.mapValues { (_, beløpstidslinje) ->
+                            beløpstidslinje.tilDto()
+                        },
+                    ),
             )
 
         data class InntektsmeldingData(
@@ -522,7 +431,13 @@ data class PersonData(
                     JsonDagType.FRISK_HELGEDAG -> FriskHelgedagDto(dato = dagen, kilde = kilde)
                     JsonDagType.FORELDET_SYKEDAG -> ForeldetSykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                     JsonDagType.PERMISJONSDAG -> PermisjonsdagDto(dato = dagen, kilde = kilde)
-                    JsonDagType.PROBLEMDAG -> ProblemDagDto(dato = dagen, kilde = kilde, other = this.other!!.tilDto(), melding = this.melding!!)
+                    JsonDagType.PROBLEMDAG ->
+                        ProblemDagDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            other = this.other!!.tilDto(),
+                            melding = this.melding!!,
+                        )
                     JsonDagType.SYKEDAG ->
                         if (dagen.erHelg()) {
                             SykHelgedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
@@ -530,13 +445,43 @@ data class PersonData(
                             SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                         }
 
-                    JsonDagType.ANDRE_YTELSER_FORELDREPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, AndreYtelserDto.YtelseDto.Foreldrepenger)
+                    JsonDagType.ANDRE_YTELSER_FORELDREPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            AndreYtelserDto.YtelseDto.Foreldrepenger,
+                        )
                     JsonDagType.ANDRE_YTELSER_AAP -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.AAP)
-                    JsonDagType.ANDRE_YTELSER_OMSORGSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Omsorgspenger)
-                    JsonDagType.ANDRE_YTELSER_PLEIEPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Pleiepenger)
-                    JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Svangerskapspenger)
-                    JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Opplæringspenger)
-                    JsonDagType.ANDRE_YTELSER_DAGPENGER -> AndreYtelserDto(dato = dagen, kilde = kilde, ytelse = AndreYtelserDto.YtelseDto.Dagpenger)
+                    JsonDagType.ANDRE_YTELSER_OMSORGSPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            ytelse = AndreYtelserDto.YtelseDto.Omsorgspenger,
+                        )
+                    JsonDagType.ANDRE_YTELSER_PLEIEPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            ytelse = AndreYtelserDto.YtelseDto.Pleiepenger,
+                        )
+                    JsonDagType.ANDRE_YTELSER_SVANGERSKAPSPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            ytelse = AndreYtelserDto.YtelseDto.Svangerskapspenger,
+                        )
+                    JsonDagType.ANDRE_YTELSER_OPPLÆRINGSPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            ytelse = AndreYtelserDto.YtelseDto.Opplæringspenger,
+                        )
+                    JsonDagType.ANDRE_YTELSER_DAGPENGER ->
+                        AndreYtelserDto(
+                            dato = dagen,
+                            kilde = kilde,
+                            ytelse = AndreYtelserDto.YtelseDto.Dagpenger,
+                        )
                     JsonDagType.UKJENT_DAG -> UkjentDagDto(dato = dagen, kilde = kilde)
                 }
             }
@@ -1005,6 +950,7 @@ data class PersonData(
                     val faktaavklartInntekt: FaktaavklartInntektData?,
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
                     val beregningId: UUID,
+                    val graderteAndreYtelserId: UUID?,
                 ) {
                     fun tilDto() =
                         BehandlingendringInnDto(
@@ -1044,6 +990,7 @@ data class PersonData(
                             faktaavklartInntekt = faktaavklartInntekt?.tilDto(),
                             korrigertInntekt = korrigertInntekt?.tilDto(),
                             beregningId = beregningId,
+                            graderteAndreYtelserId = graderteAndreYtelserId,
                         )
 
                     data class AvslagstidslinjeData(
@@ -1054,7 +1001,8 @@ data class PersonData(
                             val kilde: String,
                             val perioder: PeriodeData,
                         ) {
-                            fun tilDto() = AvslagstidslinjeDto.AvslagstidslinjedagDto(begrunnelser.map { it.tilDto() }, kilde, perioder.tilDto())
+                            fun tilDto() =
+                                AvslagstidslinjeDto.AvslagstidslinjedagDto(begrunnelser.map { it.tilDto() }, kilde, perioder.tilDto())
                         }
 
                         fun tilDto() = AvslagstidslinjeDto(perioder = perioder.map { it.tilDto() })
@@ -1489,7 +1437,8 @@ data class PersonData(
                     personbeløp = lagretPersonbeløp,
                     // Disse elvisene kan fjernes når alle personer har blitt oppdatert i databasen
                     // Feltene må være nullable (om ingen finner ut at arbeidsigverbeløp & personbeløp aldri blir lagret ned som null)
-                    reservertArbeidsgiverbeløp = this.reservertArbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) } ?: lagretArbeidsgiverbeløp,
+                    reservertArbeidsgiverbeløp =
+                        this.reservertArbeidsgiverbeløp?.let { InntektbeløpDto.DagligDouble(it) } ?: lagretArbeidsgiverbeløp,
                     reservertPersonbeløp = this.reservertPersonbeløp?.let { InntektbeløpDto.DagligDouble(it) } ?: lagretPersonbeløp,
                 )
             }
@@ -1501,10 +1450,10 @@ data class PersonData(
                     TypeData.ArbeidsgiverperiodeDag -> ArbeidsgiverperiodeDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.NavDag -> NavDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.NavHelgDag -> NavHelgDagDto(dato = dato, økonomi = økonomiDto)
-                    TypeData.Arbeidsdag -> ArbeidsdagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.Arbeidsdag -> UtbetalingsdagInnDto.ArbeidsdagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.Fridag -> FridagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.AvvistDag -> AvvistDagDto(dato = dato, økonomi = økonomiDto, begrunnelser = begrunnelser!!.map { it.tilDto() })
-                    TypeData.UkjentDag -> UkjentDagDto(dato = dato, økonomi = økonomiDto)
+                    TypeData.UkjentDag -> UtbetalingsdagInnDto.UkjentDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.ForeldetDag -> ForeldetDagDto(dato = dato, økonomi = økonomiDto)
                     TypeData.ArbeidsgiverperiodedagNav -> ArbeidsgiverperiodeDagNavDto(dato = dato, økonomi = økonomiDto)
                     TypeData.Ventetidsdag -> VentetidsdagDto(dato = dato, økonomi = økonomiDto)
@@ -1554,9 +1503,15 @@ data class PersonData(
         val anvendtÅrligGrunnbeløp: Double?,
         val skatteopplysninger: List<SkatteopplysningData>?,
     ) {
-        fun tilArbeidstakerDto() = checkNotNull(tilDto() as? ArbeidstakerFaktaavklartInntektInnDto) { "Forventet at den faktaavklarte inntekten var av type arbeidstaker" }
+        fun tilArbeidstakerDto() =
+            checkNotNull(tilDto() as? ArbeidstakerFaktaavklartInntektInnDto) {
+                "Forventet at den faktaavklarte inntekten var av type arbeidstaker"
+            }
 
-        fun tilSelvstendigDto() = checkNotNull(tilDto() as? SelvstendigFaktaavklartInntektInnDto) { "Forventet at den faktaavklarte inntekten var av type selvstendig" }
+        fun tilSelvstendigDto() =
+            checkNotNull(tilDto() as? SelvstendigFaktaavklartInntektInnDto) {
+                "Forventet at den faktaavklarte inntekten var av type selvstendig"
+            }
 
         fun tilDto(): FaktaavklartInntektInnDto {
             val inntektsdata =
@@ -1574,7 +1529,10 @@ data class PersonData(
                         inntektsdata = inntektsdata,
                         inntektsopplysningskilde =
                             when (checkNotNull(kilde) { "For arbeidstaker har vi alltid kilde" }) {
-                                InntektsopplysningskildeData.AORDNINGEN -> AOrdningenDto(skatteopplysninger?.map { it.tilDto() } ?: emptyList())
+                                InntektsopplysningskildeData.AORDNINGEN ->
+                                    AOrdningenDto(
+                                        skatteopplysninger?.map { it.tilDto() } ?: emptyList(),
+                                    )
                                 InntektsopplysningskildeData.INFOTRYGD -> ArbeidstakerinntektskildeInnDto.InfotrygdDto
                                 InntektsopplysningskildeData.INNTEKTSMELDING -> ArbeidstakerinntektskildeInnDto.ArbeidsgiverDto
                             },
@@ -1584,8 +1542,14 @@ data class PersonData(
                     SelvstendigFaktaavklartInntektInnDto(
                         id = id,
                         inntektsdata = inntektsdata,
-                        pensjonsgivendeInntekter = checkNotNull(pensjonsgivendeInntekter) { "Selvstendiginntekt skal ha pensjonsgivende inntekter" }.map { it.tilDto() },
-                        anvendtGrunnbeløp = InntektbeløpDto.Årlig(checkNotNull(anvendtÅrligGrunnbeløp) { "Selvstendiginntekt skal ha anvendt grunnbeløp" }),
+                        pensjonsgivendeInntekter =
+                            checkNotNull(pensjonsgivendeInntekter) {
+                                "Selvstendiginntekt skal ha pensjonsgivende inntekter"
+                            }.map { it.tilDto() },
+                        anvendtGrunnbeløp =
+                            InntektbeløpDto.Årlig(
+                                checkNotNull(anvendtÅrligGrunnbeløp) { "Selvstendiginntekt skal ha anvendt grunnbeløp" },
+                            ),
                     )
             }
         }
@@ -1605,7 +1569,8 @@ data class PersonData(
             val årstall: Int,
             val årligBeløp: Double,
         ) {
-            fun tilDto() = SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(årstall), InntektbeløpDto.Årlig(årligBeløp))
+            fun tilDto() =
+                SelvstendigFaktaavklartInntektInnDto.PensjonsgivendeInntektDto(Year.of(årstall), InntektbeløpDto.Årlig(årligBeløp))
         }
 
         data class SkatteopplysningData(
