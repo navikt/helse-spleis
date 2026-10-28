@@ -115,6 +115,7 @@ data class SpannerPersonDto(
         val forsikringsvurderingId: UUID?,
         val opptjeningsvurderingId: UUID,
         val medlemskapsvurderingId: UUID,
+        val rettighetskategoriId: UUID,
     ) {
         enum class MedlemskapstatusDto { JA, VET_IKKE, NEI, UAVKLART_MED_BRUKERSPØRSMÅL }
 
@@ -1885,6 +1886,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() =
         forsikringsvurderingId = (this as? VilkårsgrunnlagUtDto.Spleis)?.forsikringsvurderingId,
         opptjeningsvurderingId = this.opptjeningsvurderingId,
         medlemskapsvurderingId = this.medlemskapsvurderingId,
+        rettighetskategoriId = this.rettighetskategoriId,
     )
 
 private fun OpptjeningUtDto.tilPersonData() =

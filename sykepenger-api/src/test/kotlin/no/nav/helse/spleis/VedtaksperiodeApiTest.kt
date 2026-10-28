@@ -47,6 +47,16 @@ internal class VedtaksperiodeApiTest : AbstractSpleisApiTest() {
             assertEquals(vilkårsgrunnlagId, vilkårsgrunnlag["vilkårsgrunnlagId"].asText())
             assertEquals(FOM.toString(), vilkårsgrunnlag["skjæringstidspunkt"].asText())
             assertEquals("Vilkårsprøving", vilkårsgrunnlag["type"].asText())
+            assertEquals(
+                person
+                    .dto()
+                    .vilkårsgrunnlagHistorikk.historikk
+                    .flatMap { it.vilkårsgrunnlag }
+                    .single { it.vilkårsgrunnlagId.toString() == vilkårsgrunnlagId }
+                    .rettighetskategoriId
+                    .toString(),
+                vilkårsgrunnlag["rettighetskategoriId"].asText(),
+            )
             assertTrue(vilkårsgrunnlag["inntektsgrunnlag"]["arbeidsgiverInntektsopplysninger"].size() > 0)
         }
     }
