@@ -81,7 +81,10 @@ internal class InntektsmeldingReplayTest : AbstractEndToEndMediatorTest() {
     private fun søknad(
         periode: Periode,
         orgnr: String,
-    ) = sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = periode.start, tom = periode.endInclusive, sykmeldingsgrad = 100)), orgnummer = orgnr)
+    ) = sendSøknad(
+        perioder = listOf(SoknadsperiodeDTO(fom = periode.start, tom = periode.endInclusive, sykmeldingsgrad = 100)),
+        orgnummer = orgnr,
+    )
 
     private companion object {
         val a1 = "a1"

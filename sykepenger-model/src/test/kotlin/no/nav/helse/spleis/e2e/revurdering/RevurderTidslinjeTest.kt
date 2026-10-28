@@ -51,7 +51,13 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode])
         }
     }
@@ -105,7 +111,16 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             håndterAnnullering(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_ANNULLERING)
         }
         nullstillTilstandsendringer()
@@ -134,7 +149,16 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
 
             assertIngenFunksjonelleFeil()
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
@@ -375,8 +399,24 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+            assertTilstander(
+                3.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -488,7 +528,9 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         a1 {
             assertEquals(6, inspektør.sisteMaksdato(1.vedtaksperiode).antallForbrukteDager)
 
-            håndterOverstyrTidslinje((3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) })
+            håndterOverstyrTidslinje(
+                (3.januar til 20.januar).map { manuellFeriedag(it) } + (21.januar til 26.januar).map { manuellPermisjonsdag(it) },
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -519,7 +561,9 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         }
         nullstillTilstandsendringer()
         a1 {
-            håndterOverstyrTidslinje((3.mars til 20.mars).map { manuellFeriedag(it) } + (21.mars til 26.mars).map { manuellPermisjonsdag(it) })
+            håndterOverstyrTidslinje(
+                (3.mars til 20.mars).map { manuellFeriedag(it) } + (21.mars til 26.mars).map { manuellPermisjonsdag(it) },
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
@@ -822,8 +866,24 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(3.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+            assertTilstander(
+                3.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
             assertIngenFunksjonelleFeil()
             assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(1.vedtaksperiode).size)
             assertEquals(0, inspektør.ikkeUtbetalteUtbetalingerForVedtaksperiode(2.vedtaksperiode).size)
@@ -1145,7 +1205,12 @@ internal class RevurderTidslinjeTest : AbstractDslTest() {
         vedtaksperiodeId: UUID,
         block: () -> Unit,
     ) {
-        val faktiskAntallBehov = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker> { block() }.filter { it.vedtaksperiodeId == vedtaksperiodeId }.size
+        val faktiskAntallBehov =
+            behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker> { block() }
+                .filter {
+                    it.vedtaksperiodeId ==
+                        vedtaksperiodeId
+                }.size
         assertEquals(expected, faktiskAntallBehov)
     }
 }

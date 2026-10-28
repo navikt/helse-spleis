@@ -120,7 +120,8 @@ internal object Impossible : Strategy() {
     override fun decide(
         row: Dag,
         column: Dag,
-    ): Dag = throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
+    ): Dag =
+        throw RuntimeException("Nøklene ${Turneringsnøkkel.fraDag(row)} + ${Turneringsnøkkel.fraDag(column)} er en ugyldig sammenligning")
 
     override fun decideInverse(
         row: Dag,

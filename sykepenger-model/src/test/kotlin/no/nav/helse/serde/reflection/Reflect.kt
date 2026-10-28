@@ -33,7 +33,8 @@ internal class ReflectClass private constructor(
                 .flatMap { it.memberProperties }
                 .filter { it.visibility == KVisibility.PRIVATE }
 
-    internal fun getNestedClass(nestedClassName: String) = getNestedClasses().single { it.simpleName == nestedClassName }.let(::ReflectClass)
+    internal fun getNestedClass(nestedClassName: String) =
+        getNestedClasses().single { it.simpleName == nestedClassName }.let(::ReflectClass)
 
     private fun getNestedClasses(kClass: KClass<*> = this.kClass): List<KClass<*>> =
         kClass.nestedClasses.fold(emptyList()) { nestedClasses, nestedClass ->

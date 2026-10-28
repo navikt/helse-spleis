@@ -16,7 +16,13 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     @Test
     fun `setter inntekt på økonomi`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
-        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, 100.prosent, 21000.månedlig, Beløpstidslinje())
+        val økonomi: Økonomi =
+            utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(
+                1.januar,
+                100.prosent,
+                21000.månedlig,
+                Beløpstidslinje(),
+            )
         assertEquals(21000.månedlig, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -24,7 +30,13 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `setter inntekt på økonomi om vurdering ikke er ok`() {
         val inntekt = 21000.månedlig
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
-        val økonomi: Økonomi = utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, 100.prosent, inntekt, Beløpstidslinje())
+        val økonomi: Økonomi =
+            utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(
+                1.januar,
+                100.prosent,
+                inntekt,
+                Beløpstidslinje(),
+            )
         assertEquals(inntekt, økonomi.inspektør.aktuellDagsinntekt)
     }
 
@@ -32,7 +44,16 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     fun `feiler dersom orgnr ikke finnes i inntektsgrunnlaget eller det forekommer inntektsendringer`() {
         val utbetalingstidslinjeBuilderVedtaksperiode = utbetalingstidslinjeBuilderVedtaksperiode()
 
-        assertEquals(INGEN, utbetalingstidslinjeBuilderVedtaksperiode.medInntektHvisFinnes(1.januar, 100.prosent, INGEN, Beløpstidslinje()).inspektør.aktuellDagsinntekt)
+        assertEquals(
+            INGEN,
+            utbetalingstidslinjeBuilderVedtaksperiode
+                .medInntektHvisFinnes(
+                    1.januar,
+                    100.prosent,
+                    INGEN,
+                    Beløpstidslinje(),
+                ).inspektør.aktuellDagsinntekt,
+        )
     }
 
     private fun utbetalingstidslinjeBuilderVedtaksperiode() =

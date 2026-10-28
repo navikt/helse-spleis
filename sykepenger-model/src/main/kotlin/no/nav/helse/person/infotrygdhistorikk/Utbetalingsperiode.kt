@@ -18,7 +18,8 @@ sealed class Utbetalingsperiode(
     fom: LocalDate,
     tom: LocalDate,
 ) : Infotrygdperiode(fom, tom) {
-    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, HundreProsent, kilde)
+    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje =
+        Sykdomstidslinje.sykedager(periode.start, periode.endInclusive, HundreProsent, kilde)
 
     override fun utbetalingstidslinje() =
         Utbetalingstidslinje

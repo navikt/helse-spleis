@@ -63,7 +63,8 @@ data class Beløpstidslinje(
 
     internal fun medBeløp() = Beløpstidslinje(dager.filterValues { it.beløp != INGEN })
 
-    internal operator fun minus(other: Beløpstidslinje) = Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
+    internal operator fun minus(other: Beløpstidslinje) =
+        Beløpstidslinje(this.dager.filterValues { it.beløp != other.dager[it.dato]?.beløp })
 
     internal fun subset(periode: Periode): Beløpstidslinje {
         if (this.periode == null || !this.periode.overlapperMed(periode)) return Beløpstidslinje()

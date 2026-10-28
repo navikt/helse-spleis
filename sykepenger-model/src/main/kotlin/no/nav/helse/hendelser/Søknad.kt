@@ -132,7 +132,13 @@ class Søknad(
                 // ingen spesiell validering
             }
 
-            Arbeidssituasjon.ARBEIDSLEDIG -> validerArbeidsledig(aktivitetslogg, vilkårsgrunnlag, sykdomstidslinje.periode(), refusjonstidslinje)
+            Arbeidssituasjon.ARBEIDSLEDIG ->
+                validerArbeidsledig(
+                    aktivitetslogg,
+                    vilkårsgrunnlag,
+                    sykdomstidslinje.periode(),
+                    refusjonstidslinje,
+                )
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
 
             Arbeidssituasjon.JORDBRUKER -> {
@@ -177,7 +183,8 @@ class Søknad(
         vilkårsgrunnlag: VilkårsgrunnlagElement?,
     ) {
         val ferdiglignetPensjonsgivendeInntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
-        val harMinst3årMedFerdiglignetInntekter = ferdiglignetPensjonsgivendeInntekter == null || ferdiglignetPensjonsgivendeInntekter.size < 3
+        val harMinst3årMedFerdiglignetInntekter =
+            ferdiglignetPensjonsgivendeInntekter == null || ferdiglignetPensjonsgivendeInntekter.size < 3
         if (harMinst3årMedFerdiglignetInntekter) aktivitetslogg.funksjonellFeil(Varselkode.RV_IV_12)
 
         if (harOppgittAvvikling == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_47)
@@ -187,7 +194,11 @@ class Søknad(
         if (harOppgittOpprettholdtInntekt == true) aktivitetslogg.varsel(Varselkode.RV_SØ_51)
         if (harOppgittOppholdIUtlandet == true) aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_52)
 
-        if (vilkårsgrunnlag == null && pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true) aktivitetslogg.varsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
+        if (vilkårsgrunnlag == null &&
+            pensjonsgivendeInntekter?.harFlereTyperPensjonsgivendeInntekt() == true
+        ) {
+            aktivitetslogg.varsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`)
+        }
     }
 
     private fun valider(
@@ -223,9 +234,17 @@ class Søknad(
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
     ) {
-        if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`)
+        if (ikkeJobbetIDetSisteFraAnnetArbeidsforhold) {
+            aktivitetslogg.varsel(
+                Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen er arbeidstaker hos annen arbeidsgiver, men ikke jobbet der de siste 14 dagene før hen ble sykmeldt`,
+            )
+        }
         if (!andreInntektskilder) return
-        if (skjæringstidspunkt in sykdomsperiode) return aktivitetslogg.funksjonellFeil(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
+        if (skjæringstidspunkt in
+            sykdomsperiode
+        ) {
+            return aktivitetslogg.funksjonellFeil(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
+        }
         aktivitetslogg.varsel(Varselkode.TilkommenInntekt.`Opplyst i søknaden om at hen har andre inntekskilder`)
     }
 
@@ -267,7 +286,11 @@ class Søknad(
                             Inntektsdata(
                                 hendelseId = metadata.meldingsreferanseId,
                                 dato = sykdomsperiode.start,
-                                beløp = SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(avklartePensjonsgivendeInntekter, anvendtGrunnbeløp),
+                                beløp =
+                                    SelvstendigFaktaavklartInntekt.grunnbeløpsjustertGjennomsnitt(
+                                        avklartePensjonsgivendeInntekter,
+                                        anvendtGrunnbeløp,
+                                    ),
                                 tidsstempel = LocalDateTime.now(),
                             ),
                         pensjonsgivendeInntekter = avklartePensjonsgivendeInntekter,
@@ -389,7 +412,11 @@ class Søknad(
             private val sykdomsgrad = søknadsgrad ?: sykmeldingsgrad
 
             init {
-                if (søknadsgrad != null && søknadsgrad > sykmeldingsgrad) throw IllegalStateException("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+                if (søknadsgrad != null &&
+                    søknadsgrad > sykmeldingsgrad
+                ) {
+                    throw IllegalStateException("Bruker har oppgitt at de har jobbet mindre enn sykmelding tilsier")
+                }
             }
 
             override fun sykdomstidslinje(
@@ -525,11 +552,21 @@ class Søknad(
                     næringsinntektFraFiskeFangstEllerFamiliebarnehage += it.næringsinntektFraFiskeFangstEllerFamiliebarnehage
                 }
 
-                return listOf(næringsinntekt, lønnsinntekt, lønnsinntektBarePensjonsdel, næringsinntektFraFiskeFangstEllerFamiliebarnehage).count { it > INGEN } > 1
+                return listOf(
+                    næringsinntekt,
+                    lønnsinntekt,
+                    lønnsinntektBarePensjonsdel,
+                    næringsinntektFraFiskeFangstEllerFamiliebarnehage,
+                ).count {
+                    it >
+                        INGEN
+                } >
+                    1
             }
         }
 
-        val sumAvPensjonsgivendeInntekter = næringsinntekt + lønnsinntekt + lønnsinntektBarePensjonsdel + næringsinntektFraFiskeFangstEllerFamiliebarnehage
+        val sumAvPensjonsgivendeInntekter =
+            næringsinntekt + lønnsinntekt + lønnsinntektBarePensjonsdel + næringsinntektFraFiskeFangstEllerFamiliebarnehage
     }
 
     enum class Arbeidssituasjon {

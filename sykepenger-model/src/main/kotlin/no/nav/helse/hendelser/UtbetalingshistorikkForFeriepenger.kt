@@ -35,7 +35,8 @@ class UtbetalingshistorikkForFeriepenger(
 
     internal fun utbetalteFeriepengerTilPerson() = feriepengehistorikk.utbetalteFeriepengerTilPerson(opptjeningsår)
 
-    internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) = feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
+    internal fun utbetalteFeriepengerTilArbeidsgiver(orgnummer: String) =
+        feriepengehistorikk.utbetalteFeriepengerTilArbeidsgiver(orgnummer, opptjeningsår)
 
     internal fun harRettPåFeriepenger(
         dato: LocalDate,
@@ -63,8 +64,22 @@ class UtbetalingshistorikkForFeriepenger(
                             .filter { harRettPåFeriepenger(it, dag.orgnr) }
                             .forEach { dato ->
                                 when (dag) {
-                                    is Utbetalingsperiode.Arbeidsgiverutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.ARBEIDSGIVER, Kilde.INFOTRYGD, dag.beløp)
-                                    is Utbetalingsperiode.Personutbetalingsperiode -> leggTilUtbetaling(dato, dag.orgnr, Mottaker.PERSON, Kilde.INFOTRYGD, dag.beløp)
+                                    is Utbetalingsperiode.Arbeidsgiverutbetalingsperiode ->
+                                        leggTilUtbetaling(
+                                            dato,
+                                            dag.orgnr,
+                                            Mottaker.ARBEIDSGIVER,
+                                            Kilde.INFOTRYGD,
+                                            dag.beløp,
+                                        )
+                                    is Utbetalingsperiode.Personutbetalingsperiode ->
+                                        leggTilUtbetaling(
+                                            dato,
+                                            dag.orgnr,
+                                            Mottaker.PERSON,
+                                            Kilde.INFOTRYGD,
+                                            dag.beløp,
+                                        )
                                 }
                             }
                     }
@@ -77,7 +92,12 @@ class UtbetalingshistorikkForFeriepenger(
         val tom: LocalDate,
     ) {
         internal companion object {
-            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) = filter { it.orgnummer.all('0'::equals) }.filter { Year.from(it.fom) == opptjeningsår.plusYears(1) }.map { it.beløp }
+            internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilPerson(opptjeningsår: Year) =
+                filter { it.orgnummer.all('0'::equals) }
+                    .filter {
+                        Year.from(it.fom) ==
+                            opptjeningsår.plusYears(1)
+                    }.map { it.beløp }
 
             internal fun Iterable<Feriepenger>.utbetalteFeriepengerTilArbeidsgiver(
                 orgnummer: String,

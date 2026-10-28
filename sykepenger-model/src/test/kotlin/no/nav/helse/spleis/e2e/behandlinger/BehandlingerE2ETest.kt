@@ -47,7 +47,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val refusjonsopplysningerPeriode = refusjonsopplysninger.perioderMedBeløp.single()
             assertEquals(1.januar til 31.januar, refusjonsopplysningerPeriode)
             assertFalse(refusjonsopplysninger.subset(1.januar til 9.januar).all { it.beløp == INNTEKT })
-            assertTrue(refusjonsopplysninger.subset(10.januar til 31.januar).all { it.beløp == INGEN && it.kilde.meldingsreferanseId.id == korrigertIm })
+            assertTrue(
+                refusjonsopplysninger.subset(10.januar til 31.januar).all {
+                    it.beløp == INGEN &&
+                        it.kilde.meldingsreferanseId.id == korrigertIm
+                },
+            )
         }
     }
 
@@ -75,7 +80,12 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                søknadId = søknadId,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                registrert = registrert,
+            )
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(1, behandlinger.size)
@@ -244,7 +254,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             val id = UUID.randomUUID()
-            håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar)), id = id)
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 5.januar)),
+                id = id,
+            )
             inspektørForkastet(1.vedtaksperiode).behandlinger.also { behandlinger ->
                 assertEquals(2, behandlinger.size)
                 assertEquals(Avsender.SYKMELDT, behandlinger.first().kilde.avsender)
@@ -427,7 +440,10 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             forlengVedtak(februar)
-            val inntektsmeldingId = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode))
+            val inntektsmeldingId =
+                MeldingsreferanseId(
+                    håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode),
+                )
             assertFalse(inntektsmeldingId.id in observatør.inntektsmeldingIkkeHåndtert)
             assertTrue(inntektsmeldingId.id in observatør.inntektsmeldingHåndtert.map { it.first })
             inspektør(1.vedtaksperiode).behandlinger.also { behandlinger ->
@@ -773,7 +789,11 @@ internal class BehandlingerE2ETest : AbstractDslTest() {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             nyttVedtak(15.januar til 25.januar, arbeidsgiverperiode = listOf(1.januar til 10.januar, 15.januar til 20.januar))
 
-            val inntektsmeldingId = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 10.januar, 15.januar til 20.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn")
+            val inntektsmeldingId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(1.januar til 10.januar, 15.januar til 20.januar),
+                    begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeLoenn",
+                )
 
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(2.vedtaksperiode))

@@ -87,7 +87,18 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterSøknad(29.januar til 23.februar)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, false)
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(0))
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_INFOTRYGD,
+            )
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, TIL_INFOTRYGD)
         }
     }
@@ -266,7 +277,13 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
             assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 
@@ -286,7 +303,14 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
             assertEquals(Utbetalingstatus.IKKE_UTBETALT, inspektør.utbetalingtilstand(1))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
         }
     }
 
@@ -307,7 +331,15 @@ internal class ForkastingTest : AbstractDslTest() {
             håndterAnmodningOmForkasting(1.vedtaksperiode)
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
             assertEquals(Utbetalingstatus.OVERFØRT, inspektør.utbetalingtilstand(1))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+            )
         }
     }
 
@@ -332,7 +364,14 @@ internal class ForkastingTest : AbstractDslTest() {
             }
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(0))
             assertEquals(Utbetalingstatus.IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
         }
     }
 }

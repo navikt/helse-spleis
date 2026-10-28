@@ -70,7 +70,9 @@ internal class TestObservatør(
     private val forkastedeEventer = mutableMapOf<UUID, EventSubscription.VedtaksperiodeForkastetEvent>()
     val annulleringer = mutableListOf<EventSubscription.UtbetalingAnnullertEvent>()
 
-    fun hendelseider(vedtaksperiodeId: UUID) = vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
+    fun hendelseider(vedtaksperiodeId: UUID) =
+        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser
+            ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
     fun sisteVedtaksperiodeId(orgnummer: String) = vedtaksperioder.getValue(orgnummer).last()
 
@@ -179,22 +181,34 @@ internal class TestObservatør(
     }
 
     internal fun forsikreArbeidsgiveropplysningerForkastetVedtaksperiode(vedtaksperiodeId: UUID) {
-        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode) { "Kan bare brukes ved svar på forespørsler på forkastede vedtaksperioder!" }
+        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.ForkastetVedtaksperiode) {
+            "Kan bare brukes ved svar på forespørsler på forkastede vedtaksperioder!"
+        }
     }
 
     internal fun forsikreKanKorrigereArbeidsgiveropplysninger(vedtaksperiodeId: UUID) {
-        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart) { "Kan ikke korrigere arbeidsgiveropplysninger." }
+        check(arbeidsgiverForespørsler[vedtaksperiodeId]?.tilstand == Forespørsel.Tilstand.Besvart) {
+            "Kan ikke korrigere arbeidsgiveropplysninger."
+        }
     }
 
     internal fun forsikreForespurteArbeidsgiveropplysninger(
         vedtaksperiodeId: UUID,
         vararg oppgitt: Arbeidsgiveropplysning,
     ) {
-        val forespørsel = arbeidsgiverForespørsler[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
+        val forespørsel =
+            arbeidsgiverForespørsler[vedtaksperiodeId] ?: error("Det er ikke forespurt arbeidsgiveropplysninger for $vedtaksperiodeId")
         if (oppgitt.isEmpty()) return
-        val relevante = oppgitt.filter { it is Arbeidsgiveropplysning.OppgittInntekt || it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode || it is Arbeidsgiveropplysning.OppgittRefusjon }
+        val relevante =
+            oppgitt.filter {
+                it is Arbeidsgiveropplysning.OppgittInntekt ||
+                    it is Arbeidsgiveropplysning.OppgittArbeidgiverperiode ||
+                    it is Arbeidsgiveropplysning.OppgittRefusjon
+            }
 
-        check(forespørsel.tilstand == Forespørsel.Tilstand.Åpen) { "Godtar ikke svar på forspørsel som har tilstand ${forespørsel.tilstand::class.simpleName}" }
+        check(forespørsel.tilstand == Forespørsel.Tilstand.Åpen) {
+            "Godtar ikke svar på forspørsel som har tilstand ${forespørsel.tilstand::class.simpleName}"
+        }
         val forespurt = forespørsel.opplysninger
         val forespurteOpplysninger = forespurt.map { it.somArbeidsgiveropplysning }.toSet()
         val oppgittOpplysninger = relevante.map { it::class }.toSet()
@@ -211,7 +225,11 @@ internal class TestObservatør(
         vararg forventet: KClass<out EventSubscription.ForespurtOpplysning>,
     ) {
         val forespurteOpplysninger =
-            trengerArbeidsgiveropplysningerVedtaksperioder.lastOrNull { it.opplysninger.vedtaksperiodeId == vedtaksperiode }?.opplysninger?.forespurteOpplysninger
+            trengerArbeidsgiveropplysningerVedtaksperioder
+                .lastOrNull {
+                    it.opplysninger.vedtaksperiodeId == vedtaksperiode
+                }?.opplysninger
+                ?.forespurteOpplysninger
                 ?: emptyList()
         assertEquals(forventet.toSet(), forespurteOpplysninger.map { it::class }.toSet())
     }
@@ -242,7 +260,8 @@ internal class TestObservatør(
         forkastedeEventer[event.vedtaksperiodeId] = event
         if (event.vedtaksperiodeId !in arbeidsgiverForespørsler) {
             // Dette er en såkalt "begrenset forespørsel" som sendes når vi har en forkastet periode på direkten. Da spør vi alltid om alt.
-            arbeidsgiverForespørsler[event.vedtaksperiodeId] = Forespørsel(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon, EventSubscription.Arbeidsgiverperiode))
+            arbeidsgiverForespørsler[event.vedtaksperiodeId] =
+                Forespørsel(setOf(EventSubscription.Inntekt, EventSubscription.Refusjon, EventSubscription.Arbeidsgiverperiode))
         }
         endrearbeidsgiverForespørselTilstand(event.vedtaksperiodeId, Forespørsel.Tilstand.ForkastetVedtaksperiode)
     }

@@ -195,7 +195,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler forkasting av sykmeldingsperioder")
-        finnYrkesaktivitet(forkastSykmeldingsperioder.behandlingsporing).håndterForkastSykmeldingsperioder(forkastSykmeldingsperioder, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            forkastSykmeldingsperioder.behandlingsporing,
+        ).håndterForkastSykmeldingsperioder(forkastSykmeldingsperioder, aktivitetsloggMedPersonkontekst)
         gjenopptaBehandling(aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, forkastSykmeldingsperioder, aktivitetsloggMedPersonkontekst)
     }
@@ -206,7 +208,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler anmodning om forkasting")
-        val revurderingseventyr = finnYrkesaktivitet(anmodningOmForkasting.behandlingsporing).håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                anmodningOmForkasting.behandlingsporing,
+            ).håndterAnmodningOmForkasting(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, anmodningOmForkasting, aktivitetsloggMedPersonkontekst)
     }
@@ -219,7 +224,14 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler søknad")
         tidligereBehandlinger(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst, søknad.sykdomstidslinje.periode()!!)
         val yrkesaktivitet = finnEllerOpprettYrkesaktivitet(søknad.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = yrkesaktivitet.håndterSøknad(eventBus, søknad, aktivitetsloggMedPersonkontekst, yrkesaktiviteter.toList(), infotrygdhistorikk)
+        val revurderingseventyr =
+            yrkesaktivitet.håndterSøknad(
+                eventBus,
+                søknad,
+                aktivitetsloggMedPersonkontekst,
+                yrkesaktiviteter.toList(),
+                infotrygdhistorikk,
+            )
         igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, søknad, aktivitetsloggMedPersonkontekst)
     }
@@ -229,11 +241,24 @@ class Person private constructor(
         arbeidsgiveropplysninger: Arbeidsgiveropplysninger,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
+        val aktivitetsloggMedPersonkontekst =
+            registrer(
+                aktivitetslogg,
+                "Behandler arbeidsgiveropplysningene ${arbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}",
+            )
         val arbeidsgiver = finnEllerOpprettYrkesaktivitet(arbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = arbeidsgiver.håndterArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            arbeidsgiver.håndterArbeidsgiveropplysninger(
+                eventBus,
+                arbeidsgiveropplysninger,
+                aktivitetsloggMedPersonkontekst,
+            )
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
-        arbeidsgiver.validerArbeidsgiverperiode(arbeidsgiveropplysninger, arbeidsgiveropplysninger.vedtaksperiodeId, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.validerArbeidsgiverperiode(
+            arbeidsgiveropplysninger,
+            arbeidsgiveropplysninger.vedtaksperiodeId,
+            aktivitetsloggMedPersonkontekst,
+        )
         håndterGjenoppta(eventBus, arbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
@@ -242,9 +267,21 @@ class Person private constructor(
         korrigerteArbeidsgiveropplysninger: KorrigerteArbeidsgiveropplysninger,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
-        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = arbeidsgiver.håndterKorrigerteArbeidsgiveropplysninger(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        val aktivitetsloggMedPersonkontekst =
+            registrer(
+                aktivitetslogg,
+                "Behandler de korrigerte arbeidsgiveropplysningene ${korrigerteArbeidsgiveropplysninger.joinToString {
+                    "${it::class.simpleName}"
+                }}",
+            )
+        val arbeidsgiver =
+            finnEllerOpprettYrkesaktivitet(korrigerteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            arbeidsgiver.håndterKorrigerteArbeidsgiveropplysninger(
+                eventBus,
+                korrigerteArbeidsgiveropplysninger,
+                aktivitetsloggMedPersonkontekst,
+            )
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, korrigerteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
@@ -254,11 +291,27 @@ class Person private constructor(
         selvbestemteArbeidsgiveropplysninger: SelvbestemteArbeidsgiveropplysninger,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler de selvbestemte arbeidsgiveropplysningene ${selvbestemteArbeidsgiveropplysninger.joinToString { "${it::class.simpleName}" }}")
-        val arbeidsgiver = finnEllerOpprettYrkesaktivitet(selvbestemteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
-        val revurderingseventyr = arbeidsgiver.håndterSelvbestemteArbeidsgiveropplysninger(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
+        val aktivitetsloggMedPersonkontekst =
+            registrer(
+                aktivitetslogg,
+                "Behandler de selvbestemte arbeidsgiveropplysningene ${selvbestemteArbeidsgiveropplysninger.joinToString {
+                    "${it::class.simpleName}"
+                }}",
+            )
+        val arbeidsgiver =
+            finnEllerOpprettYrkesaktivitet(selvbestemteArbeidsgiveropplysninger.behandlingsporing, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            arbeidsgiver.håndterSelvbestemteArbeidsgiveropplysninger(
+                eventBus,
+                selvbestemteArbeidsgiveropplysninger,
+                aktivitetsloggMedPersonkontekst,
+            )
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
-        arbeidsgiver.validerArbeidsgiverperiode(selvbestemteArbeidsgiveropplysninger, selvbestemteArbeidsgiveropplysninger.vedtaksperiodeId, aktivitetsloggMedPersonkontekst)
+        arbeidsgiver.validerArbeidsgiverperiode(
+            selvbestemteArbeidsgiveropplysninger,
+            selvbestemteArbeidsgiveropplysninger.vedtaksperiodeId,
+            aktivitetsloggMedPersonkontekst,
+        )
         håndterGjenoppta(eventBus, selvbestemteArbeidsgiveropplysninger, aktivitetsloggMedPersonkontekst)
     }
 
@@ -269,7 +322,12 @@ class Person private constructor(
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler inntektsopplysninger fra lagret inntektmelding")
         val arbeidsgiver = finnYrkesaktivitet(inntektsopplysningerFraLagretInnteksmelding.behandlingsporing)
-        val revurderingseventyr = arbeidsgiver.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            arbeidsgiver.håndterInntektsopplysningerFraLagretInntektsmelding(
+                eventBus,
+                inntektsopplysningerFraLagretInnteksmelding,
+                aktivitetsloggMedPersonkontekst,
+            )
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, inntektsopplysningerFraLagretInnteksmelding, aktivitetsloggMedPersonkontekst)
     }
@@ -280,7 +338,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler replay av inntektsmeldinger")
-        val revurderingseventyr = finnYrkesaktivitet(replays.behandlingsporing).håndterInntektsmeldingerReplay(eventBus, replays, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                replays.behandlingsporing,
+            ).håndterInntektsmeldingerReplay(eventBus, replays, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, replays, aktivitetsloggMedPersonkontekst)
     }
@@ -292,7 +353,11 @@ class Person private constructor(
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler minimum sykdomsgradvurdering")
         melding.oppdater(this.minimumSykdomsgradsvurdering)
-        this.igangsettOverstyring(eventBus, Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()), aktivitetsloggMedPersonkontekst)
+        this.igangsettOverstyring(
+            eventBus,
+            Revurderingseventyr.minimumSykdomsgradVurdert(melding, melding.periodeForEndring()),
+            aktivitetsloggMedPersonkontekst,
+        )
         håndterGjenoppta(eventBus, melding, aktivitetsloggMedPersonkontekst)
     }
 
@@ -359,8 +424,16 @@ class Person private constructor(
         endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret ${endretVurderingPåSkjæringstidspunkt.endretVurdering::class.simpleName} på skjæringstidspunkt")
-        val grunnlag = vilkårsgrunnlagFor(endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt) ?: return aktivitetsloggMedPersonkontekst.info("Fant ikke vilkårsgrunnlag på ${endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt}")
+        val aktivitetsloggMedPersonkontekst =
+            registrer(
+                aktivitetslogg,
+                "Behandler endret ${endretVurderingPåSkjæringstidspunkt.endretVurdering::class.simpleName} på skjæringstidspunkt",
+            )
+        val grunnlag =
+            vilkårsgrunnlagFor(endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt)
+                ?: return aktivitetsloggMedPersonkontekst.info(
+                    "Fant ikke vilkårsgrunnlag på ${endretVurderingPåSkjæringstidspunkt.skjæringstidspunkt}",
+                )
         val nyttGrunnlag = grunnlag.håndterEndretVurdering(endretVurderingPåSkjæringstidspunkt, aktivitetsloggMedPersonkontekst) ?: return
         lagreVilkårsgrunnlag(nyttGrunnlag)
         igangsettOverstyring(eventBus, endretVurderingPåSkjæringstidspunkt.revurderingseventyr(), aktivitetsloggMedPersonkontekst)
@@ -372,7 +445,8 @@ class Person private constructor(
         endretGrunnlagForBeregning: EndretGrunnlagForBeregning,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret ${endretGrunnlagForBeregning.endretGrunnlag::class.simpleName}")
+        val aktivitetsloggMedPersonkontekst =
+            registrer(aktivitetslogg, "Behandler endret ${endretGrunnlagForBeregning.endretGrunnlag::class.simpleName}")
         igangsettOverstyring(eventBus, endretGrunnlagForBeregning.revurderingseventyr(), aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, endretGrunnlagForBeregning, aktivitetsloggMedPersonkontekst)
     }
@@ -383,7 +457,12 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikkEtterInfotrygdendring, aktivitetsloggMedPersonkontekst, utbetalingshistorikkEtterInfotrygdendring.element)
+        håndterHistorikkFraInfotrygd(
+            eventBus,
+            utbetalingshistorikkEtterInfotrygdendring,
+            aktivitetsloggMedPersonkontekst,
+            utbetalingshistorikkEtterInfotrygdendring.element,
+        )
     }
 
     fun håndterUtbetalingshistorikk(
@@ -392,7 +471,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler historikk fra infotrygd")
-        finnYrkesaktivitet(utbetalingshistorikk.behandlingsporing).håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            utbetalingshistorikk.behandlingsporing,
+        ).håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst)
         håndterHistorikkFraInfotrygd(eventBus, utbetalingshistorikk, aktivitetsloggMedPersonkontekst, utbetalingshistorikk.element)
     }
 
@@ -409,7 +490,9 @@ class Person private constructor(
                 aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
                 null
             } else {
-                aktivitetslogg.info("Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring")
+                aktivitetslogg.info(
+                    "Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring",
+                )
                 eventBus.nyInformasjonIInfotrygd(tidligsteDatoForEndring)
                 Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
             }
@@ -425,7 +508,9 @@ class Person private constructor(
         val hendelseId = infotrygdhistorikk.siste.hendelseId
         val perioder = infotrygdhistorikk.siste.perioder
         val event =
-            vedtaksperioder { true }.fold(EventSubscription.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id)) { result, vedtaksperiode ->
+            vedtaksperioder { true }.fold(
+                EventSubscription.OverlappendeInfotrygdperioder(emptyList(), hendelseId.id),
+            ) { result, vedtaksperiode ->
                 vedtaksperiode.overlappendeInfotrygdperioder(result, perioder)
             }
         eventBus.overlappendeInfotrygdperioder(event)
@@ -451,7 +536,10 @@ class Person private constructor(
             Feriepengeberegner(
                 alder = alder,
                 opptjeningsår = utbetalingshistorikk.opptjeningsår,
-                grunnlagFraInfotrygd = utbetalingshistorikk.grunnlagForFeriepenger(utbetalingshistorikk.datoForSisteFeriepengekjøringIInfotrygd),
+                grunnlagFraInfotrygd =
+                    utbetalingshistorikk.grunnlagForFeriepenger(
+                        utbetalingshistorikk.datoForSisteFeriepengekjøringIInfotrygd,
+                    ),
                 grunnlagFraSpleis = grunnlagForFeriepenger(),
             )
 
@@ -487,7 +575,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetalingsgodkjenning")
-        val revurderingseventyr = finnYrkesaktivitet(utbetalingsgodkjenning.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                utbetalingsgodkjenning.behandlingsporing,
+            ).håndterBehandlingsavgjørelse(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, utbetalingsgodkjenning, aktivitetsloggMedPersonkontekst)
     }
@@ -498,7 +589,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler vedtak fattet")
-        finnYrkesaktivitet(vedtakFattet.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, vedtakFattet, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            vedtakFattet.behandlingsporing,
+        ).håndterBehandlingsavgjørelse(eventBus, vedtakFattet, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, vedtakFattet, aktivitetsloggMedPersonkontekst)
     }
 
@@ -508,7 +601,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler kan ikke behandles her")
-        finnYrkesaktivitet(kanIkkeBehandlesHer.behandlingsporing).håndterBehandlingsavgjørelse(eventBus, kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            kanIkkeBehandlesHer.behandlingsporing,
+        ).håndterBehandlingsavgjørelse(eventBus, kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, kanIkkeBehandlesHer, aktivitetsloggMedPersonkontekst)
     }
 
@@ -518,7 +613,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler vilkårsgrunnlag")
-        finnYrkesaktivitet(vilkårsgrunnlag.behandlingsporing).håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            vilkårsgrunnlag.behandlingsporing,
+        ).håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
     }
 
@@ -538,7 +635,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler utbetaling")
-        finnYrkesaktivitet(utbetaling.behandlingsporing).håndterFeriepengeutbetalingHendelse(eventBus, utbetaling, aktivitetsloggMedPersonkontekst)
+        finnYrkesaktivitet(
+            utbetaling.behandlingsporing,
+        ).håndterFeriepengeutbetalingHendelse(eventBus, utbetaling, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, utbetaling, aktivitetsloggMedPersonkontekst)
     }
 
@@ -577,7 +676,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler påminnelse")
-        val revurderingseventyr = finnYrkesaktivitet(påminnelse.behandlingsporing).håndterPåminnelse(eventBus, påminnelse, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                påminnelse.behandlingsporing,
+            ).håndterPåminnelse(eventBus, påminnelse, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, påminnelse, aktivitetsloggMedPersonkontekst)
     }
@@ -588,7 +690,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyr tidslinje")
-        val revurderingseventyr = finnYrkesaktivitet(overstyrTidslinjeHendelse.behandlingsporing).håndterOverstyrTidslinje(eventBus, overstyrTidslinjeHendelse, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                overstyrTidslinjeHendelse.behandlingsporing,
+            ).håndterOverstyrTidslinje(eventBus, overstyrTidslinjeHendelse, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, overstyrTidslinjeHendelse, aktivitetsloggMedPersonkontekst)
     }
@@ -601,7 +706,11 @@ class Person private constructor(
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler Overstyring av arbeidsgiveropplysninger")
         val inntektseventyr = yrkesaktiviteter.håndterOverstyringAvInntekt(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
         val refusjonseventyr = yrkesaktiviteter.håndterOverstyringAvRefusjon(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
-        val tidligsteEventyr = tidligsteEventyr(inntektseventyr, refusjonseventyr) ?: return aktivitetsloggMedPersonkontekst.info("Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.")
+        val tidligsteEventyr =
+            tidligsteEventyr(inntektseventyr, refusjonseventyr)
+                ?: return aktivitetsloggMedPersonkontekst.info(
+                    "Ingen vedtaksperioder håndterte overstyringen av arbeidsgiveropplysninger fordi overstyringen ikke har endret noe.",
+                )
         igangsettOverstyring(eventBus, tidligsteEventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
     }
@@ -612,7 +721,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler skjønnsmessig fastsettelse")
-        val revurderingseventyr = yrkesaktiviteter.håndterOverstyrInntektsgrunnlag(skjønnsmessigFastsettelse, aktivitetsloggMedPersonkontekst) ?: error("Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse")
+        val revurderingseventyr =
+            yrkesaktiviteter.håndterOverstyrInntektsgrunnlag(skjønnsmessigFastsettelse, aktivitetsloggMedPersonkontekst)
+                ?: error("Ingen vedtaksperioder håndterte skjønnsmessig fastsettelse")
         igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, skjønnsmessigFastsettelse, aktivitetsloggMedPersonkontekst)
     }
@@ -623,7 +734,9 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler overstyring av arbeidsforhold")
-        val revurderingseventyr = yrkesaktiviteter.håndterOverstyrInntektsgrunnlag(overstyrArbeidsforhold, aktivitetsloggMedPersonkontekst) ?: error("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
+        val revurderingseventyr =
+            yrkesaktiviteter.håndterOverstyrInntektsgrunnlag(overstyrArbeidsforhold, aktivitetsloggMedPersonkontekst)
+                ?: error("Kan ikke overstyre arbeidsforhold fordi ingen vedtaksperioder håndterte hendelsen")
         igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, overstyrArbeidsforhold, aktivitetsloggMedPersonkontekst)
     }
@@ -634,7 +747,10 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler annulleringforespørsel")
-        val revurderingseventyr = finnYrkesaktivitet(hendelse.behandlingsporing).håndterAnnullerUtbetaling(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
+        val revurderingseventyr =
+            finnYrkesaktivitet(
+                hendelse.behandlingsporing,
+            ).håndterAnnullerUtbetaling(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
         if (revurderingseventyr != null) igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
     }
@@ -645,7 +761,11 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler grunnbeløpsendring")
-        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(hendelse.skjæringstidspunkt) == null) return eventBus.sykefraværstilfelleIkkeFunnet(hendelse.skjæringstidspunkt)
+        if (vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(hendelse.skjæringstidspunkt) ==
+            null
+        ) {
+            return eventBus.sykefraværstilfelleIkkeFunnet(hendelse.skjæringstidspunkt)
+        }
         val revurderingseventyr = yrkesaktiviteter.håndterOverstyrInntektsgrunnlag(hendelse, aktivitetsloggMedPersonkontekst) ?: return
         igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, hendelse, aktivitetsloggMedPersonkontekst)
@@ -665,7 +785,13 @@ class Person private constructor(
         infotrygdhistorikk.initiell(aktivitetslogg, eventBus, yrkesaktiviteter.tidligsteDato(), vedtaksperiodeId, yrkesaktivitetsporing)
     }
 
-    override fun toSpesifikkKontekst(): SpesifikkKontekst = SpesifikkKontekst("Person", mapOf("fødselsnummer" to personidentifikator.toString()))
+    override fun toSpesifikkKontekst(): SpesifikkKontekst =
+        SpesifikkKontekst(
+            "Person",
+            mapOf(
+                "fødselsnummer" to personidentifikator.toString(),
+            ),
+        )
 
     private fun registrer(
         aktivitetslogg: IAktivitetslogg,
@@ -680,7 +806,8 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) = _yrkesaktiviteter.finnEllerOpprett(yrkesaktivitet, aktivitetslogg)
 
-    private fun finnYrkesaktivitet(behandlingsporing: Behandlingsporing.Yrkesaktivitet) = yrkesaktiviteter.finn(behandlingsporing) ?: error("Finner ikke arbeidsgiver med $behandlingsporing")
+    private fun finnYrkesaktivitet(behandlingsporing: Behandlingsporing.Yrkesaktivitet) =
+        yrkesaktiviteter.finn(behandlingsporing) ?: error("Finner ikke arbeidsgiver med $behandlingsporing")
 
     private fun MutableList<Yrkesaktivitet>.finnEllerOpprett(
         behandlingsporing: Behandlingsporing.Yrkesaktivitet,
@@ -688,7 +815,10 @@ class Person private constructor(
     ) = finn(behandlingsporing) ?: Yrkesaktivitet(this@Person, behandlingsporing, regelverkslogg).also { yrkesaktivitet ->
         when (behandlingsporing) {
             Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidsledig for denne personen")
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidstaker med organisasjonsnummer ${behandlingsporing.organisasjonsnummer} for denne personen")
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker ->
+                aktivitetslogg.info(
+                    "Ny yrkesaktivitet som Arbeidstaker med organisasjonsnummer ${behandlingsporing.organisasjonsnummer} for denne personen",
+                )
             Behandlingsporing.Yrkesaktivitet.Frilans -> aktivitetslogg.info("Ny yrkesaktivitet som Frilans for denne personen")
             Behandlingsporing.Yrkesaktivitet.Selvstendig -> aktivitetslogg.info("Ny yrkesaktivitet som Selvstendig for denne personen")
         }
@@ -801,11 +931,18 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) {
         val skjæringstidspunkter = yrkesaktiviteter.aktiveSkjæringstidspunkter()
-        if (skjæringstidspunkt !in skjæringstidspunkter) return aktivitetslogg.info("Skjæringstidspunktet $skjæringstidspunkt er ikke et aktivt skjæringstidspunkt, så det er ikke noe vilkårsgrunnlag å fjerne.")
+        if (skjæringstidspunkt !in
+            skjæringstidspunkter
+        ) {
+            return aktivitetslogg.info(
+                "Skjæringstidspunktet $skjæringstidspunkt er ikke et aktivt skjæringstidspunkt, så det er ikke noe vilkårsgrunnlag å fjerne.",
+            )
+        }
         ryddOppVilkårsgrunnlag(aktivitetslogg, (skjæringstidspunkter - skjæringstidspunkt))
     }
 
-    internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean = infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
+    internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean =
+        infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
 
     fun dto() =
         PersonUtDto(

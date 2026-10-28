@@ -51,7 +51,11 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding med begrunnelseForReduksjon & FF kommer før kort søknad`() {
         a1 {
-            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke", førsteFraværsdag = 1.januar)
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
+                emptyList(),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke",
+                førsteFraværsdag = 1.januar,
+            )
             nyPeriode(1.januar til 16.januar, a1)
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(1.januar til 1.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -62,7 +66,10 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
     @Test
     fun `Inntektsmelding med begrunnelseForReduksjon & AGP kommer før kort søknad`() {
         a1 {
-            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke")
+            håndterGammelInntektsmeldingForÅBliFangetOppAvReplay(
+                listOf(1.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "VilIkke",
+            )
             nyPeriode(1.januar til 16.januar, a1)
             assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(listOf(1.januar til 16.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -80,7 +87,14 @@ internal class ReplayInntektsmeldingE2ETest : AbstractDslTest() {
             )
             håndterSøknad(Sykdom(21.januar, 31.januar, 100.prosent))
             assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

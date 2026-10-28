@@ -60,7 +60,15 @@ internal class ISpleisGrunnlag(
     val forsikringsvurderingId: UUID?,
     opptjeningsvurderingId: UUID,
     medlemskapsvurderingId: UUID,
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId, medlemskapsvurderingId) {
+) : IVilkårsgrunnlag(
+        skjæringstidspunkt,
+        beregningsgrunnlag,
+        sykepengegrunnlag,
+        inntekter,
+        id,
+        opptjeningsvurderingId,
+        medlemskapsvurderingId,
+    ) {
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag =
         SpleisVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -107,7 +115,15 @@ internal class IInfotrygdGrunnlag(
     id: UUID,
     opptjeningsvurderingId: UUID,
     medlemskapsvurderingId: UUID,
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId, medlemskapsvurderingId) {
+) : IVilkårsgrunnlag(
+        skjæringstidspunkt,
+        beregningsgrunnlag,
+        sykepengegrunnlag,
+        inntekter,
+        id,
+        opptjeningsvurderingId,
+        medlemskapsvurderingId,
+    ) {
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag =
         InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -131,7 +147,8 @@ internal class IVilkårsgrunnlagHistorikk(
     private val vilkårsgrunnlagIBruk = mutableMapOf<UUID, IVilkårsgrunnlag>()
     private val refusjonsopplysningerPerArbeidsgiver = mutableMapOf<Pair<UUID, String>, IArbeidsgiverrefusjon>()
 
-    internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) = vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
+    internal fun inngårIkkeISammenligningsgrunnlag(organisasjonsnummer: String) =
+        vilkårsgrunnlagIBruk.all { (_, a) -> a.inngårIkkeISammenligningsgrunnlag(organisasjonsnummer) }
 
     internal fun finnSpleisVilkårsgrunnlag(vilkårsgrunnlagId: UUID): ISpleisGrunnlag? =
         tilgjengeligeVilkårsgrunnlag.firstNotNullOf { elementer ->
@@ -153,7 +170,14 @@ internal class IVilkårsgrunnlagHistorikk(
 
     internal fun toDTO(): Map<UUID, Vilkårsgrunnlag> =
         vilkårsgrunnlagIBruk.mapValues { (_, vilkårsgrunnlag) ->
-            vilkårsgrunnlag.toDTO(refusjonsopplysningerPerArbeidsgiver.filterKeys { (vilkårsgrunnlagId, _) -> vilkårsgrunnlagId == vilkårsgrunnlag.id }.values.toList())
+            vilkårsgrunnlag.toDTO(
+                refusjonsopplysningerPerArbeidsgiver
+                    .filterKeys { (vilkårsgrunnlagId, _) ->
+                        vilkårsgrunnlagId ==
+                            vilkårsgrunnlag.id
+                    }.values
+                    .toList(),
+            )
         }
 
     internal fun leggIBøtta(vilkårsgrunnlagId: UUID): IVilkårsgrunnlag =
@@ -243,12 +267,14 @@ internal class VilkårsgrunnlagBuilder(
         )
     }
 
-    private fun inntekter(dto: InntektsgrunnlagUtDto): List<IArbeidsgiverinntekt> = dto.arbeidsgiverInntektsopplysninger.map { mapInntekt(it) } + dto.deaktiverteArbeidsforhold.map { mapInntekt(it, true) }
+    private fun inntekter(dto: InntektsgrunnlagUtDto): List<IArbeidsgiverinntekt> =
+        dto.arbeidsgiverInntektsopplysninger.map { mapInntekt(it) } + dto.deaktiverteArbeidsforhold.map { mapInntekt(it, true) }
 
     private fun mapInntekt(
         dto: ArbeidsgiverInntektsopplysningUtDto,
         deaktivert: Boolean = false,
-    ): IArbeidsgiverinntekt = mapInntekt(dto.orgnummer, dto.faktaavklartInntekt, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
+    ): IArbeidsgiverinntekt =
+        mapInntekt(dto.orgnummer, dto.faktaavklartInntekt, dto.korrigertInntekt, dto.skjønnsmessigFastsatt, deaktivert)
 
     private fun mapInntekt(
         orgnummer: String,
@@ -293,7 +319,14 @@ internal class VilkårsgrunnlagBuilder(
                 when (faktaavklartInntekt.inntektsopplysningskilde) {
                     is ArbeidstakerinntektskildeUtDto.InfotrygdDto -> IInntektkilde.Infotrygd
                     is ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> IInntektkilde.Inntektsmelding
-                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp == 0.0) IInntektkilde.IkkeRapportert else IInntektkilde.AOrdningen
+                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto ->
+                        if (faktaavklartInntekt.inntektsdata.beløp.årlig.beløp ==
+                            0.0
+                        ) {
+                            IInntektkilde.IkkeRapportert
+                        } else {
+                            IInntektkilde.AOrdningen
+                        }
                 },
             beløp = faktaavklartInntekt.inntektsdata.beløp.årlig.beløp,
             månedsbeløp = faktaavklartInntekt.inntektsdata.beløp.månedligDouble.beløp,

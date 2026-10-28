@@ -51,12 +51,23 @@ internal data object AvventerGodkjenning : Vedtaksperiodetilstand {
 
         val (skjæringstidspunkt, skjæringstidspunkter) =
             bestemSkjæringstidspunkt(
-                beregnetSkjæringstidspunkter = vedtaksperiode.person.yrkesaktiviteter.beregnSkjæringstidspunkt(vedtaksperiode.person.infotrygdhistorikk),
+                beregnetSkjæringstidspunkter =
+                    vedtaksperiode.person.yrkesaktiviteter.beregnSkjæringstidspunkt(
+                        vedtaksperiode.person.infotrygdhistorikk,
+                    ),
                 sykdomstidslinje = vedtaksperiode.sykdomstidslinje,
                 periode = vedtaksperiode.periode,
             )
         if (skjæringstidspunkter.isEmpty()) return aktivitetslogg.info("Skatt på direkten: Her har vi fortsatt ingen skjæringstidspunkt")
-        if (vedtaksperiode.person.vilkårsgrunnlagFor(skjæringstidspunkt) == null) return aktivitetslogg.info("Skatt på direkten: Her har vi nå skjæringstidspunktet $skjæringstidspunkt, men det er ikke vilkårsprøvd")
-        aktivitetslogg.info("Skatt på direkten: Denne kunne vi nok reberegnet slik at den hektet seg på det vilkårsprøvde skjæringstidspunktet $skjæringstidspunkt")
+        if (vedtaksperiode.person.vilkårsgrunnlagFor(skjæringstidspunkt) ==
+            null
+        ) {
+            return aktivitetslogg.info(
+                "Skatt på direkten: Her har vi nå skjæringstidspunktet $skjæringstidspunkt, men det er ikke vilkårsprøvd",
+            )
+        }
+        aktivitetslogg.info(
+            "Skatt på direkten: Denne kunne vi nok reberegnet slik at den hektet seg på det vilkårsprøvde skjæringstidspunktet $skjæringstidspunkt",
+        )
     }
 }

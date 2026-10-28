@@ -13,7 +13,8 @@ data class GhostPeriodeDTO(
     val vilkårsgrunnlagId: UUID,
     val deaktivert: Boolean,
 ) {
-    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) = brytOpp(this, fom, tom, tidslinjeperiode, GhostPeriodeDTO::til, GhostPeriodeDTO::fra)
+    internal fun brytOpp(tidslinjeperiode: ClosedRange<LocalDate>) =
+        brytOpp(this, fom, tom, tidslinjeperiode, GhostPeriodeDTO::til, GhostPeriodeDTO::fra)
 
     internal fun til(other: ClosedRange<LocalDate>) =
         copy(

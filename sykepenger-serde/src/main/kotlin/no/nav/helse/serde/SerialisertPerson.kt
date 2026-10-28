@@ -166,7 +166,10 @@ class SerialisertPerson(
             val personData = serdeObjectMapper.readValue<PersonData>(migratedJson)
             return personData.tilPersonDto()
         } catch (err: Exception) {
-            throw DeserializationException("Feil under oversetting til modellobjekter fra skjemaversjon $skjemaVersjon til $nySkjemaverjon: ${err.message}", err)
+            throw DeserializationException(
+                "Feil under oversetting til modellobjekter fra skjemaversjon $skjemaVersjon til $nySkjemaverjon: ${err.message}",
+                err,
+            )
         }
     }
 }

@@ -38,7 +38,16 @@ internal class SendtNavSøknaderRiver(
                 require("tom") { JsonNode::asLocalDate }
             }
         }
-        message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys")
+        message.interestedIn(
+            "sporsmal",
+            "arbeidGjenopptatt",
+            "andreInntektskilder",
+            "permitteringer",
+            "merknaderFraSykmelding",
+            "opprinneligSendt",
+            "utenlandskSykmelding",
+            "sendTilGosys",
+        )
     }
 
     override fun createMessage(packet: JsonMessage) =

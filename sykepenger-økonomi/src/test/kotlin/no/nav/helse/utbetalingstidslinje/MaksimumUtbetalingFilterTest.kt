@@ -35,7 +35,10 @@ internal class MaksimumUtbetalingFilterTest {
             assertThrows<IllegalStateException> {
                 tidslinje.betal(sykepengegrunnlag)
             }
-        assertEquals("Det er et restbeløp på kr [Årlig: 598000.0, Månedlig: 49833.333333333336, Daglig: 2300.0] etter all fordeling", m.message)
+        assertEquals(
+            "Det er et restbeløp på kr [Årlig: 598000.0, Månedlig: 49833.333333333336, Daglig: 2300.0] etter all fordeling",
+            m.message,
+        )
     }
 
     @Test
@@ -52,9 +55,7 @@ internal class MaksimumUtbetalingFilterTest {
         assertEquals(6000, tidslinje.inspektør.totalUtbetaling())
     }
 
-    private fun Utbetalingstidslinje.betal(
-        sykepengegrunnlag: Inntekt,
-    ): Utbetalingstidslinje {
+    private fun Utbetalingstidslinje.betal(sykepengegrunnlag: Inntekt): Utbetalingstidslinje {
         val input =
             listOf(
                 Arbeidsgiverberegning(

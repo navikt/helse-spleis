@@ -26,5 +26,6 @@ internal class InMemoryUtboksDao : UtboksDao {
         usendte.removeAll(kvittering.ok)
     }
 
-    override fun personerMedUsendteMeldinger(): Set<Personidentifikator> = usendte.mapNotNull { it.key }.map { Personidentifikator(it) }.toSet()
+    override fun personerMedUsendteMeldinger(): Set<Personidentifikator> =
+        usendte.mapNotNull { it.key }.map { Personidentifikator(it) }.toSet()
 }

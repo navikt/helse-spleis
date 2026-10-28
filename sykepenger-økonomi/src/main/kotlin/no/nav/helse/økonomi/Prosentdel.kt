@@ -29,7 +29,10 @@ class Prosentdel private constructor(
             b: Double,
         ) = Prosentdel(if (a < b) a.toBigDecimal(mc).divide(b.toBigDecimal(mc), mc) else SIKKER_BRØK)
 
-        internal fun Collection<Triple<Prosentdel, Double, Double>>.vektlagtGjennomsnitt(): Prosentdel = map { Triple(it.first, it.second.toBigDecimal(mc), it.third.toBigDecimal(mc)) }.vektlagtGjennomsnitt()
+        internal fun Collection<Triple<Prosentdel, Double, Double>>.vektlagtGjennomsnitt(): Prosentdel =
+            map {
+                Triple(it.first, it.second.toBigDecimal(mc), it.third.toBigDecimal(mc))
+            }.vektlagtGjennomsnitt()
 
         private fun Collection<Triple<Prosentdel, BigDecimal, BigDecimal>>.vektlagtGjennomsnitt(): Prosentdel {
             val total = this.sumOf { it.second }

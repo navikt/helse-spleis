@@ -94,7 +94,15 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertVarsler(listOf(Varselkode.RV_IV_7), 1.vedtaksperiode.filter())
         }
     }
@@ -558,7 +566,13 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         a2 { håndterSøknad(Sykdom(5.januar, lørdag den 20.januar, 100.prosent)) }
         a1 {
             håndterYtelser(1.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
         }
         a2 { assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING) }
         nullstillTilstandsendringer()
@@ -1332,7 +1346,17 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         }
 
         a1 { assertTilstander(1.vedtaksperiode, AVSLUTTET) }
-        a2 { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET) }
+        a2 {
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+        }
         a1 { assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET) }
 
         a1 {
@@ -1411,8 +1435,26 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         }
 
         a1 { assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET) }
-        a2 { assertTilstander(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET) }
-        a1 { assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET) }
+        a2 {
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+        }
+        a1 {
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
+        }
 
         a1 {
             val revurderingen = inspektør.sisteUtbetaling()

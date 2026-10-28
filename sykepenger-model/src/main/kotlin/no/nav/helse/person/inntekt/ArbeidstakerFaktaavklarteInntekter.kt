@@ -48,7 +48,9 @@ internal data class VurderbarArbeidstakerFaktaavklartInntekt(
         val dagerMellom = ChronoUnit.DAYS.between(tidligereSkjæringstidspunkt, skjæringstidspunkt)
 
         if (dagerMellom >= 60) {
-            aktivitetslogg.info("Det er $dagerMellom dager mellom tidligere skjæringstidspunkt ($tidligereSkjæringstidspunkt) og nytt skjæringstidspunkt ($skjæringstidspunkt), dette utløser varsel om gjenbruk.")
+            aktivitetslogg.info(
+                "Det er $dagerMellom dager mellom tidligere skjæringstidspunkt ($tidligereSkjæringstidspunkt) og nytt skjæringstidspunkt ($skjæringstidspunkt), dette utløser varsel om gjenbruk.",
+            )
             aktivitetslogg.varsel(RV_IV_7)
         } else if (endretArbeidsgiverperiode) {
             aktivitetslogg.info("Det er endret arbeidsgiverperiode, og dette utløser varsel om gjenbruk")

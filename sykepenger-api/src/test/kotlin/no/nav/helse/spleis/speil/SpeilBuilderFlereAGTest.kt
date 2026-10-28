@@ -110,7 +110,11 @@ internal class SpeilBuilderFlereAGTest : AbstractSpeilBuilderTest() {
         håndterSøknad(Sykdom(4.januar, 31.januar, 100.prosent), orgnummer = a2)
 
         håndterArbeidsgiveropplysninger(1.januar, orgnummer = a1)
-        håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(4.januar til 19.januar), orgnummer = a2, beregnetInntekt = 5000.månedlig)
+        håndterArbeidsgiveropplysninger(
+            arbeidsgiverperioder = listOf(4.januar til 19.januar),
+            orgnummer = a2,
+            beregnetInntekt = 5000.månedlig,
+        )
 
         håndterVilkårsgrunnlag(
             inntekter = listOf(a1 to INNTEKT, a2 to 5000.månedlig, a3 to 10000.månedlig),

@@ -545,7 +545,13 @@ internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
                     .inspektør.dagteller[Arbeidsdag::class],
             )
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 }

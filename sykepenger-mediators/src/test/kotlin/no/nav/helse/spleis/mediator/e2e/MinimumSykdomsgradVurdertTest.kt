@@ -25,8 +25,18 @@ internal class MinimumSykdomsgradVurdertTest : AbstractEndToEndMediatorTest() {
             orgnummer = a1,
             arbeidsforhold =
                 listOf(
-                    TestMessageFactory.Arbeidsforhold(a1, LocalDate.EPOCH, null, TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
-                    TestMessageFactory.Arbeidsforhold(a2, LocalDate.EPOCH, null, TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT),
+                    TestMessageFactory.Arbeidsforhold(
+                        a1,
+                        LocalDate.EPOCH,
+                        null,
+                        TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT,
+                    ),
+                    TestMessageFactory.Arbeidsforhold(
+                        a2,
+                        LocalDate.EPOCH,
+                        null,
+                        TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT,
+                    ),
                 ),
             inntekterForSykepengegrunnlag =
                 sykepengegrunnlag(

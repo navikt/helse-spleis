@@ -33,7 +33,9 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
                 .single {
                     val vedtaksperiodeYrkesaktivitet = vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype
                     when (val ya = it.inntektskilde) {
-                        is Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker -> vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && ya.organisasjonsnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer
+                        is Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker ->
+                            vedtaksperiodeYrkesaktivitet is Behandlingsporing.Yrkesaktivitet.Arbeidstaker &&
+                                ya.organisasjonsnummer == vedtaksperiode.yrkesaktivitet.organisasjonsnummer
 
                         Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig,
                         Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans,
@@ -44,7 +46,15 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
                 }.vedtaksperioder
                 .single()
 
-        val sisteBehandling = vedtaksperiode.behandlinger.avsluttUtenVedtak(with(vedtaksperiode) { eventBus.behandlingEventBus }, vedtaksperiode.yrkesaktivitet, utbetalingstidslinje.utbetalingstidslinje, emptyMap())
+        val sisteBehandling =
+            vedtaksperiode.behandlinger.avsluttUtenVedtak(
+                with(vedtaksperiode) {
+                    eventBus.behandlingEventBus
+                },
+                vedtaksperiode.yrkesaktivitet,
+                utbetalingstidslinje.utbetalingstidslinje,
+                emptyMap(),
+            )
         val dekkesAvArbeidsgiverperioden =
             vedtaksperiode.behandlinger
                 .ventedager()
@@ -52,7 +62,9 @@ internal data object AvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
                 ?.inneholder(vedtaksperiode.periode) != false
 
         if (dekkesAvArbeidsgiverperioden) {
-            vedtaksperiode.subsumsjonslogg.logg(`§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje.subsumsjonsformat()))
+            vedtaksperiode.subsumsjonslogg.logg(
+                `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(vedtaksperiode.periode, vedtaksperiode.sykdomstidslinje.subsumsjonsformat()),
+            )
         }
         eventBus.avsluttetUtenVedtak(
             EventSubscription.AvsluttetUtenVedtakEvent(

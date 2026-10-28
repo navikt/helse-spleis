@@ -35,7 +35,12 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
             (hendelse as? AnnullerUtbetaling)?.vurdering
                 ?: Utbetaling.Vurdering(true, "Automatisk behandlet", "tbd@nav.no", LocalDateTime.now(), true)
 
-        vedtaksperiode.behandlinger.leggTilAnnullering(with(vedtaksperiode) { eventBus.behandlingEventBus }, annullering, vurdering, aktivitetslogg)
+        vedtaksperiode.behandlinger.leggTilAnnullering(
+            with(vedtaksperiode) { eventBus.behandlingEventBus },
+            annullering,
+            vurdering,
+            aktivitetslogg,
+        )
 
         if (!vedtaksperiode.behandlinger.erAvsluttet()) {
             return vedtaksperiode.tilstand(eventBus, aktivitetslogg, TilAnnullering)
@@ -74,7 +79,11 @@ internal data object AvventerAnnullering : Vedtaksperiodetilstand {
         Utbetaling.lagTomUtbetaling(
             vedtaksperiodekladd =
                 Utbetalingkladd(
-                    arbeidsgiveroppdrag = Oppdrag(mottaker = vedtaksperiode.yrkesaktivitet.organisasjonsnummer, fagområde = Fagområde.SykepengerRefusjon),
+                    arbeidsgiveroppdrag =
+                        Oppdrag(
+                            mottaker = vedtaksperiode.yrkesaktivitet.organisasjonsnummer,
+                            fagområde = Fagområde.SykepengerRefusjon,
+                        ),
                     personoppdrag = Oppdrag(mottaker = vedtaksperiode.person.fødselsnummer, fagområde = Fagområde.Sykepenger),
                 ),
             periode = vedtaksperiode.periode,

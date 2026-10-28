@@ -21,7 +21,10 @@ data class Maksdatoresultat(
     val antallForbrukteDager = forbrukteDager.sumOf { it.count() }
 
     val sisteNødvendigeOppholdsdag = oppholdsdager.flatten().getOrNull(TILSTREKKELIG_OPPHOLD_I_SYKEDAGER - 1)
-    val fremdelesSykEtterTilstrekkeligOpphold = sisteNødvendigeOppholdsdag != null && oppholdsdager.isNotEmpty() && avslåtteDager.any { it.endInclusive > sisteNødvendigeOppholdsdag }
+    val fremdelesSykEtterTilstrekkeligOpphold =
+        sisteNødvendigeOppholdsdag != null &&
+            oppholdsdager.isNotEmpty() &&
+            avslåtteDager.any { it.endInclusive > sisteNødvendigeOppholdsdag }
 
     enum class Bestemmelse { IKKE_VURDERT, ORDINÆR_RETT, BEGRENSET_RETT, SYTTI_ÅR }
 

@@ -18,7 +18,10 @@ internal class ArbeidsledigMediatorTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `overgang til arbeidsledig`() {
         nyttVedtak(1.januar, 31.januar)
-        sendNySøknadArbeidsledig(SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100), tidligereArbeidsgiverOrgnummer = ORGNUMMER)
+        sendNySøknadArbeidsledig(
+            SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100),
+            tidligereArbeidsgiverOrgnummer = ORGNUMMER,
+        )
         sendArbeidsledigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 1.februar, tom = 26.februar, sykmeldingsgrad = 100)),
             tidligereArbeidsgiverOrgnummer = ORGNUMMER,

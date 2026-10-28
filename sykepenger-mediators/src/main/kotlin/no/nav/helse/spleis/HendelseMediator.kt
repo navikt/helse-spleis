@@ -213,10 +213,15 @@ internal class HendelseMediator(
                 meldingId = inntektsmeldingMeldingsreferanseId,
             ) ?: return
 
-        val inntektsopplysningerFraLagretInntektsmelding = message.inntektsopplysningerFraLagretInntektsmelding(inntektsmeldingJson) ?: return
+        val inntektsopplysningerFraLagretInntektsmelding =
+            message.inntektsopplysningerFraLagretInntektsmelding(inntektsmeldingJson) ?: return
 
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
-            person.håndterInntektsopplysningerFraLagretInntektsmelding(eventBus, inntektsopplysningerFraLagretInntektsmelding, aktivitetslogg)
+            person.håndterInntektsopplysningerFraLagretInntektsmelding(
+                eventBus,
+                inntektsopplysningerFraLagretInntektsmelding,
+                aktivitetslogg,
+            )
         }
     }
 

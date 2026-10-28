@@ -57,7 +57,8 @@ internal data class SelvstendigFaktaavklartInntekt(
             anvendtGrunnbeløp = this.anvendtGrunnbeløp.dto(),
         )
 
-    fun grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp: Inntekt): Inntekt = grunnbeløpsjustertGjennomsnitt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
+    fun grunnbeløpsjustertGjennomsnitt(anvendtGrunnbeløp: Inntekt): Inntekt =
+        grunnbeløpsjustertGjennomsnitt(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 
     fun beregningsgrunnlag(anvendtGrunnbeløp: Inntekt) = beregningsgrunnlag(pensjonsgivendeInntekter, anvendtGrunnbeløp)
 

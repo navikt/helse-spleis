@@ -50,9 +50,18 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null), beregnetInntekt = INNTEKT * 1.1)
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = arbeidsgiverperiode,
+                refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
+                beregnetInntekt =
+                    INNTEKT * 1.1,
+            )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertBeløpstidslinje(
@@ -68,9 +77,20 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
         a1 {
             val arbeidsgiverperiode = listOf(1.januar til 16.januar)
             nyttVedtak(januar, arbeidsgiverperiode = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(INNTEKT, opphørsdato = null))
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-            håndterKorrigerteArbeidsgiveropplysninger(arbeidsgiverperioder = arbeidsgiverperiode, refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null))
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
+            håndterKorrigerteArbeidsgiveropplysninger(
+                arbeidsgiverperioder = arbeidsgiverperiode,
+                refusjon = Inntektsmelding.Refusjon(beløp = INNTEKT, opphørsdato = null),
+            )
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
@@ -88,7 +108,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
@@ -98,7 +122,11 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 arbeidsgiverperioder = arbeidsgiverperiode,
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())

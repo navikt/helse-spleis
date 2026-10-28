@@ -12,8 +12,14 @@ import org.junit.jupiter.api.assertThrows
 internal class InntektsmeldingMessageTest {
     @Test
     fun `mapper naturalytelser fra json`() {
-        assertEquals(emptyList<Inntektsmelding.OpphørAvNaturalytelse>(), objectMapper.readTree(naturalytelseTom).tilOpphørAvNaturalytelser())
-        assertEquals(listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = "ANNET", beløp = 1200.månedlig, fom = 1.januar)), objectMapper.readTree(naturalytelse).tilOpphørAvNaturalytelser())
+        assertEquals(
+            emptyList<Inntektsmelding.OpphørAvNaturalytelse>(),
+            objectMapper.readTree(naturalytelseTom).tilOpphørAvNaturalytelser(),
+        )
+        assertEquals(
+            listOf(Inntektsmelding.OpphørAvNaturalytelse(naturalytelse = "ANNET", beløp = 1200.månedlig, fom = 1.januar)),
+            objectMapper.readTree(naturalytelse).tilOpphørAvNaturalytelser(),
+        )
         assertThrows<NullPointerException> { objectMapper.readTree(naturalytelseUgyldig).tilOpphørAvNaturalytelser() }
     }
 

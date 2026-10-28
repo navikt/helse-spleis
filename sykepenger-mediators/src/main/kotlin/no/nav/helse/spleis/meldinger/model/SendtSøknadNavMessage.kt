@@ -29,7 +29,19 @@ internal class SendtSøknadNavMessage(
     ) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(
+            personopplysninger,
+            this,
+            builder.build(
+                meldingsporing,
+            ),
+            context,
+            packet["historiskeFolkeregisteridenter"]
+                .map(JsonNode::asText)
+                .map {
+                    Personidentifikator(it)
+                }.toSet(),
+        )
     }
 
     internal companion object {

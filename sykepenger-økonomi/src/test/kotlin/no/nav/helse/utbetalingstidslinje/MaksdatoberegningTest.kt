@@ -283,7 +283,18 @@ internal class MaksdatoberegningTest {
 
     @Test
     fun `bruke opp alt fom 67 år`() {
-        val tidslinje = tidslinjeOf(188.NAVDAGER, 61.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 61.NAVDAGER, 36.ARB, 365.ARB, 365.ARB, 1.NAVDAGER, startDato = 30.mars(2017))
+        val tidslinje =
+            tidslinjeOf(
+                188.NAVDAGER,
+                61.NAVDAGER,
+                (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB,
+                61.NAVDAGER,
+                36.ARB,
+                365.ARB,
+                365.ARB,
+                1.NAVDAGER,
+                startDato = 30.mars(2017),
+            )
         val avslåtteDager = listOf(tidslinje).utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
 
         assertEquals(listOf(listOf(13.mars), listOf(5.desember), listOf(11.januar(2021))), avslåtteDager)
@@ -325,7 +336,15 @@ internal class MaksdatoberegningTest {
 
     @Test
     fun `begrunnelse ved flere oppbrukte rettigheter - hel tidslinje`() {
-        val tidslinje = tidslinjeOf(248.NAVDAGER, 1.NAVDAGER, (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB, 60.NAVDAGER, 1.NAVDAGER, startDato = 23.februar(2017))
+        val tidslinje =
+            tidslinjeOf(
+                248.NAVDAGER,
+                1.NAVDAGER,
+                (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).ARB,
+                60.NAVDAGER,
+                1.NAVDAGER,
+                startDato = 23.februar(2017),
+            )
         val avslåtteDager = listOf(tidslinje).utbetalingsavgrenser(PERSON_67_ÅR_11_JANUAR_2018)
 
         assertEquals(listOf(listOf(6.februar), listOf(31.oktober)), avslåtteDager)
@@ -622,7 +641,8 @@ internal class MaksdatoberegningTest {
 
     @Test
     fun `avviste dager avvises med maksdatobegrunnelse i tillegg`() {
-        val tidslinje = tidslinjeOf(16.AP, 248.NAVDAGER, 182.AVV(1000, begrunnelse = MinimumSykdomsgrad), 16.AP, 248.NAVDAGER, startDato = 5.juli(2016))
+        val tidslinje =
+            tidslinjeOf(16.AP, 248.NAVDAGER, 182.AVV(1000, begrunnelse = MinimumSykdomsgrad), 16.AP, 248.NAVDAGER, startDato = 5.juli(2016))
         val forventetFørsteAvvisteDag = 4.juli(2017)
         val forventetSisteAvvisteDag = forventetFørsteAvvisteDag.plusDays(181)
         val avvisteDager = (forventetFørsteAvvisteDag til forventetSisteAvvisteDag).toList()
@@ -952,7 +972,12 @@ internal class MaksdatoberegningTest {
     @Test
     fun `ukjente dager generert når du legger til to utbetalingstidslinjer teller som ikke-utbetalingsdager`() {
         val tidslinje1 = tidslinjeOf(50.NAVDAGER)
-        val tidslinje2 = tidslinjeOf((TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).UTELATE, 248.NAVDAGER, startDato = tidslinje1.periode().endInclusive.plusDays(1))
+        val tidslinje2 =
+            tidslinjeOf(
+                (TILSTREKKELIG_OPPHOLD_I_SYKEDAGER).UTELATE,
+                248.NAVDAGER,
+                startDato = tidslinje1.periode().endInclusive.plusDays(1),
+            )
         val tidslinje = tidslinje1 + tidslinje2
         val avslåtteDager = listOf(tidslinje).utbetalingsavgrenser(UNG_PERSON_FNR_2018)
 

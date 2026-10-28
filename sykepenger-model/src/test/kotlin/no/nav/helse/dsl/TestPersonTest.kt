@@ -122,7 +122,15 @@ internal class TestPersonTest : AbstractDslTest() {
             )
         }
         a1 {
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
         }
     }
 

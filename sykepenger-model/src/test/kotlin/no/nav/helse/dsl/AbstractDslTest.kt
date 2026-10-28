@@ -87,7 +87,12 @@ internal abstract class AbstractDslTest {
 
     protected operator fun <R> String.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) = testperson.arbeidsgiver(this, testblokk)
 
-    protected operator fun <R> List<String>.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) = forEach { organisasjonsnummer -> organisasjonsnummer { testblokk() } }
+    protected operator fun <R> List<String>.invoke(testblokk: TestPerson.TestArbeidsgiver.() -> R) =
+        forEach { organisasjonsnummer ->
+            organisasjonsnummer {
+                testblokk()
+            }
+        }
 
     protected fun List<String>.forlengVedtak(
         periode: Periode,
@@ -180,7 +185,12 @@ internal abstract class AbstractDslTest {
         forventetVenteperiode: List<Periode>,
         forventetEgenmeldinger: List<Periode> = emptyList(),
     ) {
-        testArbeidsgiverAsserter.assertSkjæringstidspunktOgVenteperiode(id, forventetSkjæringstidspunkt, forventetVenteperiode, forventetEgenmeldinger)
+        testArbeidsgiverAsserter.assertSkjæringstidspunktOgVenteperiode(
+            id,
+            forventetSkjæringstidspunkt,
+            forventetVenteperiode,
+            forventetEgenmeldinger,
+        )
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertUtbetalingsbeløp(
@@ -190,7 +200,13 @@ internal abstract class AbstractDslTest {
         forventetPersonbeløp: Int = 0,
         subset: Periode? = null,
     ) {
-        testArbeidsgiverAsserter.assertUtbetalingsbeløp(vedtaksperiodeId, forventetArbeidsgiverbeløp, forventetArbeidsgiverRefusjonsbeløp, forventetPersonbeløp, subset)
+        testArbeidsgiverAsserter.assertUtbetalingsbeløp(
+            vedtaksperiodeId,
+            forventetArbeidsgiverbeløp,
+            forventetArbeidsgiverRefusjonsbeløp,
+            forventetPersonbeløp,
+            subset,
+        )
     }
 
     protected fun TestPerson.TestArbeidsgiver.assertSisteForkastetTilstand(
@@ -251,14 +267,16 @@ internal abstract class AbstractDslTest {
         vararg hendelseIder: UUID,
     ) = testArbeidsgiverAsserter.assertHarIkkeHendelseIder(vedtaksperiodeId, *hendelseIder)
 
-    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) = testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
+    protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle) =
+        testArbeidsgiverAsserter.assertIngenFunksjonelleFeil(filter)
 
     protected fun TestPerson.TestArbeidsgiver.assertIngenFunksjonellFeil(
         kode: Varselkode,
         filter: AktivitetsloggFilter = AktivitetsloggFilter.Alle,
     ) = testArbeidsgiverAsserter.assertIngenFunksjonellFeil(kode, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) = testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
+    protected fun TestPerson.TestArbeidsgiver.assertFunksjonelleFeil(filter: AktivitetsloggFilter = AktivitetsloggFilter.person()) =
+        testArbeidsgiverAsserter.assertFunksjonelleFeil(filter)
 
     protected fun TestPerson.TestArbeidsgiver.assertFunksjonellFeil(
         funksjonellFeil: String,
@@ -270,7 +288,8 @@ internal abstract class AbstractDslTest {
         filter: AktivitetsloggFilter,
     ) = testArbeidsgiverAsserter.assertFunksjonellFeil(funksjonellFeil.varseltekst, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block: () -> Unit) = testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
+    protected fun TestPerson.TestArbeidsgiver.ingenNyeFunksjonelleFeil(block: () -> Unit) =
+        testArbeidsgiverAsserter.ingenNyeFunksjonelleFeil(block)
 
     protected fun TestPerson.TestArbeidsgiver.nyeFunksjonelleFeil(block: () -> Unit) = testArbeidsgiverAsserter.nyeFunksjonelleFeil(block)
 
@@ -299,7 +318,8 @@ internal abstract class AbstractDslTest {
         filter: AktivitetsloggFilter,
     ) = testArbeidsgiverAsserter.assertInfo(forventet, filter)
 
-    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String) = testArbeidsgiverAsserter.assertInfo(forventet, AktivitetsloggFilter.Alle)
+    protected fun TestPerson.TestArbeidsgiver.assertInfo(forventet: String) =
+        testArbeidsgiverAsserter.assertInfo(forventet, AktivitetsloggFilter.Alle)
 
     protected fun TestPerson.TestArbeidsgiver.assertIngenInfo(
         forventet: String,
@@ -326,7 +346,10 @@ internal abstract class AbstractDslTest {
 
     protected fun nullstillTilstandsendringer() = observatør.nullstillTilstandsendringer()
 
-    internal inline fun <reified R : Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) = testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> { block() }
+    internal inline fun <reified R : Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit) =
+        testperson.behovshåndterer.behovSomOppstårSomFølgeAv<R> {
+            block()
+        }
 
     protected fun håndterOverstyrArbeidsforhold(
         skjæringstidspunkt: LocalDate,
@@ -374,7 +397,15 @@ internal abstract class AbstractDslTest {
         feriepengehistorikk: List<UtbetalingshistorikkForFeriepenger.Feriepenger> = emptyList(),
         datoForSisteFeriepengekjøringIInfotrygd: LocalDate,
         skalBeregnesManuelt: Boolean = false,
-    ) = testperson { håndterUtbetalingshistorikkForFeriepenger(opptjeningsår, utbetalinger, feriepengehistorikk, datoForSisteFeriepengekjøringIInfotrygd, skalBeregnesManuelt) }
+    ) = testperson {
+        håndterUtbetalingshistorikkForFeriepenger(
+            opptjeningsår,
+            utbetalinger,
+            feriepengehistorikk,
+            datoForSisteFeriepengekjøringIInfotrygd,
+            skalBeregnesManuelt,
+        )
+    }
 
     protected fun håndterFeriepengerUtbetalt(
         fagsystemId: String,
@@ -427,7 +458,8 @@ internal abstract class AbstractDslTest {
     }
 
     protected fun medPersonidentifikator(personidentifikator: Personidentifikator) {
-        testperson = TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
+        testperson =
+            TestPerson(observatør = observatør, personidentifikator = personidentifikator, deferredLog = deferredLog, jurist = jurist)
     }
 
     protected fun medMaksSykedager(
@@ -435,7 +467,14 @@ internal abstract class AbstractDslTest {
         maksSykedagerOver67: Int = maksSykedager,
         fødselsdato: LocalDate = UNG_PERSON_FØDSELSDATO,
     ) {
-        testperson = TestPerson(observatør = observatør, fødselsdato = fødselsdato, deferredLog = deferredLog, jurist = jurist, regler = regler(maksSykedager, maksSykedagerOver67))
+        testperson =
+            TestPerson(
+                observatør = observatør,
+                fødselsdato = fødselsdato,
+                deferredLog = deferredLog,
+                jurist = jurist,
+                regler = regler(maksSykedager, maksSykedagerOver67),
+            )
     }
 
     @BeforeEach

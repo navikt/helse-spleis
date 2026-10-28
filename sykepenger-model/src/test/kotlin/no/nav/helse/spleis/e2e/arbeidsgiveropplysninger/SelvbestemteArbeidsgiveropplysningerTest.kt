@@ -38,14 +38,23 @@ internal class SelvbestemteArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(5.januar til 31.januar, egenmeldinger = listOf(1.januar til 4.januar))
             // simulerer at det har gått 3 måneder og vi ikke har fått inntektsmelding
-            håndterPåminnelse(1.vedtaksperiode, tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, flagg = setOf("ønskerInntektFraAOrdningen"))
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                tilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+                flagg = setOf("ønskerInntektFraAOrdningen"),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 5.januar, listOf(1.januar til 16.januar), listOf(1.januar til 4.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                5.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 4.januar),
+            )
             håndterSelvbestemtArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),

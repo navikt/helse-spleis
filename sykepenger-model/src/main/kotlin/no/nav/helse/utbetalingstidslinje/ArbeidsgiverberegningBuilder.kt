@@ -67,7 +67,10 @@ internal class ArbeidsgiverberegningBuilder(
         val aktuellPeriode = checkNotNull(aktuellSykdomstidslinje.periode()) { "Sykdomstidslinjen kan ikke være tom" }
 
         inntektskilder.add(yrkesaktivitet)
-        vedtaksperioder.getOrPut(yrkesaktivitet) { mutableListOf() }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, aktuellPeriode, aktuellSykdomstidslinje, builder))
+        vedtaksperioder
+            .getOrPut(yrkesaktivitet) {
+                mutableListOf()
+            }.add(UberegnetVedtaksperiode(vedtaksperiodeId, yrkesaktivitet, aktuellPeriode, aktuellSykdomstidslinje, builder))
     }
 
     private fun perioderMedInntektjustring(inntektskilde: Inntektskilde): List<Periode> {
@@ -132,7 +135,8 @@ internal class ArbeidsgiverberegningBuilder(
                         sykdomstidslinje = it.sykdomstidslinje,
                         inntekt = inntekt ?: Inntekt.INGEN,
                         inntektjusteringer = inntektsjusteringer.subset(it.periode),
-                        graderteAndreYtelserTidslinje = graderteAndreYtelserTidslinjer[yrkesaktivitet]?.subset(it.periode) ?: GraderteAndreYtelserTidslinje(),
+                        graderteAndreYtelserTidslinje =
+                            graderteAndreYtelserTidslinjer[yrkesaktivitet]?.subset(it.periode) ?: GraderteAndreYtelserTidslinje(),
                     ),
             )
         }

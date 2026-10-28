@@ -205,7 +205,11 @@ internal class MessageMediator(
 
     fun afterRiverHandling(message: String) {
         if (messageRecognized || riverErrors.isEmpty()) return
-        sikkerLogg.error("kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(separator = "\n") { "${it.first}:\n${it.second}" }}")
+        sikkerLogg.error(
+            "kunne ikke gjenkjenne melding:\n\t$message\n\nProblemer:\n${riverErrors.joinToString(
+                separator = "\n",
+            ) { "${it.first}:\n${it.second}" }}",
+        )
     }
 
     private fun MessageContext.sendPåSlack(message: HendelseMessage) {
@@ -280,7 +284,8 @@ internal class MessageMediator(
             rapidsConnection.publish(key, message)
         }
 
-        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> = rapidsConnection.publish(messages)
+        override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> =
+            rapidsConnection.publish(messages)
 
         override fun rapidName() = rapidsConnection.rapidName()
 

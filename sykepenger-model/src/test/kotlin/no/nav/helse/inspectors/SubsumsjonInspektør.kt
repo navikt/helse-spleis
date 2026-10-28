@@ -127,7 +127,8 @@ internal class SubsumsjonInspektør(
         output: Map<String, Any>? = null,
         vedtaksperiodeId: UUID? = null,
     ) {
-        val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId)
+        val resultat =
+            finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, VILKAR_OPPFYLT, vedtaksperiodeId = vedtaksperiodeId)
         assertEquals(1, resultat.size, "Forventer kun en subsumsjon. Subsumsjoner funnet: $resultat")
         val subsumsjon = resultat.first()
         assertEquals(VILKAR_OPPFYLT, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
@@ -151,7 +152,11 @@ internal class SubsumsjonInspektør(
     ) {
         val resultat = finnSubsumsjoner(lovverk, paragraf, versjon, ledd, punktum, bokstav, utfall, vedtaksperiodeId = vedtaksperiodeId)
         val subsumsjon = resultat[index]
-        assertEquals(forventetAntall, resultat.size, "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}")
+        assertEquals(
+            forventetAntall,
+            resultat.size,
+            "Forventer $forventetAntall subsumsjoner for vilkåret. Subsumsjoner funnet: ${resultat.size}",
+        )
         assertEquals(utfall, subsumsjon.utfall) { "Forventet oppfylt $paragraf $ledd $punktum" }
         assertResultat(input, output, subsumsjon)
     }

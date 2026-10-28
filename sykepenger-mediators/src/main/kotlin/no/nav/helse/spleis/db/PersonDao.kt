@@ -46,7 +46,14 @@ internal class PersonDao(
         dataSource.connection {
             transaction {
                 val (personId, person) =
-                    hentPersonEllerOpprettNy(this, regelverkslogg, hendelseRepository, personidentifikator, lagNyPerson, historiskeFolkeregisteridenter)
+                    hentPersonEllerOpprettNy(
+                        this,
+                        regelverkslogg,
+                        hendelseRepository,
+                        personidentifikator,
+                        lagNyPerson,
+                        historiskeFolkeregisteridenter,
+                    )
                         ?: return@transaction behandlingContext.lagreMeldingerIUtboks(this)
 
                 knyttPersonTilHistoriskeIdenter(this, personId, personidentifikator, historiskeFolkeregisteridenter)
@@ -70,7 +77,15 @@ internal class PersonDao(
         personidentifikator: Personidentifikator,
         lagNyPerson: () -> Person?,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
-    ): Pair<Long, Person>? = gjenopprettFraTidligereBehandling(connection, regelverkslogg, hendelseRepository, personidentifikator, historiskeFolkeregisteridenter) ?: opprettNyPerson(connection, lagNyPerson)
+    ): Pair<Long, Person>? =
+        gjenopprettFraTidligereBehandling(
+            connection,
+            regelverkslogg,
+            hendelseRepository,
+            personidentifikator,
+            historiskeFolkeregisteridenter,
+        )
+            ?: opprettNyPerson(connection, lagNyPerson)
 
     private fun gjenopprettFraTidligereBehandling(
         connection: Connection,
@@ -83,7 +98,10 @@ internal class PersonDao(
             hentPersonOgLåsPersonForBehandling(connection, personidentifikator, historiskeFolkeregisteridenter)
                 ?: hentPersonFraHistoriskeIdenter(connection, personidentifikator, historiskeFolkeregisteridenter)
                 ?: return null
-        val tidligereBehandlinger = tidligerePersoner.map { tidligerePerson -> Person.gjenopprett(regelverkslogg, tidligerePerson.tilPersonDto()) }
+        val tidligereBehandlinger =
+            tidligerePersoner.map { tidligerePerson ->
+                Person.gjenopprett(regelverkslogg, tidligerePerson.tilPersonDto())
+            }
         val personInn = serialisertPerson.tilPersonDto { hendelseRepository.hentAlleHendelser(personidentifikator) }
         return personId to Person.gjenopprett(regelverkslogg, personInn, tidligereBehandlinger)
     }
@@ -178,10 +196,19 @@ internal class PersonDao(
         personidentifikator: Personidentifikator,
         historiskeFolkeregisteridenter: Set<Personidentifikator>,
     ) {
-        val identer = if (STØTTER_IDENTBYTTE) historiskeFolkeregisteridenter.plusElement(personidentifikator) else setOf(personidentifikator)
+        val identer =
+            if (STØTTER_IDENTBYTTE) {
+                historiskeFolkeregisteridenter.plusElement(
+                    personidentifikator,
+                )
+            } else {
+                setOf(personidentifikator)
+            }
 
         @Language("PostgreSQL")
-        val statement = """INSERT INTO person_alias(fnr, person_id) VALUES ${identer.joinToString { "(?, $personId)" }} ON CONFLICT DO NOTHING;"""
+        val statement = """INSERT INTO person_alias(fnr, person_id) VALUES ${identer.joinToString {
+            "(?, $personId)"
+        }} ON CONFLICT DO NOTHING;"""
         connection.prepareStatement(statement).use { stmt ->
             identer.forEachIndexed { index, ident ->
                 stmt.setLong(index + 1, ident.toLong())

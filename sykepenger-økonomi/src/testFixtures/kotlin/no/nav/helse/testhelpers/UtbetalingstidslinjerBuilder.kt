@@ -23,7 +23,9 @@ fun tidslinjeOf(
 ) = Utbetalingstidslinje
     .Builder()
     .apply {
-        utbetalingsdager.fold(startDato) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, graderteAndreYtelserGrad, grad, arbeidsgiverbeløp) ->
+        utbetalingsdager.fold(
+            startDato,
+        ) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, graderteAndreYtelserGrad, grad, arbeidsgiverbeløp) ->
             var dato = startDato
             val antallDager = antallDagerFun(startDato)
             repeat(antallDager) {
@@ -113,7 +115,9 @@ fun Int.NAVDAGER(
     dekningsgrunnlag: Number,
     grad: Number = 100.0,
     refusjonsbeløp: Number = dekningsgrunnlag,
-) = NAV({ ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt() }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
+) = NAV({
+    ChronoUnit.DAYS.between(it, it.plus((this - 1).ukedager).plusDays(1)).toInt()
+}, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig)
 
 val Int.ARB get() = this.ARB(1200)
 

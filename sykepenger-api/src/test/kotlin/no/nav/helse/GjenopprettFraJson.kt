@@ -24,4 +24,5 @@ internal fun gjenopprettFraJSONtekst(
     return Person.gjenopprett(regelverkslogg, dto, emptyList())
 }
 
-private fun String.readResource() = object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")
+private fun String.readResource() =
+    object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")

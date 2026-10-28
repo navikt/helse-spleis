@@ -14,7 +14,10 @@ internal class V336PerioderUtenNavAnsvarPåBehandling : JsonMigration(336) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("perioderUtenNavAnsvar").forEach { periodeUtenNavAnsvar ->
                 periodeUtenNavAnsvar as ObjectNode
-                periodeUtenNavAnsvar.set<ArrayNode>("dagerUtenNavAnsvar", periodeUtenNavAnsvar.path("arbeidsgiverperiode").deepCopy<ArrayNode>())
+                periodeUtenNavAnsvar.set<ArrayNode>(
+                    "dagerUtenNavAnsvar",
+                    periodeUtenNavAnsvar.path("arbeidsgiverperiode").deepCopy<ArrayNode>(),
+                )
                 periodeUtenNavAnsvar.remove("arbeidsgiverperiode")
             }
             arbeidsgiver.path("vedtaksperioder").forEach { vedtaksperiode ->

@@ -346,7 +346,10 @@ private fun mapPeriodevilkår(vilkår: BeregnetPeriode.Vilkår) =
             },
     )
 
-private fun mapPensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>) = pensjonsgivendeInntekter.map { ApiPensjonsgivendeInntekt(it.årstall.value, it.beløp.årlig.beløp) }
+private fun mapPensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntektUtDto.PensjonsgivendeInntektDto>) =
+    pensjonsgivendeInntekter.map {
+        ApiPensjonsgivendeInntekt(it.årstall.value, it.beløp.årlig.beløp)
+    }
 
 private fun mapPeriodetype(type: Tidslinjeperiodetype) =
     when (type) {
@@ -585,7 +588,14 @@ internal fun mapVilkårsgrunnlag(
             medlemskapsvurderingId = vilkårsgrunnlag.medlemskapsvurderingId,
         )
 
-    else -> throw IllegalStateException("har ikke mapping for vilkårsgrunnlag ${vilkårsgrunnlag::class.simpleName ?: "[ukjent klassenavn]"}")
+    else -> throw IllegalStateException(
+        "har ikke mapping for vilkårsgrunnlag ${vilkårsgrunnlag::class.simpleName ?: "[ukjent klassenavn]"}",
+    )
 }
 
-private fun mapSykepengegrunnlagsgrense(sykepengegrunnlagsgrenseDTO: SykepengegrunnlagsgrenseDTO) = ApiSykepengegrunnlagsgrense(sykepengegrunnlagsgrenseDTO.grunnbeløp, sykepengegrunnlagsgrenseDTO.grense, sykepengegrunnlagsgrenseDTO.virkningstidspunkt)
+private fun mapSykepengegrunnlagsgrense(sykepengegrunnlagsgrenseDTO: SykepengegrunnlagsgrenseDTO) =
+    ApiSykepengegrunnlagsgrense(
+        sykepengegrunnlagsgrenseDTO.grunnbeløp,
+        sykepengegrunnlagsgrenseDTO.grense,
+        sykepengegrunnlagsgrenseDTO.virkningstidspunkt,
+    )

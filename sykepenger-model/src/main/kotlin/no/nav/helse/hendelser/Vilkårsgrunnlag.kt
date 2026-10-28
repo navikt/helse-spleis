@@ -47,7 +47,10 @@ class Vilkårsgrunnlag(
     private var grunnlagsdata: VilkårsgrunnlagHistorikk.Grunnlagsdata? = null
 
     private val opptjeningsgrunnlag = arbeidsforhold.opptjeningsgrunnlag()
-    private val harInntektMånedenFørSkjæringstidspunkt = inntekterForOpptjeningsvurdering.harInntektI(YearMonth.from(skjæringstidspunkt).minusMonths(1))
+    private val harInntektMånedenFørSkjæringstidspunkt =
+        inntekterForOpptjeningsvurdering.harInntektI(
+            YearMonth.from(skjæringstidspunkt).minusMonths(1),
+        )
 
     internal fun erRelevant(
         aktivitetslogg: IAktivitetslogg,
@@ -56,7 +59,9 @@ class Vilkårsgrunnlag(
     ): Boolean {
         if (other.toString() != vedtaksperiodeId) return false
         if (skjæringstidspunktVedtaksperiode == skjæringstidspunkt) return true
-        aktivitetslogg.info("Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]")
+        aktivitetslogg.info(
+            "Vilkårsgrunnlag var relevant for Vedtaksperiode, men skjæringstidspunktene var ulikte: [$skjæringstidspunkt, $skjæringstidspunktVedtaksperiode]",
+        )
         return false
     }
 
@@ -88,7 +93,14 @@ class Vilkårsgrunnlag(
         inntektsgrunnlag: Inntektsgrunnlag,
         subsumsjonslogg: Subsumsjonslogg,
     ): IAktivitetslogg {
-        arbeidsforhold.forEach { it.validerFrilans(aktivitetslogg, skjæringstidspunkt, arbeidsforhold, inntektsvurderingForSykepengegrunnlag) }
+        arbeidsforhold.forEach {
+            it.validerFrilans(
+                aktivitetslogg,
+                skjæringstidspunkt,
+                arbeidsforhold,
+                inntektsvurderingForSykepengegrunnlag,
+            )
+        }
 
         val opptjening =
             when (behandlingsporing) {
@@ -97,15 +109,23 @@ class Vilkårsgrunnlag(
                         ArbeidstakerOpptjening.nyOpptjening(
                             grunnlag =
                                 opptjeningsgrunnlag.map { (orgnummer, ansattPerioder) ->
-                                    ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(orgnummer, ansattPerioder.map { it.tilDomeneobjekt() })
+                                    ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                                        orgnummer,
+                                        ansattPerioder.map { it.tilDomeneobjekt() },
+                                    )
                                 },
                             skjæringstidspunkt = skjæringstidspunkt,
                         )
                     subsumsjonslogg.logg(arbeidstakerOpptjening.subsumsjon)
                     if (!harInntektMånedenFørSkjæringstidspunkt) {
                         aktivitetslogg.varsel(Varselkode.RV_OV_3)
-                    } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(YearMonth.from(skjæringstidspunkt.minusMonths(1)))) {
-                        aktivitetslogg.info("Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag")
+                    } else if (!inntektsvurderingForSykepengegrunnlag.inntekter.harInntektI(
+                            YearMonth.from(skjæringstidspunkt.minusMonths(1)),
+                        )
+                    ) {
+                        aktivitetslogg.info(
+                            "Har inntekt måneden før skjæringstidspunkt med inntekter for opptjeningsvurdering, men ikke med inntekter for sykepengegrunnlag",
+                        )
                     }
                     arbeidstakerOpptjening
                 }
@@ -144,7 +164,11 @@ class Vilkårsgrunnlag(
             ORDINÆRT,
         }
 
-        constructor(orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate? = null, type: Arbeidsforholdtype) : this(orgnummer, ansattFom til (ansattTom ?: LocalDate.MAX), type)
+        constructor(orgnummer: String, ansattFom: LocalDate, ansattTom: LocalDate? = null, type: Arbeidsforholdtype) : this(
+            orgnummer,
+            ansattFom til (ansattTom ?: LocalDate.MAX),
+            type,
+        )
 
         init {
             check(orgnummer.isNotBlank())
@@ -185,7 +209,9 @@ class Vilkårsgrunnlag(
             aktivitetslogg.info("Vedkommende har et aktivt frilansoppdrag på skjæringstidspunktet")
 
             if (andre.count { it.orgnummer == this.orgnummer && it.ansettelseperiode.overlapperMed(this.ansettelseperiode) } > 1) {
-                aktivitetslogg.info("Vedkommende har andre overlappende arbeidsforhold i samme virksomhet hvor vedkommende har frilansoppdrag")
+                aktivitetslogg.info(
+                    "Vedkommende har andre overlappende arbeidsforhold i samme virksomhet hvor vedkommende har frilansoppdrag",
+                )
             }
         }
 
@@ -196,7 +222,15 @@ class Vilkårsgrunnlag(
                 deaktivert = false,
             )
 
-        internal fun somAnsattPeriode() = AnsattPeriode(ansattFom = ansettelseperiode.start, ansattTom = ansettelseperiode.endInclusive.takeUnless { it == LocalDate.MAX })
+        internal fun somAnsattPeriode() =
+            AnsattPeriode(
+                ansattFom = ansettelseperiode.start,
+                ansattTom =
+                    ansettelseperiode.endInclusive.takeUnless {
+                        it ==
+                            LocalDate.MAX
+                    },
+            )
 
         private fun kanBrukes() = type != Arbeidsforholdtype.FRILANSER // filtrerer ut frilans-arbeidsforhold enn så lenge
 

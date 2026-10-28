@@ -21,7 +21,13 @@ fun main() {
         Triple("a1", "a2", "a1"),
         Triple("a1", "a2", "a2"),
     ).forEach { (orgForInntektsopplysning, orgForOpptjeningsgrunnlag, orgForVurderingAvSkifte) ->
-        println("($orgForInntektsopplysning, $orgForOpptjeningsgrunnlag, $orgForVurderingAvSkifte) => ${kjørr(orgForInntektsopplysning, orgForOpptjeningsgrunnlag, orgForVurderingAvSkifte)}")
+        println(
+            "($orgForInntektsopplysning, $orgForOpptjeningsgrunnlag, $orgForVurderingAvSkifte) => ${kjørr(
+                orgForInntektsopplysning,
+                orgForOpptjeningsgrunnlag,
+                orgForVurderingAvSkifte,
+            )}",
+        )
     }
 }
 

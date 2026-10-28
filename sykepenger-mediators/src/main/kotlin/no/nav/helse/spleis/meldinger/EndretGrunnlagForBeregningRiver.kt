@@ -50,5 +50,7 @@ internal class EndretGrunnlagForBeregningRiver(
             grunnlag.singleOrNull { it.eventName == get("@event_name").asText() }
         }
 
-    private val JsonMessage.grunnlagsformat get() = grunnlagsformatOrNull ?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
+    private val JsonMessage.grunnlagsformat get() =
+        grunnlagsformatOrNull
+            ?: error("Ukjent grunnlag for eventName ${get("@event_name").asText()}")
 }

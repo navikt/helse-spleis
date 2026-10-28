@@ -126,7 +126,10 @@ class InfotrygdhistorikkElement private constructor(
         return førsteUlikePeriode?.periode?.start
     }
 
-    private fun førsteUlikePeriode(other: InfotrygdhistorikkElement): Infotrygdperiode? = this.perioder.firstOrNull { other.perioder.none { otherIt -> it.funksjoneltLik(otherIt) } }
+    private fun førsteUlikePeriode(other: InfotrygdhistorikkElement): Infotrygdperiode? =
+        this.perioder.firstOrNull {
+            other.perioder.none { otherIt -> it.funksjoneltLik(otherIt) }
+        }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
 

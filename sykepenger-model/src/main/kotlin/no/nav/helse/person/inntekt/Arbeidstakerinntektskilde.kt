@@ -12,7 +12,10 @@ internal sealed interface Arbeidstakerinntektskilde {
         val inntektsopplysninger: List<Skatteopplysning>,
     ) : Arbeidstakerinntektskilde {
         internal companion object {
-            internal fun fraSkatt(inntektsopplysningerTreMånederFørSkjæringstidspunkt: List<Skatteopplysning>? = emptyList()) = AOrdningen(inntektsopplysningerTreMånederFørSkjæringstidspunkt ?: emptyList())
+            internal fun fraSkatt(inntektsopplysningerTreMånederFørSkjæringstidspunkt: List<Skatteopplysning>? = emptyList()) =
+                AOrdningen(
+                    inntektsopplysningerTreMånederFørSkjæringstidspunkt ?: emptyList(),
+                )
 
             internal fun gjenopprett(dto: ArbeidstakerinntektskildeInnDto.AOrdningenDto): AOrdningen {
                 val skatteopplysninger = dto.inntektsopplysninger.map { Skatteopplysning.gjenopprett(it) }

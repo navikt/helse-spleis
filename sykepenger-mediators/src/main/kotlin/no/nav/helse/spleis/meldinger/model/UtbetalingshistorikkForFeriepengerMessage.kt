@@ -17,8 +17,12 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
     packet: JsonMessage,
     override val meldingsporing: Meldingsporing,
 ) : BehovMessage(packet) {
-    private val skalBeregnesManuelt = packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengerSkalBeregnesManuelt"].asBoolean()
-    private val datoForSisteFeriepengekjøringIInfotrygd = packet["${SykepengehistorikkForFeriepenger.utgåendeNavn}.datoForSisteFeriepengekjøringIInfotrygd"].asLocalDate()
+    private val skalBeregnesManuelt =
+        packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengerSkalBeregnesManuelt"]
+            .asBoolean()
+    private val datoForSisteFeriepengekjøringIInfotrygd =
+        packet["${SykepengehistorikkForFeriepenger.utgåendeNavn}.datoForSisteFeriepengekjøringIInfotrygd"]
+            .asLocalDate()
 
     private val utbetalinger =
         packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.utbetalinger"]
@@ -38,7 +42,13 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
                         val beløp = utbetaling["dagsats"].asInt()
                         val orgnummer = utbetaling["orgnummer"].asText()
                         val utbetalt = utbetaling["utbetalt"].asLocalDate()
-                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(orgnummer, fom, tom, beløp, utbetalt)
+                        UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                            orgnummer,
+                            fom,
+                            tom,
+                            beløp,
+                            utbetalt,
+                        )
                     }
 
                     else -> null

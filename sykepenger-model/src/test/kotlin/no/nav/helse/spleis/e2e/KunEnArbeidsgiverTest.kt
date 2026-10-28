@@ -269,7 +269,10 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
                 arbeidsgiverperioder = listOf(16.desember(2017) til 31.desember(2017)),
                 beregnetInntekt = INNTEKT,
             )
-            assertEquals("GG UUUUUGG UUUUUGG SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "GG UUUUUGG UUUUUGG SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertEquals(16.desember(2017) til 31.januar, inspektør.vedtaksperioder(1.vedtaksperiode).periode)
         }
@@ -408,7 +411,16 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
 
             assertIngenFunksjonelleFeil()
             assertActivities()
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
             assertTilstander(
                 2.vedtaksperiode,
                 START,
@@ -545,7 +557,14 @@ internal class KunEnArbeidsgiverTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(23.oktober(2020), 18.november(2020)))
             håndterSøknad(Sykdom(23.oktober(2020), 18.november(2020), 100.prosent), Ferie(23.oktober(2020), 18.november(2020)))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
         }
     }
 

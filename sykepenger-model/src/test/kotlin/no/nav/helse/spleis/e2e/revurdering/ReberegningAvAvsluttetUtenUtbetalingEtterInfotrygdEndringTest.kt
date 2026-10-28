@@ -47,7 +47,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+            )
             assertIngenOverlappendeInfotrygdutbetaling()
         }
     }
@@ -175,7 +181,13 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a2 {
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(Varselkode.RV_IM_3, 1.vedtaksperiode.filter())
         }
     }
@@ -186,8 +198,14 @@ internal class ReberegningAvAvsluttetUtenUtbetalingEtterInfotrygdEndringTest : A
     ) {
         a1 {
             val overlapp = observatør.overlappendeInfotrygdperioder.last()
-            assertEquals(vedtaksperiodeId, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId)
-            assertEquals(tilstand, overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodetilstand)
+            assertEquals(
+                vedtaksperiodeId,
+                overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodeId,
+            )
+            assertEquals(
+                tilstand,
+                overlapp.overlappendeInfotrygdperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }?.vedtaksperiodetilstand,
+            )
         }
     }
 

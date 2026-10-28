@@ -131,7 +131,9 @@ class Grunnbeløp private constructor(
             gyldigSomMinsteinntektKrav: LocalDate = gyldigFra,
         ) = HistoriskGrunnbeløp(this, gyldigFra, virkningsdato, gyldigSomMinsteinntektKrav)
 
-        fun virkningstidspunktFor(beløp: Inntekt): LocalDate = `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt() ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
+        fun virkningstidspunktFor(beløp: Inntekt): LocalDate =
+            `1G`.grunnbeløp.find { it.beløp(1.0) == beløp }?.virkningstidspunkt()
+                ?: throw IllegalArgumentException("$beløp er ikke et Grunnbeløp")
     }
 
     private class HistoriskGrunnbeløp(
@@ -142,7 +144,9 @@ class Grunnbeløp private constructor(
     ) {
         init {
             require(virkningsdato >= gyldigFra) { "Virkningsdato må være nyere eller lik gyldighetstidspunktet" }
-            require(gyldigMinsteinntektKrav >= gyldigFra) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
+            require(
+                gyldigMinsteinntektKrav >= gyldigFra,
+            ) { "Virkningsdato for kravet til minsteinntekt må være nyere eller lik gyldighetstidspunktet" }
         }
 
         private fun gyldighetsperiode(andre: List<HistoriskGrunnbeløp>) =

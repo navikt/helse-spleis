@@ -64,7 +64,9 @@ class Periode(
             }
         }
 
-        private fun Iterable<Periode>.merge(erForlengelse: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean = mergeKantIKant): List<Periode> {
+        private fun Iterable<Periode>.merge(
+            erForlengelse: (forrigeDag: LocalDate, nesteDag: LocalDate) -> Boolean = mergeKantIKant,
+        ): List<Periode> {
             val resultat = mutableListOf<Periode>()
             val sortert = sortedBy { it.start }
             sortert.forEachIndexed { index, periode ->
@@ -85,7 +87,8 @@ class Periode(
             return false
         }
 
-        fun Iterable<Periode>.intersect(other: Iterable<Periode>): List<Periode> = flatten().intersect(other.flatten().toSet()).grupperSammenhengendePerioder()
+        fun Iterable<Periode>.intersect(other: Iterable<Periode>): List<Periode> =
+            flatten().intersect(other.flatten().toSet()).grupperSammenhengendePerioder()
 
         fun List<Periode>.lik(other: List<Periode>): Boolean {
             if (size != other.size) return false
@@ -245,7 +248,10 @@ class Periode(
         other: Periode,
         erForlengelseStrategy: (LocalDate, LocalDate) -> Boolean,
     ): Periode {
-        if (this.overlapperMed(other) || erForlengelseStrategy(this.endInclusive, other.start) || erForlengelseStrategy(other.endInclusive, this.start)) {
+        if (this.overlapperMed(other) ||
+            erForlengelseStrategy(this.endInclusive, other.start) ||
+            erForlengelseStrategy(other.endInclusive, this.start)
+        ) {
             return this + other
         }
         return this

@@ -389,7 +389,8 @@ internal class TestMessageFactory(
         ventetid: HendelsePeriode,
         harOppgittForsikring: Boolean? = null,
         selvstendigHovedspørsmål: Map<String, Boolean> = emptyMap(),
-        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? = selvstendigNæringsdrivende(ventetid, selvstendigHovedspørsmål, harOppgittForsikring),
+        selvstendigNaringsdrivende: SelvstendigNaringsdrivendeDTO? =
+            selvstendigNæringsdrivende(ventetid, selvstendigHovedspørsmål, harOppgittForsikring),
         meldingTilNavDager: List<PeriodeDTO>? = null,
     ): Pair<String, String> {
         val fom = perioder.minOfOrNull { it.fom!! }
@@ -693,7 +694,9 @@ internal class TestMessageFactory(
             besvart = besvart,
         )
 
-    fun lagUtbetalingshistorikkEtterInfotrygdendring(sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList()): Pair<String, String> =
+    fun lagUtbetalingshistorikkEtterInfotrygdendring(
+        sykepengehistorikk: List<UtbetalingshistorikkTestdata> = emptyList(),
+    ): Pair<String, String> =
         nyHendelse(
             "behov",
             mutableMapOf(
@@ -1723,15 +1726,14 @@ internal class TestMessageFactory(
             ),
         )
 
-    internal fun lagGraderteAndreYtelserEndret(
-        graderteAndreYtelserEndretFom: LocalDate = LocalDate.now().minusDays(1),
-    ) = nyHendelse(
-        "graderte_andre_ytelser_endret",
-        mutableMapOf(
-            "fødselsnummer" to fødselsnummer,
-            "fom" to graderteAndreYtelserEndretFom,
-        ),
-    )
+    internal fun lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate = LocalDate.now().minusDays(1)) =
+        nyHendelse(
+            "graderte_andre_ytelser_endret",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "fom" to graderteAndreYtelserEndretFom,
+            ),
+        )
 
     internal fun lagEndretForsikringsvurdering(
         skjæringstidspunkt: LocalDate,
@@ -1768,32 +1770,30 @@ internal class TestMessageFactory(
             ),
         )
 
-    internal fun lagEndretGrunnlagForBeregningUtenEventName(
-        fom: LocalDate = LocalDate.now().minusDays(1),
-    ) = nyHendelse(
-        "graderte_andre_ytelser_endret",
-        mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "fom" to fom.toString(),
-        ),
-    ).let { (id, json) ->
-        id to
-            objectMapper
-                .readTree(json)
-                .also {
-                    (it as ObjectNode).remove("@event_name")
-                }.toString()
-    }
+    internal fun lagEndretGrunnlagForBeregningUtenEventName(fom: LocalDate = LocalDate.now().minusDays(1)) =
+        nyHendelse(
+            "graderte_andre_ytelser_endret",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "fom" to fom.toString(),
+            ),
+        ).let { (id, json) ->
+            id to
+                objectMapper
+                    .readTree(json)
+                    .also {
+                        (it as ObjectNode).remove("@event_name")
+                    }.toString()
+        }
 
-    internal fun lagEndretGrunnlagForBeregningMedUkjentEventName(
-        fom: LocalDate = LocalDate.now().minusDays(1),
-    ) = nyHendelse(
-        "ukjent_endret_grunnlag",
-        mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "fom" to fom.toString(),
-        ),
-    )
+    internal fun lagEndretGrunnlagForBeregningMedUkjentEventName(fom: LocalDate = LocalDate.now().minusDays(1)) =
+        nyHendelse(
+            "ukjent_endret_grunnlag",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "fom" to fom.toString(),
+            ),
+        )
 
     private fun nyHendelse(
         navn: String,

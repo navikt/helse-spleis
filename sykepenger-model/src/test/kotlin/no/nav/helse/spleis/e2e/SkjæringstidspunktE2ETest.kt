@@ -152,7 +152,13 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             )
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent), Ferie(1.mars, 31.mars))
             assertEquals(1.mars, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
         }
     }
 
@@ -204,7 +210,15 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+            )
         }
 
         a1 {
@@ -237,11 +251,30 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         }
 
         a2 {
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
 
         a1 {
-            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -323,7 +356,16 @@ internal class SkjæringstidspunktE2ETest : AbstractDslTest() {
         }
 
         a2 {
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 }

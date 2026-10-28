@@ -72,7 +72,9 @@ internal class ArbeidsgiverperiodeOgInfotrygdutbetlingerTest : AbstractDslTest()
         infotrygdutbetaling: LocalDate,
     ): List<Periode> =
         a1 {
-            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(orgnummer, infotrygdutbetaling, infotrygdutbetaling))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                ArbeidsgiverUtbetalingsperiode(orgnummer, infotrygdutbetaling, infotrygdutbetaling),
+            )
             val vedtaksperiodeId = håndterSøknad(vedtaksperiode)!!
             if (vedtaksperiode.overlapperMed(infotrygdutbetaling.somPeriode())) assertVarsler(vedtaksperiodeId, RV_IT_3)
             inspektør.venteperiode(vedtaksperiodeId)

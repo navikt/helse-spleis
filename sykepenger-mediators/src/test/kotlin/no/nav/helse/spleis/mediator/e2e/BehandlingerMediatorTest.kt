@@ -132,8 +132,12 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
 
         assertEquals(2, behandlingOpprettet.size) { "forventer to behandlinger" }
         assertTrue(førsteBehandlingOpprettetIndeks < behandlingLukketIndeks) { "behandling_opprettet må sendes først" }
-        assertTrue(sisteBehandlingOpprettetIndeks > behandlingLukketIndeks) { "det skal ikke sendes behandling_lukket for forkastede behandlinger" }
-        assertTrue(sisteBehandlingOpprettetIndeks < behandlingForkastetIndeks) { "behandling_forkastet må sendes etter behandling_opprettet" }
+        assertTrue(
+            sisteBehandlingOpprettetIndeks > behandlingLukketIndeks,
+        ) { "det skal ikke sendes behandling_lukket for forkastede behandlinger" }
+        assertTrue(
+            sisteBehandlingOpprettetIndeks < behandlingForkastetIndeks,
+        ) { "behandling_forkastet må sendes etter behandling_opprettet" }
         verifiserBehandlingForkastetKontrakt(behandlingForkastet)
     }
 
@@ -141,7 +145,15 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
         assertEquals("behandling_opprettet", behandlingOpprettet.path("@event_name").asText())
         assertTrue(behandlingOpprettet.path("fødselsnummer").isTextual)
         assertTrue(behandlingOpprettet.path("yrkesaktivitetstype").isTextual)
-        assertTrue(behandlingOpprettet.path("organisasjonsnummer").takeIf { behandlingOpprettet.path("yrkesaktivitetstype").asText() == "ARBEDISTAKER" }?.isTextual ?: true)
+        assertTrue(
+            behandlingOpprettet
+                .path("organisasjonsnummer")
+                .takeIf {
+                    behandlingOpprettet.path("yrkesaktivitetstype").asText() ==
+                        "ARBEDISTAKER"
+                }?.isTextual
+                ?: true,
+        )
         assertTrue(behandlingOpprettet.path("vedtaksperiodeId").isTextual)
         assertTrue(behandlingOpprettet.path("behandlingId").isTextual)
         assertDato(behandlingOpprettet.path("fom").asText())
@@ -151,7 +163,14 @@ internal class BehandlingerMediatorTest : AbstractEndToEndMediatorTest() {
     private fun verifiserBehandlingLukketKontrakt(behandlingLukket: JsonNode) {
         assertEquals("behandling_lukket", behandlingLukket.path("@event_name").asText())
         assertTrue(behandlingLukket.path("fødselsnummer").isTextual)
-        assertTrue(behandlingLukket.path("organisasjonsnummer").takeIf { behandlingLukket.path("yrkesaktivitetstype").asText() == "ARBEDISTAKER" }?.isTextual ?: true)
+        assertTrue(
+            behandlingLukket
+                .path(
+                    "organisasjonsnummer",
+                ).takeIf { behandlingLukket.path("yrkesaktivitetstype").asText() == "ARBEDISTAKER" }
+                ?.isTextual
+                ?: true,
+        )
         assertTrue(behandlingLukket.path("vedtaksperiodeId").isTextual)
         assertTrue(behandlingLukket.path("behandlingId").isTextual)
     }

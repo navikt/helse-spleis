@@ -76,7 +76,13 @@ internal class Inntektsgrunnlag(
         skjæringstidspunkt: LocalDate,
         subsumsjonslogg: Subsumsjonslogg,
         vurdertInfotrygd: Boolean = false,
-    ) : this(skjæringstidspunkt, arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold, vurdertInfotrygd) {
+    ) : this(
+        skjæringstidspunkt,
+        arbeidsgiverInntektsopplysninger,
+        selvstendigInntektsopplysning,
+        deaktiverteArbeidsforhold,
+        vurdertInfotrygd,
+    ) {
         subsumsjonslogg.apply {
             logg(
                 `§ 8-10 ledd 2 punktum 1`(
@@ -138,8 +144,18 @@ internal class Inntektsgrunnlag(
         ): Inntektsgrunnlag =
             Inntektsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
-                arbeidsgiverInntektsopplysninger = dto.arbeidsgiverInntektsopplysninger.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
-                selvstendigInntektsopplysning = dto.selvstendigInntektsopplysning?.let { SelvstendigInntektsopplysning.gjenopprett(it) },
+                arbeidsgiverInntektsopplysninger =
+                    dto.arbeidsgiverInntektsopplysninger.map {
+                        ArbeidsgiverInntektsopplysning.gjenopprett(
+                            it,
+                        )
+                    },
+                selvstendigInntektsopplysning =
+                    dto.selvstendigInntektsopplysning?.let {
+                        SelvstendigInntektsopplysning.gjenopprett(
+                            it,
+                        )
+                    },
                 deaktiverteArbeidsforhold = dto.deaktiverteArbeidsforhold.map { ArbeidsgiverInntektsopplysning.gjenopprett(it) },
                 vurdertInfotrygd = dto.vurdertInfotrygd,
                 `6G` = Inntekt.gjenopprett(dto.`6G`),
@@ -166,7 +182,12 @@ internal class Inntektsgrunnlag(
         forklaring: String,
         subsumsjonslogg: Subsumsjonslogg,
     ): Inntektsgrunnlag {
-        if (arbeidsgiverInntektsopplysninger.any { it.gjelder(orgnummer) }) return this // Unngår å aktivere om det allerede er aktivt ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        if (arbeidsgiverInntektsopplysninger.any {
+                it.gjelder(orgnummer)
+            }
+        ) {
+            return this // Unngår å aktivere om det allerede er aktivt ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        }
         return deaktiverteArbeidsforhold
             .aktiver(arbeidsgiverInntektsopplysninger, orgnummer, forklaring, subsumsjonslogg)
             .let { (deaktiverte, aktiverte) ->
@@ -183,7 +204,12 @@ internal class Inntektsgrunnlag(
         forklaring: String,
         subsumsjonslogg: Subsumsjonslogg,
     ): Inntektsgrunnlag {
-        if (deaktiverteArbeidsforhold.any { it.gjelder(orgnummer) }) return this // Unngår å deaktivere om det allerede er deaktivert ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        if (deaktiverteArbeidsforhold.any {
+                it.gjelder(orgnummer)
+            }
+        ) {
+            return this // Unngår å deaktivere om det allerede er deaktivert ettersom det ruller tilbake eventuell skjønnsmessig fastsettelse
+        }
         return arbeidsgiverInntektsopplysninger
             .deaktiver(deaktiverteArbeidsforhold, orgnummer, forklaring, subsumsjonslogg)
             .let { (aktiverte, deaktiverte) ->
@@ -228,10 +254,11 @@ internal class Inntektsgrunnlag(
         }
     }
 
-    internal fun håndterKorrigerteInntekter(
-        hendelse: OverstyrArbeidsgiveropplysninger,
-    ): Utfall {
-        val arbeidsgiverInntektsopplysningerUtfall = arbeidsgiverInntektsopplysninger.håndterKorrigerteInntekter(hendelse.arbeidsgiveropplysninger)
+    internal fun håndterKorrigerteInntekter(hendelse: OverstyrArbeidsgiveropplysninger): Utfall {
+        val arbeidsgiverInntektsopplysningerUtfall =
+            arbeidsgiverInntektsopplysninger.håndterKorrigerteInntekter(
+                hendelse.arbeidsgiveropplysninger,
+            )
         return Utfall.bestem(arbeidsgiverInntektsopplysningerUtfall) { nyeArbeidsgiverInntektsopplysninger ->
             kopierInntektsgrunnlag(
                 arbeidsgiverInntektsopplysninger = nyeArbeidsgiverInntektsopplysninger,
@@ -256,12 +283,14 @@ internal class Inntektsgrunnlag(
     )
 
     internal fun grunnbeløpsregulering(): Inntektsgrunnlag? {
-        val nyttInntektsgrunnlag = kopierInntektsgrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
+        val nyttInntektsgrunnlag =
+            kopierInntektsgrunnlag(arbeidsgiverInntektsopplysninger, selvstendigInntektsopplysning, deaktiverteArbeidsforhold)
         if (this.`6G` == nyttInntektsgrunnlag.`6G`) return null
         return nyttInntektsgrunnlag
     }
 
-    internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
+    internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) =
+        arbeidsgiverInntektsopplysninger.any { it.gjelder(organisasjonsnummer) }
 
     internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) =
         when (yrkesaktivitet.yrkesaktivitetstype) {
@@ -325,14 +354,25 @@ internal class Inntektsgrunnlag(
                 arbeidsgiverInntektsopplysningerUtfall.none { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp } ->
                     Endret(
                         arbeidsgivereMedEndretBeløp = emptyList(),
-                        nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning }),
+                        nyttInntektsgrunnlag =
+                            lagNyttInnteksgrunnlag(
+                                arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning },
+                            ),
                     )
                 // Reel endring i beløp hos minst én arbeidsgiver
                 else -> {
-                    val arbeidsgivereMedEndretBeløp = arbeidsgiverInntektsopplysningerUtfall.filter { it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp }.map { it.arbeidsgiverInntektsopplysning.orgnummer }
+                    val arbeidsgivereMedEndretBeløp =
+                        arbeidsgiverInntektsopplysningerUtfall
+                            .filter {
+                                it is ArbeidsgiverInntektsopplysning.Utfall.EndretBeløp
+                            }.map { it.arbeidsgiverInntektsopplysning.orgnummer }
                     check(arbeidsgivereMedEndretBeløp.isNotEmpty()) { "Hei! Hva skjer her da??" }
                     // Når vi endrer en inntekt så må alle eventuelle skjønnsmessig fastesettelser rulles tilbake
-                    val nyeArbeidsgiveropplysninger = arbeidsgiverInntektsopplysningerUtfall.map { it.arbeidsgiverInntektsopplysning }.rullTilbakeEventuellSkjønnsmessigFastsettelse()
+                    val nyeArbeidsgiveropplysninger =
+                        arbeidsgiverInntektsopplysningerUtfall
+                            .map {
+                                it.arbeidsgiverInntektsopplysning
+                            }.rullTilbakeEventuellSkjønnsmessigFastsettelse()
                     Endret(
                         arbeidsgivereMedEndretBeløp = arbeidsgivereMedEndretBeløp,
                         nyttInntektsgrunnlag = lagNyttInnteksgrunnlag(nyeArbeidsgiveropplysninger),

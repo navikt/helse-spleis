@@ -124,7 +124,11 @@ internal class SelvstendigTest : AbstractDslTest() {
     @Test
     fun `Søknad som oppgir melding til Nav dager med mellomrom`() {
         selvstendig {
-            håndterFørstegangssøknadSelvstendig(MeldingTilNavDager(1.januar, 4.januar), Arbeid(5.januar, 6.januar), Sykdom(7.januar, 31.januar, 100.prosent))
+            håndterFørstegangssøknadSelvstendig(
+                MeldingTilNavDager(1.januar, 4.januar),
+                Arbeid(5.januar, 6.januar),
+                Sykdom(7.januar, 31.januar, 100.prosent),
+            )
             assertEquals("MMMMARH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 7.januar, listOf(7.januar til 22.januar))
             assertVarsel(Varselkode.RV_SØ_56, 1.vedtaksperiode.filter())
@@ -402,7 +406,13 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
         }
     }
 
@@ -473,7 +483,16 @@ internal class SelvstendigTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -525,7 +544,14 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             assertVarsel(Varselkode.RV_VV_2, 1.vedtaksperiode.filter())
             assertFunksjonellFeil(Varselkode.RV_IV_13, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -633,9 +659,30 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år1),
+                            næringsinntekt1.årlig,
+                            lønnsinntekt1.årlig,
+                            lønnsinntektBarePensjonsdel1.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år2),
+                            næringsinntekt2.årlig,
+                            lønnsinntekt2.årlig,
+                            lønnsinntektBarePensjonsdel2.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år3),
+                            næringsinntekt3.årlig,
+                            lønnsinntekt3.årlig,
+                            lønnsinntektBarePensjonsdel3.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig,
+                            erFerdigLignet = true,
+                        ),
                     ),
             )
             if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
@@ -716,9 +763,30 @@ internal class SelvstendigTest : AbstractDslTest() {
                 januar,
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år1), næringsinntekt1.årlig, lønnsinntekt1.årlig, lønnsinntektBarePensjonsdel1.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år2), næringsinntekt2.årlig, lønnsinntekt2.årlig, lønnsinntektBarePensjonsdel2.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år3), næringsinntekt3.årlig, lønnsinntekt3.årlig, lønnsinntektBarePensjonsdel3.årlig, næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år1),
+                            næringsinntekt1.årlig,
+                            lønnsinntekt1.årlig,
+                            lønnsinntektBarePensjonsdel1.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage1.årlig,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år2),
+                            næringsinntekt2.årlig,
+                            lønnsinntekt2.årlig,
+                            lønnsinntektBarePensjonsdel2.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage2.årlig,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år3),
+                            næringsinntekt3.årlig,
+                            lønnsinntekt3.årlig,
+                            lønnsinntektBarePensjonsdel3.årlig,
+                            næringsinntektFraFiskeFangstEllerFamiliebarnehage3.årlig,
+                            erFerdigLignet = true,
+                        ),
                     ),
             )
             if (forventetVarsel) assertVarsel(`Selvstendigsøknad med flere typer pensjonsgivende inntekter`, 1.vedtaksperiode.filter())
@@ -1076,7 +1144,17 @@ internal class SelvstendigTest : AbstractDslTest() {
 
             håndterInntektsendringer(1.januar)
 
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 20.januar til 31.januar, 1000.daglig)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(
+                            a2,
+                            20.januar til 31.januar,
+                            1000.daglig,
+                        ),
+                    ),
+            )
             assertVarsler(listOf(Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -1190,7 +1268,10 @@ internal class SelvstendigTest : AbstractDslTest() {
             )
 
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
+            utbetalingstidslinje
+                .subset(
+                    1.januar til 16.januar,
+                ).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
 
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
@@ -1346,7 +1427,10 @@ internal class SelvstendigTest : AbstractDslTest() {
             )
 
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
+            utbetalingstidslinje
+                .subset(
+                    1.januar til 16.januar,
+                ).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
 
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
@@ -1384,7 +1468,10 @@ internal class SelvstendigTest : AbstractDslTest() {
                     ),
             )
             val utbetalingstidslinje = inspektør.utbetalinger(1.vedtaksperiode).single().utbetalingstidslinje
-            utbetalingstidslinje.subset(1.januar til 16.januar).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
+            utbetalingstidslinje
+                .subset(
+                    1.januar til 16.januar,
+                ).forEach { assertUtbetalingsdag(it, Utbetalingsdag.Ventetidsdag::class, 100) }
 
             inspektør.utbetalinger(1.vedtaksperiode).single().inspektør.also { utbetalinginspektør ->
                 assertEquals(0, utbetalinginspektør.arbeidsgiverOppdrag.size)
@@ -1538,8 +1625,22 @@ internal class SelvstendigTest : AbstractDslTest() {
             )
             håndterSimulering(1.vedtaksperiode)
 
-            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 0, subset = 1.januar til 16.januar)
-            assertUtbetalingsbeløp(1.vedtaksperiode, forventetArbeidsgiverbeløp = 0, forventetArbeidsgiverRefusjonsbeløp = 0, forventetPersonbeløp = 617, subset = 17.januar til 31.januar)
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 0,
+                forventetArbeidsgiverRefusjonsbeløp = 0,
+                forventetPersonbeløp = 0,
+                subset =
+                    1.januar til 16.januar,
+            )
+            assertUtbetalingsbeløp(
+                1.vedtaksperiode,
+                forventetArbeidsgiverbeløp = 0,
+                forventetArbeidsgiverRefusjonsbeløp = 0,
+                forventetPersonbeløp = 617,
+                subset =
+                    17.januar til 31.januar,
+            )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 0) {
                 assertSelvstendigInntektsgrunnlag(460589.0.årlig)
                 assertBeregningsgrunnlag(460589.0.årlig)

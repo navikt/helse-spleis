@@ -42,7 +42,12 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
 
             assertVarsel(RV_VV_2, 1.vedtaksperiode.filter())
             testperson.personlogg
-            assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+            assertEquals(
+                1,
+                SubsumsjonInspektør(
+                    jurist,
+                ).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)),
+            )
             assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
 
             håndterYtelser(1.vedtaksperiode)
@@ -66,9 +71,19 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
                         ),
                     ),
             )
-            assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+            assertEquals(
+                1,
+                SubsumsjonInspektør(
+                    jurist,
+                ).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)),
+            )
             assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
-            assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)))
+            assertEquals(
+                1,
+                SubsumsjonInspektør(
+                    jurist,
+                ).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)),
+            )
         }
 
         a1 {
@@ -85,9 +100,19 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
                 beregnetInntekt = INNTEKT,
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
-            assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)))
+            assertEquals(
+                1,
+                SubsumsjonInspektør(
+                    jurist,
+                ).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_A, versjon = 1.januar(2019)),
+            )
             assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_29, versjon = 1.januar(2019)))
-            assertEquals(1, SubsumsjonInspektør(jurist).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)))
+            assertEquals(
+                1,
+                SubsumsjonInspektør(
+                    jurist,
+                ).antallSubsumsjoner(paragraf = PARAGRAF_8_28, ledd = LEDD_3, bokstav = BOKSTAV_B, versjon = 1.januar(2019)),
+            )
         }
     }
 
@@ -774,7 +799,10 @@ internal class SubsumsjonE2ETest : AbstractDslTest() {
         a1 {
             {
                 håndterSykmelding(Sykmeldingsperiode(3.januar(2018), 11.januar(2019)))
-                håndterSøknad(Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent), sendtTilNAVEllerArbeidsgiver = 3.januar(2018))
+                håndterSøknad(
+                    Sykdom(3.januar(2018), 11.januar(2019), 50.prosent, 50.prosent),
+                    sendtTilNAVEllerArbeidsgiver = 3.januar(2018),
+                )
                 håndterArbeidsgiveropplysninger(
                     listOf(Periode(3.januar(2018), 18.januar(2018))),
                     vedtaksperiodeId = 1.vedtaksperiode,

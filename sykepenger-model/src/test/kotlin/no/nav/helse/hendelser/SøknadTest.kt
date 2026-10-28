@@ -102,20 +102,31 @@ internal class SøknadTest {
         skalHaWarning: Boolean,
     ) {
         søknad(Sykdom(1.januar, 10.januar, 100.prosent), ferie, utlandsopphold)
-        assertEquals(skalHaWarning, søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harVarslerEllerVerre())
+        assertEquals(
+            skalHaWarning,
+            søknad.valider(aktivitetslogg, null, Beløpstidslinje(), subsumsjonslogg, 1.januar).harVarslerEllerVerre(),
+        )
         assertEquals(10, søknad.sykdomstidslinje.count())
     }
 
     @Test
     fun `17 år på søknadstidspunkt gir error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 1.november)
+        søknad(
+            Sykdom(1.januar, 10.januar, 100.prosent),
+            hendelsefabrikk = fyller18År2NovemberHendelsefabrikk,
+            sendtTilNAVEllerArbeidsgiver = 1.november,
+        )
         assertTrue(søknad.forUng(aktivitetslogg, november2.alder))
         assertTrue(aktivitetslogg.harFunksjonelleFeil())
     }
 
     @Test
     fun `18 år på søknadstidspunkt gir ikke error`() {
-        søknad(Sykdom(1.januar, 10.januar, 100.prosent), hendelsefabrikk = fyller18År2NovemberHendelsefabrikk, sendtTilNAVEllerArbeidsgiver = 2.november)
+        søknad(
+            Sykdom(1.januar, 10.januar, 100.prosent),
+            hendelsefabrikk = fyller18År2NovemberHendelsefabrikk,
+            sendtTilNAVEllerArbeidsgiver = 2.november,
+        )
         assertFalse(søknad.forUng(aktivitetslogg, november2.alder))
         assertFalse(aktivitetslogg.harFunksjonelleFeil())
     }
@@ -292,7 +303,8 @@ internal class SøknadTest {
             hendelsefabrikk.lagSøknad(
                 perioder = perioder,
                 andreInntektskilder = andreInntektskilder,
-                sendtTilNAVEllerArbeidsgiver = sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
+                sendtTilNAVEllerArbeidsgiver =
+                    sendtTilNAVEllerArbeidsgiver ?: Søknadsperiode.søknadsperiode(perioder.toList())?.endInclusive ?: LocalDate.now(),
                 sykmeldingSkrevet = LocalDateTime.now(),
                 ikkeJobbetIDetSisteFraAnnetArbeidsforhold = ikkeJobbetIDetSisteFraAnnetArbeidsforhold,
                 merknaderFraSykmelding = merknaderFraSykmelding,

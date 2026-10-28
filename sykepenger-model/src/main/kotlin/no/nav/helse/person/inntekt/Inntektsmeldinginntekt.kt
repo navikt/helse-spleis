@@ -12,7 +12,8 @@ internal data class Inntektsmeldinginntekt private constructor(
 ) {
     internal constructor(id: UUID, inntektsdata: Inntektsdata) : this(id, inntektsdata, Kilde.Arbeidsgiver)
 
-    internal fun kanLagres(other: Inntektsmeldinginntekt) = this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
+    internal fun kanLagres(other: Inntektsmeldinginntekt) =
+        this.inntektsdata.hendelseId != other.inntektsdata.hendelseId || this.inntektsdata.dato != other.inntektsdata.dato
 
     fun dto() =
         InntektsmeldingUtDto(

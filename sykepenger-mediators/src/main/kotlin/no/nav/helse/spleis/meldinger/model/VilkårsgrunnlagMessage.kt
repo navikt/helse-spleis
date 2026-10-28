@@ -38,15 +38,33 @@ internal class VilkårsgrunnlagMessage(
 
     internal val inntekterForSykepengegrunnlag = packet.mapSkatteopplysninger("@løsning.${InntekterForSykepengegrunnlag.utgåendeNavn}")
 
-    internal val inntekterForOpptjeningsvurdering = packet.mapSkatteopplysninger("@løsning.${InntekterForOpptjeningsvurdering.utgåendeNavn}")
+    internal val inntekterForOpptjeningsvurdering =
+        packet.mapSkatteopplysninger(
+            "@løsning.${InntekterForOpptjeningsvurdering.utgåendeNavn}",
+        )
 
     internal val arbeidsforhold = packet.mapArbeidsforhold()
 
-    internal val forsikringsvurderingId = packet["@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
+    internal val forsikringsvurderingId =
+        packet["@løsning.${Forsikringsvurdering.utgåendeNavn}.forsikringsvurderingId"]
+            .takeUnless {
+                it.isMissingOrNull()
+            }?.asText()
+            ?.toUUID()
 
-    internal val opptjeningsvurderingId = packet["@løsning.${Opptjeningsvurdering.utgåendeNavn}.id"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
+    internal val opptjeningsvurderingId =
+        packet["@løsning.${Opptjeningsvurdering.utgåendeNavn}.id"]
+            .takeUnless {
+                it.isMissingOrNull()
+            }?.asText()
+            ?.toUUID()
 
-    internal val medlemskapsvurderingId = packet["@løsning.${MedlemskapsvurderingBehov.utgåendeNavn}.id"].takeUnless { it.isMissingOrNull() }?.asText()?.toUUID()
+    internal val medlemskapsvurderingId =
+        packet["@løsning.${MedlemskapsvurderingBehov.utgåendeNavn}.id"]
+            .takeUnless {
+                it.isMissingOrNull()
+            }?.asText()
+            ?.toUUID()
 
     internal val medlemskapstatus =
         when (packet["@løsning.${Medlemskap.utgåendeNavn}.resultat.svar"].asText()) {

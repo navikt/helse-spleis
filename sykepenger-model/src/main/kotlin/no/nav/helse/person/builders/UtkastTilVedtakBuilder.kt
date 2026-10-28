@@ -51,7 +51,10 @@ internal class UtkastTilVedtakBuilder(
         if (overlapperMedInfotrygd) tags.add(Tag.OverlapperMedInfotrygd)
     }
 
-    internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>) = apply { this.pensjonsgivendeInntekter.addAll(pensjonsgivendeInntekter) }
+    internal fun pensjonsgivendeInntekter(pensjonsgivendeInntekter: List<SelvstendigFaktaavklartInntekt.PensjonsgivendeInntekt>) =
+        apply {
+            this.pensjonsgivendeInntekter.addAll(pensjonsgivendeInntekter)
+        }
 
     internal fun grunnbeløpsregulert() = apply { tags.add(Tag.Grunnbeløpsregulering) }
 
@@ -89,7 +92,11 @@ internal class UtkastTilVedtakBuilder(
 
     private var relevanteSøknader: Set<UUID> = emptySet()
 
-    internal fun relevanteSøknader(relevanteSøknader: Set<MeldingsreferanseId>) = apply { this.relevanteSøknader = relevanteSøknader.map { it.id }.toSet() }
+    internal fun relevanteSøknader(relevanteSøknader: Set<MeldingsreferanseId>) =
+        apply {
+            this.relevanteSøknader =
+                relevanteSøknader.map { it.id }.toSet()
+        }
 
     private var relevanteInntektsmeldinger: Set<UUID> = emptySet()
 
@@ -104,13 +111,15 @@ internal class UtkastTilVedtakBuilder(
     ) = apply {
         this.periode = periode
 
-        val arbeidsgiverperiodePåstartetITidligerePeriode = arbeidsgiverperiode.isNotEmpty() && periode.start >= arbeidsgiverperiode.last().endInclusive
+        val arbeidsgiverperiodePåstartetITidligerePeriode =
+            arbeidsgiverperiode.isNotEmpty() && periode.start >= arbeidsgiverperiode.last().endInclusive
 
         // flex viser denne teksten hvis vi har tagget med 'IngenNyArbeidsgiverperiode':
         //      Det er tidligere utbetalt en hel arbeidsgiverperiode.
         //      Etter dette har vi vurdert at du ikke har gjenopptatt arbeidet og deretter vært friskmeldt i mer enn 16 dager.
         //      NAV har derfor utbetalt sykepenger fra første dag du ble sykmeldt.
-        val utbetalingFraFørsteDagEtterAGP = !harPeriodeRettFør && arbeidsgiverperiodeFerdigAvklart && arbeidsgiverperiodePåstartetITidligerePeriode
+        val utbetalingFraFørsteDagEtterAGP =
+            !harPeriodeRettFør && arbeidsgiverperiodeFerdigAvklart && arbeidsgiverperiodePåstartetITidligerePeriode
         if (utbetalingFraFørsteDagEtterAGP) {
             tags.add(Tag.IngenNyArbeidsgiverperiode)
         }
@@ -270,19 +279,39 @@ internal class UtkastTilVedtakBuilder(
     private inner class Build {
         private val skjønnsfastsatt =
             arbeidsgiverinntekter.any { it.skjønnsfastsatt != null }.also {
-                if (it) check(arbeidsgiverinntekter.all { arbeidsgiver -> arbeidsgiver.skjønnsfastsatt != null }) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
+                if (it) {
+                    check(
+                        arbeidsgiverinntekter.all { arbeidsgiver ->
+                            arbeidsgiver.skjønnsfastsatt != null
+                        },
+                    ) { "Enten må ingen eller alle arbeidsgivere i sykepengegrunnlaget være skjønnsmessig fastsatt." }
+                }
             }
         private val perioderMedSammeSkjæringstidspunkt = relevantePerioder.filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         init {
             check(arbeidsgiverinntekter.isNotEmpty()) { "Forventet ikke at det ikke er noen arbeidsgivere i sykepengegrunnlaget." }
             if (arbeidsgiverinntekter.size == 1) tags.add(Tag.EnArbeidsgiver) else tags.add(Tag.FlereArbeidsgivere)
-            if (arbeidsgiverinntekter.singleOrNull { it.arbeidsgiver == (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer }?.inntektskilde == Inntektskilde.AOrdningen) tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
+            if (arbeidsgiverinntekter
+                    .singleOrNull {
+                        it.arbeidsgiver ==
+                            (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer
+                    }?.inntektskilde ==
+                Inntektskilde.AOrdningen
+            ) {
+                tags.add(Tag.InntektFraAOrdningenLagtTilGrunn)
+            }
         }
 
         private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta =
             when {
-                tags.contains(Tag.InngangsvilkårFraInfotrygd) -> FastsattIInfotrygd(totalOmregnetÅrsinntekt, (yrkesaktivitetssporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker).organisasjonsnummer)
+                tags.contains(
+                    Tag.InngangsvilkårFraInfotrygd,
+                ) ->
+                    FastsattIInfotrygd(
+                        totalOmregnetÅrsinntekt,
+                        (yrkesaktivitetssporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker).organisasjonsnummer,
+                    )
 
                 skjønnsfastsatt ->
                     FastsattEtterSkjønn(
@@ -364,11 +393,12 @@ internal class UtkastTilVedtakBuilder(
                                         seksG = seksG,
                                         arbeidsgivere =
                                             sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                                EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel.Arbeidsgiver(
-                                                    arbeidsgiver = it.arbeidsgiver,
-                                                    omregnetÅrsinntekt = it.omregnetÅrsinntekt,
-                                                    inntektskilde = it.inntektskilde.name,
-                                                )
+                                                EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel
+                                                    .Arbeidsgiver(
+                                                        arbeidsgiver = it.arbeidsgiver,
+                                                        omregnetÅrsinntekt = it.omregnetÅrsinntekt,
+                                                        inntektskilde = it.inntektskilde.name,
+                                                    )
                                             },
                                     )
 
@@ -378,11 +408,12 @@ internal class UtkastTilVedtakBuilder(
                                         seksG = seksG,
                                         arbeidsgivere =
                                             sykepengegrunnlagsfakta.arbeidsgivere.map {
-                                                EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn.Arbeidsgiver(
-                                                    arbeidsgiver = it.arbeidsgiver,
-                                                    omregnetÅrsinntekt = it.omregnetÅrsinntekt,
-                                                    skjønnsfastsatt = it.skjønnsfastsatt,
-                                                )
+                                                EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn
+                                                    .Arbeidsgiver(
+                                                        arbeidsgiver = it.arbeidsgiver,
+                                                        omregnetÅrsinntekt = it.omregnetÅrsinntekt,
+                                                        skjønnsfastsatt = it.skjønnsfastsatt,
+                                                    )
                                             },
                                     )
 
@@ -399,10 +430,11 @@ internal class UtkastTilVedtakBuilder(
                                 seksG = seksG,
                                 pensjonsgivendeInntekter =
                                     pensjonsgivendeInntekter.map {
-                                        EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt(
-                                            årstall = it.årstall,
-                                            beløp = it.beløp.årlig.toDesimaler,
-                                        )
+                                        EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel
+                                            .PensjonsgivendeInntekt(
+                                                årstall = it.årstall,
+                                                beløp = it.beløp.årlig.toDesimaler,
+                                            )
                                     },
                                 beregningsgrunnlag = beregningsgrunnlag.årlig.toDesimaler,
                             )
@@ -459,7 +491,13 @@ internal class UtkastTilVedtakBuilder(
                             fakta.copy(
                                 omregnetÅrsinntekt = fakta.omregnetÅrsinntekt.toDesimaler,
                                 `6G` = fakta.`6G`.toDesimaler,
-                                arbeidsgivere = fakta.arbeidsgivere.map { it.copy(omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler, skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler) },
+                                arbeidsgivere =
+                                    fakta.arbeidsgivere.map {
+                                        it.copy(
+                                            omregnetÅrsinntekt = it.omregnetÅrsinntekt.toDesimaler,
+                                            skjønnsfastsatt = it.skjønnsfastsatt.toDesimaler,
+                                        )
+                                    },
                             )
                     },
             )

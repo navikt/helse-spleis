@@ -96,7 +96,14 @@ internal class OverstyrArbeidsgiverperiodeTest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                3.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
 
             assertEquals(3, inspektør.antallUtbetalinger)
             inspektør.sisteUtbetaling().also { utbetalingen ->

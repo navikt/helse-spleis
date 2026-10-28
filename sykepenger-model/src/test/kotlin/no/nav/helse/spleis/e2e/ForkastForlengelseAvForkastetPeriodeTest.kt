@@ -62,7 +62,16 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractDslTest() {
             assertTrue(observatør.hendelseider(3.vedtaksperiode).isNotEmpty())
             assertTrue(observatør.hendelseider(4.vedtaksperiode).isNotEmpty())
             assertTrue(observatør.hendelseider(5.vedtaksperiode).isNotEmpty())
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
             assertForkastetPeriodeTilstander(4.vedtaksperiode, START, TIL_INFOTRYGD)
@@ -245,7 +254,14 @@ internal class ForkastForlengelseAvForkastetPeriodeTest : AbstractDslTest() {
             assertForkastetPeriodeTilstander(3.vedtaksperiode, START, TIL_INFOTRYGD)
         }
         a2 {
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 

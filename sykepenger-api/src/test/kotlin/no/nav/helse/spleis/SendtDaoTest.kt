@@ -38,8 +38,18 @@ internal class SendtDaoTest {
                 antallMeldinger = 2,
                 meldinger =
                     listOf(
-                        SendtMelding(key = null, json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode, mottaker = "RAPID", sendt1),
-                        SendtMelding(key = "foo-bar", json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode, mottaker = "SUBSUMSJON", sendt2),
+                        SendtMelding(
+                            key = null,
+                            json = objectMapper.readTree("""{"testJson": true}""") as ObjectNode,
+                            mottaker = "RAPID",
+                            sendt1,
+                        ),
+                        SendtMelding(
+                            key = "foo-bar",
+                            json = objectMapper.readTree("""{"testSubsumsjon": "oui"}""") as ObjectNode,
+                            mottaker = "SUBSUMSJON",
+                            sendt2,
+                        ),
                     ),
             )
         assertEquals(forventet, dao.sendteMeldinger(forårsaketAv))

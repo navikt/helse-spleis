@@ -138,7 +138,11 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestAvstemmingVerdi = ThreadLocal.withInitial { false }
     private val lestMigrateVerdi = ThreadLocal.withInitial { false }
     private val lestForkastSykmeldingsperioderMessageVerdi = ThreadLocal.withInitial { false }
-    private val lestEndretVurderingPåSkjæringstidspunktVerdi: ThreadLocal<EndretVurderingPåSkjæringstidspunktData?> = ThreadLocal.withInitial { null }
+    private val lestEndretVurderingPåSkjæringstidspunktVerdi: ThreadLocal<EndretVurderingPåSkjæringstidspunktData?> =
+        ThreadLocal
+            .withInitial {
+                null
+            }
     private val lestEndretGrunnlagForBeregningVerdi: ThreadLocal<EndretGrunnlagForBeregningData?> = ThreadLocal.withInitial { null }
     private val lestAvbruttSøknadVerdi: ThreadLocal<AvbruttSøknadData?> = ThreadLocal.withInitial { null }
 

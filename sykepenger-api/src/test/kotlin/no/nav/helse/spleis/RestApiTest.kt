@@ -106,14 +106,23 @@ internal class RestApiTest : AbstractApiTest() {
         val tom = fom.plusDays(16)
         val person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
         val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER))
-        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent), arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER)
+        val søknad =
+            fabrikk.lagSøknad(
+                Søknad.Søknadsperiode.Sykdom(fom, tom, 100.prosent),
+                arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
+            )
         person.håndterSøknad(eventBus, søknad, aktivitetslogg)
         vedtaksperiodeId =
             eventBus.events
                 .filterIsInstance<EventSubscription.VedtaksperiodeOpprettet>()
                 .single()
                 .vedtaksperiodeId
-        val arbeidsgiveropplysninger = fabrikk.lagArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(fom til fom.plusDays(15)), vedtaksperiodeId = vedtaksperiodeId, beregnetInntekt = 31000.månedlig)
+        val arbeidsgiveropplysninger =
+            fabrikk.lagArbeidsgiveropplysninger(
+                arbeidsgiverperioder = listOf(fom til fom.plusDays(15)),
+                vedtaksperiodeId = vedtaksperiodeId,
+                beregnetInntekt = 31000.månedlig,
+            )
         person.håndterArbeidsgiveropplysninger(eventBus, arbeidsgiveropplysninger, Aktivitetslogg())
         testDataSource.ds.lagrePerson(UNG_PERSON_FNR, person)
         testDataSource.ds.lagreHendelse(meldingsReferanse = MELDINGSREFERANSE, fødselsnummer = UNG_PERSON_FNR)

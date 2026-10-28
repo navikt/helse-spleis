@@ -107,7 +107,10 @@ sealed interface Arbeidsgiveropplysning {
                     filterIsInstance<IkkeNyArbeidsgiverperiode>()
 
             check(opplysningerFraBegrunnelse.size <= 1) {
-                "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${map { it::class.simpleName }.joinToString()}"
+                "Det kan maks oppgis én opplysning relatert til begrunnelse. Fant ${opplysningerFraBegrunnelse.size}: ${map {
+                    it::class
+                        .simpleName
+                }.joinToString()}"
             }
 
             val arbeidsgiverperiode =
@@ -170,7 +173,9 @@ sealed interface Arbeidsgiveropplysning {
                 oppgittInntekt,
                 oppgittArbeidsgiverperiode,
                 refusjon?.somOppgittRefusjon(refusjonskravGyldigFra),
-                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(arbeidsgiverperioder?.sortedBy { it.start } ?: emptyList()),
+                begrunnelseForReduksjonEllerIkkeUtbetalt?.somArbeidsgiveropplysning(
+                    arbeidsgiverperioder?.sortedBy { it.start } ?: emptyList(),
+                ),
                 oppgittOpphørAvNaturalytelser,
                 HarFlereArbeidsforhold.takeIf { harFlereArbeidsforhold },
             )

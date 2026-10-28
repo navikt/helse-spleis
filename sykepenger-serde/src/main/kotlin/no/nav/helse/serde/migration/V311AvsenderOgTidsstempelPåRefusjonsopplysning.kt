@@ -17,7 +17,10 @@ internal class V311AvsenderOgTidsstempelPåRefusjonsopplysning : JsonMigration(v
         jsonNode.path("vilkårsgrunnlagHistorikk").forEach { historikkinnslag ->
             historikkinnslag.path("vilkårsgrunnlag").forEach { vilkårsgrunnlag ->
                 vilkårsgrunnlag.path("inntektsgrunnlag").path("arbeidsgiverInntektsopplysninger").forEach { arbeidsgiverInntektsopplysning ->
-                    val fallbackTidsstempel = LocalDateTime.parse(arbeidsgiverInntektsopplysning.path("inntektsopplysning").path("tidsstempel").asText())
+                    val fallbackTidsstempel =
+                        LocalDateTime.parse(
+                            arbeidsgiverInntektsopplysning.path("inntektsopplysning").path("tidsstempel").asText(),
+                        )
                     arbeidsgiverInntektsopplysning
                         .path("refusjonsopplysninger")
                         .filter { refusjonsopplysning ->
@@ -29,7 +32,9 @@ internal class V311AvsenderOgTidsstempelPåRefusjonsopplysning : JsonMigration(v
                             if (hendelse == null) {
                                 refusjonsopplysning.put("avsender", "ARBEIDSGIVER")
                                 refusjonsopplysning.put("tidsstempel", "$fallbackTidsstempel")
-                                sikkerlogg.info("Fant ikke melding med meldingsreferanse $meldingsreferanseId for person $fnr. Defaulter til ARBEIDSGIVER og tidsstempel for inntektsopplysning")
+                                sikkerlogg.info(
+                                    "Fant ikke melding med meldingsreferanse $meldingsreferanseId for person $fnr. Defaulter til ARBEIDSGIVER og tidsstempel for inntektsopplysning",
+                                )
                             } else {
                                 refusjonsopplysning.put("avsender", hendelse.meldingstype.avsender)
                                 refusjonsopplysning.put("tidsstempel", "${hendelse.lestDato}")

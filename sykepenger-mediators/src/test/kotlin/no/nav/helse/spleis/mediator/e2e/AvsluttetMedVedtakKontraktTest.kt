@@ -206,7 +206,10 @@ internal class AvsluttetMedVedtakKontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vedtak med utbetaling selvstendig`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
         val søknadId =
             sendSelvstendigsøknad(
                 arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,

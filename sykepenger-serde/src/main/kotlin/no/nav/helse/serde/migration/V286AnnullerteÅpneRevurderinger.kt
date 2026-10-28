@@ -19,7 +19,10 @@ internal class V286AnnullerteÅpneRevurderinger : JsonMigration(version = 286) {
             val organisasjonsnummer = arbeidsgiver.path("organisasjonsnummer").asText()
 
             arbeidsgiver.path("vedtaksperioder").forEach { migrerVedtaksperiode(aktørId, organisasjonsnummer, it) }
-            arbeidsgiver.path("forkastede").forEach { migrerForkastetVedtaksperiode(aktørId, organisasjonsnummer, it.path("vedtaksperiode")) }
+            arbeidsgiver
+                .path(
+                    "forkastede",
+                ).forEach { migrerForkastetVedtaksperiode(aktørId, organisasjonsnummer, it.path("vedtaksperiode")) }
         }
     }
 
@@ -59,7 +62,15 @@ internal class V286AnnullerteÅpneRevurderinger : JsonMigration(version = 286) {
         if (nestSist.path("tilstand").asText() !in setOf("UBEREGNET_REVURDERING", "BEREGNET_REVURDERING")) return
         nestSist.put("tilstand", "TIL_INFOTRYGD")
         val avsluttettidspunkt = sisteGenerasjon.path("avsluttet").asText().takeUnless(String::isBlank)
-        if (avsluttettidspunkt == null) return sikkerLogg.info("[V286] Ingen avsluttettidspunkt for generasjon ${sisteGenerasjon.path("id").asText()}", kv("aktørId", aktørId), kv("orgnr", orgnr))
+        if (avsluttettidspunkt ==
+            null
+        ) {
+            return sikkerLogg.info(
+                "[V286] Ingen avsluttettidspunkt for generasjon ${sisteGenerasjon.path("id").asText()}",
+                kv("aktørId", aktørId),
+                kv("orgnr", orgnr),
+            )
+        }
         nestSist.put("avsluttet", avsluttettidspunkt)
         generasjonerNode.remove(generasjoner.lastIndex)
     }

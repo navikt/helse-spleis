@@ -36,7 +36,10 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
             håndterAnnullering(2.vedtaksperiode)
             håndterUtbetalt()
             assertEquals(1, observatør.vedtaksperiodeAnnullertEventer.size)
-            assertEquals(1.februar til 28.februar, observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom)
+            assertEquals(
+                1.februar til 28.februar,
+                observatør.vedtaksperiodeAnnullertEventer[0].fom til observatør.vedtaksperiodeAnnullertEventer[0].tom,
+            )
         }
     }
 
@@ -45,7 +48,10 @@ internal class VedtaksperiodeAnnullertEventTest : AbstractDslTest() {
         a1 {
             tilGodkjenning(januar)
             val feil = assertThrows<IllegalStateException> { håndterAnnullering(1.vedtaksperiode) }
-            assertEquals("Fant ingen annulleringskandidater for vedtaksperiode ${1.vedtaksperiode} i tilstand AVVENTER_GODKJENNING", feil.message)
+            assertEquals(
+                "Fant ingen annulleringskandidater for vedtaksperiode ${1.vedtaksperiode} i tilstand AVVENTER_GODKJENNING",
+                feil.message,
+            )
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
             assertEquals(0, observatør.vedtaksperiodeAnnullertEventer.size)
         }

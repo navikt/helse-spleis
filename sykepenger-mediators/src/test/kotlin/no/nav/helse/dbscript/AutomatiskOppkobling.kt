@@ -121,7 +121,13 @@ internal object AutomatiskOppkobling {
     ): Job =
         async(Dispatchers.IO) {
             try {
-                startProcessAndStreamOutput(arrayOf("nais", "postgres", "proxy", "--port", "$port", "spleis"), stopSignal, completionChannel, stdoutChannel, stderrChannel)
+                startProcessAndStreamOutput(
+                    arrayOf("nais", "postgres", "proxy", "--port", "$port", "spleis"),
+                    stopSignal,
+                    completionChannel,
+                    stdoutChannel,
+                    stderrChannel,
+                )
             } catch (err: Exception) {
                 println("Feil i dbproxyJob: ${err.message}")
             }

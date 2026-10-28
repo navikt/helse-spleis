@@ -30,7 +30,10 @@ fun PersonUtDto.tilPersonData() =
         arbeidsgivere = this.arbeidsgivere.map { it.tilPersonData() },
         infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikk.historikk.map { it.tilPersonData() },
-        minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { PersonData.MinimumSykdomsgradVurderingPeriodeData(it.fom, it.tom) },
+        minimumSykdomsgradVurdering =
+            minimumSykdomsgradVurdering.perioder.map {
+                PersonData.MinimumSykdomsgradVurderingPeriodeData(it.fom, it.tom)
+            },
         skjæringstidspunkter = this.skjæringstidspunkter.map { PersonData.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
         dødsdato = this.alder.dødsdato,
     )

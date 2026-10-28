@@ -146,7 +146,8 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
                 path("opptjeningsvurderinger").forEach { opptjeningsvurdering ->
                     if (opptjeningsvurdering.path("kilde").asText() == "INFOTRYGD") return@forEach
                     opptjeningsvurdering as ObjectNode
-                    val opptjeningsvurderingId = assertDoesNotThrow { UUID.fromString(opptjeningsvurdering.path("opptjeningsvurderingId").asText()) }
+                    val opptjeningsvurderingId =
+                        assertDoesNotThrow { UUID.fromString(opptjeningsvurdering.path("opptjeningsvurderingId").asText()) }
                     spleisOpptjeningsvurderingIder.add(opptjeningsvurderingId)
                     opptjeningsvurdering.put("opptjeningsvurderingId", "00000000-0000-0000-0000-000000000000")
                     assertDoesNotThrow { LocalDateTime.parse(opptjeningsvurdering.path("opprettet").asText()) }
@@ -165,7 +166,11 @@ class OpptjeningsvurderingApiTest : AbstractApiTest() {
 
         val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER))
 
-        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent), arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER)
+        val søknad =
+            fabrikk.lagSøknad(
+                Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent),
+                arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
+            )
         person.håndterSøknad(eventBus, søknad, Aktivitetslogg())
 
         val vedtaksperiodeId =

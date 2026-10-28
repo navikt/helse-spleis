@@ -25,7 +25,19 @@ internal class SendtAnnetSøknaderRiver(
         message.forbid("arbeidsgiver.orgnummer")
         message.require("sendtNav", JsonNode::asLocalDateTime)
         message.interestedIn("egenmeldingsdagerFraSykmelding") { egenmeldinger -> egenmeldinger.map { it.asLocalDate() } }
-        message.interestedIn("sporsmal", "arbeidGjenopptatt", "andreInntektskilder", "permitteringer", "merknaderFraSykmelding", "opprinneligSendt", "utenlandskSykmelding", "sendTilGosys", "fravar", "papirsykmeldinger", "inntektFraNyttArbeidsforhold")
+        message.interestedIn(
+            "sporsmal",
+            "arbeidGjenopptatt",
+            "andreInntektskilder",
+            "permitteringer",
+            "merknaderFraSykmelding",
+            "opprinneligSendt",
+            "utenlandskSykmelding",
+            "sendTilGosys",
+            "fravar",
+            "papirsykmeldinger",
+            "inntektFraNyttArbeidsforhold",
+        )
     }
 
     override fun createMessage(packet: JsonMessage) =

@@ -28,7 +28,11 @@ internal class FeriepengeutbetalingerRiver(
     override fun validate(message: JsonMessage) {
         message.requireKey("@løsning.${Feriepengeutbetaling.utgåendeNavn}")
         message.requireAny("@løsning.${Feriepengeutbetaling.utgåendeNavn}.status", gyldigeStatuser)
-        message.requireKey("${Feriepengeutbetaling.utgåendeNavn}.fagsystemId", "utbetalingId", "@løsning.${Feriepengeutbetaling.utgåendeNavn}.beskrivelse")
+        message.requireKey(
+            "${Feriepengeutbetaling.utgåendeNavn}.fagsystemId",
+            "utbetalingId",
+            "@løsning.${Feriepengeutbetaling.utgåendeNavn}.beskrivelse",
+        )
         message.requireKey("@løsning.${Feriepengeutbetaling.utgåendeNavn}.avstemmingsnøkkel")
         message.require("@løsning.${Feriepengeutbetaling.utgåendeNavn}.overføringstidspunkt", JsonNode::asLocalDateTime)
     }

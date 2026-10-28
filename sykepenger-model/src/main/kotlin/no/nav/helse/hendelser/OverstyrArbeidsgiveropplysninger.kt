@@ -50,11 +50,18 @@ class OverstyrArbeidsgiveropplysninger(
     ): Refusjonsservitør? {
         val (refusjonstidslinjeFraOverstyring, strekkbar) = refusjonstidslinjer[orgnummer] ?: return null
         if (refusjonstidslinjeFraOverstyring.isEmpty()) return null
-        if (eksisterendeRefusjonstidslinje.isEmpty()) return Refusjonsservitør.fra(startdatoer = startdatoer, refusjonstidslinje = refusjonstidslinjeFraOverstyring)
+        if (eksisterendeRefusjonstidslinje.isEmpty()) {
+            return Refusjonsservitør.fra(
+                startdatoer = startdatoer,
+                refusjonstidslinje = refusjonstidslinjeFraOverstyring,
+            )
+        }
 
         val refusjonstidslinje =
             if (strekkbar) {
-                refusjonstidslinjeFraOverstyring.fyll(maxOf(eksisterendeRefusjonstidslinje.last().dato, refusjonstidslinjeFraOverstyring.last().dato))
+                refusjonstidslinjeFraOverstyring.fyll(
+                    maxOf(eksisterendeRefusjonstidslinje.last().dato, refusjonstidslinjeFraOverstyring.last().dato),
+                )
             } else {
                 refusjonstidslinjeFraOverstyring
             }
@@ -104,7 +111,9 @@ class OverstyrArbeidsgiveropplysninger(
             val overstyrtInntektMap = mapOf("dato" to skjæringstidspunkt, "beløp" to beløp.månedlig)
             when (begrunnelse) {
                 Begrunnelse.NYOPPSTARTET_ARBEIDSFORHOLD -> {
-                    requireNotNull(startdatoArbeidsforhold) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
+                    requireNotNull(
+                        startdatoArbeidsforhold,
+                    ) { "Fant ikke aktivt arbeidsforhold for skjæringstidspunktet i arbeidsforholdshistorikken" }
                     subsumsjonslogg.logg(
                         `§ 8-28 ledd 3 bokstav b`(
                             organisasjonsnummer = organisasjonsnummer,

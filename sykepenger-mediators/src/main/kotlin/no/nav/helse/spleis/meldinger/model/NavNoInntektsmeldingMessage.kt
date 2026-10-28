@@ -39,7 +39,11 @@ internal class NavNoInntektsmeldingMessage(
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
-    private val begrunnelseForReduksjonEllerIkkeUtbetalt = packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
+    private val begrunnelseForReduksjonEllerIkkeUtbetalt =
+        packet["begrunnelseForReduksjonEllerIkkeUtbetalt"]
+            .takeIf(
+                JsonNode::isTextual,
+            )?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()
     private val harFlereArbeidsforhold = packet["harFlereArbeidsforhold"].takeUnless { it.isMissingOrNull() }?.asBoolean() ?: false
     private val refusjonskravGyldigFra = packet["refusjonskravGyldigFra"].takeUnless { it.isMissingOrNull() }?.asLocalDate()

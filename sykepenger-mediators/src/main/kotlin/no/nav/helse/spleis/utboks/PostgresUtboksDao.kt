@@ -44,8 +44,30 @@ internal class PostgresUtboksDao(
                 withParameter("key", meldinger.map { it.utgåendeMelding.key })
                 withParameter("json", meldinger.map { it.utgåendeMelding.json.toString() })
                 withParameter("mottaker", meldinger.map { it.utgåendeMelding.mottaker.name })
-                withParameter("opprettet") { setArray(it, connection.createArrayOf("timestamptz", meldinger.map { melding -> melding.utgåendeMelding.opprettet }.toTypedArray())) }
-                withParameter("behold_etter_sending") { setArray(it, connection.createArrayOf("boolean", meldinger.map { melding -> melding is Utboksmelding.BeholdEtterSending }.toTypedArray())) }
+                withParameter("opprettet") {
+                    setArray(
+                        it,
+                        connection.createArrayOf(
+                            "timestamptz",
+                            meldinger
+                                .map { melding ->
+                                    melding.utgåendeMelding.opprettet
+                                }.toTypedArray(),
+                        ),
+                    )
+                }
+                withParameter("behold_etter_sending") {
+                    setArray(
+                        it,
+                        connection.createArrayOf(
+                            "boolean",
+                            meldinger
+                                .map { melding ->
+                                    melding is Utboksmelding.BeholdEtterSending
+                                }.toTypedArray(),
+                        ),
+                    )
+                }
             }.use { it.execute() }
     }
 

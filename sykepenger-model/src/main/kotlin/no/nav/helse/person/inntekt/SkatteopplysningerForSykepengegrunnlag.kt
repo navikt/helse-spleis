@@ -39,9 +39,13 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
     val harInntekterToMånederFørSkjæringstidspunkt = inntektsopplysninger.any { it.måned in inntektvurderingsperiode }
     val erNyoppstartetArbeidsforhold = inntektsopplysninger.isEmpty() && nyoppstartetArbeidsforhold
 
-    val erGhostarbeidsgiver = ansattPerioder.isNotEmpty() && ansattVedSkjæringstidspunkt && (erNyoppstartetArbeidsforhold || harInntekterToMånederFørSkjæringstidspunkt)
+    val erGhostarbeidsgiver =
+        ansattPerioder.isNotEmpty() &&
+            ansattVedSkjæringstidspunkt &&
+            (erNyoppstartetArbeidsforhold || harInntekterToMånederFørSkjæringstidspunkt)
 
-    private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate) = ansattPerioder.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
+    private fun nyoppstartetArbeidsforhold(skjæringstidspunkt: LocalDate) =
+        ansattPerioder.harArbeidsforholdNyereEnn(skjæringstidspunkt, MAKS_INNTEKT_GAP)
 
     private fun ansattVedSkjæringstidspunkt(dato: LocalDate) = ansattPerioder.any { ansattPeriode -> ansattPeriode.gjelder(dato) }
 
@@ -49,7 +53,8 @@ internal data class SkatteopplysningerForSykepengegrunnlag(
         val ansattFom: LocalDate,
         val ansattTom: LocalDate?,
     ) {
-        fun gjelder(skjæringstidspunkt: LocalDate) = ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
+        fun gjelder(skjæringstidspunkt: LocalDate) =
+            ansattFom <= skjæringstidspunkt && (ansattTom == null || ansattTom >= skjæringstidspunkt)
 
         fun harArbeidetMindreEnn(
             skjæringstidspunkt: LocalDate,

@@ -109,7 +109,10 @@ internal class YtelserRiver(
                 "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.harIndividuellForsikring",
             )
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning") {
-                message.requireKey("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.grad", "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.iVentetid")
+                message.requireKey(
+                    "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.grad",
+                    "@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.dekning.iVentetid",
+                )
             }
             message.interestedIn("@løsning.${ForsikringsvurderingResultat.utgåendeNavn}.opphørsdato")
         }

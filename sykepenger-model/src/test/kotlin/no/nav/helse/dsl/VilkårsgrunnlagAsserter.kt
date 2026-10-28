@@ -20,7 +20,14 @@ internal fun ArbeidsgiverInntektsopplysning.assertArbeidsgiverInntektsopplysning
     forventetKorrigertInntekt: Inntekt? = null,
     forventetkilde: Arbeidstakerkilde = Arbeidstakerkilde.Arbeidsgiver,
 ) {
-    assertArbeidsgiverInntektsopplysning(inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde)
+    assertArbeidsgiverInntektsopplysning(
+        inspektør,
+        forventetFaktaavklartInntekt,
+        forventetOmregnetÅrsinntekt,
+        forventetFastsattÅrsinntekt,
+        forventetKorrigertInntekt,
+        forventetkilde,
+    )
 }
 
 internal fun TestPerson.TestArbeidsgiver.assertInntektsgrunnlag(
@@ -36,7 +43,10 @@ private fun assertInntektsgrunnlag(
     forventetAntallArbeidsgivere: Int,
     assertBlock: InntektsgrunnlagAssert.() -> Unit,
 ) {
-    assertEquals(forventetAntallArbeidsgivere, inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size + inntektsgrunnlag.deaktiverteArbeidsforhold.size)
+    assertEquals(
+        forventetAntallArbeidsgivere,
+        inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size + inntektsgrunnlag.deaktiverteArbeidsforhold.size,
+    )
     InntektsgrunnlagAssert(inntektsgrunnlag).apply(assertBlock).assert()
 }
 
@@ -78,7 +88,15 @@ internal data class InntektsgrunnlagAssert(
         assertNotNull(actual)
         assertEquals(deaktivert, aktiv == null) { "forventet at inntekten er ${if (deaktivert) "deaktivert" else "aktivert"}" }
         assertEquals(deaktivert, deaktiv != null) { "forventet at inntekten er ${if (deaktivert) "deaktivert" else "aktivert"}" }
-        assertArbeidsgiverInntektsopplysning(actual.inspektør, forventetFaktaavklartInntekt, forventetOmregnetÅrsinntekt, forventetFastsattÅrsinntekt, forventetKorrigertInntekt, forventetkilde, forventetKildeId)
+        assertArbeidsgiverInntektsopplysning(
+            actual.inspektør,
+            forventetFaktaavklartInntekt,
+            forventetOmregnetÅrsinntekt,
+            forventetFastsattÅrsinntekt,
+            forventetKorrigertInntekt,
+            forventetkilde,
+            forventetKildeId,
+        )
     }
 
     internal fun assertSelvstendigInntektsgrunnlag(

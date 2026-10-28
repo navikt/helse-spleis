@@ -63,11 +63,45 @@ class Ytelser(
         arbeidsavklaringspenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
         dagpenger.valider(aktivitetslogg, skjæringstidspunkt, periodeForOverlappsjekk)
         foreldrepenger.valider(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)
-        if (svangerskapspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med svangerskapspenger`)
-        if (pleiepenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med pleiepenger`)
-        if (omsorgspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med omsorgspenger`)
-        if (opplæringspenger.overlapper(aktivitetslogg, periodeForOverlappsjekk, erForlengelse)) aktivitetslogg.varsel(Varselkode.`Overlapper med opplæringspenger`)
-        if (institusjonsopphold.overlapper(aktivitetslogg, periodeForOverlappsjekk)) aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
+        if (svangerskapspenger.overlapper(
+                aktivitetslogg,
+                periodeForOverlappsjekk,
+                erForlengelse,
+            )
+        ) {
+            aktivitetslogg.varsel(Varselkode.`Overlapper med svangerskapspenger`)
+        }
+        if (pleiepenger.overlapper(
+                aktivitetslogg,
+                periodeForOverlappsjekk,
+                erForlengelse,
+            )
+        ) {
+            aktivitetslogg.varsel(Varselkode.`Overlapper med pleiepenger`)
+        }
+        if (omsorgspenger.overlapper(
+                aktivitetslogg,
+                periodeForOverlappsjekk,
+                erForlengelse,
+            )
+        ) {
+            aktivitetslogg.varsel(Varselkode.`Overlapper med omsorgspenger`)
+        }
+        if (opplæringspenger.overlapper(
+                aktivitetslogg,
+                periodeForOverlappsjekk,
+                erForlengelse,
+            )
+        ) {
+            aktivitetslogg.varsel(Varselkode.`Overlapper med opplæringspenger`)
+        }
+        if (institusjonsopphold.overlapper(
+                aktivitetslogg,
+                periodeForOverlappsjekk,
+            )
+        ) {
+            aktivitetslogg.funksjonellFeil(Varselkode.`Overlapper med institusjonsopphold`)
+        }
 
         return !aktivitetslogg.harFunksjonelleFeil()
     }

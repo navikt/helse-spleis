@@ -23,7 +23,11 @@ internal class V339JustereFomPåSpesifikkeUtbetalinger : JsonMigration(339) {
                 }.forEach { utbetaling ->
                     val (opprinneligFom, nyOgFeilFom) = utbetalingerSomSkalFikses.getValue(utbetaling.path("id").asText())
                     if (utbetaling.path("fom").dato == nyOgFeilFom) {
-                        sikkerlogg.info("Endrer tilbake fom fra=$nyOgFeilFom til fom=$opprinneligFom for utbetaling med id=${utbetaling.path("id").asText()}.")
+                        sikkerlogg.info(
+                            "Endrer tilbake fom fra=$nyOgFeilFom til fom=$opprinneligFom for utbetaling med id=${utbetaling.path(
+                                "id",
+                            ).asText()}.",
+                        )
                         kv("fødselsnummer", fnr)
                         (utbetaling as ObjectNode).putArray("fom").apply {
                             add(opprinneligFom.year)

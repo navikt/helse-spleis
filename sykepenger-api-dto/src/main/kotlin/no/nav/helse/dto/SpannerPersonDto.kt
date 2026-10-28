@@ -386,13 +386,21 @@ data class SpannerPersonDto(
                             skjæringstidspunkt = skjæringstidspunkt,
                             dagerUtenNavAnsvar = gjeldendeEndring.dagerUtenNavAnsvar,
                             refusjonstidslinje = gjeldendeEndring.refusjonstidslinje.perioder,
-                            refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger = if (behandling.id == sisteBehandlingId) sisteRefusjonstidslinje!!.perioder else emptyList(),
+                            refusjonstidslinjeHensyntattUbrukteRefusjonsopplysninger =
+                                if (behandling.id ==
+                                    sisteBehandlingId
+                                ) {
+                                    sisteRefusjonstidslinje!!.perioder
+                                } else {
+                                    emptyList()
+                                },
                             utbetalingstidslinje = gjeldendeEndring.utbetalingstidslinje.dager,
                             forbrukteDager = gjeldendeEndring.maksdatoresultat.forbrukteDagerAntall,
                             gjenståendeDager = gjeldendeEndring.maksdatoresultat.gjenståendeDager,
                             maksdato = gjeldendeEndring.maksdatoresultat.maksdato,
                             sykdomstidslinje = gjeldendeEndring.sykdomstidslinje.dager,
-                            arbeidsgiverInntektsopplysninger = vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger ?: emptyList(),
+                            arbeidsgiverInntektsopplysninger =
+                                vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger ?: emptyList(),
                             personOppdrag = utbetaling?.personOppdrag?.takeUnless { it.linjer.isEmpty() },
                             arbeidsgiverOppdrag = utbetaling?.arbeidsgiverOppdrag?.takeUnless { it.linjer.isEmpty() },
                             dagerNavOvertarAnsvar = gjeldendeEndring.dagerNavOvertarAnsvar,
@@ -889,7 +897,10 @@ fun PersonUtDto.tilSpannerPersonDto(): SpannerPersonDto {
         infotrygdhistorikk = this.infotrygdhistorikk.elementer.map { it.tilPersonData() },
         vilkårsgrunnlagHistorikk = vilkårsgrunnlagHistorikkDto,
         skjæringstidspunkter = this.skjæringstidspunkter.map { SpannerPersonDto.ArbeidsgiverData.PeriodeData(it.fom, it.tom) },
-        minimumSykdomsgradVurdering = minimumSykdomsgradVurdering.perioder.map { SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom) },
+        minimumSykdomsgradVurdering =
+            minimumSykdomsgradVurdering.perioder.map {
+                SpannerPersonDto.MinimumSykdomsgradVurderingPeriode(it.fom, it.tom)
+            },
         dødsdato = this.alder.dødsdato,
     )
 }
@@ -917,9 +928,20 @@ private fun ArbeidsgiverUtDto.tilPersonData(vilkårsgrunnlagHistorikk: List<Vilk
                         .last()
                         .endringer
                         .last()
-                val vilkårsgrunnlag = gjeldendeEndring.vilkårsgrunnlagId?.let { vilkårsgrunnlagId -> vilkårsgrunnlagHistorikk.flatMap { it.vilkårsgrunnlag }.first { it.vilkårsgrunnlagId == vilkårsgrunnlagId } }
+                val vilkårsgrunnlag =
+                    gjeldendeEndring.vilkårsgrunnlagId?.let { vilkårsgrunnlagId ->
+                        vilkårsgrunnlagHistorikk.flatMap { it.vilkårsgrunnlag }.first {
+                            it.vilkårsgrunnlagId ==
+                                vilkårsgrunnlagId
+                        }
+                    }
                 val utbetaling = gjeldendeEndring.utbetalingId?.let { utbetalingId -> utbetalingerDto.first { it.id == utbetalingId } }
-                vedtaksperiode.tilPersonData(vilkårsgrunnlag, utbetaling, ubrukteRefusjonsopplysninger.sisteBehandlingId, ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje?.tilPersonData())
+                vedtaksperiode.tilPersonData(
+                    vilkårsgrunnlag,
+                    utbetaling,
+                    ubrukteRefusjonsopplysninger.sisteBehandlingId,
+                    ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje?.tilPersonData(),
+                )
             },
         forkastede = this.forkastede.map { it.tilPersonData() },
         utbetalinger = utbetalingerDto,
@@ -1262,10 +1284,20 @@ private fun VedtaksperiodeUtDto.tilPersonData(
     utbetaling = utbetaling,
     sisteBehandlingId,
     sisteRefusjonstidslinje,
-    annulleringskandidater = annulleringskandidater.map { SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.AnnulleringskandidatDto(it.vedtaksperiodeId, it.organisasjonsnummer, it.fom, it.tom) },
+    annulleringskandidater =
+        annulleringskandidater.map {
+            SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.AnnulleringskandidatDto(
+                it.vedtaksperiodeId,
+                it.organisasjonsnummer,
+                it.fom,
+                it.tom,
+            )
+        },
 )
 
-private fun utledVenteårsak(venteårsak: VedtaksperiodeVenterDto?): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
+private fun utledVenteårsak(
+    venteårsak: VedtaksperiodeVenterDto?,
+): SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.VedtaksperiodeVenterDto? {
     try {
         return venteårsak?.tilPersonData()
     } catch (_: Exception) {
@@ -1977,7 +2009,9 @@ private fun FaktaavklartInntektUtDto.tilPersonData(): SpannerPersonDto.Faktaavkl
         is ArbeidstakerFaktaavklartInntektUtDto -> {
             val (kilde, skatteopplysninger) =
                 when (val io = this.inntektsopplysningskilde) {
-                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto -> AORDNINGEN to io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
+                    is ArbeidstakerinntektskildeUtDto.AOrdningenDto ->
+                        AORDNINGEN to
+                            io.inntektsopplysninger.map { it.tilPersonDataSkattopplysning() }
                     ArbeidstakerinntektskildeUtDto.ArbeidsgiverDto -> ARBEIDSGIVER to null
                     ArbeidstakerinntektskildeUtDto.InfotrygdDto -> INFOTRYGD to null
                 }
@@ -1999,7 +2033,10 @@ private fun FaktaavklartInntektUtDto.tilPersonData(): SpannerPersonDto.Faktaavkl
                 hendelseId = this.inntektsdata.hendelseId.id,
                 beløp = this.inntektsdata.beløp.tilPersonData(),
                 tidsstempel = this.inntektsdata.tidsstempel,
-                pensjonsgivendeInntekter = this.pensjonsgivendeInntekter.map { SpannerPersonDto.SelvstendigFaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall, it.beløp.tilPersonData()) },
+                pensjonsgivendeInntekter =
+                    this.pensjonsgivendeInntekter.map {
+                        SpannerPersonDto.SelvstendigFaktaavklartInntektData.PensjonsgivendeInntektData(it.årstall, it.beløp.tilPersonData())
+                    },
                 anvendtGrunnbeløp = this.anvendtGrunnbeløp.tilPersonData(),
             )
     }

@@ -316,7 +316,11 @@ fun `§ 8-12 ledd 1 punktum 1`(
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
     if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
-    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    if (dagerIkkeOppfylt.isNotEmpty()) {
+        subsumsjoner.add(
+            lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()),
+        )
+    }
     return subsumsjoner
 }
 
@@ -541,17 +545,16 @@ fun `§ 8-17 ledd 1 bokstav a - arbeidsgiversøknad`(
  *
  * @param dato Nav utbetaler første 16 dager
  */
-fun `§ 8-17 ledd 1`(
-    dato: Collection<ClosedRange<LocalDate>>,
-) = Subsumsjon.periodisertSubsumsjon(
-    perioder = dato,
-    lovverk = "folketrygdloven",
-    versjon = LocalDate.of(2018, 1, 1),
-    utfall = VILKAR_OPPFYLT,
-    paragraf = PARAGRAF_8_17,
-    ledd = LEDD_1,
-    input = emptyMap(),
-)
+fun `§ 8-17 ledd 1`(dato: Collection<ClosedRange<LocalDate>>) =
+    Subsumsjon.periodisertSubsumsjon(
+        perioder = dato,
+        lovverk = "folketrygdloven",
+        versjon = LocalDate.of(2018, 1, 1),
+        utfall = VILKAR_OPPFYLT,
+        paragraf = PARAGRAF_8_17,
+        ledd = LEDD_1,
+        input = emptyMap(),
+    )
 
 /**
  * Trygden yter ikke sykepenger for lovpålagt ferie og permisjon
@@ -1023,7 +1026,11 @@ fun `§ 8-51 ledd 3`(
 
     val subsumsjoner = mutableListOf<Subsumsjon>()
     if (dagerOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_OPPFYLT, dagerOppfylt.first(), dagerOppfylt.last()))
-    if (dagerIkkeOppfylt.isNotEmpty()) subsumsjoner.add(lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()))
+    if (dagerIkkeOppfylt.isNotEmpty()) {
+        subsumsjoner.add(
+            lagSubsumsjon(VILKAR_IKKE_OPPFYLT, dagerIkkeOppfylt.first(), dagerIkkeOppfylt.last()),
+        )
+    }
     return subsumsjoner
 }
 
@@ -1140,6 +1147,10 @@ private fun ClosedRange<LocalDate>.trim(periodeSomSkalTrimmesBort: ClosedRange<L
     // situasjon så vil resultatet være to perioder.
     val result = mutableListOf<ClosedRange<LocalDate>>()
     if (this.start < periodeSomSkalTrimmesBort.start) result.add(this.start..periodeSomSkalTrimmesBort.start.minusDays(1))
-    if (this.endInclusive > periodeSomSkalTrimmesBort.endInclusive) result.add(periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive)
+    if (this.endInclusive >
+        periodeSomSkalTrimmesBort.endInclusive
+    ) {
+        result.add(periodeSomSkalTrimmesBort.endInclusive.plusDays(1)..this.endInclusive)
+    }
     return result
 }

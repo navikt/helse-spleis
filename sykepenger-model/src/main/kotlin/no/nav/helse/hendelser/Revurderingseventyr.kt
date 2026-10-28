@@ -94,7 +94,12 @@ class Revurderingseventyr private constructor(
         fun graderteAndreYtelserEndret(
             hendelse: Hendelse,
             graderteAndreYtelserEndringFom: LocalDate,
-        ) = Revurderingseventyr(RevurderingÅrsak.GraderteAndreYtelserEndret, graderteAndreYtelserEndringFom, graderteAndreYtelserEndringFom.somPeriode(), hendelse)
+        ) = Revurderingseventyr(
+            RevurderingÅrsak.GraderteAndreYtelserEndret,
+            graderteAndreYtelserEndringFom,
+            graderteAndreYtelserEndringFom.somPeriode(),
+            hendelse,
+        )
 
         fun korrigertInntektsmeldingInntektsopplysninger(
             hendelse: Hendelse,

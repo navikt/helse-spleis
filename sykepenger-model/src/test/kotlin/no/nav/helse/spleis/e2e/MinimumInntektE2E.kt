@@ -43,7 +43,12 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(11, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((17.januar til 31.januar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
-                assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntekt })
+                assertTrue(
+                    utbetalingstidslinjeInspektør.avvistedatoer.all {
+                        utbetalingstidslinjeInspektør.begrunnelse(it).single() ==
+                            Begrunnelse.MinimumInntekt
+                    },
+                )
             }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }
@@ -65,7 +70,12 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(16, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((7.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
-                assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+                assertTrue(
+                    utbetalingstidslinjeInspektør.avvistedatoer.all {
+                        utbetalingstidslinjeInspektør.begrunnelse(it).single() ==
+                            Begrunnelse.MinimumInntektOver67
+                    },
+                )
             }
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
@@ -88,7 +98,12 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(8, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((17.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
-                assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+                assertTrue(
+                    utbetalingstidslinjeInspektør.avvistedatoer.all {
+                        utbetalingstidslinjeInspektør.begrunnelse(it).single() ==
+                            Begrunnelse.MinimumInntektOver67
+                    },
+                )
             }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }
@@ -103,10 +118,20 @@ internal class MinimumInntektE2E : AbstractDslTest() {
         }
         a2 {
             nyPeriode(31.januar til 28.februar, a2)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)), OppgittInntekt(500.daglig), OppgittRefusjon(500.daglig, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)),
+                OppgittInntekt(500.daglig),
+                OppgittRefusjon(500.daglig, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a1 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(200.daglig), OppgittRefusjon(200.daglig, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OppgittInntekt(200.daglig),
+                OppgittRefusjon(200.daglig, emptyList(), refusjonskravGyldigFra = null),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -123,7 +148,12 @@ internal class MinimumInntektE2E : AbstractDslTest() {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.also { utbetalingstidslinjeInspektør ->
                 assertEquals(9, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((16.februar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
-                assertTrue(utbetalingstidslinjeInspektør.avvistedatoer.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+                assertTrue(
+                    utbetalingstidslinjeInspektør.avvistedatoer.all {
+                        utbetalingstidslinjeInspektør.begrunnelse(it).single() ==
+                            Begrunnelse.MinimumInntektOver67
+                    },
+                )
             }
         }
     }
@@ -145,7 +175,12 @@ internal class MinimumInntektE2E : AbstractDslTest() {
                 assertEquals(21, utbetalingstidslinjeInspektør.avvistDagTeller)
                 assertEquals((31.januar til 28.februar).filterNot { it.erHelg() }, utbetalingstidslinjeInspektør.avvistedatoer)
                 assertEquals(Begrunnelse.MinimumInntekt, utbetalingstidslinjeInspektør.begrunnelse(31.januar).single())
-                assertTrue((februar).filterNot { it.erHelg() }.all { utbetalingstidslinjeInspektør.begrunnelse(it).single() == Begrunnelse.MinimumInntektOver67 })
+                assertTrue(
+                    (februar).filterNot { it.erHelg() }.all {
+                        utbetalingstidslinjeInspektør.begrunnelse(it).single() ==
+                            Begrunnelse.MinimumInntektOver67
+                    },
+                )
             }
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_GODKJENNING)
         }

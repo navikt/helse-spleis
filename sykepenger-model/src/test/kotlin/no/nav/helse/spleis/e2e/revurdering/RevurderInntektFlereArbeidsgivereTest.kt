@@ -83,7 +83,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 1080.0.daglig, aktuellDagsinntekt = 32000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
 
@@ -132,7 +135,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }
@@ -154,7 +160,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
 
@@ -177,7 +186,10 @@ internal class RevurderInntektFlereArbeidsgivereTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertDag(17.januar, 692.0.daglig, aktuellDagsinntekt = 15000.månedlig, personbeløp = INGEN)
-            assertIngenInfo("En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere", AktivitetsloggFilter.person())
+            assertIngenInfo(
+                "En endring hos en arbeidsgiver har medført at det trekkes tilbake penger hos andre arbeidsgivere",
+                AktivitetsloggFilter.person(),
+            )
         }
     }
 

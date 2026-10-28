@@ -24,7 +24,14 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
         a1 { nyPeriode(januar) }
         a2 { nyPeriode(januar) }
         a1 { håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar)) }
-        a2 { håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nåtidspunkt = 10.februar(2025).atStartOfDay()) }
+        a2 {
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay(),
+            )
+        }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -42,7 +49,12 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
     fun `sender med inntektskilde saksbehandler i sykepengegrunnlaget i godkjenningsbehovet ved skjønnsmessig fastsettelse -- AOrdning på orginal inntekt`() {
         a1 {
             nyPeriode(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(), nåtidspunkt = 10.februar(2025).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 10.november(2024).atStartOfDay(),
+                nåtidspunkt = 10.februar(2025).atStartOfDay(),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -433,8 +445,14 @@ internal class GodkjenningsbehovTest : AbstractDslTest() {
 
     private fun inntektskilder(godkjenningsbehov: Behovsoppsamler.Behovsdetaljer.Godkjenning) =
         when (val fakta = godkjenningsbehov.event.sykepengegrunnlagsfakta) {
-            is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel -> fakta.arbeidsgivere.map { Inntektskilde.valueOf(it.inntektskilde) }
-            is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn -> fakta.arbeidsgivere.map { Inntektskilde.Saksbehandler }
+            is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel ->
+                fakta.arbeidsgivere.map {
+                    Inntektskilde.valueOf(it.inntektskilde)
+                }
+            is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerEtterSkjønn ->
+                fakta.arbeidsgivere.map {
+                    Inntektskilde.Saksbehandler
+                }
             is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.ArbeidstakerFraInfotrygd,
             is EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel,
             -> error("Denne testen tester ikke disse casene..")

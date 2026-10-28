@@ -179,7 +179,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         meldingOpprettet: LocalDateTime = perioder.minOfOrNull { it.fom!! }!!.atStartOfDay(),
         fnr: String = UNG_PERSON_FNR_2018,
     ): UUID {
-        val (id, message) = meldingsfabrikk.lagNySøknadSelvstendig(*perioder, opprettet = meldingOpprettet, fnr = fnr, arbeidssituasjon = arbeidssituasjon)
+        val (id, message) =
+            meldingsfabrikk.lagNySøknadSelvstendig(
+                *perioder,
+                opprettet = meldingOpprettet,
+                fnr = fnr,
+                arbeidssituasjon = arbeidssituasjon,
+            )
         testRapid.sendTestMessage(message)
         return id.toUUID()
     }
@@ -190,7 +196,13 @@ internal abstract class AbstractEndToEndMediatorTest {
         fnr: String = UNG_PERSON_FNR_2018,
         tidligereArbeidsgiverOrgnummer: String? = null,
     ): UUID {
-        val (id, message) = meldingsfabrikk.lagNySøknadArbeidsledig(*perioder, opprettet = meldingOpprettet, fnr = fnr, tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer)
+        val (id, message) =
+            meldingsfabrikk.lagNySøknadArbeidsledig(
+                *perioder,
+                opprettet = meldingOpprettet,
+                fnr = fnr,
+                tidligereArbeidsgiverOrgnummer = tidligereArbeidsgiverOrgnummer,
+            )
         testRapid.sendTestMessage(message)
         return id.toUUID()
     }
@@ -367,9 +379,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         return id.toUUID()
     }
 
-    protected fun sendDødsmelding(
-        dødsdato: LocalDate,
-    ) {
+    protected fun sendDødsmelding(dødsdato: LocalDate) {
         val (_, message) = meldingsfabrikk.lagDødsmelding(dødsdato)
         testRapid.sendTestMessage(message)
     }
@@ -517,8 +527,23 @@ internal abstract class AbstractEndToEndMediatorTest {
         flagg: Set<String> = emptySet(),
         tilstandsendringstidspunkt: LocalDateTime = LocalDateTime.now(),
     ): Pair<UUID, String> {
-        val vedtaksperiodeId = if (vedtaksperiodeIndeks == -1) UUID.randomUUID() else testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
-        val (meldingId, message) = meldingsfabrikk.lagPåminnelse(vedtaksperiodeId, tilstandType, orgnummer, yrkesaktivitetstype, flagg, tilstandsendringstidspunkt)
+        val vedtaksperiodeId =
+            if (vedtaksperiodeIndeks ==
+                -1
+            ) {
+                UUID.randomUUID()
+            } else {
+                testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks)
+            }
+        val (meldingId, message) =
+            meldingsfabrikk.lagPåminnelse(
+                vedtaksperiodeId,
+                tilstandType,
+                orgnummer,
+                yrkesaktivitetstype,
+                flagg,
+                tilstandsendringstidspunkt,
+            )
         testRapid.sendTestMessage(message)
         return vedtaksperiodeId to meldingId
     }
@@ -570,7 +595,16 @@ internal abstract class AbstractEndToEndMediatorTest {
         makstidOppnådd: Boolean = false,
         godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
     ) {
-        sendUtbetalingsgodkjenning(vedtaksperiodeIndeks, godkjent, saksbehandlerIdent, saksbehandlerEpost, automatiskBehandling, makstidOppnådd, godkjenttidspunkt, orgnummer)
+        sendUtbetalingsgodkjenning(
+            vedtaksperiodeIndeks,
+            godkjent,
+            saksbehandlerIdent,
+            saksbehandlerEpost,
+            automatiskBehandling,
+            makstidOppnådd,
+            godkjenttidspunkt,
+            orgnummer,
+        )
     }
 
     protected fun sendYtelser(
@@ -597,7 +631,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger)
         val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
         val behandlingId = behov.path("behandlingId").asText().toUUID()
-        assertEquals(forsikringsvurderingResultat != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat))
+        assertEquals(
+            forsikringsvurderingResultat != null,
+            testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat),
+        )
         val (_, message) =
             meldingsfabrikk.lagYtelser(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -654,7 +691,10 @@ internal abstract class AbstractEndToEndMediatorTest {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Medlemskap))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Arbeidsforhold))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.InntekterForSykepengegrunnlag))
-        assertEquals(forsikringsvurderingId != null, testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering))
+        assertEquals(
+            forsikringsvurderingId != null,
+            testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Forsikringsvurdering),
+        )
         val behov = testRapid.inspektør.etterspurteBehov(Behov.Behovstype.Medlemskap)
         val skjæringstidspunktFraBehov = behov.path("Medlemskap").path("skjæringstidspunkt").asLocalDate()
         val yrkesaktivitetstypeFraBehov = behov.path("yrkesaktivitetstype").asText()
@@ -1029,7 +1069,10 @@ internal abstract class AbstractEndToEndMediatorTest {
                     orgnr = orgnr,
                     vedtaksperiodeId = vedtaksperiodeId,
                     skjæringstidspunkt = node.path("skjæringstidspunkt").asLocalDate(),
-                    førsteFraværsdager = node.path("førsteFraværsdager").map { FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate()) },
+                    førsteFraværsdager =
+                        node.path("førsteFraværsdager").map {
+                            FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate())
+                        },
                     sykmeldingsperioder =
                         node.path("sykmeldingsperioder").map {
                             no.nav.helse.spill_av_im
@@ -1051,7 +1094,9 @@ internal abstract class AbstractEndToEndMediatorTest {
 
         private fun finnInntektsmeldinger(fnr: String): List<JsonNode> =
             dataSource.connection {
-                prepareStatementWithNamedParameters("SELECT data FROM melding WHERE fnr = :fnr AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC") {
+                prepareStatementWithNamedParameters(
+                    "SELECT data FROM melding WHERE fnr = :fnr AND melding_type = 'INNTEKTSMELDING' ORDER BY lest_dato ASC",
+                ) {
                     withParameter("fnr", fnr.toLong())
                 }.use {
                     it.executeQuery().use { rs ->

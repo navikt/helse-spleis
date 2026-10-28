@@ -59,7 +59,9 @@ fun Behandlingsporing.erLik(other: Behandlingsporing) =
     when (this) {
         Behandlingsporing.IngenYrkesaktivitet -> other is Behandlingsporing.IngenYrkesaktivitet
         Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> other is Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker && this.organisasjonsnummer == other.organisasjonsnummer
+        is Behandlingsporing.Yrkesaktivitet.Arbeidstaker ->
+            other is Behandlingsporing.Yrkesaktivitet.Arbeidstaker &&
+                this.organisasjonsnummer == other.organisasjonsnummer
         Behandlingsporing.Yrkesaktivitet.Frilans -> other is Behandlingsporing.Yrkesaktivitet.Frilans
         Behandlingsporing.Yrkesaktivitet.Selvstendig -> other is Behandlingsporing.Yrkesaktivitet.Selvstendig
     }

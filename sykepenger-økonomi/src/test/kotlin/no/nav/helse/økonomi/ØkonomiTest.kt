@@ -532,6 +532,4 @@ private fun assertForventetFeil(
     assertThrows<Throwable>(ØnsketOppførsel) { ønsket() }.håndterØnsketOppførselFeil(forklaring)
 }
 
-fun List<Økonomi>.betal(
-    sykepengegrunnlagBegrenset6G: Inntekt,
-) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)
+fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)

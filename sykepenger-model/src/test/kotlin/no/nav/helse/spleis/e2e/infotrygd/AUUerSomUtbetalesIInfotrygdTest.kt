@@ -27,7 +27,13 @@ internal class AUUerSomUtbetalesIInfotrygdTest : AbstractDslTest() {
                     .vedtaksperiodetilstand,
             )
 
-            assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode })
+            assertEquals(
+                0,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count {
+                    it.opplysninger.vedtaksperiodeId ==
+                        1.vedtaksperiode
+                },
+            )
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             håndterAnmodningOmForkasting(1.vedtaksperiode)
         }

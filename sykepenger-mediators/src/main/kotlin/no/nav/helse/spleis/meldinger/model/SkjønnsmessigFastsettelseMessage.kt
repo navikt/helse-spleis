@@ -37,6 +37,9 @@ internal class SkjønnsmessigFastsettelseMessage(
             val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
             val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
 
-            SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(orgnummer, Inntektsdata(meldingsporing.id, skjæringstidspunkt, årlig, LocalDateTime.now()))
+            SkjønnsmessigFastsettelse.SkjønnsfastsattInntekt(
+                orgnummer,
+                Inntektsdata(meldingsporing.id, skjæringstidspunkt, årlig, LocalDateTime.now()),
+            )
         }
 }

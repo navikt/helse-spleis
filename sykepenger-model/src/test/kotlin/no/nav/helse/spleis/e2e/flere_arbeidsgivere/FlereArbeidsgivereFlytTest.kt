@@ -204,7 +204,11 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
         a2 {
             håndterSykmelding(Sykmeldingsperiode(1.mars, 31.mars))
             håndterSøknad(Sykdom(1.mars, 31.mars, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.mars til 16.mars), beregnetInntekt = 20000.månedlig, vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(
+                listOf(1.mars til 16.mars),
+                beregnetInntekt = 20000.månedlig,
+                vedtaksperiodeId = 2.vedtaksperiode,
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -320,7 +324,19 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
 
         a1 { assertIngenFunksjonelleFeil() }
         a1 { assertTilstander(1.vedtaksperiode, AVSLUTTET) }
-        a2 { assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET) }
+        a2 {
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+        }
         a1 { assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK) }
         a2 { assertTilstander(2.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE) }
     }

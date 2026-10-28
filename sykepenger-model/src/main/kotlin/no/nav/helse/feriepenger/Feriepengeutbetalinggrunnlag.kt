@@ -60,7 +60,9 @@ internal data class Feriepengeutbetalinggrunnlag(
             override fun dto() = UtbetaltDagUtDto.InfotrygdArbeidsgiver(orgnummer, dato, beløp)
 
             internal companion object {
-                internal fun gjenopprett(dto: FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto.InfotrygdArbeidsgiver): InfotrygdArbeidsgiver =
+                internal fun gjenopprett(
+                    dto: FeriepengeutbetalinggrunnlagInnDto.UtbetaltDagInnDto.InfotrygdArbeidsgiver,
+                ): InfotrygdArbeidsgiver =
                     InfotrygdArbeidsgiver(
                         orgnummer = dto.orgnummer,
                         dato = dto.dato,

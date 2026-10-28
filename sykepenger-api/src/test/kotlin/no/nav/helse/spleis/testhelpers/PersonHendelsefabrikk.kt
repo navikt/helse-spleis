@@ -84,7 +84,8 @@ internal class OverstyrtArbeidsgiveropplysning(
     private val inntekt: Inntekt,
     private val refusjonsopplysninger: List<Triple<LocalDate, LocalDate?, Inntekt>>? = null,
 ) {
-    private fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) = refusjonsopplysninger ?: listOf(Triple(skjæringstidspunkt, null, inntekt))
+    private fun refusjonsopplysninger(skjæringstidspunkt: LocalDate) =
+        refusjonsopplysninger ?: listOf(Triple(skjæringstidspunkt, null, inntekt))
 
     internal companion object {
         private fun List<OverstyrtArbeidsgiveropplysning>.tilArbeidsgiverInntektsopplysning(
@@ -138,7 +139,12 @@ internal class OverstyrtArbeidsgiveropplysning(
             val defaultRefusjonFom = skjæringstidspunkt
             val strekkbar = opplysning.refusjonsopplysninger(defaultRefusjonFom).any { (_, tom) -> tom == null }
             opplysning.refusjonsopplysninger(defaultRefusjonFom).fold(Beløpstidslinje()) { acc, (fom, tom, beløp) ->
-                acc + Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(MeldingsreferanseId(meldingsreferanseId), SAKSBEHANDLER, opprettet))
+                acc +
+                    Beløpstidslinje.fra(
+                        fom til (tom ?: fom),
+                        beløp,
+                        Kilde(MeldingsreferanseId(meldingsreferanseId), SAKSBEHANDLER, opprettet),
+                    )
             } to strekkbar
         }
     }

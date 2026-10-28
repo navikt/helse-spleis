@@ -50,7 +50,9 @@ internal class V285LoggeRareAnnulleringer(
                     val id = manglerOverføring.path("id").asText()
                     val nåværendeStatus = manglerOverføring.path("status").asText()
                     val oppdatert = LocalDateTime.parse(manglerOverføring.path("oppdatert").asText())
-                    sikkerLogg.warn("Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon4)")
+                    sikkerLogg.warn(
+                        "Annullering $id i Status $nåværendeStatus ser ikke ut til å være overført til Oppdrag (sist oppdatert $oppdatert). AktørId $aktørId, Organisasjonsnummer $organisasjonsnummer (Versjon4)",
+                    )
                     if (id in forkast) {
                         sikkerLogg.info("Setter status på Utbetaling $id til FORKASTET og setter nytt oppdatert-tidspunkt")
                         manglerOverføring as ObjectNode

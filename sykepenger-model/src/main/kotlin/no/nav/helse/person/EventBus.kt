@@ -128,7 +128,9 @@ class EventBus {
         observers.forEach { it.selvstendigIngenDagerIgjen(selvstendigIngenDagerIgjenEvent) }
     }
 
-    internal fun selvstendigUtbetaltEtterVentetid(selvstendigUtbetaltEtterVentetidEvent: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent) {
+    internal fun selvstendigUtbetaltEtterVentetid(
+        selvstendigUtbetaltEtterVentetidEvent: EventSubscription.SelvstendigUtbetaltEtterVentetidEvent,
+    ) {
         _events.add(selvstendigUtbetaltEtterVentetidEvent)
         observers.forEach { it.selvstendigUtbetaltEtterVentetid(selvstendigUtbetaltEtterVentetidEvent) }
     }
@@ -182,7 +184,12 @@ class EventBus {
         organisasjonsnummer: String,
         speilrelatert: Boolean,
     ) {
-        val event = EventSubscription.InntektsmeldingIkkeHåndtertEvent(meldingsreferanseId.id, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), speilrelatert)
+        val event =
+            EventSubscription.InntektsmeldingIkkeHåndtertEvent(
+                meldingsreferanseId.id,
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+                speilrelatert,
+            )
         _events.add(event)
         observers.forEach { it.inntektsmeldingIkkeHåndtert(event) }
     }
@@ -198,7 +205,13 @@ class EventBus {
         organisasjonsnummer: String,
         vedtaksperioderMedSammeFørsteFraværsdag: List<UUID>,
     ) {
-        val event = EventSubscription.InntektsmeldingHåndtertEvent(meldingsreferanseId, vedtaksperiodeId, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer), vedtaksperioderMedSammeFørsteFraværsdag)
+        val event =
+            EventSubscription.InntektsmeldingHåndtertEvent(
+                meldingsreferanseId,
+                vedtaksperiodeId,
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer),
+                vedtaksperioderMedSammeFørsteFraværsdag,
+            )
         _events.add(event)
         observers.forEach { it.inntektsmeldingHåndtert(event) }
     }
@@ -245,7 +258,14 @@ class EventBus {
         skjæringstidspunkt: LocalDate,
         opprettet: LocalDateTime,
     ) {
-        val event = EventSubscription.VedtaksperiodeOpprettet(vedtaksperiodeId, yrkesaktivitetssporing, periode, skjæringstidspunkt, opprettet)
+        val event =
+            EventSubscription.VedtaksperiodeOpprettet(
+                vedtaksperiodeId,
+                yrkesaktivitetssporing,
+                periode,
+                skjæringstidspunkt,
+                opprettet,
+            )
         _events.add(event)
         observers.forEach { it.vedtaksperiodeOpprettet(event) }
     }
@@ -294,7 +314,15 @@ class EventBus {
         oppdragsdetaljer: EventSubscription.Oppdragsdetaljer,
         saksbehandler: String,
     ) {
-        val event = EventSubscription.UtbetalingEvent(yrkesaktivitetssporing, vedtaksperiodeId, behandlingId, utbetalingId, oppdragsdetaljer, saksbehandler)
+        val event =
+            EventSubscription.UtbetalingEvent(
+                yrkesaktivitetssporing,
+                vedtaksperiodeId,
+                behandlingId,
+                utbetalingId,
+                oppdragsdetaljer,
+                saksbehandler,
+            )
         _events.add(event)
         observers.forEach { it.utbetal(event) }
     }
@@ -306,7 +334,14 @@ class EventBus {
         utbetalingId: UUID,
         oppdragsdetaljer: EventSubscription.Oppdragsdetaljer,
     ) {
-        val event = EventSubscription.SimuleringEvent(yrkesaktivitetssporing, vedtaksperiodeId, behandlingId, utbetalingId, oppdragsdetaljer)
+        val event =
+            EventSubscription.SimuleringEvent(
+                yrkesaktivitetssporing,
+                vedtaksperiodeId,
+                behandlingId,
+                utbetalingId,
+                oppdragsdetaljer,
+            )
         _events.add(event)
         observers.forEach { it.simuler(event) }
     }

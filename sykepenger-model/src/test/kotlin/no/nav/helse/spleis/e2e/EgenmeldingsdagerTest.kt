@@ -18,7 +18,12 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterSøknad(19.januar til 31.januar, egenmeldinger = listOf(1.januar til 3.januar))
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar))
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 3.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                2.vedtaksperiode,
+                3.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 3.januar),
+            )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING)
@@ -29,14 +34,27 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
     fun `egenmeldingsdager på førstegangsperioden og forlengelsen`() {
         a1 {
             håndterSøknad(3.januar til 23.januar, egenmeldinger = listOf(1.januar til 3.januar))
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = listOf(1.januar til 3.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                3.januar,
+                listOf(1.januar til 16.januar),
+                forventetEgenmeldinger =
+                    listOf(
+                        1.januar til 3.januar,
+                    ),
+            )
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(3.januar til 18.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
             håndterUtbetalt(Oppdragstatus.AKSEPTERT)
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                3.januar,
+                listOf(3.januar til 18.januar),
+                forventetEgenmeldinger = emptyList(),
+            )
 
             // Vi er i dialog med flex om at de ikke lenger skal sende med egenmeldingsdager på forlengelser, se
             // https://nav-it.slack.com/archives/C014X6VBFPV/p1782978168869839?thread_ts=1782968778.737149&cid=C014X6VBFPV
@@ -44,12 +62,35 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
 
             assertForventetFeil(
                 nå = {
-                    assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = emptyList())
-                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), forventetEgenmeldinger = listOf(1.januar til 3.januar))
+                    assertSkjæringstidspunktOgVenteperiode(
+                        1.vedtaksperiode,
+                        3.januar,
+                        listOf(1.januar til 16.januar),
+                        forventetEgenmeldinger = emptyList(),
+                    )
+                    assertSkjæringstidspunktOgVenteperiode(
+                        2.vedtaksperiode,
+                        3.januar,
+                        listOf(1.januar til 16.januar),
+                        forventetEgenmeldinger =
+                            listOf(
+                                1.januar til 3.januar,
+                            ),
+                    )
                 },
                 ønsket = {
-                    assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
-                    assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar), forventetEgenmeldinger = emptyList())
+                    assertSkjæringstidspunktOgVenteperiode(
+                        1.vedtaksperiode,
+                        3.januar,
+                        listOf(3.januar til 18.januar),
+                        forventetEgenmeldinger = emptyList(),
+                    )
+                    assertSkjæringstidspunktOgVenteperiode(
+                        2.vedtaksperiode,
+                        3.januar,
+                        listOf(3.januar til 18.januar),
+                        forventetEgenmeldinger = emptyList(),
+                    )
                 },
             )
         }
@@ -64,11 +105,26 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
             håndterSøknad(15.mai til 19.mai)
             håndterSøknad(25.mai til 29.mai, egenmeldinger = listOf(24.mai til 24.mai))
 
-            assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 25.mai, listOf(1.mai til 2.mai, 5.mai til 9.mai, 15.mai til 19.mai, 24.mai til 27.mai), listOf(24.mai til 24.mai))
+            assertSkjæringstidspunktOgVenteperiode(
+                4.vedtaksperiode,
+                25.mai,
+                listOf(
+                    1.mai til 2.mai,
+                    5.mai til 9.mai,
+                    15.mai til 19.mai,
+                    24.mai til 27.mai,
+                ),
+                listOf(24.mai til 24.mai),
+            )
 
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(15.mai til 19.mai, 25.mai til 29.mai))
 
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                3.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 2.januar),
+            )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 5.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 15.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
             assertSkjæringstidspunktOgVenteperiode(4.vedtaksperiode, 25.mai, listOf(5.mai til 9.mai, 15.mai til 19.mai, 25.mai til 29.mai))
@@ -82,7 +138,14 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
             håndterSøknad(15.januar til 31.januar, egenmeldinger = listOf(14.januar til 14.januar))
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 9.januar), listOf(1.januar til 2.januar))
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.januar, listOf(1.januar til 9.januar, 14.januar til 20.januar), listOf(14.januar til 14.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                2.vedtaksperiode,
+                15.januar,
+                listOf(1.januar til 9.januar, 14.januar til 20.januar),
+                listOf(
+                    14.januar til 14.januar,
+                ),
+            )
 
             håndterArbeidsgiveropplysninger(arbeidsgiverperioder = emptyList())
 
@@ -101,34 +164,83 @@ internal class EgenmeldingsdagerTest : AbstractDslTest() {
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar), listOf(1.januar til 2.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    5.januar,
+                    listOf(1.januar til 2.januar, 5.januar til 9.januar),
+                    listOf(
+                        1.januar til 2.januar,
+                    ),
+                )
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING)
-                assertSkjæringstidspunktOgVenteperiode(this, 15.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar, 15.januar til 19.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    15.januar,
+                    listOf(
+                        1.januar til 2.januar,
+                        5.januar til 9.januar,
+                        15.januar til 19.januar,
+                    ),
+                )
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING)
-                assertSkjæringstidspunktOgVenteperiode(this, 25.januar, listOf(1.januar til 2.januar, 5.januar til 9.januar, 15.januar til 19.januar, 24.januar til 27.januar), listOf(24.januar til 24.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    25.januar,
+                    listOf(
+                        1.januar til 2.januar,
+                        5.januar til 9.januar,
+                        15.januar til 19.januar,
+                        24.januar til 27.januar,
+                    ),
+                    listOf(24.januar til 24.januar),
+                )
             }
 
             håndterPåminnelse(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING, flagg = setOf("nullstillEgenmeldingsdager"))
 
             with(1.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-                assertSkjæringstidspunktOgVenteperiode(this, 5.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    5.januar,
+                    listOf(
+                        5.januar til 9.januar,
+                        15.januar til 19.januar,
+                        25.januar til 29.januar,
+                    ),
+                )
             }
 
             with(2.vedtaksperiode) {
                 assertTilstander(this, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-                assertSkjæringstidspunktOgVenteperiode(this, 15.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    15.januar,
+                    listOf(
+                        5.januar til 9.januar,
+                        15.januar til 19.januar,
+                        25.januar til 29.januar,
+                    ),
+                )
             }
 
             with(3.vedtaksperiode) {
                 assertTilstander(this, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-                assertSkjæringstidspunktOgVenteperiode(this, 25.januar, listOf(5.januar til 9.januar, 15.januar til 19.januar, 25.januar til 29.januar))
+                assertSkjæringstidspunktOgVenteperiode(
+                    this,
+                    25.januar,
+                    listOf(
+                        5.januar til 9.januar,
+                        15.januar til 19.januar,
+                        25.januar til 29.januar,
+                    ),
+                )
             }
         }
     }

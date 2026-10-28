@@ -34,7 +34,11 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar))
             håndterYtelser(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`, Varselkode.RV_VV_4)
+            assertVarsler(
+                1.vedtaksperiode,
+                Varselkode.TilkommenInntekt.`Søknad fra arbeidsgiver som ikke er i sykepengegrunnlaget`,
+                Varselkode.RV_VV_4,
+            )
             inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedager.let { avvisteDager ->
                 assertEquals(8, avvisteDager.size)
                 assertTrue(avvisteDager.all { it.begrunnelser.single() == Begrunnelse.MinimumSykdomsgrad })
@@ -59,7 +63,11 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(februar)
-            håndterArbeidsgiveropplysninger(listOf(1.februar til 16.februar), beregnetInntekt = 10000.månedlig, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterArbeidsgiveropplysninger(
+                listOf(1.februar til 16.februar),
+                beregnetInntekt = 10000.månedlig,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
             assertVarsler(listOf(Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
@@ -116,7 +124,9 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
     fun `Omgjøring av overlappende periode med nytt skjæringstidspunkt`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)))
+            håndterOverstyrTidslinje(
+                listOf(ManuellOverskrivingDag(30.januar, Dagtype.Arbeidsdag), ManuellOverskrivingDag(31.januar, Dagtype.Arbeidsdag)),
+            )
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             håndterSimulering(1.vedtaksperiode)
@@ -127,7 +137,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             håndterSøknad(Sykdom(31.januar, 15.februar, 100.prosent))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertEquals(31.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(31.januar til 15.februar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(31.januar til 15.februar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
@@ -161,7 +174,10 @@ internal class NyArbeidsgiverUnderveisTest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_VV_1), 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsforhold(1.januar, ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "skal ikke inngå i sykepengegrunnlaget"))
+            håndterOverstyrArbeidsforhold(
+                1.januar,
+                ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "skal ikke inngå i sykepengegrunnlaget"),
+            )
             håndterYtelser(
                 1.vedtaksperiode,
                 inntekterForBeregning =

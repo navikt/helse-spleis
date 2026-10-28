@@ -110,15 +110,31 @@ internal class MessageMediatorTest {
 
     @Test
     fun simuleringer() {
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), UUID.randomUUID(), SimuleringMessage.Simuleringstatus.OK, UUID.randomUUID()))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(UUID.randomUUID(), UUID.randomUUID(), SimuleringMessage.Simuleringstatus.OK, UUID.randomUUID()),
+        )
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese OK simulering" }
         hendelseMediator.reset()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), UUID.randomUUID(), SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL, UUID.randomUUID()))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                SimuleringMessage.Simuleringstatus.FUNKSJONELL_FEIL,
+                UUID.randomUUID(),
+            ),
+        )
         assertTrue(hendelseMediator.lestSimulering) { "Skal lese simulering med feil" }
         hendelseMediator.reset()
 
-        testRapid.sendTestMessage(meldingsfabrikk.lagSimulering(UUID.randomUUID(), UUID.randomUUID(), SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT, UUID.randomUUID()))
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagSimulering(
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                SimuleringMessage.Simuleringstatus.OPPDRAG_UR_ER_STENGT,
+                UUID.randomUUID(),
+            ),
+        )
         assertTrue(hendelseMediator.lestSimulering) { "Kan lese simuleringhendelse når Oppdrag/UR er stengt" }
         hendelseMediator.reset()
     }
@@ -343,7 +359,12 @@ internal class MessageMediatorTest {
     @Test
     fun `avbrutt arbeidsledig søknad med tidligere arbeidsgiver`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttArbeidsledigSøknad(1.juli, 31.juli, "tidligereOrgNr"))
-        val forventet = TestHendelseMediator.AvbruttSøknadData(1.juli, 31.juli, Behandlingsporing.Yrkesaktivitet.Arbeidstaker("tidligereOrgNr"))
+        val forventet =
+            TestHendelseMediator.AvbruttSøknadData(
+                1.juli,
+                31.juli,
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker("tidligereOrgNr"),
+            )
         assertEquals(forventet, hendelseMediator.lestAvbruttSøknad)
     }
 

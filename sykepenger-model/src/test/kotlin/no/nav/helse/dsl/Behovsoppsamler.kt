@@ -35,7 +35,10 @@ sealed class Behovsoppsamler(
                         orgnr = event.opplysninger.arbeidstaker.organisasjonsnummer,
                         vedtaksperiodeId = event.opplysninger.vedtaksperiodeId,
                         skjæringstidspunkt = event.opplysninger.skjæringstidspunkt,
-                        førsteFraværsdager = event.opplysninger.førsteFraværsdager.map { FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag) },
+                        førsteFraværsdager =
+                            event.opplysninger.førsteFraværsdager.map {
+                                FørsteFraværsdag(it.arbeidstaker.organisasjonsnummer, it.førsteFraværsdag)
+                            },
                         sykmeldingsperioder = event.opplysninger.sykmeldingsperioder.map { Periode(it.start, it.endInclusive) },
                         egenmeldinger = event.opplysninger.egenmeldingsperioder.map { Periode(it.start, it.endInclusive) },
                         harForespurtArbeidsgiverperiode = EventSubscription.Arbeidsgiverperiode in event.opplysninger.forespurteOpplysninger,
@@ -44,7 +47,9 @@ sealed class Behovsoppsamler(
         )
 
     fun loggUbesvarteBehov() {
-        log.log("Etter testen er det ${behovsdetaljer.size} behov uten svar: [${behovsdetaljer.joinToString { "${it::class.simpleName}" }}]")
+        log.log(
+            "Etter testen er det ${behovsdetaljer.size} behov uten svar: [${behovsdetaljer.joinToString { "${it::class.simpleName}" }}]",
+        )
     }
 
     override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
@@ -167,15 +172,27 @@ sealed class Behovsoppsamler(
                 ),
             )
 
-        override fun simuler(event: EventSubscription.SimuleringEvent) = registrer(Behovsdetaljer.Simulering(event.vedtaksperiodeId, event.utbetalingId, event.oppdragsdetaljer.fagsystemId, event.oppdragsdetaljer.fagområde))
+        override fun simuler(event: EventSubscription.SimuleringEvent) =
+            registrer(
+                Behovsdetaljer.Simulering(
+                    event.vedtaksperiodeId,
+                    event.utbetalingId,
+                    event.oppdragsdetaljer.fagsystemId,
+                    event.oppdragsdetaljer.fagområde,
+                ),
+            )
 
-        override fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) = registrer(Behovsdetaljer.Godkjenning(event.behandlingId, event.utbetalingId, event.vedtaksperiodeId, event))
+        override fun trengerGodkjenning(event: EventSubscription.GodkjenningEvent) =
+            registrer(Behovsdetaljer.Godkjenning(event.behandlingId, event.utbetalingId, event.vedtaksperiodeId, event))
 
-        override fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) = registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId, event))
+        override fun utbetalFeriepenger(event: EventSubscription.UtbetalFeriepengerEvent) =
+            registrer(Behovsdetaljer.Feriepengeutbetaling(event.utbetalingId, event))
 
-        override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) = registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
+        override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) =
+            registrer(Behovsdetaljer.InitiellHistorikFraInfotrygd(event.vedtaksperiodeId, event.yrkesaktivitetssporing))
 
-        override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) = registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd(event.periode))
+        override fun trengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent) =
+            registrer(Behovsdetaljer.OppdatertHistorikkFraInfotrygd(event.periode))
 
         override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) =
             when (event.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
@@ -183,6 +200,7 @@ sealed class Behovsoppsamler(
                 false -> registrer(Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(event.vedtaksperiodeId))
             }
 
-        override fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) = registrer(Behovsdetaljer.InformasjonTilVilkårsprøving(event.vedtaksperiodeId))
+        override fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) =
+            registrer(Behovsdetaljer.InformasjonTilVilkårsprøving(event.vedtaksperiodeId))
     }
 }

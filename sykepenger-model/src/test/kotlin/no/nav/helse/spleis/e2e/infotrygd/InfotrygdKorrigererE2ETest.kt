@@ -45,7 +45,14 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IT_14, 2.vedtaksperiode.filter())
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
     }
 

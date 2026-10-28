@@ -45,7 +45,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "DelvisInnvilget",
+                        "Arbeidsgiverutbetaling",
+                        "ArbeidsgiverØnskerRefusjon",
+                        "EnArbeidsgiver",
+                    ),
                 forbrukteSykedager = 10,
                 gjenståendeSykedager = 238,
                 foreløpigBeregnetSluttPåSykepenger = 31.desember,
@@ -158,12 +165,25 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
                     tilGodkjenning(
                         periode = januar,
-                        refusjon = Inntektsmelding.Refusjon(INGEN, null, listOf(Inntektsmelding.Refusjon.EndringIRefusjon(1.daglig, 31.januar))),
+                        refusjon =
+                            Inntektsmelding.Refusjon(
+                                INGEN,
+                                null,
+                                listOf(Inntektsmelding.Refusjon.EndringIRefusjon(1.daglig, 31.januar)),
+                            ),
                     )
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "Personutbetaling",
+                        "ArbeidsgiverØnskerRefusjon",
+                        "EnArbeidsgiver",
+                    ),
                 utbetalingsdager = standardUtbetalingsdager(0, 1431).dropLast(1) + 31.januar.somPeriode().utbetalingsdager(1, 1430),
             )
         }
@@ -178,7 +198,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "ArbeidsgiverØnskerRefusjon",
+                        "EnArbeidsgiver",
+                    ),
             )
 
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -200,8 +227,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 førstegangsbehandling = false,
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode.toString(),
+                            "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode.toString(),
+                            "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 28.februar.toString(),
+                        ),
                     ),
                 forbrukteSykedager = 31,
                 gjenståendeSykedager = 217,
@@ -242,10 +281,34 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 utbetalingsdager = (1.februar til 10.februar).utbetalingsdager(923, 0),
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a1).toString(), "behandlingId" to 2.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode(a2).toString(), "behandlingId" to 2.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.februar.toString(), "tom" to 10.februar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(),
+                            "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(),
+                            "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode(a1).toString(),
+                            "behandlingId" to 2.vedtaksperiode(a1).sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 10.februar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode(a2).toString(),
+                            "behandlingId" to 2.vedtaksperiode(a2).sisteBehandlingId(a2).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 10.februar.toString(),
+                        ),
                     ),
                 sykepengegrunnlagsfakta =
                     mapOf(
@@ -280,7 +343,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 sykepengegrunnlagsfakta =
                     mapOf(
                         "sykepengegrunnlag" to INNTEKT.årlig,
@@ -313,7 +383,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Ferie", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "Ferie",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 forbrukteSykedager = 10,
                 gjenståendeSykedager = 238,
                 foreløpigBeregnetSluttPåSykepenger = 31.desember,
@@ -333,7 +411,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "6GBegrenset",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 utbetalingsdager = standardUtbetalingsdager(2161, 0),
                 sykepengegrunnlagsfakta =
                     mapOf(
@@ -374,7 +460,16 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         .inspektør.behandlinger
                         .last()
                         .id,
-                tags = setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "SykepengegrunnlagUnder2G", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "IngenNyArbeidsgiverperiode",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "SykepengegrunnlagUnder2G",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
                         mapOf(
@@ -428,7 +523,19 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterOverstyrTidslinje((juli).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
             håndterYtelser(2.vedtaksperiode)
 
-            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), { 2.vedtaksperiode }) {
+            assertTags(
+                setOf(
+                    "Førstegangsbehandling",
+                    "IngenNyArbeidsgiverperiode",
+                    "Innvilget",
+                    "Arbeidsgiverutbetaling",
+                    "ArbeidsgiverØnskerRefusjon",
+                    "EnArbeidsgiver",
+                ),
+                {
+                    2.vedtaksperiode
+                },
+            ) {
                 håndterSimulering(2.vedtaksperiode)
             }
         }
@@ -451,7 +558,19 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalt()
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
 
-            assertTags(setOf("Førstegangsbehandling", "IngenNyArbeidsgiverperiode", "Innvilget", "Arbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "EnArbeidsgiver"), { 2.vedtaksperiode }) {
+            assertTags(
+                setOf(
+                    "Førstegangsbehandling",
+                    "IngenNyArbeidsgiverperiode",
+                    "Innvilget",
+                    "Arbeidsgiverutbetaling",
+                    "ArbeidsgiverØnskerRefusjon",
+                    "EnArbeidsgiver",
+                ),
+                {
+                    2.vedtaksperiode
+                },
+            ) {
                 tilGodkjenning(16.februar til 28.februar)
             }
             assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS???? ??????? ????SHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
@@ -490,7 +609,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
             håndterYtelser(1.vedtaksperiode)
-            assertTags(setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "ArbeidsgiverØnskerRefusjon", "InngangsvilkårFraInfotrygd", "EnArbeidsgiver"), { 1.vedtaksperiode }) {
+            assertTags(
+                setOf(
+                    "Førstegangsbehandling",
+                    "Innvilget",
+                    "Revurdering",
+                    "NegativArbeidsgiverutbetaling",
+                    "ArbeidsgiverØnskerRefusjon",
+                    "InngangsvilkårFraInfotrygd",
+                    "EnArbeidsgiver",
+                ),
+                {
+                    1.vedtaksperiode
+                },
+            ) {
                 håndterSimulering(1.vedtaksperiode)
             }
             assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IT_14), 1.vedtaksperiode.filter())
@@ -590,7 +722,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "Personutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 utbetalingsdager = standardUtbetalingsdager(715, 715),
             )
         }
@@ -621,8 +761,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         .id,
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode.toString(),
+                            "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode.toString(),
+                            "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 28.februar.toString(),
+                        ),
                     ),
                 foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
                 utbetalingsdager = (1.februar til 28.februar).feriedager(),
@@ -657,7 +809,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "SykepengegrunnlagUnder2G", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "SykepengegrunnlagUnder2G",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 vedtaksperiodeId = 1.vedtaksperiode,
                 periodeFom = 1.januar,
                 periodeTom = 31.januar,
@@ -671,7 +831,13 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         .id,
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode.toString(),
+                            "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
                     ),
                 utbetalingsdager = standardUtbetalingsdager(715, 0),
                 sykepengegrunnlagsfakta =
@@ -708,7 +874,15 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "NegativArbeidsgiverutbetaling", "Personutbetaling", "EnArbeidsgiver"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Revurdering",
+                        "NegativArbeidsgiverutbetaling",
+                        "Personutbetaling",
+                        "EnArbeidsgiver",
+                    ),
                 kanAvvises = false,
                 utbetalingstype = "REVURDERING",
                 utbetalingsdager = standardUtbetalingsdager(0, 1431),
@@ -731,7 +905,21 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                     håndterSimulering(1.vedtaksperiode)
                 }
             assertVarsler(listOf(Varselkode.RV_UT_23, Varselkode.RV_IM_4), 1.vedtaksperiode.filter())
-            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Revurdering", "Arbeidsgiverutbetaling", "NegativPersonutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"), kanAvvises = false, utbetalingstype = "REVURDERING")
+            assertGodkjenningsbehov(
+                actualBehov = godkjenningsbehov,
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Revurdering",
+                        "Arbeidsgiverutbetaling",
+                        "NegativPersonutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
+                kanAvvises = false,
+                utbetalingstype = "REVURDERING",
+            )
         }
     }
 
@@ -769,13 +957,33 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
                 vedtaksperiodeId = 1.vedtaksperiode(a1),
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "6GBegrenset", "FlereArbeidsgivere", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "6GBegrenset",
+                        "FlereArbeidsgivere",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 inntektskilde = "FLERE_ARBEIDSGIVERE",
                 orgnummere = setOf(a1, a2),
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(), "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(), "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode(a1).toString(),
+                            "behandlingId" to 1.vedtaksperiode(a1).sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode(a2).toString(),
+                            "behandlingId" to 1.vedtaksperiode(a2).sisteBehandlingId(a2).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a2),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
                     ),
                 utbetalingsdager = standardUtbetalingsdager(1080, 0),
                 sykepengegrunnlagsfakta =
@@ -809,7 +1017,17 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
                     tilGodkjenning(januar, beregnetInntekt = INNTEKT)
                 }
-            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+            assertGodkjenningsbehov(
+                actualBehov = godkjenningsbehov,
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
+            )
         }
     }
 
@@ -824,7 +1042,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 }
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
-                tags = setOf("Førstegangsbehandling", "DelvisInnvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "DelvisInnvilget",
+                        "Arbeidsgiverutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
                 forbrukteSykedager = 1,
                 gjenståendeSykedager = 0,
                 foreløpigBeregnetSluttPåSykepenger = 17.januar,
@@ -1010,8 +1235,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                         .id,
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode.toString(),
+                            "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode.toString(),
+                            "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 28.februar.toString(),
+                        ),
                     ),
                 foreløpigBeregnetSluttPåSykepenger = 25.januar(2019),
                 utbetalingsdager = (1.februar til 28.februar).feriedager(),
@@ -1026,7 +1263,17 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
                     tilGodkjenning(januar, beregnetInntekt = INNTEKT)
                 }
-            assertGodkjenningsbehov(actualBehov = godkjenningsbehov, tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"))
+            assertGodkjenningsbehov(
+                actualBehov = godkjenningsbehov,
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
+            )
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             val godkjenningsbehov2 =
@@ -1049,8 +1296,20 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
                 førstegangsbehandling = false,
                 perioderMedSammeSkjæringstidspunkt =
                     listOf(
-                        mapOf("vedtaksperiodeId" to 1.vedtaksperiode.toString(), "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.januar.toString(), "tom" to 31.januar.toString()),
-                        mapOf("vedtaksperiodeId" to 2.vedtaksperiode.toString(), "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(), "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1), "fom" to 1.februar.toString(), "tom" to 28.februar.toString()),
+                        mapOf(
+                            "vedtaksperiodeId" to 1.vedtaksperiode.toString(),
+                            "behandlingId" to 1.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.januar.toString(),
+                            "tom" to 31.januar.toString(),
+                        ),
+                        mapOf(
+                            "vedtaksperiodeId" to 2.vedtaksperiode.toString(),
+                            "behandlingId" to 2.vedtaksperiode.sisteBehandlingId(a1).toString(),
+                            "yrkesaktivitet" to mapOf("yrkesaktivitetstype" to "ARBEIDSTAKER", "organisasjonsnummer" to a1),
+                            "fom" to 1.februar.toString(),
+                            "tom" to 28.februar.toString(),
+                        ),
                     ),
                 forbrukteSykedager = 31,
                 gjenståendeSykedager = 217,
@@ -1080,7 +1339,14 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
             assertGodkjenningsbehov(
                 actualBehov = godkjenningsbehov,
                 relevanteSøknader = setOf(søknadId),
-                tags = setOf("Førstegangsbehandling", "Innvilget", "Arbeidsgiverutbetaling", "EnArbeidsgiver", "ArbeidsgiverØnskerRefusjon"),
+                tags =
+                    setOf(
+                        "Førstegangsbehandling",
+                        "Innvilget",
+                        "Arbeidsgiverutbetaling",
+                        "EnArbeidsgiver",
+                        "ArbeidsgiverØnskerRefusjon",
+                    ),
             )
         }
     }
@@ -1089,11 +1355,25 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
     fun `markerer sykepengegrunnlagsfakta som skjønnsfastsatt dersom én arbeidsgiver har fått skjønnmessig fastsatt sykepengegrunnlaget`() {
         a1 {
             nyPeriode(januar)
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, beregnetInntekt = 20000.månedlig, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                beregnetInntekt = 20000.månedlig,
+                arbeidsgiverperioder =
+                    listOf(
+                        1.januar til 16.januar,
+                    ),
+            )
         }
         a2 {
             nyPeriode(januar)
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, beregnetInntekt = 20000.månedlig, arbeidsgiverperioder = listOf(1.januar til 16.januar))
+            håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                beregnetInntekt = 20000.månedlig,
+                arbeidsgiverperioder =
+                    listOf(
+                        1.januar til 16.januar,
+                    ),
+            )
         }
         a1 {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)

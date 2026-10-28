@@ -48,9 +48,15 @@ internal class V315AuuerSomIkkeRapportertInntekt : JsonMigration(version = 315) 
                 val nodeForSkjæringstidspunkt = aktiveVilkårsgrunnlag.getValue(skjæringstidspunkt)
 
                 val inntekter = nodeForSkjæringstidspunkt.path("inntektsgrunnlag").path("arbeidsgiverInntektsopplysninger") as ArrayNode
-                val deaktiverteArbeidsforhold = nodeForSkjæringstidspunkt.path("inntektsgrunnlag").path("deaktiverteArbeidsforhold") as ArrayNode
+                val deaktiverteArbeidsforhold =
+                    nodeForSkjæringstidspunkt
+                        .path(
+                            "inntektsgrunnlag",
+                        ).path("deaktiverteArbeidsforhold") as ArrayNode
 
-                if (inntekter.none { opplysning -> opplysning.path("orgnummer").asText() == orgnr } && deaktiverteArbeidsforhold.none { opplysning -> opplysning.path("orgnummer").asText() == orgnr }) {
+                if (inntekter.none { opplysning -> opplysning.path("orgnummer").asText() == orgnr } &&
+                    deaktiverteArbeidsforhold.none { opplysning -> opplysning.path("orgnummer").asText() == orgnr }
+                ) {
                     endredeSkjæringstidspunkter.add(skjæringstidspunkt)
                     deaktiverteArbeidsforhold.addObject().apply {
                         put("orgnummer", orgnr)

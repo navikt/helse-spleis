@@ -361,10 +361,18 @@ internal class VedtaksperiodeVenterTest : AbstractDslTest() {
             venterPåOrgnr: String? = null,
             venterPåHva: Venteårsak,
         ) {
-            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
+            vedtaksperiodeVenter
+                .last {
+                    it.vedtaksperiodeId == venterVedtaksperiodeId
+                }.venterPå
+                .assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
             if (venterVedtaksperiodeId == venterPåVedtaksperiodeId) return
             // Om periode A venter på en annen periode B så burde også B vente på B (vente på seg selv)
-            vedtaksperiodeVenter.last { it.vedtaksperiodeId == venterPåVedtaksperiodeId }.venterPå.assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
+            vedtaksperiodeVenter
+                .last {
+                    it.vedtaksperiodeId == venterPåVedtaksperiodeId
+                }.venterPå
+                .assertVenterPå(venterPåVedtaksperiodeId, venterPåOrgnr, venterPåHva)
         }
 
         private fun EventSubscription.VedtaksperiodeVenterEvent.VenterPå.assertVenterPå(

@@ -107,7 +107,8 @@ internal abstract class AbstractObservableTest {
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
         orgnummer: String = ORGNUMMER,
-        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> = listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
+        arbeidsforhold: List<Vilkårsgrunnlag.Arbeidsforhold> =
+            listOf(Vilkårsgrunnlag.Arbeidsforhold(orgnummer, FOM.minusYears(1), type = Arbeidsforholdtype.ORDINÆRT)),
         inntektsvurderingForSykepengegrunnlag: InntektForSykepengegrunnlag =
             InntektForSykepengegrunnlag(
                 inntekter =

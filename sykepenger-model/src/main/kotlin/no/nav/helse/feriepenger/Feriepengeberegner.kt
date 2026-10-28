@@ -196,13 +196,33 @@ internal class Feriepengegrunnlagstidslinje(
                 when (utbetaltDag.mottaker) {
                     Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER ->
                         when (utbetaltDag.kilde) {
-                            Kilde.INFOTRYGD -> Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
-                            Kilde.SPLEIS -> Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                            Kilde.INFOTRYGD ->
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdArbeidsgiver(
+                                    utbetaltDag.orgnummer,
+                                    it.dato,
+                                    utbetaltDag.beløp,
+                                )
+                            Kilde.SPLEIS ->
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisArbeidsgiver(
+                                    utbetaltDag.orgnummer,
+                                    it.dato,
+                                    utbetaltDag.beløp,
+                                )
                         }
                     Feriepengegrunnlagsdag.Mottaker.PERSON ->
                         when (utbetaltDag.kilde) {
-                            Kilde.INFOTRYGD -> Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
-                            Kilde.SPLEIS -> Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson(utbetaltDag.orgnummer, it.dato, utbetaltDag.beløp)
+                            Kilde.INFOTRYGD ->
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.InfotrygdPerson(
+                                    utbetaltDag.orgnummer,
+                                    it.dato,
+                                    utbetaltDag.beløp,
+                                )
+                            Kilde.SPLEIS ->
+                                Feriepengeutbetalinggrunnlag.UtbetaltDag.SpleisPerson(
+                                    utbetaltDag.orgnummer,
+                                    it.dato,
+                                    utbetaltDag.beløp,
+                                )
                         }
                 }
             }
@@ -247,7 +267,8 @@ internal class Feriepengegrunnlagstidslinje(
         ) {
             val nyDag = Feriepengegrunnlagsdag.UtbetaltDag(orgnummer = orgnummer, mottaker = mottaker, kilde = kilde, beløp = beløp)
             dager.compute(dag) { _, eksisterende ->
-                eksisterende?.copy(utbetalinger = eksisterende.utbetalinger + nyDag) ?: Feriepengegrunnlagsdag(dato = dag, utbetalinger = listOf(nyDag))
+                eksisterende?.copy(utbetalinger = eksisterende.utbetalinger + nyDag)
+                    ?: Feriepengegrunnlagsdag(dato = dag, utbetalinger = listOf(nyDag))
             }
         }
 

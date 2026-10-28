@@ -206,11 +206,21 @@ internal class V303KopiereMaksdatoFraUtbetalingTilBehandling : JsonMigration(ver
         if (endring.path("maksdatoresultat").path("bestemmelse").asText() != "IKKE_VURDERT") return
 
         val utbetalingId = UUID.fromString(endring.path("utbetalingId").asText())
-        val resultat = maksdatoresultater[utbetalingId] ?: return sikkerlogg.info("[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
+        val resultat =
+            maksdatoresultater[utbetalingId]
+                ?: return sikkerlogg.info(
+                    "[V303] Fant ikke maksdatoresultat for utbetaling. KorrelasjonsIDen har muligens blitt annullert",
+                    kv("aktørId", aktørId),
+                    kv("vedtaksperiodeId", vedtaksperiodeId),
+                )
 
         // vurdering av kvaliteten
         if (resultat.antallForbrukteDager > 0 && resultat.forbrukteDager.isEmpty()) {
-            return sikkerlogg.info("[V303] Fant ingen forbrukte dager, men det skulle vært ${resultat.antallForbrukteDager}", kv("aktørId", aktørId), kv("vedtaksperiodeId", vedtaksperiodeId))
+            return sikkerlogg.info(
+                "[V303] Fant ingen forbrukte dager, men det skulle vært ${resultat.antallForbrukteDager}",
+                kv("aktørId", aktørId),
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+            )
         }
 
         val vurdertTilOgMed = endring.path("tom").asText()

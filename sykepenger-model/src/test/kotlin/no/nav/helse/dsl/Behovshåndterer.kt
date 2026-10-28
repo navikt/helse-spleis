@@ -40,8 +40,14 @@ class Behovshåndterer(
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om simulering, men det var det ikke!") }
 
     fun godkjenningsdetaljer(vedtaksperiodeId: UUID): Behovsoppsamler.Behovsdetaljer.Godkjenning {
-        val godkjenningsdetaljer = behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().filter { it.vedtaksperiodeId == vedtaksperiodeId }
-        assert(godkjenningsdetaljer.size == 1) { "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}" }
+        val godkjenningsdetaljer =
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Godkjenning>().filter {
+                it.vedtaksperiodeId ==
+                    vedtaksperiodeId
+            }
+        assert(godkjenningsdetaljer.size == 1) {
+            "Forventet at det skulle være forspurt nøyaktig én godkjenning. Fant ${godkjenningsdetaljer.size}"
+        }
         return godkjenningsdetaljer.single()
     }
 
@@ -51,17 +57,32 @@ class Behovshåndterer(
             .also { if (it.isEmpty()) fail("Forventet at det skal være spurt om feriepengerutbetaling, men det var det ikke!") }
 
     fun bekreftForespurtVilkårsprøving(vedtaksperiodeId: UUID) =
-        assertNotNull(behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilVilkårsprøving>().filter { it.vedtaksperiodeId == vedtaksperiodeId }) {
+        assertNotNull(
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilVilkårsprøving>().filter {
+                it.vedtaksperiodeId ==
+                    vedtaksperiodeId
+            },
+        ) {
             "Forventet at det skulle være forspurt informasjon til vilkårsprøving. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
     fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID) =
-        assertNotNull(behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig>().filter { it.vedtaksperiodeId == vedtaksperiodeId }) {
+        assertNotNull(
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig>().filter {
+                it.vedtaksperiodeId ==
+                    vedtaksperiodeId
+            },
+        ) {
             "Forventet at det skulle være forspurt informasjon til beregning av selvstendig periode. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
     fun bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId: UUID) =
-        assertNotNull(behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig>().filter { it.vedtaksperiodeId == vedtaksperiodeId }) {
+        assertNotNull(
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig>().filter {
+                it.vedtaksperiodeId ==
+                    vedtaksperiodeId
+            },
+        ) {
             "Forventet at det skulle være forspurt informasjon til beregning av arbeidstaker-periode. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
@@ -87,19 +108,33 @@ class Behovshåndterer(
                 operasjon()
             }
 
-        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach { initiellHistorikFraInfotrygdBehov ->
-            val fabrikk = initiellHistorikFraInfotrygdBehov.yrkesaktivitetssporing.let { ArbeidsgiverHendelsefabrikk(it.somOrganisasjonsnummer, it) }
+        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach {
+            initiellHistorikFraInfotrygdBehov,
+            ->
+            val fabrikk =
+                initiellHistorikFraInfotrygdBehov.yrkesaktivitetssporing.let {
+                    ArbeidsgiverHendelsefabrikk(
+                        it.somOrganisasjonsnummer,
+                        it,
+                    )
+                }
             val løsning = fabrikk.lagUtbetalingshistorikk(initiellHistorikFraInfotrygdBehov.vedtaksperiodeId)
             håndterInitiellHistorikkFraInfotrygd(løsning)
         }
 
         nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InntektsmeldingReplay>().forEach { trengerInntektsmeldingReplayBehov ->
-            val fabrikk = trengerInntektsmeldingReplayBehov.forespørsel.orgnr.let { ArbeidsgiverHendelsefabrikk(it, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it)) }
+            val fabrikk =
+                trengerInntektsmeldingReplayBehov.forespørsel.orgnr.let {
+                    ArbeidsgiverHendelsefabrikk(it, Behandlingsporing.Yrkesaktivitet.Arbeidstaker(it))
+                }
             val inntektsmeldinger =
                 uhåndterteInntektsmeldinger.values
-                    .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.orgnr == inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer }
-                    .filter { inntektsmeldingdetaljer -> trengerInntektsmeldingReplayBehov.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt) }
-                    .map { it.inntektsmelding }
+                    .filter { inntektsmeldingdetaljer ->
+                        trengerInntektsmeldingReplayBehov.forespørsel.orgnr ==
+                            inntektsmeldingdetaljer.inntektsmelding.behandlingsporing.organisasjonsnummer
+                    }.filter { inntektsmeldingdetaljer ->
+                        trengerInntektsmeldingReplayBehov.forespørsel.erInntektsmeldingRelevant(inntektsmeldingdetaljer.eksternKontrakt)
+                    }.map { it.inntektsmelding }
                     .sortedBy { it.metadata.innsendt }
 
             val løsning =

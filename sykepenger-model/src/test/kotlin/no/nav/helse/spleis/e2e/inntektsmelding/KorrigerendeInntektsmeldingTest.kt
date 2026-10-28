@@ -127,7 +127,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             forlengVedtak(februar)
             forlengVedtak(mars)
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.mars til 16.mars), vedtaksperiodeId = 1.vedtaksperiode)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_REVURDERING)
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_REVURDERING)
@@ -152,7 +155,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals("SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
@@ -182,7 +188,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals("SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
@@ -202,7 +211,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             )
 
             assertVarsler(listOf(RV_IM_4, RV_IM_24), 2.vedtaksperiode.filter())
-            assertEquals("SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH S??SSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
         }
@@ -222,7 +234,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
                     listOf(10.februar til 25.februar),
                 )
 
-            assertEquals("SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH S?????? ?????HH SSSSSHH SSSSSHH S",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(listOf(RV_IM_24, RV_IM_4), 2.vedtaksperiode.filter())
             assertTrue(inntektsmeldingId in observatør.inntektsmeldingHåndtert.map { it.first })
@@ -238,7 +253,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
-            assertEquals("SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
 
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -400,7 +418,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.januar, listOf(10.januar til 25.januar))
 
-            assertEquals("SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertVarsel(RV_IM_24, 1.vedtaksperiode.filter())
@@ -417,7 +438,10 @@ internal class KorrigerendeInntektsmeldingTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.februar til 16.februar), vedtaksperiodeId = 1.vedtaksperiode)
 
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.sykdomshistorikk.sykdomstidslinje().toShortString(),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())

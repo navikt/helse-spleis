@@ -29,7 +29,13 @@ internal class OverstyrGhostInntektTest : AbstractDslTest() {
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, 500.månedlig, forventetKorrigertInntekt = 500.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    500.månedlig,
+                    forventetKorrigertInntekt = 500.månedlig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
 
@@ -78,7 +84,13 @@ internal class OverstyrGhostInntektTest : AbstractDslTest() {
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, 500.månedlig, forventetKorrigertInntekt = 500.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    500.månedlig,
+                    forventetKorrigertInntekt = 500.månedlig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
 

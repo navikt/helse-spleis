@@ -15,7 +15,9 @@ internal data object AvventerAvsluttetUtenUtbetaling : Vedtaksperiodetilstand {
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        check(!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal behandles i speil, skal ende opp i $this" }
+        check(!vedtaksperiode.skalArbeidstakerBehandlesISpeil()) {
+            "forventer ikke at en periode som skal behandles i speil, skal ende opp i $this"
+        }
         vedtaksperiode.person.gjenopptaBehandling(aktivitetslogg)
     }
 

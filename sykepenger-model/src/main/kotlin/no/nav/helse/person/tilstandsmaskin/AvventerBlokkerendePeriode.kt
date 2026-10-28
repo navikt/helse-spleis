@@ -11,7 +11,8 @@ import no.nav.helse.person.EventBus
 import no.nav.helse.person.Vedtaksperiode
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 
-internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand = tilstandHvisBlokkeresAvAndre(vedtaksperiode) ?: AvventerBlokkerendePeriode
+internal fun nesteTilstandEtterInntekt(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand =
+    tilstandHvisBlokkeresAvAndre(vedtaksperiode) ?: AvventerBlokkerendePeriode
 
 private fun tilstandHvisBlokkeresAvAndre(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand? {
     val førstePeriodeAnnenArbeidsgiverSomTrengerInntekt = vedtaksperiode.førstePeriodeSomVenterPåInntektAnnenArbeidsgiver()
@@ -27,7 +28,9 @@ private fun tilstandHvisBlokkeresAvAndre(vedtaksperiode: Vedtaksperiode): Vedtak
 
 internal fun Vedtaksperiodetilstand.bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode: Vedtaksperiode) {
     check(vedtaksperiode.skalArbeidstakerBehandlesISpeil()) { "forventer ikke at en periode som skal til AUU, skal ende opp i $this" }
-    check(vedtaksperiode.refusjonstidslinje.isNotEmpty()) { "Periode i $this har ikke tilstrekkelige refusjonsopplysninger til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}." }
+    check(vedtaksperiode.refusjonstidslinje.isNotEmpty()) {
+        "Periode i $this har ikke tilstrekkelige refusjonsopplysninger til utbetaling! VedtaksperiodeId = ${vedtaksperiode.id}."
+    }
 }
 
 internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
@@ -43,7 +46,9 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
                 bekreftAtPeriodenSkalBehandlesISpeilOgHarNokInformasjon(vedtaksperiode)
                 check(!vedtaksperiode.avventerSøknad()) { "forventer ikke å vente annen søknad" }
                 vedtaksperiode.lagreArbeidstakerFaktaavklartInntektPåPeriode(eventBus, aktivitetslogg) {
-                    aktivitetslogg.info("Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!")
+                    aktivitetslogg.info(
+                        "Denne perioden har ikke faktaavklart inntekt, så håper det er med overlegg at den skal bruke skatt!",
+                    )
                 }
             }
 

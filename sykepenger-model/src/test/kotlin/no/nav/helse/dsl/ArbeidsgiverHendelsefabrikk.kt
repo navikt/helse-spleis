@@ -93,7 +93,8 @@ internal class ArbeidsgiverHendelsefabrikk(
         )
     }
 
-    fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad = AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), behandlingsporing)
+    fun lagAvbruttSøknad(sykmeldingsperiode: Periode): AvbruttSøknad =
+        AvbruttSøknad(sykmeldingsperiode, MeldingsreferanseId(UUID.randomUUID()), behandlingsporing)
 
     internal fun lagInntektsopplysningerFraLagretInnteksmelding(
         meldingsreferanseId: MeldingsreferanseId,

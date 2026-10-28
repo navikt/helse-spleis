@@ -57,7 +57,9 @@ internal class ForkastetVedtaksperiode(
                         else -> RV_SØ_34
                     },
                 )
-                aktivitetslogg.info("Søknad $nyPeriode for $arbeidsgiver overlapper med forkastet periode ${it.periode} for ${it.arbeidsgiver}")
+                aktivitetslogg.info(
+                    "Søknad $nyPeriode for $arbeidsgiver overlapper med forkastet periode ${it.periode} for ${it.arbeidsgiver}",
+                )
             }.isNotEmpty()
 
         private fun List<ForkastetVedtaksperiode>.nyere(
@@ -85,7 +87,9 @@ internal class ForkastetVedtaksperiode(
                 }
             }.onEach {
                 aktivitetslogg.funksjonellFeil(RV_SØ_28)
-                aktivitetslogg.info("Søknaden $nyPeriode for $arbeidsgiver har et gap som er mindre enn $MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD dager til forkastet periode ${it.periode} på samme arbeidsgiver")
+                aktivitetslogg.info(
+                    "Søknaden $nyPeriode for $arbeidsgiver har et gap som er mindre enn $MINIMALT_TILLATT_AVSTAND_TIL_INFOTRYGD dager til forkastet periode ${it.periode} på samme arbeidsgiver",
+                )
             }.isNotEmpty()
 
         /** Stopper eventuell behandling av nye søknader som er nærmere andre søknader vi allerede har forkastet */
@@ -112,7 +116,8 @@ internal class ForkastetVedtaksperiode(
                     .sortedByDescending { it.start } // Går motsatt vei slik at vi kan stoppe så fort vi finner et for langt gap
                     .fold(listOf(periode)) { knyttetTilSammeArbeidsgiverperiode, forrigePeriode ->
                         val eldsteRelevantePeriode = knyttetTilSammeArbeidsgiverperiode.minBy { it.start }
-                        val forStortGapTilÅVæreInteressant = (forrigePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
+                        val forStortGapTilÅVæreInteressant =
+                            (forrigePeriode.periodeMellom(eldsteRelevantePeriode.start)?.count() ?: 0) >= 16
                         if (forStortGapTilÅVæreInteressant) return@fold knyttetTilSammeArbeidsgiverperiode
                         knyttetTilSammeArbeidsgiverperiode + listOf(forrigePeriode)
                     }.sortedBy { it.start } // Snur lista igjen slik at de sendes ut i rett rekkefølge

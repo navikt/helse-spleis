@@ -28,8 +28,10 @@ internal class Refusjonsservitør(
         beløpstidslinje: Beløpstidslinje,
     ) {
         val førsteDagIDenNyeTidslinjen = beløpstidslinje.firstOrNull()?.dato ?: return
-        refusjonstidslinjer[dato] = refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
-        refusjonsrester[dato] = refusjonsrester.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
+        refusjonstidslinjer[dato] =
+            refusjonstidslinjer.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
+        refusjonsrester[dato] =
+            refusjonsrester.getOrDefault(dato, Beløpstidslinje()).tilOgMed(førsteDagIDenNyeTidslinjen.forrigeDag) + beløpstidslinje
     }
 
     private fun fjern(dato: LocalDate) {
@@ -82,7 +84,9 @@ internal class Refusjonsservitør(
             val rester = refusjonsrester[dato]?.takeUnless { it.isEmpty() }
             if (rester != null) {
                 val perioderMedBeløp = rester.filterIsInstance<Beløpsdag>().map { it.dato }.grupperSammenhengendePerioder()
-                aktivitetslogg.info("Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${perioderMedBeløp.joinToString()}")
+                aktivitetslogg.info(
+                    "Refusjonsservitøren har rester for ${dato.format(formatter)} etter servering: ${perioderMedBeløp.joinToString()}",
+                )
                 other.leggTil(dato, rester)
             } else {
                 other.fjern(dato)
@@ -109,12 +113,22 @@ internal class Refusjonsservitør(
             val refusjonsopplysningerPerStartdato =
                 sorterteStartdatoer
                     .mapWithNext { nåværende, neste ->
-                        val del = if (neste == null) refusjonstidslinje.fraOgMed(nåværende) else refusjonstidslinje.subset(nåværende til neste.forrigeDag)
+                        val del =
+                            if (neste ==
+                                null
+                            ) {
+                                refusjonstidslinje.fraOgMed(nåværende)
+                            } else {
+                                refusjonstidslinje.subset(nåværende til neste.forrigeDag)
+                            }
                         nåværende to del
                     }.toMap()
             return Refusjonsservitør(refusjonsopplysningerPerStartdato)
         }
 
-        internal fun gjenopprett(dto: RefusjonsservitørDto) = Refusjonsservitør(dto.refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> Beløpstidslinje.gjenopprett(beløpstidslinje) }.toSortedMap())
+        internal fun gjenopprett(dto: RefusjonsservitørDto) =
+            Refusjonsservitør(
+                dto.refusjonstidslinjer.mapValues { (_, beløpstidslinje) -> Beløpstidslinje.gjenopprett(beløpstidslinje) }.toSortedMap(),
+            )
     }
 }

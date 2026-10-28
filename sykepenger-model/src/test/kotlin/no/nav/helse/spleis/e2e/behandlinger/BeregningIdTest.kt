@@ -88,7 +88,8 @@ internal class BeregningIdTest : AbstractDslTest() {
         }
     }
 
-    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) = endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
+    private fun Behandlinger.Behandling.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) =
+        endringer().assertLikBeregningId(forventetSisteUtbetalingstatus)
 
     private fun List<Behandlinger.Behandling.Endring>.assertLikBeregningId(forventetSisteUtbetalingstatus: String? = null) {
         val første = first().beregningId

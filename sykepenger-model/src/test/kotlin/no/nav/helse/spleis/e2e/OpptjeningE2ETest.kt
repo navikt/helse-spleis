@@ -378,7 +378,12 @@ internal class OpptjeningE2ETest : AbstractDslTest() {
                     ),
                 inntekterForOpptjeningsvurdering =
                     InntekterForOpptjeningsvurdering(
-                        listOf(ArbeidsgiverInntekt(a1, inntekter = listOf(MånedligInntekt(mars(2018), INNTEKT, YTELSE_FRA_OFFENTLIGE, "ja", "beskrivelse")))),
+                        listOf(
+                            ArbeidsgiverInntekt(
+                                a1,
+                                inntekter = listOf(MånedligInntekt(mars(2018), INNTEKT, YTELSE_FRA_OFFENTLIGE, "ja", "beskrivelse")),
+                            ),
+                        ),
                     ),
                 inntektsvurderingForSykepengegrunnlag = lagStandardSykepengegrunnlag(a2, INNTEKT, 22.april),
             )

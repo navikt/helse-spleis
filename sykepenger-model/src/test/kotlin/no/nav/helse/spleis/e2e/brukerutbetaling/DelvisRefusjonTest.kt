@@ -743,7 +743,10 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, inntektsmeldingId.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, INNTEKT, inntektsmeldingId.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
         }
     }
 

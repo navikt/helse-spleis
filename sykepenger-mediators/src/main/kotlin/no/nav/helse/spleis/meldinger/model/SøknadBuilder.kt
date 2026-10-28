@@ -25,7 +25,11 @@ internal abstract class SøknadBuilder {
 
     internal fun fødselsdato(fødselsdato: LocalDate) = apply { this.fødselsdato = fødselsdato }
 
-    internal fun arbeidstaker(organisasjonsnummer: String) = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer) }
+    internal fun arbeidstaker(organisasjonsnummer: String) =
+        apply {
+            this.behandlingsporing =
+                Behandlingsporing.Yrkesaktivitet.Arbeidstaker(organisasjonsnummer)
+        }
 
     internal fun selvstendig() = apply { this.behandlingsporing = Behandlingsporing.Yrkesaktivitet.Selvstendig }
 

@@ -41,7 +41,10 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 15000.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 15000.månedlig)))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 15000.månedlig)),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -61,7 +64,13 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             assertPeriode(17.januar til 31.januar, 1431.daglig)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, 15000.månedlig, forventetKorrigertInntekt = 15000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    15000.månedlig,
+                    forventetKorrigertInntekt = 15000.månedlig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
     }
@@ -95,10 +104,25 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
             assertPeriode(17.januar til 31.januar, 943.daglig)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, 40000.månedlig, forventetKorrigertInntekt = 40000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    40000.månedlig,
+                    forventetKorrigertInntekt = 40000.månedlig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
     }
@@ -122,7 +146,10 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
             }
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 0.månedlig, skjæringstidspunkt = 1.januar, organisasjonsnummer = a2)
-            håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 0.månedlig)))
+            håndterSkjønnsmessigFastsettelse(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT), OverstyrtArbeidsgiveropplysning(a2, 0.månedlig)),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -199,7 +226,13 @@ internal class RevurderGhostInntektTest : AbstractDslTest() {
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, 16000.månedlig, forventetKorrigertInntekt = 16000.månedlig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    16000.månedlig,
+                    forventetKorrigertInntekt = 16000.månedlig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
             assertInntektsgrunnlag(1.mars, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)

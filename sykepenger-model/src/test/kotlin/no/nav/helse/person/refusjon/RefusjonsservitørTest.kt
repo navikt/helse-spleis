@@ -69,7 +69,11 @@ internal class RefusjonsservitørTest {
     fun `Fjerner ubrukte refusjonsopplysninger ved korrigerende refusjonsopplysninger`() {
         val refusjonstidslinjeSomDekkesAvVedtaksperiode = Beløpstidslinje.fra(januar, 100.daglig, kilde)
         val refusjonstidslinjeSomStrekkerSegUtoverVedtaksperiode = Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde)
-        val servitørFraInntektsmelding = Refusjonsservitør.fra(refusjonstidslinjeSomDekkesAvVedtaksperiode + refusjonstidslinjeSomStrekkerSegUtoverVedtaksperiode, setOf(1.januar))
+        val servitørFraInntektsmelding =
+            Refusjonsservitør.fra(
+                refusjonstidslinjeSomDekkesAvVedtaksperiode + refusjonstidslinjeSomStrekkerSegUtoverVedtaksperiode,
+                setOf(1.januar),
+            )
         servitørFraInntektsmelding.servér(1.januar, januar)
 
         val servitørPåYrkesaktivitetsNivå = Refusjonsservitør()

@@ -46,7 +46,8 @@ internal infix fun LocalDate.permisjonTil(sisteDato: LocalDate) =
         Sykdomstidslinje.permisjonsdager(førstedato, sistedato, kilde)
     }
 
-internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) = TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager)
+internal infix fun LocalDate.betalingTil(sisteDato: LocalDate) =
+    TestSykdomstidslinje(this, sisteDato, Sykdomstidslinje.Companion::arbeidsgiverdager)
 
 internal fun Sykdomstidslinje.merge(testTidslinje: TestSykdomstidslinje): Sykdomstidslinje = this.merge(testTidslinje.asSykdomstidslinje())
 

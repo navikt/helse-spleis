@@ -48,9 +48,17 @@ internal class PostgresUtboksDaoTest {
         val meldinger = meldingerTilSykmeldt + meldingUtenKey
         lagreMeldingerSomSkalBeholdesEtterSending(meldinger)
         assertEquals(meldinger, usendte(personidentifikator))
-        assertEquals(listOf(meldingUtenKey), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { meldingerTilSykmeldt }))
+        assertEquals(
+            listOf(meldingUtenKey),
+            håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { meldingerTilSykmeldt }),
+        )
         assertEquals(emptySet<Personidentifikator>(), dao.personerMedUsendteMeldinger().intersect(setOf(personidentifikator)))
-        assertEquals(emptyList<UtgåendeMelding>(), håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = { listOf(meldingUtenKey) }))
+        assertEquals(
+            emptyList<UtgåendeMelding>(),
+            håndterOgFåTilbakeUsendte(personidentifikator, sendOgFåTilbakeSendtOk = {
+                listOf(meldingUtenKey)
+            }),
+        )
     }
 
     @Test
@@ -144,9 +152,7 @@ internal class PostgresUtboksDaoTest {
         return usendte(person)
     }
 
-    private fun usendte(
-        person: Personidentifikator = personidentifikator,
-    ): List<UtgåendeMelding> {
+    private fun usendte(person: Personidentifikator = personidentifikator): List<UtgåendeMelding> {
         lateinit var usendteMeldinger: List<UtgåendeMelding>
         dao.usendte(person, { funnedeMeldinger ->
             usendteMeldinger = funnedeMeldinger
@@ -167,29 +173,42 @@ internal class PostgresUtboksDaoTest {
 
     private fun sjekkAtErLagretISendt(burdeVæreLagret: List<UtgåendeMelding>) {
         val erLagret = erLagretISendt(burdeVæreLagret)
-        assertEquals(burdeVæreLagret.toSet(), erLagret) { "Ikke alle meldinger som var forventet lagret i sendt-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}" }
+        assertEquals(burdeVæreLagret.toSet(), erLagret) {
+            "Ikke alle meldinger som var forventet lagret i sendt-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}"
+        }
     }
 
     private fun sjekkAtIkkeErLagretISendt(burdeIkkeVæreLagret: List<UtgåendeMelding>) {
         val erLagret = erLagretISendt(burdeIkkeVæreLagret)
-        assertEquals(emptySet<UtgåendeMelding>(), erLagret) { "Ingenting burde vært i sendt-tabellen, men her var det ${erLagret.size} stykk!" }
+        assertEquals(
+            emptySet<UtgåendeMelding>(),
+            erLagret,
+        ) { "Ingenting burde vært i sendt-tabellen, men her var det ${erLagret.size} stykk!" }
     }
 
     private fun sjekkAtErLagretIUtboks(burdeVæreLagret: List<UtgåendeMelding>) {
         val erLagret = erLagretIUtboks(burdeVæreLagret)
-        assertEquals(burdeVæreLagret.toSet(), erLagret) { "Ikke alle meldinger som var forventet lagret i utboks-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}" }
+        assertEquals(burdeVæreLagret.toSet(), erLagret) {
+            "Ikke alle meldinger som var forventet lagret i utboks-tabellen var i sendt-tabellen! Forventet ${burdeVæreLagret.size} men var bare ${erLagret.size}"
+        }
     }
 
     private fun sjekkAtIkkeErLagretIUtboks(burdeIkkeVæreLagret: List<UtgåendeMelding>) {
         val erLagret = erLagretIUtboks(burdeIkkeVæreLagret)
-        assertEquals(emptySet<UtgåendeMelding>(), erLagret) { "Ingen av disse burde være lagret utboks-tabellen, men her var det ${erLagret.size} stykk!" }
+        assertEquals(emptySet<UtgåendeMelding>(), erLagret) {
+            "Ingen av disse burde være lagret utboks-tabellen, men her var det ${erLagret.size} stykk!"
+        }
     }
 
     private fun nyMelding(
         key: Personidentifikator? = personidentifikator,
         mottaker: UtgåendeMelding.Mottaker = UtgåendeMelding.Mottaker.RAPID,
         eventName: String = "test",
-    ) = UtgåendeMelding(key?.toString(), """{"@id": "${nyUuidv7()}", "@event_name": "$eventName", "@opprettetUTC":"${Instant.now()}"}""", mottaker)
+    ) = UtgåendeMelding(
+        key?.toString(),
+        """{"@id": "${nyUuidv7()}", "@event_name": "$eventName", "@opprettetUTC":"${Instant.now()}"}""",
+        mottaker,
+    )
 
     private companion object {
         private fun List<UtgåendeMelding>.somKvittering(

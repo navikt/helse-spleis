@@ -337,7 +337,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterUtbetalt()
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
         a2 {
@@ -350,7 +356,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
         a2 {
@@ -384,7 +396,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterUtbetalt()
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
         a2 {
@@ -398,7 +416,13 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT)
-                assertInntektsgrunnlag(a2, INNTEKT, INNTEKT * 1.1, forventetKorrigertInntekt = INNTEKT * 1.1, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INNTEKT,
+                    INNTEKT * 1.1,
+                    forventetKorrigertInntekt = INNTEKT * 1.1,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
         a2 {
@@ -741,7 +765,10 @@ internal class FlereArbeidsgivereGhostTest : AbstractDslTest() {
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"))
+            håndterOverstyrArbeidsforhold(
+                1.januar,
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, true, "Jeg, en saksbehandler, overstyrte pga 8-15"),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {

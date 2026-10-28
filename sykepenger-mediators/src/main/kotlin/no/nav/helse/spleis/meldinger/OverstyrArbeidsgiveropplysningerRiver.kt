@@ -56,7 +56,9 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
             }
             require("arbeidsgivere") { arbeidsgiveropplysning ->
                 val organisasjonsnummer = arbeidsgiveropplysning.map { it.path("organisasjonsnummer").asText() }
-                require(organisasjonsnummer.size == organisasjonsnummer.toSet().size) { "Duplikate organisasjonsnummer $organisasjonsnummer" }
+                require(
+                    organisasjonsnummer.size == organisasjonsnummer.toSet().size,
+                ) { "Duplikate organisasjonsnummer $organisasjonsnummer" }
             }
         }
     }

@@ -19,7 +19,9 @@ internal class Utboks(
     fun nyMelding(block: (personidentifikator: Personidentifikator) -> Utboksmelding) {
         val utboksmelding = block(personidentifikator)
         val utgåendeMelding = utboksmelding.utgåendeMelding
-        require(utgåendeMelding.key == null || utgåendeMelding.key == personidentifikator.toString()) { "Kan ikke sende ut meldinger for andre i denne utboksen!" }
+        require(utgåendeMelding.key == null || utgåendeMelding.key == personidentifikator.toString()) {
+            "Kan ikke sende ut meldinger for andre i denne utboksen!"
+        }
         tilstand.nyMelding(utboksmelding, this)
     }
 
@@ -54,14 +56,18 @@ internal class Utboks(
         val tidsbruk =
             measureTimeMillis {
                 utboksDao.usendte(personidentifikator) { usendteMeldinger ->
-                    sikkerLogg.info("som følge av ${innkommendeMelding.navn} id=${innkommendeMelding.meldingsreferanseId.id} sendes ${usendteMeldinger.size} meldinger for fnr=$personidentifikator")
+                    sikkerLogg.info(
+                        "som følge av ${innkommendeMelding.navn} id=${innkommendeMelding.meldingsreferanseId.id} sendes ${usendteMeldinger.size} meldinger for fnr=$personidentifikator",
+                    )
                     utsender.send(usendteMeldinger).also { kvittering ->
                         kvittering.ok.loggSending()
                         // Logger meldinger som ble sendt nå men som ikke ble produsert nå
                         val produsertNå = utboksmeldinger.map { it.utgåendeMelding.id }.toSet()
                         val sendtNå = kvittering.ok.map { it.id }.toSet()
                         sendtNå.filterNot { it in produsertNå }.takeUnless { it.isEmpty() }?.let { gamleMeldinger ->
-                            sikkerLogg.info("Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}")
+                            sikkerLogg.info(
+                                "Sendte ${gamleMeldinger.size} melding(er) som ikke ble produsert nå: ${gamleMeldinger.joinToString()}",
+                            )
                         }
                     }
                 }
@@ -74,9 +80,14 @@ internal class Utboks(
             when (utgåendeMelding.eventName) {
                 "behov" -> {
                     val behov = utgåendeMelding.json.path("@behov").map { it.asText() }
-                    sikkerLogg.info("sender behov til ${utgåendeMelding.mottaker.name} (${behov.joinToString()}):\n\t${utgåendeMelding.json}")
+                    sikkerLogg.info(
+                        "sender behov til ${utgåendeMelding.mottaker.name} (${behov.joinToString()}):\n\t${utgåendeMelding.json}",
+                    )
                 }
-                else -> sikkerLogg.info("sender ${utgåendeMelding.eventName} til ${utgåendeMelding.mottaker.name}:\n\t${utgåendeMelding.json}")
+                else ->
+                    sikkerLogg.info(
+                        "sender ${utgåendeMelding.eventName} til ${utgåendeMelding.mottaker.name}:\n\t${utgåendeMelding.json}",
+                    )
             }
         }
     }
@@ -113,8 +124,14 @@ internal class Utboks(
                             },
                     )
                 when (melding) {
-                    is Utboksmelding.ForkastEtterSending -> utboks.utboksmeldinger.add(Utboksmelding.ForkastEtterSending(utgåendeMeldingMedForårsaketAv))
-                    is Utboksmelding.BeholdEtterSending -> utboks.utboksmeldinger.add(Utboksmelding.BeholdEtterSending(utgåendeMeldingMedForårsaketAv))
+                    is Utboksmelding.ForkastEtterSending ->
+                        utboks.utboksmeldinger.add(
+                            Utboksmelding.ForkastEtterSending(utgåendeMeldingMedForårsaketAv),
+                        )
+                    is Utboksmelding.BeholdEtterSending ->
+                        utboks.utboksmeldinger.add(
+                            Utboksmelding.BeholdEtterSending(utgåendeMeldingMedForårsaketAv),
+                        )
                 }
             }
         }

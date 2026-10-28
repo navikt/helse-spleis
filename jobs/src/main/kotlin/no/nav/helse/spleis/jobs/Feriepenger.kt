@@ -37,7 +37,9 @@ fun startFeriepenger(
     antallPersonerOmGangen: Int = 10,
     dryrun: Boolean = true,
 ) {
-    sikkerlogg.info("Feriepengejobb starter med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
+    sikkerlogg.info(
+        "Feriepengejobb starter med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun",
+    )
     factory.createProducer().use { producer ->
         opprettOgUtførArbeid(arbeidId, size = antallPersonerOmGangen) { session, fnr ->
             hentPerson(session, fnr).let { (skjemaVersjon, data) ->
@@ -45,7 +47,8 @@ fun startFeriepenger(
                     val dto = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
                     if (dto.potensiellFeriepengekjøring(opptjeningsår)) {
                         sikkerlogg.info("sender behov om SykepengehistorikkForFeriepenger for fødselsnummer=${dto.fødselsnummer}")
-                        val event = SykepengehistorikkForFeriepenger(dto.fødselsnummer, opptjeningsår, datoForSisteFeriepengekjøringIInfotrygd)
+                        val event =
+                            SykepengehistorikkForFeriepenger(dto.fødselsnummer, opptjeningsår, datoForSisteFeriepengekjøringIInfotrygd)
                         if (!dryrun) {
                             producer.send(ProducerRecord("tbd.teknisk.v1", dto.fødselsnummer, event.tilJson()))
                         }
@@ -57,7 +60,9 @@ fun startFeriepenger(
         }
         producer.flush()
     }
-    sikkerlogg.info("Feriepengejobb ferdig med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun")
+    sikkerlogg.info(
+        "Feriepengejobb ferdig med arbeidId=$arbeidId, datoForSisteFeriepengekjøringIInfotrygd=$datoForSisteFeriepengekjøringIInfotrygd, opptjeningsår=${opptjeningsår.value} og dryrun=$dryrun",
+    )
 }
 
 private fun PersonInnDto.potensiellFeriepengekjøring(opptjeningsår: Year): Boolean =
@@ -77,8 +82,15 @@ private fun ArbeidsgiverInnDto.harBeregnetFeriepengerTidligere(opptjeningsår: Y
 
 private fun List<UtbetalingInnDto>.aktive(): List<UtbetalingInnDto> =
     this
-        .filterNot { it.tilstand in setOf(UtbetalingTilstandDto.FORKASTET, UtbetalingTilstandDto.NY, UtbetalingTilstandDto.IKKE_GODKJENT, UtbetalingTilstandDto.IKKE_UTBETALT) }
-        .groupBy { it.korrelasjonsId }
+        .filterNot {
+            it.tilstand in
+                setOf(
+                    UtbetalingTilstandDto.FORKASTET,
+                    UtbetalingTilstandDto.NY,
+                    UtbetalingTilstandDto.IKKE_GODKJENT,
+                    UtbetalingTilstandDto.IKKE_UTBETALT,
+                )
+        }.groupBy { it.korrelasjonsId }
         .map { (_, utbetalinger) -> utbetalinger.maxBy { it.tidsstempel } }
         .filterNot { utbetaling -> utbetaling.tilstand == UtbetalingTilstandDto.ANNULLERT }
 

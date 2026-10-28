@@ -47,6 +47,8 @@ Legg inn følgende begrunnelse:
 ----------------------------------------
 $begrunnelse
 ----------------------------------------
-""".let { println(it) }
+""".let {
+            println(it)
+        }
     }
 }

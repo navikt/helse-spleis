@@ -43,7 +43,15 @@ internal class V280HengendeRevurderinger : JsonMigration(280) {
         val sisteIverksettingIndex = generasjoner.indexOfLast { it.path("tilstand").asText() == "VEDTAK_IVERKSATT" }
         val sisteIverksetting: JsonNode? = generasjoner.get(sisteIverksettingIndex)
         if (sisteIverksetting !is ObjectNode || sisteIverksettingIndex < 0) {
-            sikkerlogg.error("[280] $aktørId Skulle flytte uberegnet revurdering til VEDTAK_IVERKSATT for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men vedtaksperioden har ikke en generasjon i VEDTAK_IVERKSATT")
+            sikkerlogg.error(
+                "[280] $aktørId Skulle flytte uberegnet revurdering til VEDTAK_IVERKSATT for ${periode.path(
+                    "fom",
+                ).asText()} - ${periode.path(
+                    "tom",
+                ).asText()} (${periode.path(
+                    "id",
+                ).asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men vedtaksperioden har ikke en generasjon i VEDTAK_IVERKSATT",
+            )
             return
         }
 
@@ -56,7 +64,20 @@ internal class V280HengendeRevurderinger : JsonMigration(280) {
                     }
                 }.toSet()
 
-        sikkerlogg.info("[280] $aktørId Flytter ${uberegnede.size} generasjoner (${uberegnede.joinToString { it.path("tilstand").asText() }}) til VEDTAK_IVERKSATT (${sisteIverksetting.path("id").asText()}) for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode")
+        sikkerlogg.info(
+            "[280] $aktørId Flytter ${uberegnede.size} generasjoner (${uberegnede.joinToString {
+                it
+                    .path(
+                        "tilstand",
+                    ).asText()
+            }}) til VEDTAK_IVERKSATT (${sisteIverksetting.path(
+                "id",
+            ).asText()}) for ${periode.path(
+                "fom",
+            ).asText()} - ${periode.path(
+                "tom",
+            ).asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode",
+        )
         (sisteIverksetting.path("endringer") as ArrayNode).apply {
             val sisteEndring = last()
             dokumentsporing.forEach { (tidsstempel, dokumentsporing) ->

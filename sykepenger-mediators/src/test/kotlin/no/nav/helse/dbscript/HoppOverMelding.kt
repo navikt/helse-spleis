@@ -13,7 +13,9 @@ internal object HoppOverMelding : DbScript() {
         val fødselsnummer = Input.ventPåFødselsnummer()
         println()
 
-        println("## Fyll inn hendelseId/meldingId/meldingsreferanseId (kjært barn har mange navn - @id UUID'en hvert fall..) på meldingen du vil hoppe over")
+        println(
+            "## Fyll inn hendelseId/meldingId/meldingsreferanseId (kjært barn har mange navn - @id UUID'en hvert fall..) på meldingen du vil hoppe over",
+        )
         val meldingId = Input.ventPåInput { runCatching { UUID.fromString(it) }.isSuccess }
         println()
 
@@ -24,7 +26,9 @@ internal object HoppOverMelding : DbScript() {
         databaseTransaksjon(connectionInfo) {
             check(
                 1 ==
-                    prepareStatement("UPDATE melding SET behandlet_tidspunkt=now() WHERE fnr=? AND melding_id=? AND behandlet_tidspunkt IS NULL").use { stmt ->
+                    prepareStatement(
+                        "UPDATE melding SET behandlet_tidspunkt=now() WHERE fnr=? AND melding_id=? AND behandlet_tidspunkt IS NULL",
+                    ).use { stmt ->
                         stmt.setLong(1, fødselsnummer.toLong())
                         stmt.setString(2, meldingId)
                         stmt.executeUpdate()
@@ -32,6 +36,8 @@ internal object HoppOverMelding : DbScript() {
             ) { "forventet å oppdatere nøyaktig én rad ved å hoppe over en melding" }
         }
         println(" - Endringene dine er live ✅")
-        gaal("Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø. $beskrivelse")
+        gaal(
+            "Meldingen med meldingId '$meldingId' har fått 'behandlet_tidspunkt' satt til now() slik at Spleis hopper over meldingen og kan prosessere andre meldinger som står i kø. $beskrivelse",
+        )
     }
 }

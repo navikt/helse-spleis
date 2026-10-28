@@ -45,7 +45,9 @@ internal class EtterlevelseSykdomstidslinjeTest {
                 builder.dager().isNotEmpty()
             }
 
-        assertEquals(0, feilaktigSubsummért.size) { "Feilaktig subsummérte dagtyper: ${feilaktigSubsummért.map { (_, dag) -> dag::class.simpleName }}" }
+        assertEquals(0, feilaktigSubsummért.size) {
+            "Feilaktig subsummérte dagtyper: ${feilaktigSubsummért.map { (_, dag) -> dag::class.simpleName }}"
+        }
 
         // Forsikrer oss om at de dagene som skal subsummeres inngår i tidslinjen
         val manglerSubsummering =
@@ -55,7 +57,9 @@ internal class EtterlevelseSykdomstidslinjeTest {
                 builder.dager().isEmpty()
             }
 
-        assertEquals(0, manglerSubsummering.size) { "Dagtyper som mangler subsummering: ${manglerSubsummering.map { (_, dag) -> dag::class.simpleName }}" }
+        assertEquals(0, manglerSubsummering.size) {
+            "Dagtyper som mangler subsummering: ${manglerSubsummering.map { (_, dag) -> dag::class.simpleName }}"
+        }
     }
 
     private companion object {

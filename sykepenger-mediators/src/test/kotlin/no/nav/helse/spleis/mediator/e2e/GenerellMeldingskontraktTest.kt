@@ -65,7 +65,10 @@ internal class GenerellMeldingskontraktTest : AbstractEndToEndMediatorTest() {
         assertEquals(LocalDate.of(2018, 1, 31), meldingOmAnnullertVedtaksperiode["tom"].asLocalDate())
         assertEquals(UNG_PERSON_FNR_2018, meldingOmAnnullertVedtaksperiode["fødselsnummer"].asText())
         assertEquals(ORGNUMMER, meldingOmAnnullertVedtaksperiode["organisasjonsnummer"].asText())
-        assertEquals(testRapid.inspektør.vedtaksperiodeId(0), UUID.fromString(meldingOmAnnullertVedtaksperiode["vedtaksperiodeId"].asText()))
+        assertEquals(
+            testRapid.inspektør.vedtaksperiodeId(0),
+            UUID.fromString(meldingOmAnnullertVedtaksperiode["vedtaksperiodeId"].asText()),
+        )
     }
 
     @Test

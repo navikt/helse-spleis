@@ -29,7 +29,8 @@ class SpekematClientTest {
 
     @Test
     fun `tolker response fra spekemat`() {
-        every { httpClientMock.send<String>(any(), any()) } returns MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
+        every { httpClientMock.send<String>(any(), any()) } returns
+            MockHttpResponse(responsFraSpekemat, 200, mapOf("callId" to "liksom call id"))
         val result = client.hentSpekemat("fnr", "callId")
         assertEquals(1, result.pakker.size)
         assertEquals(

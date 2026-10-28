@@ -26,7 +26,8 @@ internal class V279AvsluttettidspunktVedtakFattet : JsonMigration(279) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             val avsluttettidspunktForUtbetalinger =
                 arbeidsgiver.path("utbetalinger").associate {
-                    it.path("id").asText().uuid to it.path("overføringstidspunkt").takeIf(JsonNode::isTextual)?.let { LocalDateTime.parse(it.asText()) }
+                    it.path("id").asText().uuid to
+                        it.path("overføringstidspunkt").takeIf(JsonNode::isTextual)?.let { LocalDateTime.parse(it.asText()) }
                 }
             arbeidsgiver
                 .path("vedtaksperioder")
@@ -54,15 +55,39 @@ internal class V279AvsluttettidspunktVedtakFattet : JsonMigration(279) {
                 .takeIf(JsonNode::isTextual)
                 ?.let { UUID.fromString(it.asText()) }
         if (utbetalingId == null) {
-            sikkerlogg.error("[V279] $aktørId Skulle flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men utbetalingId mangler")
+            sikkerlogg.error(
+                "[V279] $aktørId Skulle flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path(
+                    "fom",
+                ).asText()} - ${periode.path(
+                    "tom",
+                ).asText()} (${periode.path(
+                    "id",
+                ).asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men utbetalingId mangler",
+            )
             return
         }
         val avsluttettidspunkt =
             avsluttettidspunktForUtbetalinger(utbetalingId) ?: run {
-                sikkerlogg.info("[V279] $aktørId Skulle flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men avsluttettidspunkt mangler")
+                sikkerlogg.info(
+                    "[V279] $aktørId Skulle flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path(
+                        "fom",
+                    ).asText()} - ${periode.path(
+                        "tom",
+                    ).asText()} (${periode.path(
+                        "id",
+                    ).asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon, men avsluttettidspunkt mangler",
+                )
                 LocalDateTime.parse(periode.path("oppdatert").asText())
             }
-        sikkerlogg.info("[V279] $aktørId Flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon")
+        sikkerlogg.info(
+            "[V279] $aktørId Flytter generasjon fra $tilstandForSisteGenerasjon til VEDTAK_IVERKSATT for ${periode.path(
+                "fom",
+            ).asText()} - ${periode.path(
+                "tom",
+            ).asText()} (${periode.path(
+                "id",
+            ).asText()}) fordi vedtaksperioden er i $tilstandForVedtaksperiode og siste generasjon har tilstand $tilstandForSisteGenerasjon",
+        )
         sisteGenerasjon.put("tilstand", "VEDTAK_IVERKSATT")
         sisteGenerasjon.put("avsluttet", "$avsluttettidspunkt")
     }

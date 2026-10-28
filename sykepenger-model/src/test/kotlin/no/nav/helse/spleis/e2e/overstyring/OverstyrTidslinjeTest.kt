@@ -78,8 +78,18 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterOverstyrTidslinje((18.februar til 19.februar).map { ManuellOverskrivingDag(it, Sykedag, 100) })
             assertEquals("HH SSSSSHH SSSSSHH SSSSSHH SAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
-            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_3, Varselkode.RV_IM_24, Varselkode.RV_AO_3), 1.vedtaksperiode.filter())
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_SIMULERING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+            )
+            assertVarsler(
+                listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_3, Varselkode.RV_IM_24, Varselkode.RV_AO_3),
+                1.vedtaksperiode.filter(),
+            )
         }
     }
 
@@ -228,7 +238,10 @@ internal class OverstyrTidslinjeTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
 
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertEquals("SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS", inspektør.sykdomstidslinje.toShortString())
+            assertEquals(
+                "SHH SSSSSHH SSSSSHH SSSSSHH SSSSSHJ JJJJJJJ JJJJJJJ JJJJJJJ JJJJJJJ JJSSSHH SSSSSHH SSSSSHH SSSSSHH SSSSS",
+                inspektør.sykdomstidslinje.toShortString(),
+            )
 
             assertEquals(1.august, inspektør.skjæringstidspunkt(2.vedtaksperiode))
             assertEquals(1.juli til 31.august, inspektør.periode(2.vedtaksperiode))

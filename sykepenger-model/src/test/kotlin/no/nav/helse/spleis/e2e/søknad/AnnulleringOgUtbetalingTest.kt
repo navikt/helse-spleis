@@ -141,7 +141,10 @@ internal class AnnulleringOgUtbetalingTest : AbstractDslTest() {
         observatør.utbetaltEndretEventer
             .filter { it.utbetalingId == utbetalingId }
             .also { events ->
-                assertEquals(status.map(Utbetalingstatus::name).toList(), events.map { it.forrigeStatus }.plus(events.last().gjeldendeStatus))
+                assertEquals(
+                    status.map(Utbetalingstatus::name).toList(),
+                    events.map { it.forrigeStatus }.plus(events.last().gjeldendeStatus),
+                )
             }
     }
 }

@@ -34,7 +34,15 @@ internal class V287AnnullerteÅpneRevurderingerEnGangTil : JsonMigration(version
         if (nestSist.path("tilstand").asText() !in setOf("UBEREGNET_REVURDERING", "BEREGNET_REVURDERING")) return
         nestSist.put("tilstand", "TIL_INFOTRYGD")
         val avsluttettidspunkt = sisteGenerasjon.path("avsluttet").asText().takeUnless(String::isBlank)
-        if (avsluttettidspunkt == null) return sikkerLogg.info("[V287] Ingen avsluttettidspunkt for generasjon ${sisteGenerasjon.path("id").asText()}", kv("aktørId", aktørId), kv("orgnr", orgnr))
+        if (avsluttettidspunkt ==
+            null
+        ) {
+            return sikkerLogg.info(
+                "[V287] Ingen avsluttettidspunkt for generasjon ${sisteGenerasjon.path("id").asText()}",
+                kv("aktørId", aktørId),
+                kv("orgnr", orgnr),
+            )
+        }
         nestSist.put("avsluttet", avsluttettidspunkt)
         generasjonerNode.remove(generasjoner.lastIndex)
     }

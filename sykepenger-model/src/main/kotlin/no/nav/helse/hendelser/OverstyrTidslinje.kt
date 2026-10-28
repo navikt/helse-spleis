@@ -259,7 +259,11 @@ class OverstyrTidslinje(
                 .map { manuellOverskrivingDag ->
                     // Her kan man slå seg løs med nye avslagsdagtyper og tilhørende begrunnelser
                     when (manuellOverskrivingDag.type) {
-                        Dagtype.AvslattMeldingTilNavdag -> SkalAvslås(manuellOverskrivingDag.dato, listOf(Begrunnelse.AvslåttMeldingTilNavDag))
+                        Dagtype.AvslattMeldingTilNavdag ->
+                            SkalAvslås(
+                                manuellOverskrivingDag.dato,
+                                listOf(Begrunnelse.AvslåttMeldingTilNavDag),
+                            )
 
                         // For dager som er overstyrt til noe annet enn avslagsdager må vi fjerne eventuelle avslagsdager fra eksisterendeAvslagstidslinje
                         else -> SkalIkkeAvslås(manuellOverskrivingDag.dato)

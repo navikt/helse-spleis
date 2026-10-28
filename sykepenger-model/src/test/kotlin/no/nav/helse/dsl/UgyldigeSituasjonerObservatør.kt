@@ -97,10 +97,10 @@ internal class UgyldigeSituasjonerObservatør(
         }
     }
 
-    override fun vedtaksperiodeEndret(
-        event: EventSubscription.VedtaksperiodeEndretEvent,
-    ) {
-        arbeidsgivereMap.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { person.arbeidsgiver(event.yrkesaktivitetssporing.somOrganisasjonsnummer) }
+    override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
+        arbeidsgivereMap.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) {
+            person.arbeidsgiver(event.yrkesaktivitetssporing.somOrganisasjonsnummer)
+        }
         gjeldendeTilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }
 
@@ -123,7 +123,9 @@ internal class UgyldigeSituasjonerObservatør(
         Eller har du klart å skriv en test vi ikke støtter? 
         ${event.tilstander()}
         $event
-        """.let { throw IllegalStateException(it) }
+        """.let {
+            throw IllegalStateException(it)
+        }
     }
 
     private fun sjekkSøknadIdEierskap(
@@ -143,7 +145,11 @@ internal class UgyldigeSituasjonerObservatør(
 
     override fun trengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent) {
         if (event.opplysninger.vedtaksperiodeId in kvittertUtArbeidsgiveropplysninger) {
-            throw UgyldigSituasjonException(IllegalStateException("Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?\n\t$event"))
+            throw UgyldigSituasjonException(
+                IllegalStateException(
+                    "Vedtaksperioden har allerede kvittert ut arbeidsgiveropplysninger! Hvorfor blir det forespurt på ny?\n\t$event",
+                ),
+            )
         }
     }
 
@@ -156,14 +162,19 @@ internal class UgyldigeSituasjonerObservatør(
         IM.håndtert(event.meldingsreferanseId)
     }
 
-    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) = IM.ikkeHåndtert(event.meldingsreferanseId)
+    override fun inntektsmeldingIkkeHåndtert(event: EventSubscription.InntektsmeldingIkkeHåndtertEvent) =
+        IM.ikkeHåndtert(event.meldingsreferanseId)
 
     override fun inntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent) = IM.førSøknad(event.inntektsmeldingId)
 
     private fun EventSubscription.VedtaksperiodeVenterEvent.tilstander() =
         when (vedtaksperiodeId == venterPå.vedtaksperiodeId) {
-            true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
-            false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger${venterPå.venteårsak.hvorfor?.let { " fordi $it" } ?: ""}! 😱"
+            true -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} trenger hjelp${venterPå.venteårsak.hvorfor?.let {
+                " fordi $it"
+            } ?: ""}! 😱"
+            false -> "En vedtaksperiode i ${gjeldendeTilstander[vedtaksperiodeId]} venter på en annen vedtaksperiode i ${gjeldendeTilstander[venterPå.vedtaksperiodeId]} som trenger${venterPå.venteårsak.hvorfor?.let {
+                " fordi $it"
+            } ?: ""}! 😱"
         }
 
     override fun behandlingUtført() {
@@ -264,12 +275,18 @@ internal class UgyldigeSituasjonerObservatør(
                         if (endring.refusjonstidslinje.isEmpty()) {
                             if (behandling.tilstand == Tilstand.AvsluttetUtenVedtak) return@behandling // Ikke noe refusjonsopplysning på AUU er OK
                             if (vedtaksperiode.tilstand.type == AVVENTER_AVSLUTTET_UTEN_UTBETALING) return@behandling // Dette ER være AUU'er som skal tilbake til AUU, de må ikke ha refusjonsopplysninger.
-                            if (vedtaksperiode.tilstand.type in setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)) return@behandling // Ikke fått refusjonsopplysninger enda da
+                            if (vedtaksperiode.tilstand.type in
+                                setOf(AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
+                            ) {
+                                return@behandling // Ikke fått refusjonsopplysninger enda da
+                            }
                             error("Burde ikke ha tom refusjonstidslinje i tilstand ${vedtaksperiode.tilstand.type}")
                         }
                         val perioder = endring.refusjonstidslinje.perioderMedBeløp
                         check(perioder.size == 1) { "Burde ikke være noen hull i refusjonstidslinjen." }
-                        check(perioder.single() == endring.periode) { "Refusjonstidslinjen skal dekke hele perioden. Perioden er ${endring.periode}, refusjonsopplysninger for $perioder" }
+                        check(perioder.single() == endring.periode) {
+                            "Refusjonstidslinjen skal dekke hele perioden. Perioden er ${endring.periode}, refusjonsopplysninger for $perioder"
+                        }
                     }
                 }
             }
@@ -288,7 +305,9 @@ internal class UgyldigeSituasjonerObservatør(
                             -> {
                                 assertNotNull(endring.utbetaling) { "forventer utbetaling i ${behandling.tilstand}" }
                                 assertNotNull(endring.grunnlagsdata) { "forventer vilkårsgrunnlag i ${behandling.tilstand}" }
-                                assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) { "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}" }
+                                assertEquals(IKKE_UTBETALT, endring.utbetaling!!.inspektør.tilstand) {
+                                    "forventer at utbetaling i behandlingstilstand ${behandling.tilstand} skal være IKKE_UTBETALT, men var ${endring.utbetaling.inspektør.tilstand}"
+                                }
                             }
 
                             Tilstand.RevurdertVedtakAvvist,
@@ -309,14 +328,22 @@ internal class UgyldigeSituasjonerObservatør(
                             -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
-                                assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
-                                assertTrue(endring.utbetalingstidslinje.isEmpty()) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
+                                assertEquals(
+                                    IKKE_VURDERT,
+                                    endring.maksdatoresultat.bestemmelse,
+                                ) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
+                                assertTrue(
+                                    endring.utbetalingstidslinje.isEmpty(),
+                                ) { "forventer tom utbetalingstidslinje i ${behandling.tilstand}" }
                             }
 
                             Tilstand.AvsluttetUtenVedtak -> {
                                 assertNull(endring.utbetaling) { "forventer ingen utbetaling i ${behandling.tilstand}" }
                                 assertNull(endring.grunnlagsdata) { "forventer inget vilkårsgrunnlag i ${behandling.tilstand}" }
-                                assertEquals(IKKE_VURDERT, endring.maksdatoresultat.bestemmelse) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
+                                assertEquals(
+                                    IKKE_VURDERT,
+                                    endring.maksdatoresultat.bestemmelse,
+                                ) { "forventer maksdatoresultat IKKE_VURDERT i ${behandling.tilstand}" }
                             }
                         }
                     }
@@ -342,17 +369,25 @@ internal class UgyldigeSituasjonerObservatør(
 
                         if (endring.utbetaling != null) {
                             if (endring.utbetaling.id != forrigeUtbetalingId && forrigeUtbetalingId != null) {
-                                check(endring.beregningId != forrigeBeregningId) { "Forventer ulike beregningIder ved ulike utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                check(endring.beregningId != forrigeBeregningId) {
+                                    "Forventer ulike beregningIder ved ulike utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}"
+                                }
                                 oppbrukteBeregningIder.add(forrigeBeregningId)
                             } else {
-                                check(endring.beregningId == forrigeBeregningId) { "Forventer like beregningIder ved like utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                check(endring.beregningId == forrigeBeregningId) {
+                                    "Forventer like beregningIder ved like utbetalingIder for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}"
+                                }
                             }
                         } else {
                             if (forrigeUtbetalingId != null) {
-                                check(endring.beregningId != forrigeBeregningId) { "Forventer ulike beregningIder når forrige endring hadde utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                check(endring.beregningId != forrigeBeregningId) {
+                                    "Forventer ulike beregningIder når forrige endring hadde utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}"
+                                }
                                 oppbrukteBeregningIder.add(forrigeBeregningId)
                             } else {
-                                check(endring.beregningId == forrigeBeregningId) { "Forventer like beregningIder når forrige endring ikke hadde utbetaling og gjeldende ikke har utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}" }
+                                check(endring.beregningId == forrigeBeregningId) {
+                                    "Forventer like beregningIder når forrige endring ikke hadde utbetaling og gjeldende ikke har utbetaling for arbeidsgiver ${arbeidsgiver.organisasjonsnummer} for periode ${endring.periode}"
+                                }
                             }
                         }
                         forrigeBeregningId = endring.beregningId
@@ -363,11 +398,14 @@ internal class UgyldigeSituasjonerObservatør(
         }
     }
 
-    private fun Behandlinger.Behandling.gyldigTilInfotrygd() = tilstand == Tilstand.TilInfotrygd && avsluttet != null && vedtakFattet == null
+    private fun Behandlinger.Behandling.gyldigTilInfotrygd() =
+        tilstand == Tilstand.TilInfotrygd && avsluttet != null && vedtakFattet == null
 
-    private fun Behandlinger.Behandling.gyldigAvsluttetUtenUtbetaling() = tilstand == Tilstand.AvsluttetUtenVedtak && avsluttet != null && vedtakFattet == null
+    private fun Behandlinger.Behandling.gyldigAvsluttetUtenUtbetaling() =
+        tilstand == Tilstand.AvsluttetUtenVedtak && avsluttet != null && vedtakFattet == null
 
-    private fun Behandlinger.Behandling.gyldigAvsluttet() = tilstand == Tilstand.VedtakIverksatt && avsluttet != null && vedtakFattet != null
+    private fun Behandlinger.Behandling.gyldigAvsluttet() =
+        tilstand == Tilstand.VedtakIverksatt && avsluttet != null && vedtakFattet != null
 
     private val Behandlinger.Behandling.nøkkelinfo get() = "tilstand=$tilstand, avsluttet=$avsluttet, vedtakFattet=$vedtakFattet"
 
@@ -375,29 +413,37 @@ internal class UgyldigeSituasjonerObservatør(
         arbeidsgivere.forEach { arbeidsgiver ->
             arbeidsgiver
                 .vedtaksperioder()
-                .filter { it.tilstand.type in setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD) }
-                .groupBy(keySelector = { it.tilstand.type }) {
+                .filter {
+                    it.tilstand.type in
+                        setOf(TilstandType.AVSLUTTET, TilstandType.AVSLUTTET_UTEN_UTBETALING, TilstandType.TIL_INFOTRYGD)
+                }.groupBy(keySelector = { it.tilstand.type }) {
                     it.behandlinger.behandlinger().last()
                 }.forEach { (tilstand, sisteBehandlinger) ->
                     when (tilstand) {
                         TilstandType.TIL_INFOTRYGD ->
                             sisteBehandlinger.filterNot { it.gyldigTilInfotrygd() }.let {
                                 check(it.isEmpty()) {
-                                    "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                    "Disse ${it.size} periodene i TilInfotrygd har sine siste behandlinger i snedige tilstander: ${it.map { behandling ->
+                                        behandling.nøkkelinfo
+                                    }}}"
                                 }
                             }
 
                         TilstandType.AVSLUTTET_UTEN_UTBETALING ->
                             sisteBehandlinger.filterNot { it.gyldigAvsluttetUtenUtbetaling() }.let {
                                 check(it.isEmpty()) {
-                                    "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                    "Disse ${it.size} periodene i AvsluttetUtenUtbetaling har sine siste behandlinger i snedige tilstander: ${it.map { behandling ->
+                                        behandling.nøkkelinfo
+                                    }}}"
                                 }
                             }
 
                         TilstandType.AVSLUTTET ->
                             sisteBehandlinger.filterNot { it.gyldigAvsluttet() }.let {
                                 check(it.isEmpty()) {
-                                    "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling -> behandling.nøkkelinfo }}}"
+                                    "Disse ${it.size} periodene i Avsluttet har sine siste behandlinger i snedige tilstander: ${it.map { behandling ->
+                                        behandling.nøkkelinfo
+                                    }}}"
                                 }
                             }
 
@@ -421,7 +467,11 @@ internal class UgyldigeSituasjonerObservatør(
                             .firstNotNullOfOrNull { it.utbetaling }
                             ?.inspektør
                             ?.tilstand
-                    check(utbetalingstatus == null || utbetalingstatus in setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT)) {
+                    check(
+                        utbetalingstatus == null ||
+                            utbetalingstatus in
+                            setOf(Utbetalingstatus.FORKASTET, Utbetalingstatus.IKKE_GODKJENT, Utbetalingstatus.ANNULLERT),
+                    ) {
                         "Utbetalingstatus for forkastet behandling er ikke FORKASTET / IKKE_GODKJENT / ANNULLERT, men $utbetalingstatus"
                     }
                     check(behandling.tilstand in setOf(Tilstand.TilInfotrygd, Tilstand.AnnullertPeriode)) {
@@ -438,7 +488,9 @@ internal class UgyldigeSituasjonerObservatør(
             arbeidsgiver.vedtaksperioder().forEach { current ->
                 kanskjeForrigePeriode?.also { forrigePeriode ->
                     if (forrigePeriode.periode.overlapperMed(current.periode)) {
-                        error("For Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!")
+                        error(
+                            "For Arbeidsgiver ${arbeidsgiver.organisasjonsnummer()} overlapper Vedtaksperiode ${current.id} (${current.periode}) og Vedtaksperiode ${forrigePeriode.id} (${forrigePeriode.periode}) med hverandre!",
+                        )
                     }
                 }
                 kanskjeForrigePeriode = current

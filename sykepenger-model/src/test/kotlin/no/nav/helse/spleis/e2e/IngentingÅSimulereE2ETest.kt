@@ -24,7 +24,15 @@ internal class IngentingÅSimulereE2ETest : AbstractDslTest() {
             håndterSøknad(20.januar til 21.januar)
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+                AVSLUTTET,
+            )
             assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(1))
         }
     }

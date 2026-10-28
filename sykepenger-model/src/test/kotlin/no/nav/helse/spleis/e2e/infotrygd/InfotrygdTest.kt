@@ -48,7 +48,12 @@ internal class InfotrygdTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertVarsler(listOf(RV_IT_14, RV_IV_10), 1.vedtaksperiode.filter())
             assertEquals(refusjonFør, inspektør.refusjon(1.vedtaksperiode))
         }
@@ -110,7 +115,10 @@ internal class InfotrygdTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
 
             // Mens Mars står til godkjenning utbetales den i Infotrygd
-            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar),
+                ArbeidsgiverUtbetalingsperiode(a1, 10.mars, 31.mars),
+            )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 10.mars, emptyList())
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
@@ -147,7 +155,10 @@ internal class InfotrygdTest : AbstractDslTest() {
 
             håndterYtelser(3.vedtaksperiode)
             håndterSimulering(3.vedtaksperiode)
-            håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar), ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli))
+            håndterUtbetalingshistorikkEtterInfotrygdendring(
+                ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar),
+                ArbeidsgiverUtbetalingsperiode(a1, 1.juli, 31.juli),
+            )
 
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(3.vedtaksperiode).inspektør.dagerUtenNavAnsvar)
 
@@ -311,7 +322,10 @@ internal class InfotrygdTest : AbstractDslTest() {
             )
             assertEquals(antallInnslagFør, inspektør(a1).vilkårsgrunnlagHistorikkInnslag().size)
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(februar, 15000.månedlig, meldingsreferanse.saksbehandler),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)

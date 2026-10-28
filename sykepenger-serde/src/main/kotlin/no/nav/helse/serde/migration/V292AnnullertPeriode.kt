@@ -33,8 +33,10 @@ internal class V292AnnullertPeriode : JsonMigration(version = 292) {
                     val annulleringer =
                         arbeidsgiver
                             .path("utbetalinger")
-                            .filter { utbetaling -> utbetaling.path("type").asText() == "ANNULLERING" && utbetaling.path("status").asText() == "ANNULLERT" }
-                            .filterNot { annullering -> annullering.path("id").asText() in opphørtAvAndreUtbetalinger }
+                            .filter { utbetaling ->
+                                utbetaling.path("type").asText() == "ANNULLERING" &&
+                                    utbetaling.path("status").asText() == "ANNULLERT"
+                            }.filterNot { annullering -> annullering.path("id").asText() in opphørtAvAndreUtbetalinger }
 
                     arbeidsgiver
                         .path("forkastede")
@@ -57,7 +59,15 @@ internal class V292AnnullertPeriode : JsonMigration(version = 292) {
         val generasjoner = vedtaksperiode.path("generasjoner") as ArrayNode
         val siste = generasjoner.last()
 
-        if (siste.path("tilstand").asText() != "TIL_INFOTRYGD") return sikkerLogg.info("[V292] siste generasjon ${siste.path("id").asText()} som står i ${siste.path("tilstand").asText()} og det er forventet at den skal være TIL_INFOTRYGD")
+        if (siste.path("tilstand").asText() !=
+            "TIL_INFOTRYGD"
+        ) {
+            return sikkerLogg.info(
+                "[V292] siste generasjon ${siste.path(
+                    "id",
+                ).asText()} som står i ${siste.path("tilstand").asText()} og det er forventet at den skal være TIL_INFOTRYGD",
+            )
+        }
         if (generasjoner.size() == 1) return
 
         val nestSist = generasjoner[generasjoner.size() - 2]

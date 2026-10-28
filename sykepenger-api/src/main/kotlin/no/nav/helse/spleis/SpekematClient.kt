@@ -44,7 +44,11 @@ class SpekematClient(
         val responseBody = response.body()
         val statusCode = response.statusCode()
         sikkerlogg.info("mottok $statusCode:\n$responseBody", kv("fødselsnummer", fnr), kv("callId", callId))
-        if (statusCode != 200) throw SpekematClientException("Fikk uventet http statuskode fra spekemat: $statusCode. Forventet HTTP 200 OK")
+        if (statusCode !=
+            200
+        ) {
+            throw SpekematClientException("Fikk uventet http statuskode fra spekemat: $statusCode. Forventet HTTP 200 OK")
+        }
         return parsePølsefabrikker(responseBody)
     }
 

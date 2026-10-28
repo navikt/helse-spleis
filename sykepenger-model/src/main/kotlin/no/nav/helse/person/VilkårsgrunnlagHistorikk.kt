@@ -53,9 +53,13 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         private val opprettet: LocalDateTime,
         internal val vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>,
     ) {
-        internal constructor(vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>) : this(UUID.randomUUID(), LocalDateTime.now(), vilkårsgrunnlag)
+        internal constructor(
+            vilkårsgrunnlag: Map<LocalDate, VilkårsgrunnlagElement>,
+        ) : this(UUID.randomUUID(), LocalDateTime.now(), vilkårsgrunnlag)
 
-        internal constructor(other: Innslag?, nyttElement: VilkårsgrunnlagElement) : this((other?.vilkårsgrunnlag ?: emptyMap()) + mapOf(nyttElement.skjæringstidspunkt to nyttElement))
+        internal constructor(other: Innslag?, nyttElement: VilkårsgrunnlagElement) : this(
+            (other?.vilkårsgrunnlag ?: emptyMap()) + mapOf(nyttElement.skjæringstidspunkt to nyttElement),
+        )
 
         internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt]
 
@@ -70,7 +74,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             return Innslag(gyldigeVilkårsgrunnlag)
         }
 
-        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> = vilkårsgrunnlag.filter { (dato, _) -> dato in sykefraværstilfeller }
+        private fun beholdAktiveSkjæringstidspunkter(sykefraværstilfeller: Set<LocalDate>): Map<LocalDate, VilkårsgrunnlagElement> =
+            vilkårsgrunnlag.filter { (dato, _) ->
+                dato in
+                    sykefraværstilfeller
+            }
 
         internal companion object {
             fun gjenopprett(
@@ -158,13 +166,22 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
         ): Grunnlagsdata? {
             if (this !is Grunnlagsdata) return null
-            return when (val utfall = inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(organisasjonsnummer, førsteFraværsdag, arbeidstakerFaktaavklartInntekt)) {
+            return when (
+                val utfall =
+                    inntektsgrunnlag.håndterArbeidstakerFaktaavklartInntekt(
+                        organisasjonsnummer,
+                        førsteFraværsdag,
+                        arbeidstakerFaktaavklartInntekt,
+                    )
+            ) {
                 Inntektsgrunnlag.Utfall.Uendret -> null
                 is Inntektsgrunnlag.Utfall.Endret -> medNyttInntektsgrunnlag(utfall.nyttInntektsgrunnlag)
             }
         }
 
-        internal fun håndterKorrigerteInntekter(hendelse: OverstyrArbeidsgiveropplysninger): Pair<Grunnlagsdata, List<EndretArbeidsgiver>>? {
+        internal fun håndterKorrigerteInntekter(
+            hendelse: OverstyrArbeidsgiveropplysninger,
+        ): Pair<Grunnlagsdata, List<EndretArbeidsgiver>>? {
             if (this !is Grunnlagsdata) return null
             return when (val utfall = inntektsgrunnlag.håndterKorrigerteInntekter(hendelse)) {
                 Inntektsgrunnlag.Utfall.Uendret -> null
@@ -265,13 +282,18 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             nyttInntektsgrunnlag = inntektsgrunnlag.overstyrArbeidsforhold(hendelse, subsumsjonslogg),
         )
 
-        internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) = kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)
+        internal fun medNyttInntektsgrunnlag(nyttInntektsgrunnlag: Inntektsgrunnlag) =
+            kopierMed(nyttInntektsgrunnlag = nyttInntektsgrunnlag)
 
         internal fun medEndretForsikringsvurdering(
             forsikringsvurdering: Vurdering.Forsikringsvurdering,
             aktivitetslogg: IAktivitetslogg,
         ): Grunnlagsdata? {
-            if (forsikringsvurderingId == forsikringsvurdering.id) return null.also { aktivitetslogg.info("Forsikringsvurderingen er allerede lagt til grunn") }
+            if (forsikringsvurderingId ==
+                forsikringsvurdering.id
+            ) {
+                return null.also { aktivitetslogg.info("Forsikringsvurderingen er allerede lagt til grunn") }
+            }
             return kopierMed(nyForsikringsvurderingId = forsikringsvurdering.id)
         }
 
@@ -279,7 +301,11 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             opptjeningsvurdering: Vurdering.Opptjeningsvurdering,
             aktivitetslogg: IAktivitetslogg,
         ): Grunnlagsdata? {
-            if (opptjeningsvurderingId == opptjeningsvurdering.id) return null.also { aktivitetslogg.info("Opptjeningsvurderingen er allerede lagt til grunn") }
+            if (opptjeningsvurderingId ==
+                opptjeningsvurdering.id
+            ) {
+                return null.also { aktivitetslogg.info("Opptjeningsvurderingen er allerede lagt til grunn") }
+            }
             return kopierMed(nyOpptjeningsvurderingId = opptjeningsvurdering.id)
         }
 
@@ -290,7 +316,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             nyOpptjeningsvurderingId: UUID? = null,
             nyForsikringsvurderingId: UUID? = null,
         ): Grunnlagsdata {
-            require(listOfNotNull(nyttInntektsgrunnlag, nyOpptjening, nyttSkjæringstidspunkt, nyOpptjeningsvurderingId, nyForsikringsvurderingId).isNotEmpty()) {
+            require(
+                listOfNotNull(
+                    nyttInntektsgrunnlag,
+                    nyOpptjening,
+                    nyttSkjæringstidspunkt,
+                    nyOpptjeningsvurderingId,
+                    nyForsikringsvurderingId,
+                ).isNotEmpty(),
+            ) {
                 "Må endre minst et felt for at det skal gi mening å lage et nytt grunnlag!"
             }
             return Grunnlagsdata(

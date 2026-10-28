@@ -94,6 +94,7 @@ internal abstract class MigrationTest(
     internal companion object {
         private val placeholderRegex = "<!.*!>".toRegex()
 
-        internal fun String.readResource() = object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")
+        internal fun String.readResource() =
+            object {}.javaClass.getResource(this)?.readText(Charsets.UTF_8) ?: error("did not find resource <$this>")
     }
 }

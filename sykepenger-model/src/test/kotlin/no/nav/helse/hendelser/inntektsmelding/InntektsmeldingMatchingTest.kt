@@ -241,7 +241,8 @@ internal class InntektsmeldingMatchingTest {
         assertTrue(dager.harBlittHåndtertAv(31.januar.somPeriode()))
     }
 
-    private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? = bitAvInntektsmelding(Aktivitetslogg(), periode)?.sykdomstidslinje?.periode()
+    private fun DagerFraInntektsmelding.håndter(periode: Periode): Periode? =
+        bitAvInntektsmelding(Aktivitetslogg(), periode)?.sykdomstidslinje?.periode()
 
     private companion object {
         private val fabrikk = ArbeidsgiverHendelsefabrikk("a1", behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("a1"))

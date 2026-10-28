@@ -55,14 +55,26 @@ internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
 
             val utbetalingOverstyringJanuar = inspektør.utbetaling(2)
             assertEquals(1, utbetalingOverstyringJanuar.arbeidsgiverOppdrag.size)
-            assertEquals(utbetalingJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId(), utbetalingOverstyringJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId())
+            assertEquals(
+                utbetalingJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+                utbetalingOverstyringJanuar.arbeidsgiverOppdrag.inspektør.fagsystemId(),
+            )
             utbetalingOverstyringJanuar.arbeidsgiverOppdrag[0].inspektør.also { linje ->
                 assertEquals(ENDR, linje.endringskode)
                 assertEquals(17.januar, linje.fom)
                 assertEquals(30.januar, linje.tom)
             }
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
@@ -207,7 +219,18 @@ internal class UtbetalingFeiletE2ETest : AbstractDslTest() {
                 vedtaksperiodeId = 2.vedtaksperiode,
             )
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+            )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

@@ -135,9 +135,21 @@ internal class SubsumsjonSelvstendigE2ETest : AbstractDslTest() {
                         "skjæringstidspunkt" to 1.januar,
                         "pensjonsgivendeInntekter" to
                             listOf(
-                                mapOf<String, Any>("pensjonsgivendeInntekt" to 450000.0, "årstall" to Year.of(2017), "gjennomsnittligG" to 93281.0),
-                                mapOf<String, Any>("pensjonsgivendeInntekt" to 450000.0, "årstall" to Year.of(2016), "gjennomsnittligG" to 91740.0),
-                                mapOf<String, Any>("pensjonsgivendeInntekt" to 450000.0, "årstall" to Year.of(2015), "gjennomsnittligG" to 89502.0),
+                                mapOf<String, Any>(
+                                    "pensjonsgivendeInntekt" to 450000.0,
+                                    "årstall" to Year.of(2017),
+                                    "gjennomsnittligG" to 93281.0,
+                                ),
+                                mapOf<String, Any>(
+                                    "pensjonsgivendeInntekt" to 450000.0,
+                                    "årstall" to Year.of(2016),
+                                    "gjennomsnittligG" to 91740.0,
+                                ),
+                                mapOf<String, Any>(
+                                    "pensjonsgivendeInntekt" to 450000.0,
+                                    "årstall" to Year.of(2015),
+                                    "gjennomsnittligG" to 89502.0,
+                                ),
                             ),
                         "nåværendeGrunnbeløp" to 93634.0,
                     ),

@@ -24,14 +24,31 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`)
+            assertVarsler(
+                1.vedtaksperiode,
+                Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`,
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
 
             håndterInntektsendringer(inntektsendringFom = 20.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 20.januar til 31.januar, 1000.daglig)))
-            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`, Varselkode.RV_UT_23)
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning =
+                    listOf(
+                        InntekterForBeregning.Inntektsperiode(
+                            a2,
+                            20.januar til 31.januar,
+                            1000.daglig,
+                        ),
+                    ),
+            )
+            assertVarsler(
+                1.vedtaksperiode,
+                Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`,
+                Varselkode.RV_UT_23,
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 19.januar)
             assertUtbetalingsbeløp(1.vedtaksperiode, 431, 1431, subset = 20.januar til 31.januar)
         }
@@ -47,13 +64,19 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`)
+            assertVarsler(
+                1.vedtaksperiode,
+                Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`,
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
 
             håndterInntektsendringer(inntektsendringFom = 1.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, 1000.daglig)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, 1000.daglig)),
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 431, 1431, subset = 17.januar til 31.januar)
         }
     }
@@ -68,13 +91,19 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
-            assertVarsler(1.vedtaksperiode, Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`)
+            assertVarsler(
+                1.vedtaksperiode,
+                Varselkode.TilkommenInntekt.`Opplyst i søknaden om inntekter hen har hatt fra andre arbeidsgivere`,
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.januar til 31.januar)
 
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
 
             håndterInntektsendringer(inntektsendringFom = 1.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, 10000.daglig)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, 10000.daglig)),
+            )
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 17.januar til 31.januar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_VV_4, Varselkode.RV_SV_5)
         }
@@ -91,7 +120,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a2, INNTEKT, deaktivert = false, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
 
-            håndterOverstyrArbeidsforhold(1.januar, OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "Dette er tilkommen inntekt"))
+            håndterOverstyrArbeidsforhold(
+                1.januar,
+                OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(a2, deaktivert = true, forklaring = "Dette er tilkommen inntekt"),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
@@ -105,7 +137,10 @@ internal class TilkommenInntektTest : AbstractDslTest() {
             // Her legger saksbehandler til inntekter basert på informasjon i søknaden
             // Ettersom a2 nå ikke er en del av sykepengegrunnlaget blir utbetalingen annerledes selv om inntekten i a2 er helt lik som da den var ghost
             håndterInntektsendringer(inntektsendringFom = 1.januar)
-            håndterYtelser(1.vedtaksperiode, inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, INNTEKT)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                inntekterForBeregning = listOf(InntekterForBeregning.Inntektsperiode(a2, 1.januar til 31.januar, INNTEKT)),
+            )
             håndterSimulering(1.vedtaksperiode)
             assertUtbetalingsbeløp(1.vedtaksperiode, 0, 1431, subset = 17.januar til 31.januar)
             assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23, Varselkode.RV_VV_2, Varselkode.RV_VV_4)

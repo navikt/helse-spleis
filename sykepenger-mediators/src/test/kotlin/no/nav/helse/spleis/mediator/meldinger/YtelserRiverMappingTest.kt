@@ -223,8 +223,18 @@ internal class YtelserRiverMappingTest :
         private val forventetSvangerskapspenger = Svangerskapspenger(listOf(GradertPeriode(1.juni til 30.juni, 99)))
         private val forventetOmsorgspenger = Omsorgspenger(listOf(GradertPeriode(3.januar til 17.januar, 70)))
         private val forventetOpplæringspenger = Opplæringspenger(listOf(GradertPeriode(4.januar til 18.januar, 80)))
-        private val forventetInstitusjonsopphold = Institusjonsopphold(listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
-        private val forventetInntekterForBeregning = InntekterForBeregning(listOf(InntekterForBeregning.Inntektsperiode("heihei", 1.april til 30.april, 100.daglig)))
+        private val forventetInstitusjonsopphold =
+            Institusjonsopphold(listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
+        private val forventetInntekterForBeregning =
+            InntekterForBeregning(
+                listOf(
+                    InntekterForBeregning.Inntektsperiode(
+                        "heihei",
+                        1.april til 30.april,
+                        100.daglig,
+                    ),
+                ),
+            )
         private val forventetArbeidsavklaringspenger = Arbeidsavklaringspenger(listOf(1.mars til 31.mars))
         private val forventetDagpenger = Dagpenger(listOf(1.februar til 28.februar))
         private val forventetForsikring =

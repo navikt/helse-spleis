@@ -39,7 +39,9 @@ internal class UtboksRetryRiver(
                     else -> utboksDao.personerMedUsendteMeldinger()
                 }
 
-            sikkerlogg.info("Sender ut personpåminnelse for ${personerMedUsendteMeldinger.size} personer som har usendte meldinger i utboksen.")
+            sikkerlogg.info(
+                "Sender ut personpåminnelse for ${personerMedUsendteMeldinger.size} personer som har usendte meldinger i utboksen.",
+            )
 
             personerMedUsendteMeldinger.forEach { personidentifikator ->
                 val personpåminnelse =

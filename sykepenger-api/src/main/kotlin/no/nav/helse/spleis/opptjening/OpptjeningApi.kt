@@ -72,10 +72,15 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
                                 put("tom", opptjeningsperiode.tom.toString())
                             }
                     }
-                    put("antallDager", arbeidstakerOpptjening.opptjeningsdager.takeUnless { arbeidstakerOpptjening.reellOpptjeningsperiode == null } ?: 0)
+                    put(
+                        "antallDager",
+                        arbeidstakerOpptjening.opptjeningsdager.takeUnless { arbeidstakerOpptjening.reellOpptjeningsperiode == null } ?: 0,
+                    )
                     putArray("arbeidsforhold").apply {
                         arbeidstakerOpptjening.arbeidsforhold.forEach arbeidsforhold@{ arbeidsforhold ->
-                            val ansettelsesperioder = arbeidsforhold.ansattPerioder.filterNot { it.deaktivert }.takeUnless { it.isEmpty() } ?: return@arbeidsforhold
+                            val ansettelsesperioder =
+                                arbeidsforhold.ansattPerioder.filterNot { it.deaktivert }.takeUnless { it.isEmpty() }
+                                    ?: return@arbeidsforhold
                             addObject().apply {
                                 put("organisasjonsnummer", arbeidsforhold.orgnummer)
                                 putArray("ansettelsesperioder").apply {

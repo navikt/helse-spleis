@@ -24,6 +24,18 @@ internal class SendtSøknadArbeidsledigMessage(
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         builder.arbeidsgjennopptatt(packet["friskmeldt"].asOptionalLocalDate())
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(
+            personopplysninger,
+            this,
+            builder.build(
+                meldingsporing,
+            ),
+            context,
+            packet["historiskeFolkeregisteridenter"]
+                .map(JsonNode::asText)
+                .map {
+                    Personidentifikator(it)
+                }.toSet(),
+        )
     }
 }

@@ -64,9 +64,7 @@ class Utbetalingstidslinje private constructor(
                 økonomiList.betal(sykepengegrunnlagBegrenset6G)
             }
 
-        fun totalSykdomsgrad(
-            tidslinjer: List<Utbetalingstidslinje>,
-        ): List<Utbetalingstidslinje> =
+        fun totalSykdomsgrad(tidslinjer: List<Utbetalingstidslinje>): List<Utbetalingstidslinje> =
             beregnDagForDag(tidslinjer) { økonomiList ->
                 Økonomi.totalSykdomsgrad(økonomiList)
             }
@@ -269,7 +267,8 @@ class Utbetalingstidslinje private constructor(
 }
 
 sealed class Begrunnelse {
-    open fun skalAvvises(utbetalingsdag: Utbetalingsdag) = utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
+    open fun skalAvvises(utbetalingsdag: Utbetalingsdag) =
+        utbetalingsdag is AvvistDag || utbetalingsdag is NavDag || utbetalingsdag is ArbeidsgiverperiodedagNav
 
     fun dto() =
         when (this) {

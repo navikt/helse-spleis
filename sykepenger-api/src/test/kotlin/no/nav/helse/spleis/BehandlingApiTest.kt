@@ -60,7 +60,12 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
             assertEquals(1431, navDag["forespurtRefusjon"]["beløp"].asInt())
             assertEquals("ARBEIDSGIVER", navDag["forespurtRefusjon"]["avsender"].asText())
             assertEquals(arbeidsgiveropplysningerId.toString(), navDag["forespurtRefusjon"]["sasInternInntektsmeldingReferanse"].asText())
-            assertTrue(utbetalingstidslinje.all { it["forespurtRefusjon"]["sasInternInntektsmeldingReferanse"].asText() == arbeidsgiveropplysningerId.toString() })
+            assertTrue(
+                utbetalingstidslinje.all {
+                    it["forespurtRefusjon"]["sasInternInntektsmeldingReferanse"].asText() ==
+                        arbeidsgiveropplysningerId.toString()
+                },
+            )
         }
     }
 
@@ -77,7 +82,8 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
         val tomPerson = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
 
         spleisApiTestApplication(testdata = { lagrePerson(it.ds, UNG_PERSON_FNR, tomPerson) }) {
-            val body = hentBehandling("""{"fødselsnummer":"$UNG_PERSON_FNR","behandlingId":"${UUID.randomUUID()}"}""", HttpStatusCode.NotFound)
+            val body =
+                hentBehandling("""{"fødselsnummer":"$UNG_PERSON_FNR","behandlingId":"${UUID.randomUUID()}"}""", HttpStatusCode.NotFound)
             assertFalse(body.contains(UNG_PERSON_FNR))
         }
     }
@@ -126,9 +132,26 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
             val behandlingId = simuleringsutfisker.behandlingId
             val utbetalingId = simuleringsutfisker.utbetalingId
             val fagsystemId = simuleringsutfisker.fagsystemId
-            person.håndterSimulering(eventBus, simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = simuleringsutfisker.fagområde), Aktivitetslogg())
-            person.håndterUtbetalingsgodkjenning(eventBus, utbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = utbetalingId), Aktivitetslogg())
-            person.håndterUtbetalingHendelse(eventBus, utbetaling(vedtaksperiodeId = vedtaksperiodeId, behandlingId = behandlingId, utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
+            person.håndterSimulering(
+                eventBus,
+                simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = simuleringsutfisker.fagområde),
+                Aktivitetslogg(),
+            )
+            person.håndterUtbetalingsgodkjenning(
+                eventBus,
+                utbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = utbetalingId),
+                Aktivitetslogg(),
+            )
+            person.håndterUtbetalingHendelse(
+                eventBus,
+                utbetaling(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    behandlingId = behandlingId,
+                    utbetalingId = utbetalingId,
+                    fagsystemId = fagsystemId,
+                ),
+                Aktivitetslogg(),
+            )
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
         }
 

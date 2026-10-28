@@ -84,7 +84,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterYtelser(3.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(26.januar til 31.januar, 100)))
 
             assertVarsel(`Overlapper med foreldrepenger`, 3.vedtaksperiode.filter())
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
     }
 
@@ -145,8 +152,22 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             }
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -248,7 +269,10 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             val antallSykedagerIFebruar2018 = 20
             val nettoBeløpForFebruarMedStandardInntektUtenAgp = 1431 * antallSykedagerIFebruar2018
             val revurdering = inspektør.sisteUtbetaling()
-            assertEquals(nettoBeløpForFebruarMedStandardInntektUtenAgp - nettoBeløpForFebruarMedStandardInntektOgAgp, revurdering.nettobeløp)
+            assertEquals(
+                nettoBeløpForFebruarMedStandardInntektUtenAgp - nettoBeløpForFebruarMedStandardInntektOgAgp,
+                revurdering.nettobeløp,
+            )
         }
     }
 
@@ -477,7 +501,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             nyPeriode(1.januar til 15.januar)
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_INNTEKTSMELDING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
         }
     }
 
@@ -489,7 +519,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             nyPeriode(1.januar til 15.januar)
 
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
@@ -502,7 +538,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
         nyPeriode(1.januar til 15.januar, a1)
 
         a1 {
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
         a2 { assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING) }
@@ -588,7 +630,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertEquals(20.februar til 31.mars, inspektør.periode(1.vedtaksperiode))
             assertVarsler(listOf(Varselkode.RV_IV_7, RV_SØ_13), 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
         }
     }
@@ -766,9 +814,24 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                3.vedtaksperiode,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[2.vedtaksperiode])
         }
     }
@@ -812,7 +875,13 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 TIL_UTBETALING,
                 AVSLUTTET,
             )
-            assertTilstander(1.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -1190,8 +1259,20 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             nyPeriode(20.januar til 31.januar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
         }
     }
 

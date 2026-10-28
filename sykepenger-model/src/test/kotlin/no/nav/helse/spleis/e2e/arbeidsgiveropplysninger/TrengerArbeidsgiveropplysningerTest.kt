@@ -64,7 +64,8 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             )
 
             // Arbeidsgiver svarer ikke på forespørselen, men sender en "gammel" inntektsmelding & opplyser om begrunnelseForReduksjonEllerIkkeUtbetalt
-            val inntektsmeldingId = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            val inntektsmeldingId =
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
             // Da er det periode nummer 1 som håndterer denne inntektsmeldingen
             assertEquals(inntektsmeldingId to 2.vedtaksperiode, observatør.inntektsmeldingHåndtert.single())
 
@@ -77,7 +78,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(januar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            val forespørsler = { observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode } }
+            val forespørsler = {
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter {
+                    it.opplysninger.vedtaksperiodeId ==
+                        1.vedtaksperiode
+                }
+            }
             val opprinneligForespørsel = forespørsler().single()
             assertEquals(1, forespørsler().size)
 
@@ -122,7 +128,12 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertForventetFeil(
                 forklaring = "Her burde forespørselen kvitteres ut",
                 nå = { assertTrue(observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.isEmpty()) },
-                ønsket = { assertEquals(1.vedtaksperiode, observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.singleOrNull()?.vedtaksperiodeId) },
+                ønsket = {
+                    assertEquals(
+                        1.vedtaksperiode,
+                        observatør.trengerIkkeArbeidsgiveropplysningerVedtaksperioder.singleOrNull()?.vedtaksperiodeId,
+                    )
+                },
             )
         }
     }
@@ -247,12 +258,24 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(Sykdom(6.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar til 5.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 6.januar, listOf(1.januar til 16.januar), listOf(1.januar til 5.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                6.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 5.januar),
+            )
 
             håndterSøknad(Sykdom(22.januar, 25.januar, 100.prosent), egenmeldinger = listOf(21.januar til 21.januar))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 22.januar, listOf(1.januar til 16.januar), listOf(21.januar til 21.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                2.vedtaksperiode,
+                22.januar,
+                listOf(1.januar til 16.januar),
+                listOf(
+                    21.januar til 21.januar,
+                ),
+            )
 
             håndterArbeidsgiveropplysninger(listOf(6.januar til 17.januar))
 
@@ -296,7 +319,10 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last().opplysninger.let { event ->
                 assertEquals(listOf(12.februar til 28.februar), event.sykmeldingsperioder)
                 assertEquals(13.februar, event.skjæringstidspunkt)
-                assertEquals(listOf(EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 13.februar)), event.førsteFraværsdager)
+                assertEquals(
+                    listOf(EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 13.februar)),
+                    event.førsteFraværsdager,
+                )
                 assertFalse(event.forespurteOpplysninger.any { it is EventSubscription.Arbeidsgiverperiode })
             }
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
@@ -332,16 +358,43 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
 
         assertEquals(1, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a2 })
+        assertEquals(
+            1,
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count {
+                it.opplysninger.arbeidstaker.organisasjonsnummer ==
+                    a1
+            },
+        )
+        assertEquals(
+            2,
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count {
+                it.opplysninger.arbeidstaker.organisasjonsnummer ==
+                    a2
+            },
+        )
 
         a2 {
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
 
         assertEquals(2, observatør.inntektsmeldingHåndtert.size)
-        assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a1 })
-        assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count { it.opplysninger.arbeidstaker.organisasjonsnummer == a2 })
+        assertEquals(
+            1,
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count {
+                it.opplysninger.arbeidstaker.organisasjonsnummer ==
+                    a1
+            },
+        )
+        assertEquals(
+            2,
+            observatør.trengerArbeidsgiveropplysningerVedtaksperioder.count {
+                it.opplysninger.arbeidstaker.organisasjonsnummer ==
+                    a2
+            },
+        )
     }
 
     @Test
@@ -716,7 +769,15 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
 
         nullstillTilstandsendringer()
         a2 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), Arbeidsgiveropplysning.OppgittArbeidgiverperiode(listOf(1.februar til 16.februar)))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                Arbeidsgiveropplysning.OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                Arbeidsgiveropplysning.OppgittArbeidgiverperiode(
+                    listOf(
+                        1.februar til 16.februar,
+                    ),
+                ),
+            )
         }
 
         a1 { assertVarsler(listOf(RV_VV_2), AktivitetsloggFilter.arbeidsgiver(a1)) }
@@ -838,7 +899,16 @@ internal class TrengerArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `Skal ikke be om arbeidsgiveropplysninger for perioder innenfor arbeidsgiverperioden`() {
         nyPeriode(1.januar til 10.januar, a1)
         assertTrue(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.isEmpty())
-        a1 { assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING) }
+        a1 {
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
+        }
     }
 
     @Test

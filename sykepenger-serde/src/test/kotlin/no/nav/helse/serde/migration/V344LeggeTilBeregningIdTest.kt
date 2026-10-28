@@ -26,14 +26,21 @@ internal class V344LeggeTilBeregningIdTest : MigrationTest(V344LeggeTilBeregning
     @Test
     fun `Legger på beregningId`() {
         assertMigration("/migrations/344/expected.json", "/migrations/344/original.json")
-        assertMigration("/migrations/344/expected_endret_skjæringstidspunkt.json", "/migrations/344/original_endret_skjæringstidspunkt.json")
+        assertMigration(
+            "/migrations/344/expected_endret_skjæringstidspunkt.json",
+            "/migrations/344/original_endret_skjæringstidspunkt.json",
+        )
     }
 
     @Test
     fun `Uuid v7 basert på tidsstempel`() {
         assertDoesNotThrow { UuidGenerator.UuidV7BasertPåTidsstempelGenerator.generate(Clock.System.now()) }
-        assertDoesNotThrow { UuidGenerator.UuidV7BasertPåTidsstempelGenerator.generate(LocalDateTime.parse("2020-02-26T15:00:29.191576").toKotlinInstant()) }
-        assertDoesNotThrow { UuidGenerator.UuidV7BasertPåTidsstempelGenerator.generate(LocalDateTime.parse("2026-02-26T16:00:29.191576").toKotlinInstant()) }
+        assertDoesNotThrow {
+            UuidGenerator.UuidV7BasertPåTidsstempelGenerator.generate(LocalDateTime.parse("2020-02-26T15:00:29.191576").toKotlinInstant())
+        }
+        assertDoesNotThrow {
+            UuidGenerator.UuidV7BasertPåTidsstempelGenerator.generate(LocalDateTime.parse("2026-02-26T16:00:29.191576").toKotlinInstant())
+        }
     }
 
     @Test

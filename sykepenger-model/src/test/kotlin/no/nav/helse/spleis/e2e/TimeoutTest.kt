@@ -62,10 +62,23 @@ internal class TimeoutTest : AbstractDslTest() {
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             nullstillTilstandsendringer()
             assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(2))
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(2),
+            )
             assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3))
-            assertTilstander(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(3),
+            )
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(RV_SY_4, 1.vedtaksperiode.filter())
         }
     }
@@ -78,7 +91,11 @@ internal class TimeoutTest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+                flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsel(RV_SY_4, 1.vedtaksperiode.filter())
         }
@@ -121,7 +138,14 @@ internal class TimeoutTest : AbstractDslTest() {
 
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, LocalDateTime.now().minusDays(91))
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING)
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -247,7 +271,8 @@ internal class TimeoutTest : AbstractDslTest() {
         }
     }
 
-    private fun venterTil(vedtaksperiodeId: UUID) = observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil
+    private fun venterTil(vedtaksperiodeId: UUID) =
+        observatør.vedtaksperiodeVenter.last { it.vedtaksperiodeId == vedtaksperiodeId }.venterTil
 
     private fun assertTimeoutTidspunkt(
         vedtaksperiodeId: UUID,

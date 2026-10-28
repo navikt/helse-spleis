@@ -18,7 +18,13 @@ internal class PersonBuilder(
         val arbeidsgivere =
             personUtDto.arbeidsgivere
                 .map { arbeidsgiverDto ->
-                    ArbeidsgiverBuilder(arbeidsgiverDto, pølsepakke.pakker.singleOrNull { it.yrkesaktivitetidentifikator == arbeidsgiverDto.organisasjonsnummer })
+                    ArbeidsgiverBuilder(
+                        arbeidsgiverDto,
+                        pølsepakke.pakker.singleOrNull {
+                            it.yrkesaktivitetidentifikator ==
+                                arbeidsgiverDto.organisasjonsnummer
+                        },
+                    )
                 }.map { it.build(alder, vilkårsgrunnlagHistorikk) }
                 .let { arbeidsgivere ->
                     val arbeidsgivereFraVilkårsgrunnlag =

@@ -42,7 +42,11 @@ sealed class Infotrygdperiode(
         periode: Periode,
     ): Boolean {
         if (!this.periode.overlapperMed(periode)) return false
-        aktivitetslogg.info("Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden", this.periode.start, this.periode.endInclusive)
+        aktivitetslogg.info(
+            "Utbetaling i Infotrygd %s til %s overlapper med vedtaksperioden",
+            this.periode.start,
+            this.periode.endInclusive,
+        )
         return true
     }
 
@@ -68,7 +72,12 @@ sealed class Infotrygdperiode(
     internal companion object {
         private const val MINIMALT_TILLAT_AVSTAND_NYERE_OPPLYSNINGER = 182
 
-        internal fun sorter(perioder: List<Infotrygdperiode>) = perioder.sortedWith(compareBy({ it.periode.start }, { it.periode.endInclusive }, { it::class.simpleName }))
+        internal fun sorter(perioder: List<Infotrygdperiode>) =
+            perioder.sortedWith(
+                compareBy({
+                    it.periode.start
+                }, { it.periode.endInclusive }, { it::class.simpleName }),
+            )
 
         internal fun List<Infotrygdperiode>.utbetalingsperioder(organisasjonsnummer: String? = null) =
             this

@@ -45,7 +45,10 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 assertThrows<IllegalStateException> {
                     håndterVilkårsgrunnlag(1.vedtaksperiode)
                 }
-            assertEquals("Fant ikke noen periode i forventet tilstand, i forbindelse med å gå videre uten arbeidsgiveropplysninger", feil.message)
+            assertEquals(
+                "Fant ikke noen periode i forventet tilstand, i forbindelse med å gå videre uten arbeidsgiveropplysninger",
+                feil.message,
+            )
         }
     }
 
@@ -123,14 +126,28 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(
                 1.vedtaksperiode,
                 forventetSkjæringstidspunkt = 15.januar,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = listOf(1.januar.somPeriode()),
             )
 
             assertSkjæringstidspunktOgVenteperiode(
                 2.vedtaksperiode,
                 forventetSkjæringstidspunkt = 1.mars,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = listOf(20.januar.somPeriode(), 5.februar.somPeriode(), 19.februar.somPeriode()),
             )
 
@@ -144,40 +161,77 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                     assertEquals(15.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
                     assertEquals("SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
                     assertEquals(mars, inspektør.periode(2.vedtaksperiode))
-                    assertEquals("SSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+                    assertEquals(
+                        "SSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                        inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+                    )
 
                     assertSkjæringstidspunktOgVenteperiode(
                         1.vedtaksperiode,
                         forventetSkjæringstidspunkt = 15.januar,
-                        forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                        forventetVenteperiode =
+                            listOf(
+                                1.januar.somPeriode(),
+                                15.januar til 25.januar,
+                                5.februar.somPeriode(),
+                                19.februar.somPeriode(),
+                                1.mars til 2.mars,
+                            ),
                         forventetEgenmeldinger = listOf(1.januar.somPeriode()),
                     )
 
                     assertSkjæringstidspunktOgVenteperiode(
                         2.vedtaksperiode,
                         forventetSkjæringstidspunkt = 1.mars,
-                        forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                        forventetVenteperiode =
+                            listOf(
+                                1.januar.somPeriode(),
+                                15.januar til 25.januar,
+                                5.februar.somPeriode(),
+                                19.februar.somPeriode(),
+                                1.mars til 2.mars,
+                            ),
                         forventetEgenmeldinger = listOf(20.januar.somPeriode(), 5.februar.somPeriode(), 19.februar.somPeriode()),
                     )
                 },
                 ønsket = {
                     // ??
                     assertEquals(1.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
-                    assertEquals("UAAAARR AAAAARR SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+                    assertEquals(
+                        "UAAAARR AAAAARR SSSSSHH SSSS",
+                        inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+                    )
                     assertEquals(26.januar til 31.mars, inspektør.periode(2.vedtaksperiode))
-                    assertEquals("ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+                    assertEquals(
+                        "ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                        inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+                    )
 
                     assertSkjæringstidspunktOgVenteperiode(
                         1.vedtaksperiode,
                         forventetSkjæringstidspunkt = 15.januar,
-                        forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                        forventetVenteperiode =
+                            listOf(
+                                1.januar.somPeriode(),
+                                15.januar til 25.januar,
+                                5.februar.somPeriode(),
+                                19.februar.somPeriode(),
+                                1.mars til 2.mars,
+                            ),
                         forventetEgenmeldinger = emptyList(),
                     ) // fordi nå ligger de på sykdomstidslinjen
 
                     assertSkjæringstidspunktOgVenteperiode(
                         2.vedtaksperiode,
                         forventetSkjæringstidspunkt = 1.mars,
-                        forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                        forventetVenteperiode =
+                            listOf(
+                                1.januar.somPeriode(),
+                                15.januar til 25.januar,
+                                5.februar.somPeriode(),
+                                19.februar.somPeriode(),
+                                1.mars til 2.mars,
+                            ),
                         forventetEgenmeldinger = emptyList(),
                     )
                 },
@@ -203,14 +257,28 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertSkjæringstidspunktOgVenteperiode(
                 1.vedtaksperiode,
                 forventetSkjæringstidspunkt = 15.januar,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = listOf(1.januar.somPeriode()),
             )
 
             assertSkjæringstidspunktOgVenteperiode(
                 2.vedtaksperiode,
                 forventetSkjæringstidspunkt = 1.mars,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = listOf(20.januar.somPeriode(), 5.februar.somPeriode(), 19.februar.somPeriode()),
             )
 
@@ -233,19 +301,36 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertEquals(1.januar til 25.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals("UAAAARR AAAAARR SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(26.januar til 31.mars, inspektør.periode(2.vedtaksperiode))
-            assertEquals("ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "ARR AAAAARR UAAAARR AAAAARR UAAAARR AAASSHH SSSSSHH SSSSSHH SSSSSHH SSSSSH",
+                inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
 
             assertSkjæringstidspunktOgVenteperiode(
                 1.vedtaksperiode,
                 forventetSkjæringstidspunkt = 15.januar,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = emptyList(),
             ) // fordi nå ligger de på sykdomstidslinjen
 
             assertSkjæringstidspunktOgVenteperiode(
                 2.vedtaksperiode,
                 forventetSkjæringstidspunkt = 1.mars,
-                forventetVenteperiode = listOf(1.januar.somPeriode(), 15.januar til 25.januar, 5.februar.somPeriode(), 19.februar.somPeriode(), 1.mars til 2.mars),
+                forventetVenteperiode =
+                    listOf(
+                        1.januar.somPeriode(),
+                        15.januar til 25.januar,
+                        5.februar.somPeriode(),
+                        19.februar.somPeriode(),
+                        1.mars til 2.mars,
+                    ),
                 forventetEgenmeldinger = emptyList(),
             )
         }
@@ -258,9 +343,22 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             håndterSøknad(februar)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar))
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+                Søknad.Søknadsperiode.Arbeid(1.februar, 28.februar),
+            )
 
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+            )
             assertEquals(0, observatør.skatteinntekterLagtTilGrunnEventer.size)
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
         }
@@ -282,7 +380,13 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
         a2 {
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER, AVVENTER_BLOKKERENDE_PERIODE)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
+                AVVENTER_BLOKKERENDE_PERIODE,
+            )
         }
         a1 {
             håndterVilkårsgrunnlag(1.vedtaksperiode)
@@ -319,11 +423,21 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
 
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             assertVarsel(RV_IV_10, 2.vedtaksperiode.filter())
         }
@@ -337,11 +451,21 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             nullstillTilstandsendringer()
-            håndterPåminnelse(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             assertTilstander(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
 
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsel(RV_IV_10, 1.vedtaksperiode.filter())
         }
@@ -399,16 +523,41 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
             )
             håndterVilkårsgrunnlag(
                 vedtaksperiodeId = 1.vedtaksperiode,
-                arbeidsforhold = listOf(Vilkårsgrunnlag.Arbeidsforhold(a1, 1.januar(2017), type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT)),
+                arbeidsforhold =
+                    listOf(
+                        Vilkårsgrunnlag.Arbeidsforhold(
+                            a1,
+                            1.januar(2017),
+                            type = Vilkårsgrunnlag.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT,
+                        ),
+                    ),
                 inntektsvurderingForSykepengegrunnlag =
                     InntektForSykepengegrunnlag(
                         listOf(
                             ArbeidsgiverInntekt(
                                 a1,
                                 listOf(
-                                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 12), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 11), inntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
-                                    ArbeidsgiverInntekt.MånedligInntekt(YearMonth.of(2017, 10), sprøInntektFraSkatt, ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, "", ""),
+                                    ArbeidsgiverInntekt.MånedligInntekt(
+                                        YearMonth.of(2017, 12),
+                                        inntektFraSkatt,
+                                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                        "",
+                                        "",
+                                    ),
+                                    ArbeidsgiverInntekt.MånedligInntekt(
+                                        YearMonth.of(2017, 11),
+                                        inntektFraSkatt,
+                                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                        "",
+                                        "",
+                                    ),
+                                    ArbeidsgiverInntekt.MånedligInntekt(
+                                        YearMonth.of(2017, 10),
+                                        sprøInntektFraSkatt,
+                                        ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT,
+                                        "",
+                                        "",
+                                    ),
                                 ),
                             ),
                         ),
@@ -458,7 +607,12 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
         val inntektFraSkatt = 10000.månedlig
         a1 {
             håndterSøknad(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = inntektFraSkatt)
             håndterYtelser(1.vedtaksperiode)
@@ -470,7 +624,16 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 forventetPersonbeløp = 462,
                 subset = 17.januar til 31.januar,
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
         }
     }
 
@@ -478,7 +641,12 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     fun `Tar med inntekter når det er rapportert 0 kr i AOrdningen`() {
         a1 {
             håndterSøknad(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = INGEN)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
@@ -490,7 +658,16 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 subset = 17.januar til 31.januar,
             )
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+            )
 
             val forelagteOpplysninger = observatør.skatteinntekterLagtTilGrunnEventer.last()
             assertEquals(
@@ -509,7 +686,12 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
     fun `Tar ikke med inntekter når det ikke er rapportert inntekt i AOrdningen`() {
         a1 {
             håndterSøknad(januar)
-            håndterPåminnelse(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = 1.januar.atStartOfDay(), nåtidspunkt = 1.januar.plusDays(90).atStartOfDay())
+            håndterPåminnelse(
+                1.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                tilstandsendringstidspunkt = 1.januar.atStartOfDay(),
+                nåtidspunkt = 1.januar.plusDays(90).atStartOfDay(),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode, skatteinntekt = null)
             håndterYtelser(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_SV_1, RV_IV_10, Varselkode.RV_VV_4), 1.vedtaksperiode.filter())
@@ -520,7 +702,16 @@ internal class InntektsmeldingKommerIkkeE2ETest : AbstractDslTest() {
                 forventetPersonbeløp = 0,
                 subset = 17.januar til 31.januar,
             )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_GODKJENNING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_GODKJENNING,
+            )
 
             val forelagteOpplysninger = observatør.skatteinntekterLagtTilGrunnEventer.last()
             assertEquals(emptyList<Skatteinntekt>(), forelagteOpplysninger.skatteinntekter)

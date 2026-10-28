@@ -16,7 +16,8 @@ data class Refusjonsdag(
     val beløp: Inntekt,
     val kilde: Kilde,
 ) {
-    override fun toString() = "Daglig=${beløp.dagligInt}, Avsender=${kilde.avsender}, Tidsstempel=${kilde.tidsstempel}, MeldingsreferanseId=${kilde.meldingsreferanseId.id}"
+    override fun toString() =
+        "Daglig=${beløp.dagligInt}, Avsender=${kilde.avsender}, Tidsstempel=${kilde.tidsstempel}, MeldingsreferanseId=${kilde.meldingsreferanseId.id}"
 }
 
 class Refusjonstidslinje(
@@ -37,7 +38,12 @@ class Refusjonstidslinje(
 
     internal fun kunIngenRefusjon() = sumOf { it.verdi?.beløp?.årlig ?: 0.0 } == 0.0
 
-    internal operator fun minus(other: Refusjonstidslinje) = filter { it.verdi != null }.filter { (dato, refusjonsdag) -> refusjonsdag!!.beløp != other[dato]?.beløp }.opprett()
+    internal operator fun minus(other: Refusjonstidslinje) =
+        filter { it.verdi != null }
+            .filter { (dato, refusjonsdag) ->
+                refusjonsdag!!.beløp !=
+                    other[dato]?.beløp
+            }.opprett()
 
     private fun List<Tidslinjedag<Refusjonsdag>>.opprett() = opprett(*somArray)
 
@@ -89,7 +95,10 @@ class Refusjonstidslinje(
     }
 
     internal companion object {
-        internal val List<Tidslinjedag<Refusjonsdag>>.somArray get() = filter { it.verdi != null }.map { it.dato.somPeriode() to it.verdi!! }.toTypedArray()
+        internal val List<Tidslinjedag<Refusjonsdag>>.somArray get() =
+            filter {
+                it.verdi != null
+            }.map { it.dato.somPeriode() to it.verdi!! }.toTypedArray()
 
         private fun periodeOrNull(
             fom: LocalDate,

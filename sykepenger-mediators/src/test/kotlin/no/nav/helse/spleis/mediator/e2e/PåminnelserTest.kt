@@ -87,7 +87,11 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE",
         )
 
-        sendNyPåminnelse(0, TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE, flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"))
+        sendNyPåminnelse(
+            0,
+            TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
+            flagg = setOf("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"),
+        )
 
         assertTilstander(
             0,

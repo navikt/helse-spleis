@@ -208,7 +208,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             assertEquals(7006.1759999999995, inspektør.spleisFeriepengebeløpPerson.first())
             assertEquals(
                 listOf(
-                    Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.NY),
+                    Feriepengeutbetalingslinje(
+                        1.mai(2023),
+                        31.mai(2023),
+                        -700,
+                        Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                        Feriepengerendringskode.NY,
+                    ),
                 ),
                 inspektør.feriepengeoppdrag.utbetalingslinjer,
             )
@@ -227,7 +233,14 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             )
             assertEquals(
                 listOf(
-                    Feriepengeutbetalingslinje(1.mai(2023), 31.mai(2023), -700, Feriepengerklassekode.SykepengerArbeidstakerFeriepenger, Feriepengerendringskode.ENDR, statuskode = "OPPH"),
+                    Feriepengeutbetalingslinje(
+                        1.mai(2023),
+                        31.mai(2023),
+                        -700,
+                        Feriepengerklassekode.SykepengerArbeidstakerFeriepenger,
+                        Feriepengerendringskode.ENDR,
+                        statuskode = "OPPH",
+                    ),
                 ),
                 inspektør.feriepengeoppdrag.utbetalingslinjer,
             )
@@ -276,7 +289,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
             assertEquals(
-                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                Feriepengeutbetalingslinje(
+                    1.mai(2021),
+                    31.mai(2021),
+                    1460,
+                    Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                    Feriepengerendringskode.NY,
+                ),
                 inspektør.feriepengeoppdrag
                     .first()
                     .feriepengeutbetalingslinjer
@@ -300,7 +319,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
             assertEquals(
-                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                Feriepengeutbetalingslinje(
+                    1.mai(2021),
+                    31.mai(2021),
+                    1460,
+                    Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                    Feriepengerendringskode.NY,
+                ),
                 inspektør.feriepengeoppdrag
                     .first()
                     .feriepengeutbetalingslinjer
@@ -334,7 +359,13 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             assertEquals(1431 * 10 * 0.102, inspektør.spleisFeriepengebeløpArbeidsgiver.first())
 
             assertEquals(
-                Feriepengeutbetalingslinje(1.mai(2021), 31.mai(2021), 1460, Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig, Feriepengerendringskode.NY),
+                Feriepengeutbetalingslinje(
+                    1.mai(2021),
+                    31.mai(2021),
+                    1460,
+                    Feriepengerklassekode.RefusjonFeriepengerIkkeOpplysningspliktig,
+                    Feriepengerendringskode.NY,
+                ),
                 inspektør.feriepengeoppdrag
                     .first()
                     .feriepengeutbetalingslinjer
@@ -634,7 +665,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         assertIngenFeriepengebehov {
             håndterUtbetalingshistorikkForFeriepenger(
                 utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))),
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                feriepengehistorikk =
+                    listOf(
+                        UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                    ),
                 opptjeningsår = Year.of(2020),
                 datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
             )
@@ -647,7 +681,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
 
         val førsteBehovOmFeriepenger =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 10.mai(2021),
+                )
             }
         val fagsystemId = førsteBehovOmFeriepenger.event.fagsystemId
 
@@ -655,7 +692,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             fangDetEnesteFeriepengebehovet {
                 håndterUtbetalingshistorikkForFeriepenger(
                     utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-                    feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                    feriepengehistorikk =
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                        ),
                     opptjeningsår = Year.of(2020),
                     datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020),
                 )
@@ -678,7 +718,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         assertIngenFeriepengebehov {
             håndterUtbetalingshistorikkForFeriepenger(
                 utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 1.januar(2020), 8.mars(2020), 690, 30.juni(2020))), // 10 dager
-                feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                feriepengehistorikk =
+                    listOf(
+                        UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                    ),
                 opptjeningsår = Year.of(2020),
                 datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020),
             )
@@ -688,7 +731,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             fangDetEnesteFeriepengebehovet {
                 håndterUtbetalingshistorikkForFeriepenger(
                     utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-                    feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                    feriepengehistorikk =
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                        ),
                     opptjeningsår = Year.of(2020),
                     datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020),
                 )
@@ -704,12 +750,18 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         standardOppsettLangPeriode2020()
         val behov1 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         val fagsystemId = behov1.event.fagsystemId
 
         assertIngenFeriepengebehov {
-            håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+            )
         }
 
         assertEquals(4, a1 { inspektør.feriepengeoppdrag.size })
@@ -718,7 +770,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
             fangDetEnesteFeriepengebehovet {
                 håndterUtbetalingshistorikkForFeriepenger(
                     utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-                    feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+                    feriepengehistorikk =
+                        listOf(
+                            UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                        ),
                     opptjeningsår = Year.of(2020),
                     datoForSisteFeriepengekjøringIInfotrygd = 1.juli(2020),
                 )
@@ -738,7 +793,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
         håndterUtbetalingshistorikkForFeriepenger(
             utbetalinger = listOf(Arbeidsgiverutbetalingsperiode(a1, 20.januar(2020), 31.januar(2020), 690, 30.juni(2020))), // 10 dager
-            feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai)),
+            feriepengehistorikk =
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Feriepenger(a1, (10 * 690 * 0.102).roundToInt(), 1.mai, 31.mai),
+                ),
             opptjeningsår = Year.of(2020),
             datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
         )
@@ -749,7 +807,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         standardOppsettLangPeriode2020()
         val behov1 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         val fagsystemId = behov1.event.fagsystemId
 
@@ -760,7 +821,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
 
         val behov2 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         assertEquals(4, a1 { inspektør.feriepengeoppdrag.size })
         assertEquals((43 * DAGSINNTEKT * 0.102).roundToInt(), behov2.event.linje.sats)
@@ -774,7 +838,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         standardOppsettLangPeriode2020()
         val behov1 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         val fagsystemId1FraBehov = behov1.event.fagsystemId
 
@@ -785,10 +852,16 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
 
         val behov2 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         assertIngenFeriepengebehov {
-            håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+            håndterUtbetalingshistorikkForFeriepenger(
+                opptjeningsår = Year.of(2020),
+                datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+            )
         }
 
         a1 {
@@ -810,7 +883,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         standardOppsettLangPeriode2020()
         val behov1 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
         val fagsystemId1FraBehov = behov1.event.fagsystemId
 
@@ -821,7 +897,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
 
         val behov2 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
 
         a1 {
@@ -837,7 +916,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
 
         val behov3 =
             fangDetEnesteFeriepengebehovet {
-                håndterUtbetalingshistorikkForFeriepenger(opptjeningsår = Year.of(2020), datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020))
+                håndterUtbetalingshistorikkForFeriepenger(
+                    opptjeningsår = Year.of(2020),
+                    datoForSisteFeriepengekjøringIInfotrygd = 30.juni(2020),
+                )
             }
 
         a1 {
@@ -869,8 +951,14 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 fangAlleFeriepengebehovene {
                     håndterUtbetalingshistorikkForFeriepenger(
                         opptjeningsår = Year.of(2020),
-                        utbetalinger = listOf(Personutbetalingsperiode(a1, 1.september(2020), 15.september(2020), 1172, 20.september(2020))),
-                        feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021))),
+                        utbetalinger =
+                            listOf(
+                                Personutbetalingsperiode(a1, 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+                            ),
+                        feriepengehistorikk =
+                            listOf(
+                                UtbetalingshistorikkForFeriepenger.Feriepenger(a1, 3211, 1.mai(2021), 31.mai(2021)),
+                            ),
                         datoForSisteFeriepengekjøringIInfotrygd = 21.september(2020),
                     )
                 }
@@ -912,8 +1000,14 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
                 fangAlleFeriepengebehovene {
                     håndterUtbetalingshistorikkForFeriepenger(
                         opptjeningsår = Year.of(2020),
-                        utbetalinger = listOf(Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020))),
-                        feriepengehistorikk = listOf(UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021))),
+                        utbetalinger =
+                            listOf(
+                                Personutbetalingsperiode("0", 1.september(2020), 15.september(2020), 1172, 20.september(2020)),
+                            ),
+                        feriepengehistorikk =
+                            listOf(
+                                UtbetalingshistorikkForFeriepenger.Feriepenger("0", 3211, 1.mai(2021), 31.mai(2021)),
+                            ),
                         datoForSisteFeriepengekjøringIInfotrygd = 21.september(2020),
                     )
                 }
@@ -957,7 +1051,10 @@ internal class FeriepengeE2ETest : AbstractDslTest() {
         }.also { assertTrue(it.isNotEmpty()) }
     }
 
-    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> = behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> { block() }
+    private fun fangAlleFeriepengebehovene(block: () -> Unit): Set<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> =
+        behovSomOppstårSomFølgeAv<Behovsoppsamler.Behovsdetaljer.Feriepengeutbetaling> {
+            block()
+        }
 
     private fun assertIngenFeriepengebehov(block: () -> Unit) =
         fangAlleFeriepengebehovene(block).let {

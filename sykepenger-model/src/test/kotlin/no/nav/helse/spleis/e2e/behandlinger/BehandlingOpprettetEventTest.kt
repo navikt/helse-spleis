@@ -26,7 +26,12 @@ internal class BehandlingOpprettetEventTest : AbstractDslTest() {
             val søknadId = UUID.randomUUID()
             val registrert = LocalDateTime.now()
             val innsendt = registrert.minusHours(2)
-            håndterSøknad(Sykdom(1.januar, 20.januar, 100.prosent), søknadId = søknadId, sendtTilNAVEllerArbeidsgiver = innsendt, registrert = registrert)
+            håndterSøknad(
+                Sykdom(1.januar, 20.januar, 100.prosent),
+                søknadId = søknadId,
+                sendtTilNAVEllerArbeidsgiver = innsendt,
+                registrert = registrert,
+            )
             assertVarsel(Varselkode.RV_SØ_2, 1.vedtaksperiode.filter())
 
             assertBehandlingEventRekkefølge(

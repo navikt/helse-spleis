@@ -116,7 +116,8 @@ class MedlemskapsvurderingApiTest : AbstractApiTest() {
                 path("medlemskapsvurderinger").forEach { medlemskapsvurdering ->
                     medlemskapsvurdering as ObjectNode
                     if (medlemskapsvurdering.path("kilde").asText() == "INFOTRYGD") return@forEach
-                    val medlemskapsvurderingId = assertDoesNotThrow { UUID.fromString(medlemskapsvurdering.path("medlemskapsvurderingId").asText()) }
+                    val medlemskapsvurderingId =
+                        assertDoesNotThrow { UUID.fromString(medlemskapsvurdering.path("medlemskapsvurderingId").asText()) }
                     spleisMedlemskapsvurderingIder.add(medlemskapsvurderingId)
                     medlemskapsvurdering.put("medlemskapsvurderingId", "00000000-0000-0000-0000-000000000000")
                     assertDoesNotThrow { LocalDateTime.parse(medlemskapsvurdering.path("opprettet").asText()) }
@@ -140,7 +141,11 @@ class MedlemskapsvurderingApiTest : AbstractApiTest() {
 
         val fabrikk = YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER))
 
-        val søknad = fabrikk.lagSøknad(Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent), arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER)
+        val søknad =
+            fabrikk.lagSøknad(
+                Søknad.Søknadsperiode.Sykdom(fom = fom, tom = tom, sykmeldingsgrad = 100.prosent),
+                arbeidssituasjon = Søknad.Arbeidssituasjon.ARBEIDSTAKER,
+            )
         person.håndterSøknad(eventBus, søknad, Aktivitetslogg())
 
         val vedtaksperiodeId =

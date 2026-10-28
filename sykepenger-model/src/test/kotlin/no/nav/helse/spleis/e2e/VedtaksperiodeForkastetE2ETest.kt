@@ -178,7 +178,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSøknad(11.januar til 17.januar, sendTilGosys = true)
 
             assertTrue(observatør.forkastet(2.vedtaksperiode).trengerArbeidsgiveropplysninger)
-            assertEquals(listOf(1.januar til 10.januar, 11.januar til 17.januar), observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder)
+            assertEquals(
+                listOf(1.januar til 10.januar, 11.januar til 17.januar),
+                observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder,
+            )
         }
     }
 
@@ -208,7 +211,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSøknad(11.januar til 31.januar)
 
             assertTrue(observatør.forkastet(2.vedtaksperiode).trengerArbeidsgiveropplysninger)
-            assertEquals(listOf(1.januar til 10.januar, 11.januar til 31.januar), observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder)
+            assertEquals(
+                listOf(1.januar til 10.januar, 11.januar til 31.januar),
+                observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder,
+            )
         }
     }
 
@@ -223,7 +229,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSøknad(11.januar til 17.januar)
 
             assertTrue(observatør.forkastet(2.vedtaksperiode).trengerArbeidsgiveropplysninger)
-            assertEquals(listOf(1.januar til 10.januar, 11.januar til 17.januar), observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder)
+            assertEquals(
+                listOf(1.januar til 10.januar, 11.januar til 17.januar),
+                observatør.forkastet(2.vedtaksperiode).sykmeldingsperioder,
+            )
         }
     }
 
@@ -255,7 +264,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(15.januar, 25.januar))
             håndterSøknad(15.januar til 25.januar)
             assertTrue(observatør.forkastet(3.vedtaksperiode).trengerArbeidsgiveropplysninger)
-            assertEquals(listOf(1.januar til 10.januar, 15.januar til 25.januar), observatør.forkastet(3.vedtaksperiode).sykmeldingsperioder)
+            assertEquals(
+                listOf(1.januar til 10.januar, 15.januar til 25.januar),
+                observatør.forkastet(3.vedtaksperiode).sykmeldingsperioder,
+            )
         }
     }
 
@@ -271,7 +283,10 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(20.januar, 31.januar))
             håndterSøknad(20.januar til 31.januar)
             assertTrue(observatør.forkastet(3.vedtaksperiode).trengerArbeidsgiveropplysninger)
-            assertEquals(listOf(1.januar til 5.januar, 10.januar til 15.januar, 20.januar til 31.januar), observatør.forkastet(3.vedtaksperiode).sykmeldingsperioder)
+            assertEquals(
+                listOf(1.januar til 5.januar, 10.januar til 15.januar, 20.januar til 31.januar),
+                observatør.forkastet(3.vedtaksperiode).sykmeldingsperioder,
+            )
         }
     }
 

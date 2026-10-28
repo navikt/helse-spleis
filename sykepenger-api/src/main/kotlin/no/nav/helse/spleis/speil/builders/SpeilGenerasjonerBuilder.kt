@@ -41,9 +41,19 @@ internal class SpeilGenerasjonerBuilder(
         val aktive =
             arbeidsgiverUtDto.vedtaksperioder
                 .map {
-                    it.behandlinger.behandlinger.last().takeIf { sisteBehandling -> sisteBehandling.endringer.last().vilkårsgrunnlagId != null }?.endringer?.last()?.let { sisteBeregnedeEndring ->
-                        vilkårsgrunnlaghistorikk.leggRefusjonsopplysningerIBøtta(sisteBeregnedeEndring.vilkårsgrunnlagId!!, gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt.getValue(sisteBeregnedeEndring.skjæringstidspunkt))
-                    }
+                    it.behandlinger.behandlinger
+                        .last()
+                        .takeIf { sisteBehandling ->
+                            sisteBehandling.endringer.last().vilkårsgrunnlagId !=
+                                null
+                        }?.endringer
+                        ?.last()
+                        ?.let { sisteBeregnedeEndring ->
+                            vilkårsgrunnlaghistorikk.leggRefusjonsopplysningerIBøtta(
+                                sisteBeregnedeEndring.vilkårsgrunnlagId!!,
+                                gjeldendeRefusjonsopplysningerPerSkjæringstidspunkt.getValue(sisteBeregnedeEndring.skjæringstidspunkt),
+                            )
+                        }
                     mapVedtaksperiode(it)
                 }.flatten()
         val forkastede = arbeidsgiverUtDto.forkastede.flatMap { mapVedtaksperiode(it.vedtaksperiode) }
@@ -158,7 +168,9 @@ internal class SpeilGenerasjonerBuilder(
         generasjon: BehandlingUtDto,
     ): BeregnetPeriode {
         val sisteEndring = generasjon.endringer.last()
-        val utbetaling = utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId } ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
+        val utbetaling =
+            utbetalinger.singleOrNull { it.id == sisteEndring.utbetalingId }
+                ?: error("Fant ikke tilhørende utbetaling for vedtaksperiodeId=${vedtaksperiode.id}")
         val utbetalingstidslinje = UtbetalingstidslinjeBuilder(sisteEndring.utbetalingstidslinje).build()
         val skjæringstidspunkt = sisteEndring.skjæringstidspunkt
         val sisteSykepengedag = utbetalingstidslinje.sisteNavDag()?.dato ?: sisteEndring.periode.tom
@@ -198,7 +210,12 @@ internal class SpeilGenerasjonerBuilder(
             utbetaling = utbetaling,
             periodevilkår = periodevilkår(sisteSykepengedag, sisteEndring.maksdatoresultat, alder, skjæringstidspunkt),
             vilkårsgrunnlagId = sisteEndring.vilkårsgrunnlagId!!,
-            refusjonstidslinje = mapRefusjonstidslinje(arbeidsgiverUtDto.ubrukteRefusjonsopplysninger, generasjon.id, sisteEndring.refusjonstidslinje),
+            refusjonstidslinje =
+                mapRefusjonstidslinje(
+                    arbeidsgiverUtDto.ubrukteRefusjonsopplysninger,
+                    generasjon.id,
+                    sisteEndring.refusjonstidslinje,
+                ),
             pensjonsgivendeInntekter = pensjonsgivendeInntekter,
             annulleringskandidater = vedtaksperiode.annulleringskandidater,
             grunnbeløpsjustertGjennomsnitt =
@@ -507,14 +524,19 @@ internal class SpeilGenerasjonerBuilder(
             return ubrukteRefusjonsopplysninger.sisteRefusjonstidslinje!!
         }
 
-        private fun Map<LocalDate, List<VedtaksperiodeUtDto>>.tilRefusjonstidslinjer(ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto) =
-            mapValues { (_, perioder) ->
-                perioder.map { periode ->
-                    periode.behandlinger.behandlinger.last().let { sisteBehandling ->
-                        mapRefusjonstidslinje(ubrukteRefusjonsopplysninger, sisteBehandling.id, sisteBehandling.endringer.last().refusjonstidslinje)
-                    }
+        private fun Map<LocalDate, List<VedtaksperiodeUtDto>>.tilRefusjonstidslinjer(
+            ubrukteRefusjonsopplysninger: UbrukteRefusjonsopplysningerUtDto,
+        ) = mapValues { (_, perioder) ->
+            perioder.map { periode ->
+                periode.behandlinger.behandlinger.last().let { sisteBehandling ->
+                    mapRefusjonstidslinje(
+                        ubrukteRefusjonsopplysninger,
+                        sisteBehandling.id,
+                        sisteBehandling.endringer.last().refusjonstidslinje,
+                    )
                 }
             }
+        }
 
         private fun Map<LocalDate, List<BeløpstidslinjeDto>>.slåSammenSammenhengendeRefusjonstidslinjer() =
             mapValues { (_, beløpstidslinjer) ->

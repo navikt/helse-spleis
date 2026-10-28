@@ -218,11 +218,11 @@ internal class TestPerson(
 
         internal fun håndterSykmelding(periode: Periode) = håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
 
-        internal fun håndterSykmelding(
-            vararg sykmeldingsperiode: Sykmeldingsperiode,
-        ) = arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndterSykmelding)
+        internal fun håndterSykmelding(vararg sykmeldingsperiode: Sykmeldingsperiode) =
+            arbeidsgiverHendelsefabrikk.lagSykmelding(*sykmeldingsperiode).håndter(Person::håndterSykmelding)
 
-        internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) = arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndterAvbruttSøknad)
+        internal fun håndterAvbruttSøknad(sykmeldingsperiode: Periode) =
+            arbeidsgiverHendelsefabrikk.lagAvbruttSøknad(sykmeldingsperiode).håndter(Person::håndterAvbruttSøknad)
 
         internal fun håndterSøknad(
             periode: Periode,
@@ -597,7 +597,8 @@ internal class TestPerson(
             vararg forventet: KClass<out EventSubscription.ForespurtOpplysning>,
         ) = observatør.assertEtterspurteArbeidsgiveropplysninger(vedtaksperiode, *forventet)
 
-        internal fun håndterForkastSykmeldingsperioder(periode: Periode) = arbeidsgiverHendelsefabrikk.lagHåndterForkastSykmeldingsperioder(periode).håndter(Person::håndterForkastSykmeldingsperioder)
+        internal fun håndterForkastSykmeldingsperioder(periode: Periode) =
+            arbeidsgiverHendelsefabrikk.lagHåndterForkastSykmeldingsperioder(periode).håndter(Person::håndterForkastSykmeldingsperioder)
 
         internal fun håndterAnmodningOmForkasting(
             vedtaksperiodeId: UUID,
@@ -659,7 +660,10 @@ internal class TestPerson(
         internal fun håndterVilkårsgrunnlag(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,
             skatteinntekter: List<Pair<String, Inntekt>>,
-            arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> = skatteinntekter.map { (orgnr, _) -> Triple(orgnr, LocalDate.EPOCH, null) },
+            arbeidsforhold: List<Triple<String, LocalDate, LocalDate?>> =
+                skatteinntekter.map { (orgnr, _) ->
+                    Triple(orgnr, LocalDate.EPOCH, null)
+                },
             medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,
             inntekterForOpptjeningsvurdering: List<Pair<String, Inntekt>>? = null,
             forsikringsvurderingId: UUID? = null,
@@ -816,8 +820,21 @@ internal class TestPerson(
         ) {
             behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
-                .lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, forsikringsvurderingResultat, opptjeningsvurderingResultatOk = true)
-                .håndter(Person::håndterYtelser)
+                .lagYtelser(
+                    vedtaksperiodeId,
+                    foreldrepenger,
+                    svangerskapspenger,
+                    pleiepenger,
+                    omsorgspenger,
+                    opplæringspenger,
+                    institusjonsoppholdsperioder,
+                    arbeidsavklaringspengerV2,
+                    dagpenger,
+                    inntekterForBeregning,
+                    graderteAndreYtelser,
+                    forsikringsvurderingResultat,
+                    opptjeningsvurderingResultatOk = true,
+                ).håndter(Person::håndterYtelser)
         }
 
         internal fun håndterYtelser(
@@ -849,8 +866,22 @@ internal class TestPerson(
 
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
-                .lagYtelser(vedtaksperiodeId, foreldrepenger, svangerskapspenger, pleiepenger, omsorgspenger, opplæringspenger, institusjonsoppholdsperioder, arbeidsavklaringspengerV2, dagpenger, inntekterForBeregning, graderteAndreYtelser, null, opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk, medlemskapsvurderingResultat = medlemskapsvurderingResultat)
-                .håndter(Person::håndterYtelser)
+                .lagYtelser(
+                    vedtaksperiodeId,
+                    foreldrepenger,
+                    svangerskapspenger,
+                    pleiepenger,
+                    omsorgspenger,
+                    opplæringspenger,
+                    institusjonsoppholdsperioder,
+                    arbeidsavklaringspengerV2,
+                    dagpenger,
+                    inntekterForBeregning,
+                    graderteAndreYtelser,
+                    null,
+                    opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+                    medlemskapsvurderingResultat = medlemskapsvurderingResultat,
+                ).håndter(Person::håndterYtelser)
         }
 
         internal fun håndterInntektsendringer(inntektsendringFom: LocalDate) {
@@ -858,7 +889,10 @@ internal class TestPerson(
         }
 
         internal fun håndterGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom: LocalDate) {
-            personHendelsefabrikk.lagGraderteAndreYtelserEndret(graderteAndreYtelserEndretFom).håndter(Person::håndterEndretGrunnlagForBeregning)
+            personHendelsefabrikk
+                .lagGraderteAndreYtelserEndret(
+                    graderteAndreYtelserEndretFom,
+                ).håndter(Person::håndterEndretGrunnlagForBeregning)
         }
 
         internal fun håndterSimulering(
@@ -882,8 +916,14 @@ internal class TestPerson(
         ) {
             val (behandlingId, utbetalingId) = behovshåndterer.godkjenningsdetaljer(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
-                .lagUtbetalingsgodkjenning(vedtaksperiodeId, behandlingId, godkjent, automatiskBehandling, utbetalingIdILøsning ?: utbetalingId, godkjenttidspunkt)
-                .håndter(Person::håndterUtbetalingsgodkjenning)
+                .lagUtbetalingsgodkjenning(
+                    vedtaksperiodeId,
+                    behandlingId,
+                    godkjent,
+                    automatiskBehandling,
+                    utbetalingIdILøsning ?: utbetalingId,
+                    godkjenttidspunkt,
+                ).håndter(Person::håndterUtbetalingsgodkjenning)
         }
 
         internal fun håndterInfotrygdendring() =
@@ -953,8 +993,13 @@ internal class TestPerson(
         internal fun håndterUtbetalt(status: Oppdragstatus = Oppdragstatus.AKSEPTERT) {
             behovshåndterer.utbetalingsdetaljer(orgnummer).forEach { utbetalingsdetaljer ->
                 arbeidsgiverHendelsefabrikk
-                    .lagUtbetalinghendelse(utbetalingsdetaljer.vedtaksperiodeId, utbetalingsdetaljer.behandlingId, utbetalingsdetaljer.utbetalingId, utbetalingsdetaljer.fagsystemId, status)
-                    .håndter(Person::håndterUtbetalingHendelse)
+                    .lagUtbetalinghendelse(
+                        utbetalingsdetaljer.vedtaksperiodeId,
+                        utbetalingsdetaljer.behandlingId,
+                        utbetalingsdetaljer.utbetalingId,
+                        utbetalingsdetaljer.fagsystemId,
+                        status,
+                    ).håndter(Person::håndterUtbetalingHendelse)
             }
         }
 
@@ -1085,11 +1130,10 @@ internal class TestPerson(
             .lagUtbetalingshistorikkEtterInfotrygdendring(utbetalinger, besvart, id)
             .håndter(Person::håndterUtbetalingshistorikkEtterInfotrygdendring)
 
-        internal fun håndterUtbetalingshistorikkForFeriepenger(
-            opptjeningsår: Year,
-        ) = personHendelsefabrikk
-            .lagUtbetalingshistorikkForFeriepenger(opptjeningsår)
-            .håndter(Person::håndterUtbetalingshistorikkForFeriepenger)
+        internal fun håndterUtbetalingshistorikkForFeriepenger(opptjeningsår: Year) =
+            personHendelsefabrikk
+                .lagUtbetalingshistorikkForFeriepenger(opptjeningsår)
+                .håndter(Person::håndterUtbetalingshistorikkForFeriepenger)
 
         operator fun <R> invoke(testblokk: TestArbeidsgiver.() -> R): R = testblokk(this)
     }
@@ -1254,7 +1298,8 @@ internal fun TestPerson.TestArbeidsgiver.nyPeriode(
     søknadId: UUID = UUID.randomUUID(),
 ): UUID {
     håndterSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive))
-    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId) ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
+    return håndterSøknad(Sykdom(periode.start, periode.endInclusive, grad), søknadId = søknadId)
+        ?: fail { "Det ble ikke opprettet noen vedtaksperiode." }
 }
 
 internal fun TestPerson.nyPeriode(

@@ -204,7 +204,12 @@ data class Utbetalingslinje(
     internal fun begrensTil(sisteDato: LocalDate) = kopier(tom = sisteDato).kuttHelg()
 
     fun slåSammenLinje(førsteLinjeIForrige: Utbetalingslinje): Utbetalingslinje? {
-        if (this.beløp != førsteLinjeIForrige.beløp || this.grad != førsteLinjeIForrige.grad || !this.tom.erRettFør(førsteLinjeIForrige.fom)) return null
+        if (this.beløp != førsteLinjeIForrige.beløp ||
+            this.grad != førsteLinjeIForrige.grad ||
+            !this.tom.erRettFør(førsteLinjeIForrige.fom)
+        ) {
+            return null
+        }
         return kopier(tom = førsteLinjeIForrige.tom)
     }
 

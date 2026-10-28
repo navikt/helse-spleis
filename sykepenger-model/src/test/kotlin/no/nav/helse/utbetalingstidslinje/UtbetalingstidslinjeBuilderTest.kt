@@ -344,12 +344,27 @@ internal class UtbetalingstidslinjeBuilderTest {
 
     @Test
     fun `ferie og permisjon med i arbeidsgiverperioden - nav overtar ansvar`() {
-        undersøkeLike({ 6.S + 6.F + 6.S }, { 6.S + 6.P + 6.S }, { 6.S + 6.AIG + 6.S }, { 6.S + 6.YF + 6.S }, dagerNavOvertarAnsvar = listOf(1.januar til 16.januar)) {
+        undersøkeLike(
+            { 6.S + 6.F + 6.S },
+            { 6.S + 6.P + 6.S },
+            { 6.S + 6.AIG + 6.S },
+            { 6.S + 6.YF + 6.S },
+            dagerNavOvertarAnsvar =
+                listOf(
+                    1.januar til 16.januar,
+                ),
+        ) {
             assertEquals(18, inspektør.size)
             assertEquals(9, inspektør.arbeidsgiverperiodeDagTeller)
             assertEquals(7, inspektør.arbeidsgiverperiodedagNavTeller)
             assertEquals(2, inspektør.navDagTeller)
-            assertEquals(listOf(1.januar til 5.januar, 15.januar til 16.januar), inspektør.arbeidsgiverperiodedagerNavAnsvar.map { it.dato }.grupperSammenhengendePerioder())
+            assertEquals(
+                listOf(1.januar til 5.januar, 15.januar til 16.januar),
+                inspektør.arbeidsgiverperiodedagerNavAnsvar
+                    .map {
+                        it.dato
+                    }.grupperSammenhengendePerioder(),
+            )
             assertEquals(1, perioder.size)
         }
     }
@@ -955,7 +970,13 @@ internal class UtbetalingstidslinjeBuilderTest {
         val sykdomstidslinje = 16.S + 15.YF(Pleiepenger)
         val periodeSomSkalAvlåsMedToBegrunnelser = 18.januar til 30.januar
 
-        undersøke(sykdomstidslinje, avslagstidslinje = Avslagstidslinje(periodeSomSkalAvlåsMedToBegrunnelser to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.Over70), "Test")))
+        undersøke(
+            sykdomstidslinje,
+            avslagstidslinje =
+                Avslagstidslinje(
+                    periodeSomSkalAvlåsMedToBegrunnelser to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.Over70), "Test"),
+                ),
+        )
 
         val syttendeJanuar = utbetalingstidslinje[17.januar] as? Utbetalingsdag.AvvistDag
         assertNotNull(syttendeJanuar)

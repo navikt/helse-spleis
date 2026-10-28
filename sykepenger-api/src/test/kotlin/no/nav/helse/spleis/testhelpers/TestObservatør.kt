@@ -15,7 +15,9 @@ internal class TestObservatør : EventSubscription {
     private val vedtaksperiodeendringer = mutableMapOf<UUID, MutableList<VedtaksperiodeEndretEvent>>()
     private val ventendeReplays = mutableListOf<Pair<String, UUID>>()
 
-    fun hendelseider(vedtaksperiodeId: UUID) = vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
+    fun hendelseider(vedtaksperiodeId: UUID) =
+        vedtaksperiodeendringer[vedtaksperiodeId]?.last()?.hendelser
+            ?: fail { "VedtaksperiodeId $vedtaksperiodeId har ingen hendelser tilknyttet" }
 
     fun vedtaksperiode(
         orgnummer: String,

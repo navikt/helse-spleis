@@ -64,9 +64,19 @@ internal class VarseloppsamlerTest {
                 internal fun List<Varsel>.finn(
                     vedtaksperiodeId: UUID,
                     varselkode: Varselkode,
-                ) = firstOrNull { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } && it.varselkode == varselkode }
+                ) = firstOrNull {
+                    it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } &&
+                        it.varselkode == varselkode
+                }
 
-                internal fun List<Varsel>.finn(vedtaksperiodeId: UUID) = filter { it.kontekster.any { (key, value) -> key == "vedtaksperiodeId" && value == "$vedtaksperiodeId" } }
+                internal fun List<Varsel>.finn(vedtaksperiodeId: UUID) =
+                    filter {
+                        it.kontekster.any { (key, value) ->
+                            key ==
+                                "vedtaksperiodeId" &&
+                                value == "$vedtaksperiodeId"
+                        }
+                    }
             }
         }
 

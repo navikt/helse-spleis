@@ -86,7 +86,9 @@ class SpannerEtterTestInterceptor : TestWatcher {
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build()
             val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-            check(response.statusCode() == 201) { "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?" }
+            check(response.statusCode() == 201) {
+                "Det var sprøtt, fikk http status ${response.statusCode()} fra Spannerish. Kanskje du ikke er nais device?"
+            }
         }
         // Litt gøyale query parametre til Spannerish
         val queryString = mapOf("testnavn" to testnavn, "error" to errorMsg).queryString

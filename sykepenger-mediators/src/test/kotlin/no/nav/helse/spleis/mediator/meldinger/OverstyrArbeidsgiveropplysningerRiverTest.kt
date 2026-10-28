@@ -209,7 +209,11 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
                         månedligInntekt = INNTEKT,
                         forklaring = "forklaring",
                         subsumsjon = Subsumsjon("8-15", null, null),
-                        refusjonsopplysninger = listOf(Refusjonsopplysning(1.januar, 31.januar, INNTEKT / 2), Refusjonsopplysning(1.februar, null, 0.0)),
+                        refusjonsopplysninger =
+                            listOf(
+                                Refusjonsopplysning(1.januar, 31.januar, INNTEKT / 2),
+                                Refusjonsopplysning(1.februar, null, 0.0),
+                            ),
                     ),
                     Arbeidsgiveropplysning(
                         organisasjonsnummer = "987654322",

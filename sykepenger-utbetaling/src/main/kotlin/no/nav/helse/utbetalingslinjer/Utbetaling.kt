@@ -128,7 +128,9 @@ class Utbetaling private constructor(
         tilstand.kvittér(this, observer, utbetaling, aktivitetsloggMedUtbetalingkontekst)
     }
 
-    private fun relevantFor(utbetaling: UtbetalingmodulHendelse) = utbetaling.utbetalingId == this.id && (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
+    private fun relevantFor(utbetaling: UtbetalingmodulHendelse) =
+        utbetaling.utbetalingId == this.id &&
+            (utbetaling.fagsystemId in setOf(this.arbeidsgiverOppdrag.fagsystemId, this.personOppdrag.fagsystemId))
 
     fun håndterSimuleringHendelse(simulering: SimuleringHendelse) {
         if (simulering.utbetalingId != this.id) return
@@ -251,7 +253,8 @@ class Utbetaling private constructor(
         forbrukteSykedager: Int,
         gjenståendeSykedager: Int,
     ): Utbetaling {
-        val nyttArbeidsgiveroppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
+        val nyttArbeidsgiveroppdrag =
+            byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.arbeidsgiverOppdrag, kladd.arbeidsgiveroppdrag)
         val nyttPersonoppdrag = byggViderePåOppdrag(aktivitetslogg, vedtaksperiode, this.personOppdrag, kladd.personoppdrag)
 
         val tidligereUtbetalingstidslinje = this.utbetalingstidslinje.fremTilOgMed(vedtaksperiode.start.forrigeDag)
@@ -308,7 +311,9 @@ class Utbetaling private constructor(
             }
 
             val forrigeUtbetalte = utbetalinger.aktive(periode)
-            check(forrigeUtbetalte.size <= 1) { "finner flere enn én korrelerende utbetaling for periode $periode: ${forrigeUtbetalte.map { it.id }}" }
+            check(
+                forrigeUtbetalte.size <= 1,
+            ) { "finner flere enn én korrelerende utbetaling for periode $periode: ${forrigeUtbetalte.map { it.id }}" }
             val korrelerendeUtbetaling = forrigeUtbetalte.firstOrNull()
 
             val utbetalingen =
@@ -377,14 +382,17 @@ class Utbetaling private constructor(
                 .aktiveMedUbetalte()
                 .filterNot { it.hørerSammen(nyUtbetaling) }
                 .flatMap { other ->
-                    other.arbeidsgiverOppdrag.overlappendeLinjer(nyUtbetaling.arbeidsgiverOppdrag) + other.personOppdrag.overlappendeLinjer(nyUtbetaling.personOppdrag)
+                    other.arbeidsgiverOppdrag.overlappendeLinjer(nyUtbetaling.arbeidsgiverOppdrag) +
+                        other.personOppdrag.overlappendeLinjer(nyUtbetaling.personOppdrag)
                 }.also { overlappendeLinjer ->
                     if (overlappendeLinjer.isNotEmpty()) {
                         val feilmelding =
                             "Vi har opprettet en utbetaling med periode ${nyUtbetaling.periode} & " +
                                 "korrelasjonsId ${nyUtbetaling.korrelasjonsId} som overlapper med " +
                                 "oppdragslinjer i eksisterende utbetalinger:\n" +
-                                overlappendeLinjer.joinToString(separator = "\n") { (fagområde, fagsystemId, linje) -> "* $fagområde - $fagsystemId - ${linje.periode}" }
+                                overlappendeLinjer.joinToString(
+                                    separator = "\n",
+                                ) { (fagområde, fagsystemId, linje) -> "* $fagområde - $fagsystemId - ${linje.periode}" }
                         sikkerlogg.error(feilmelding, kv("fødselsnummer", nyUtbetaling.personOppdrag.mottaker))
                     }
                 }.isNotEmpty()
@@ -392,7 +400,11 @@ class Utbetaling private constructor(
         fun List<Utbetaling>.validerNyUtbetaling(nyUtbetaling: Utbetaling) {
             if (nyUtbetaling.erAnnullering()) return
             val ikkeUtbetalt = filter { it.tilstand is Ubetalt }.takeUnless { it.isEmpty() } ?: return
-            error("Hvordan kan det ha seg at vi lager en ny utbetaling for ${nyUtbetaling.periode} samtidig som utbetalingene ${ikkeUtbetalt.joinToString { "${it.id}" }} står som IKKE_UTBETALT? Hvorfor er ikke disse forkastet?")
+            error(
+                "Hvordan kan det ha seg at vi lager en ny utbetaling for ${nyUtbetaling.periode} samtidig som utbetalingene ${ikkeUtbetalt.joinToString {
+                    "${it.id}"
+                }} står som IKKE_UTBETALT? Hvorfor er ikke disse forkastet?",
+            )
         }
 
         fun List<Utbetaling>.kunEnIkkeUtbetalt() {
@@ -401,7 +413,9 @@ class Utbetaling private constructor(
                     .filterNot { it.erAnnullering() }
                     .filter { it.erUbetalt() }
             check(ikkeUtbetalte.size <= 1) {
-                "Det er mer enn én utbetaling som er IKKE_UTBETALT:\n${ikkeUtbetalte.joinToString(separator = "\n") { "* ${it.id} - ${it.periode}" }}"
+                "Det er mer enn én utbetaling som er IKKE_UTBETALT:\n${ikkeUtbetalte.joinToString(
+                    separator = "\n",
+                ) { "* ${it.id} - ${it.periode}" }}"
             }
         }
 

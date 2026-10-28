@@ -127,7 +127,11 @@ internal abstract class AbstractSpeilBuilderTest {
 
             observatør.ventendeReplays().forEach { (orgnr, vedtaksperiodeId) ->
                 hendelselogg = Aktivitetslogg()
-                person.håndterInntektsmeldingerReplay(eventBus, fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId), hendelselogg)
+                person.håndterInntektsmeldingerReplay(
+                    eventBus,
+                    fabrikker.getValue(orgnr).lagInntektsmeldingReplayUtført(vedtaksperiodeId),
+                    hendelselogg,
+                )
             }
         }
 
@@ -142,7 +146,13 @@ internal abstract class AbstractSpeilBuilderTest {
     protected fun håndterSøknad(
         periode: Periode,
         orgnummer: String = a1,
-    ): UUID = håndterSøknad(Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent), sykmeldingSkrevet = periode.start.atStartOfDay(), sendtTilNAV = periode.endInclusive.atStartOfDay(), orgnummer = orgnummer)
+    ): UUID =
+        håndterSøknad(
+            Søknad.Søknadsperiode.Sykdom(periode.start, periode.endInclusive, 100.prosent),
+            sykmeldingSkrevet = periode.start.atStartOfDay(),
+            sendtTilNAV = periode.endInclusive.atStartOfDay(),
+            orgnummer = orgnummer,
+        )
 
     protected fun håndterSøknadSelvstendig(
         periode: Periode,
@@ -357,7 +367,14 @@ internal abstract class AbstractSpeilBuilderTest {
         arbeidsgivere: List<Pair<String, Inntekt>> = listOf(a1 to INNTEKT),
         forsikringsvurderingId: UUID? = null,
     ) {
-        håndterVilkårsgrunnlag(inntekter = arbeidsgivere, arbeidsforhold = arbeidsgivere.map { (orgnr, _) -> orgnr to EPOCH }, forsikringsvurderingId = forsikringsvurderingId)
+        håndterVilkårsgrunnlag(
+            inntekter = arbeidsgivere,
+            arbeidsforhold =
+                arbeidsgivere.map { (orgnr, _) ->
+                    orgnr to EPOCH
+                },
+            forsikringsvurderingId = forsikringsvurderingId,
+        )
     }
 
     protected fun håndterVilkårsgrunnlag(
@@ -462,7 +479,11 @@ internal abstract class AbstractSpeilBuilderTest {
 
     protected fun håndterYtelser(forsikringsvurderingResultat: ForsikringsvurderingResultat? = null) {
         val ytelsebehov = ytelserbehov() ?: error("Fant ikke ytelserbehov")
-        val ytelser = fabrikker.getValue(ytelsebehov.orgnummer).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId, forsikringsvurderingResultat = forsikringsvurderingResultat)
+        val ytelser =
+            fabrikker
+                .getValue(
+                    ytelsebehov.orgnummer,
+                ).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId, forsikringsvurderingResultat = forsikringsvurderingResultat)
         ytelser.håndter(Person::håndterYtelser)
     }
 
@@ -490,7 +511,11 @@ internal abstract class AbstractSpeilBuilderTest {
         perioderMedMinimumSykdomsgradVurdertOK: Set<Periode> = emptySet(),
         perioderMedMinimumSykdomsgradVurdertIkkeOK: Set<Periode> = emptySet(),
     ) {
-        personfabrikk.lagMinimumSykdomsgradsvurderingMelding(perioderMedMinimumSykdomsgradVurdertOK, perioderMedMinimumSykdomsgradVurdertIkkeOK).håndter(Person::håndterMinimumSykdomsgradsvurderingMelding)
+        personfabrikk
+            .lagMinimumSykdomsgradsvurderingMelding(
+                perioderMedMinimumSykdomsgradVurdertOK,
+                perioderMedMinimumSykdomsgradVurdertIkkeOK,
+            ).håndter(Person::håndterMinimumSykdomsgradsvurderingMelding)
     }
 
     protected fun håndterYtelserTilGodkjenning() {
@@ -602,7 +627,11 @@ internal abstract class AbstractSpeilBuilderTest {
         skjæringstidspunkt: LocalDate,
         opplysninger: List<OverstyrArbeidsforhold.ArbeidsforholdOverstyrt>,
     ) {
-        personfabrikk.lagOverstyrArbeidsforhold(skjæringstidspunkt, *opplysninger.toTypedArray()).håndter(Person::håndterOverstyrArbeidsforhold)
+        personfabrikk
+            .lagOverstyrArbeidsforhold(
+                skjæringstidspunkt,
+                *opplysninger.toTypedArray(),
+            ).håndter(Person::håndterOverstyrArbeidsforhold)
     }
 
     protected fun håndterOverstyrArbeidsgiveropplysninger(
@@ -610,7 +639,12 @@ internal abstract class AbstractSpeilBuilderTest {
         opplysninger: List<OverstyrtArbeidsgiveropplysning>,
         meldingsreferanseId: UUID = UUID.randomUUID(),
     ) {
-        personfabrikk.lagOverstyrArbeidsgiveropplysninger(skjæringstidspunkt, opplysninger, meldingsreferanseId).håndter(Person::håndterOverstyrArbeidsgiveropplysninger)
+        personfabrikk
+            .lagOverstyrArbeidsgiveropplysninger(
+                skjæringstidspunkt,
+                opplysninger,
+                meldingsreferanseId,
+            ).håndter(Person::håndterOverstyrArbeidsgiveropplysninger)
     }
 
     protected fun håndterSkjønnsmessigFastsettelse(
@@ -618,7 +652,12 @@ internal abstract class AbstractSpeilBuilderTest {
         opplysninger: List<OverstyrtArbeidsgiveropplysning>,
         meldingsreferanseId: UUID = UUID.randomUUID(),
     ) {
-        personfabrikk.lagSkjønnsmessigFastsettelse(skjæringstidspunkt, opplysninger, meldingsreferanseId).håndter(Person::håndterSkjønnsmessigFastsettelse)
+        personfabrikk
+            .lagSkjønnsmessigFastsettelse(
+                skjæringstidspunkt,
+                opplysninger,
+                meldingsreferanseId,
+            ).håndter(Person::håndterSkjønnsmessigFastsettelse)
     }
 
     protected fun håndterUtbetalingsgodkjenning(utbetalingGodkjent: Boolean = true) {

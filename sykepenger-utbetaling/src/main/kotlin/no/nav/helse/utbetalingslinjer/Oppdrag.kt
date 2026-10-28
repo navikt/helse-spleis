@@ -377,8 +377,14 @@ class Oppdrag private constructor(
             tidligere: Utbetalingslinje,
         ): List<Utbetalingslinje> =
             when {
-                nåværende.kanEndreEksisterendeLinje(tidligere, sisteLinjeITidligereOppdrag) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
-                nåværende.skalOpphøreOgErstatte(tidligere, sisteLinjeITidligereOppdrag) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
+                nåværende.kanEndreEksisterendeLinje(
+                    tidligere,
+                    sisteLinjeITidligereOppdrag,
+                ) -> listOf(nåværende.endreEksisterendeLinje(tidligere))
+                nåværende.skalOpphøreOgErstatte(
+                    tidligere,
+                    sisteLinjeITidligereOppdrag,
+                ) -> opphørTidligereLinjeOgOpprettNy(nåværende, tidligere)
                 nåværende.fom > tidligere.fom -> opphørTidligereLinjeOgOpprettNy(nåværende, sisteLinjeITidligereOppdrag, tidligere.fom)
                 else -> listOf(opprettNyLinje(nåværende))
             }

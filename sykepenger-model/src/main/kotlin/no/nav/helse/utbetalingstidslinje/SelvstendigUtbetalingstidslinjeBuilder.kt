@@ -112,10 +112,26 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                         when (erVentetid || erFørVentetid) {
                             true ->
                                 when (navSkalUtbetaleVentetidsDag(dag.dato)) {
-                                    true -> forsikringsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent)
+                                    true ->
+                                        forsikringsdag(
+                                            builder,
+                                            dag.dato,
+                                            dag.grad,
+                                            inntekt,
+                                            inntektjusteringer,
+                                            graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                        )
                                     false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                                 }
-                            false -> navDag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent)
+                            false ->
+                                navDag(
+                                    builder,
+                                    dag.dato,
+                                    dag.grad,
+                                    inntekt,
+                                    inntektjusteringer,
+                                    graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                )
                         }
                     }
                 is Dag.MeldingTilNavDag ->
@@ -124,7 +140,14 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                             builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                                 ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                             }
-                        false -> builder.avslagsdag(dag.dato, dag.grad, inntekt, inntektjusteringer, listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid))
+                        false ->
+                            builder.avslagsdag(
+                                dag.dato,
+                                dag.grad,
+                                inntekt,
+                                inntektjusteringer,
+                                listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid),
+                            )
                     }
                 is Dag.MeldingTilNavHelgedag ->
                     when (erVentetid) {
@@ -132,7 +155,14 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                             builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
                                 ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                             }
-                        false -> builder.avslagsdag(dag.dato, dag.grad, inntekt, inntektjusteringer, listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid))
+                        false ->
+                            builder.avslagsdag(
+                                dag.dato,
+                                dag.grad,
+                                inntekt,
+                                inntektjusteringer,
+                                listOf(Begrunnelse.MeldingTilNavDagUtenforVentetid),
+                            )
                     }
                 is Dag.AndreYtelser -> {
                     val begrunnelse =

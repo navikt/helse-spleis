@@ -127,9 +127,7 @@ internal class ØkonomiDagTest {
         }
     }
 
-    private fun List<Utbetalingstidslinje>.betal(
-        sykepengegrunnlagBegrenset6G: Inntekt,
-    ): List<Utbetalingstidslinje> {
+    private fun List<Utbetalingstidslinje>.betal(sykepengegrunnlagBegrenset6G: Inntekt): List<Utbetalingstidslinje> {
         val input =
             mapIndexed { index, it ->
                 Arbeidsgiverberegning(

@@ -62,7 +62,9 @@ internal class TidslinjeTest {
         }
         val tidslinje1 = PlussendeTalltidslinje(februar to 100)
         val tidslinje2 = PlussendeTalltidslinje(31.januar til 1.mars to 12)
-        val forventet = PlussendeTalltidslinje(31.januar.somPeriode() to 12) + PlussendeTalltidslinje(februar to 112) + PlussendeTalltidslinje(1.mars.somPeriode() to 12)
+        val forventet =
+            PlussendeTalltidslinje(31.januar.somPeriode() to 12) + PlussendeTalltidslinje(februar to 112) +
+                PlussendeTalltidslinje(1.mars.somPeriode() to 12)
         assertEquals(forventet, tidslinje1 + tidslinje2)
         assertEquals(forventet, tidslinje2 + tidslinje1)
     }

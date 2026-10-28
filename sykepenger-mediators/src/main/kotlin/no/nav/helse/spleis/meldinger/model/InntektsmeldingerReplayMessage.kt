@@ -84,7 +84,12 @@ internal class InntektsmeldingerReplayMessage(
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
         val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
         val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
-        val begrunnelseForReduksjonEllerIkkeUtbetalt = packet.path("begrunnelseForReduksjonEllerIkkeUtbetalt").takeIf(JsonNode::isTextual)?.asText()
+        val begrunnelseForReduksjonEllerIkkeUtbetalt =
+            packet
+                .path(
+                    "begrunnelseForReduksjonEllerIkkeUtbetalt",
+                ).takeIf(JsonNode::isTextual)
+                ?.asText()
         val opphørAvNaturalytelser = packet.path("opphoerAvNaturalytelser").tilOpphørAvNaturalytelser()
 
         return Inntektsmelding(

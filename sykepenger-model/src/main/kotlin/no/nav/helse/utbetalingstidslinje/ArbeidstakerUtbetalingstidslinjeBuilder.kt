@@ -21,7 +21,9 @@ internal data class VentedagerForVedtaksperiode(
     val dagerUtenNavAnsvar: DagerUtenNavAnsvaravklaring,
     val dagerNavOvertarAnsvar: List<Periode>,
 ) {
-    val erUtenforAGP = dagerUtenNavAnsvar.ferdigAvklart && (dagerUtenNavAnsvar.periode == null || vedtaksperiode.endInclusive > dagerUtenNavAnsvar.periode.endInclusive)
+    val erUtenforAGP =
+        dagerUtenNavAnsvar.ferdigAvklart &&
+            (dagerUtenNavAnsvar.periode == null || vedtaksperiode.endInclusive > dagerUtenNavAnsvar.periode.endInclusive)
     val navSkalOvertaAGP = dagerNavOvertarAnsvar.any { it.overlapperMed(vedtaksperiode) }
 
     val skalFatteVedtak = erUtenforAGP || navSkalOvertaAGP
@@ -114,7 +116,13 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                             arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                         }
                     } else {
-                        builder.avslagsdag(dag.dato, dag.grad, inntekt, inntektjusteringer, listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode))
+                        builder.avslagsdag(
+                            dag.dato,
+                            dag.grad,
+                            inntekt,
+                            inntektjusteringer,
+                            listOf(Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode),
+                        )
                     }
                 }
 
@@ -189,7 +197,10 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                         if (erAGP(dag.dato)) {
                             arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                         } else {
-                            builder.addForeldetDag(dag.dato, medInntektHvisFinnes(dag.dato, dag.grad, inntekt, inntektjusteringer).ikkeBetalt())
+                            builder.addForeldetDag(
+                                dag.dato,
+                                medInntektHvisFinnes(dag.dato, dag.grad, inntekt, inntektjusteringer).ikkeBetalt(),
+                            )
                         }
                     }
 

@@ -24,10 +24,24 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 { nyPeriode(januar) }
 
         a1 {
-            assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                2,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
         a2 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
 
         a1 {
@@ -67,10 +81,24 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 { nyPeriode(januar) }
 
         a1 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
         a2 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
     }
 
@@ -95,10 +123,24 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
 
         assertEquals(4, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
         a1 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
         a2 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
         a1 {
             val arbeidsgiveropplysningerEventer =
@@ -138,15 +180,32 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 { nyPeriode(20.januar til 20.februar) }
         a2 {
             håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent), Søknad.Søknadsperiode.Arbeid(18.januar, 31.januar))
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 100.prosent),
+                Søknad.Søknadsperiode.Arbeid(18.januar, 31.januar),
+            )
         }
         a1 { assertEquals(20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode)) }
         a2 { assertEquals(1.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode)) }
         a2 {
-            assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                1,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
         a1 {
-            assertEquals(2, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.filter { it.opplysninger.vedtaksperiodeId == 1.vedtaksperiode }.size)
+            assertEquals(
+                2,
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder
+                    .filter {
+                        it.opplysninger.vedtaksperiodeId ==
+                            1.vedtaksperiode
+                    }.size,
+            )
         }
     }
 
@@ -169,7 +228,10 @@ internal class OppdaterteArbeidsgiveropplysningerTest : AbstractDslTest() {
                         skjæringstidspunkt = 10.februar,
                         sykmeldingsperioder = listOf(10.februar til 10.mars),
                         egenmeldingsperioder = emptyList(),
-                        førsteFraværsdager = listOf(EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 10.februar)),
+                        førsteFraværsdager =
+                            listOf(
+                                EventSubscription.FørsteFraværsdag(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(a1), 10.februar),
+                            ),
                         forespurteOpplysninger =
                             setOf(
                                 EventSubscription.Inntekt,

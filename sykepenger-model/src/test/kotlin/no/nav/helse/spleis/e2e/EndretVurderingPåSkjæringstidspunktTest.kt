@@ -54,7 +54,10 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             håndterEndretForsikringsvurdering(1.januar, nyForsikringsvurderingId)
             assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            assertEquals(nyForsikringsvurderingId, (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)!!.forsikringsvurderingId)
+            assertEquals(
+                nyForsikringsvurderingId,
+                (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)!!.forsikringsvurderingId,
+            )
             assertEquals(nyForsikringsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().forsikringsvurderingId)
         }
     }
@@ -71,7 +74,12 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-            val forsikringsvurderingIdFraVilkårsgrunnlag = (inspektør.vilkårsgrunnlag(1.vedtaksperiode) as? VilkårsgrunnlagHistorikk.Grunnlagsdata)!!.forsikringsvurderingId!!
+            val forsikringsvurderingIdFraVilkårsgrunnlag =
+                (
+                    inspektør.vilkårsgrunnlag(
+                        1.vedtaksperiode,
+                    ) as? VilkårsgrunnlagHistorikk.Grunnlagsdata
+                )!!.forsikringsvurderingId!!
             assertEquals(forsikringsvurderingId, forsikringsvurderingIdFraVilkårsgrunnlag)
             håndterEndretForsikringsvurdering(1.januar, forsikringsvurderingId)
 

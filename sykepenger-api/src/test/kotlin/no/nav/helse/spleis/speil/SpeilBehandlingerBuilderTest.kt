@@ -339,9 +339,36 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
         val forventetPensjonsgivendeInntekt =
             listOf(
-                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2017),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2016),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2015),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
             )
 
         generasjoner(organisasjonsnummer = selvstendig) {
@@ -393,9 +420,36 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
         val opprinnelig =
             listOf(
-                PensjonsgivendeInntektDto(årstall = Year.of(2014), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 300000.0), månedligDouble = MånedligDouble(beløp = 25000.0), dagligDouble = DagligDouble(beløp = 1153.8461538461538), dagligInt = DagligInt(beløp = 1153))),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2014),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 300000.0),
+                            månedligDouble = MånedligDouble(beløp = 25000.0),
+                            dagligDouble = DagligDouble(beløp = 1153.8461538461538),
+                            dagligInt = DagligInt(beløp = 1153),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2015),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 300000.0),
+                            månedligDouble = MånedligDouble(beløp = 25000.0),
+                            dagligDouble = DagligDouble(beløp = 1153.8461538461538),
+                            dagligInt = DagligInt(beløp = 1153),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2016),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 300000.0),
+                            månedligDouble = MånedligDouble(beløp = 25000.0),
+                            dagligDouble = DagligDouble(beløp = 1153.8461538461538),
+                            dagligInt = DagligInt(beløp = 1153),
+                        ),
+                ),
             )
 
         generasjoner(organisasjonsnummer = selvstendig) {
@@ -421,9 +475,36 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
         val forventetPensjonsgivendeInntekt =
             listOf(
-                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 450000.0), månedligDouble = MånedligDouble(beløp = 37500.0), dagligDouble = DagligDouble(beløp = 1730.7692307692307), dagligInt = DagligInt(beløp = 1730))),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2017),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2016),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2015),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 450000.0),
+                            månedligDouble = MånedligDouble(beløp = 37500.0),
+                            dagligDouble = DagligDouble(beløp = 1730.7692307692307),
+                            dagligInt = DagligInt(beløp = 1730),
+                        ),
+                ),
             )
 
         generasjoner(organisasjonsnummer = selvstendig) {
@@ -434,7 +515,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                     assertEquals(460589.0, it.vilkårsgrunnlag().sykepengegrunnlag)
                     assertEquals(460589.0, it.grunnbeløpsjustertGjennomsnitt)
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
-                    assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
+                    assertEquals(
+                        listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())),
+                        it.vilkårsgrunnlag().arbeidsgiverrefusjoner,
+                    )
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
                     assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
                 }
@@ -459,9 +543,36 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
         val forventetPensjonsgivendeInntekt =
             listOf(
-                PensjonsgivendeInntektDto(årstall = Year.of(2017), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2016), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
-                PensjonsgivendeInntektDto(årstall = Year.of(2015), beløp = InntektDto(årlig = Årlig(beløp = 1_000_000.0), månedligDouble = MånedligDouble(beløp = 83_333.33333333333), dagligDouble = DagligDouble(beløp = 3846.153846153846), dagligInt = DagligInt(beløp = 3846))),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2017),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 1_000_000.0),
+                            månedligDouble = MånedligDouble(beløp = 83_333.33333333333),
+                            dagligDouble = DagligDouble(beløp = 3846.153846153846),
+                            dagligInt = DagligInt(beløp = 3846),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2016),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 1_000_000.0),
+                            månedligDouble = MånedligDouble(beløp = 83_333.33333333333),
+                            dagligDouble = DagligDouble(beløp = 3846.153846153846),
+                            dagligInt = DagligInt(beløp = 3846),
+                        ),
+                ),
+                PensjonsgivendeInntektDto(
+                    årstall = Year.of(2015),
+                    beløp =
+                        InntektDto(
+                            årlig = Årlig(beløp = 1_000_000.0),
+                            månedligDouble = MånedligDouble(beløp = 83_333.33333333333),
+                            dagligDouble = DagligDouble(beløp = 3846.153846153846),
+                            dagligInt = DagligInt(beløp = 3846),
+                        ),
+                ),
             )
 
         generasjoner(organisasjonsnummer = selvstendig) {
@@ -474,9 +585,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
                     assertTrue(grunnbeløpsjustertGjennomsnitt > it.vilkårsgrunnlag().beregningsgrunnlag)
                     val apiPeriode = mapTidslinjeperiode(it, emptyList()) as ApiBeregnetPeriode
                     assertEquals(BigDecimal(grunnbeløpsjustertGjennomsnitt), apiPeriode.grunnbeløpsjustertGjennomsnitt)
-                    assertEquals(grunnbeløpsjustertGjennomsnitt, objectMapper.readTree(objectMapper.writeValueAsString(apiPeriode))["grunnbeløpsjustertGjennomsnitt"].asDouble())
+                    assertEquals(
+                        grunnbeløpsjustertGjennomsnitt,
+                        objectMapper.readTree(objectMapper.writeValueAsString(apiPeriode))["grunnbeløpsjustertGjennomsnitt"].asDouble(),
+                    )
                     assertEquals(1.januar, it.vilkårsgrunnlag().skjæringstidspunkt)
-                    assertEquals(listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())), it.vilkårsgrunnlag().arbeidsgiverrefusjoner)
+                    assertEquals(
+                        listOf(Arbeidsgiverrefusjon(arbeidsgiver = selvstendig, refusjonsopplysninger = emptyList())),
+                        it.vilkårsgrunnlag().arbeidsgiverrefusjoner,
+                    )
                     assertEquals(emptyList<Arbeidsgiverinntekt>(), it.vilkårsgrunnlag().inntekter)
                     assertEquals(forventetPensjonsgivendeInntekt, it.pensjonsgivendeInntekter)
                 }
@@ -623,7 +740,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
     fun `syk nav-dager i to korte perioder`() {
         håndterSøknad(Sykdom(1.januar, 15.januar, 100.prosent), Ferie(1.januar, 15.januar))
         håndterSøknad(Sykdom(16.januar, 20.januar, 100.prosent), Ferie(16.januar, 20.januar))
-        håndterSelvbestemteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiode = 1)
+        håndterSelvbestemteArbeidsgiveropplysninger(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            vedtaksperiode = 1,
+        )
         generasjoner {
             assertEquals(2, size)
             0.generasjon {
@@ -692,7 +813,11 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         val beregnetInntekt = halvG.beløp(1.januar)
         nyttVedtak(1.januar, 31.januar)
         forlengVedtak(1.februar, 28.februar)
-        håndterKorrigerendeArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = beregnetInntekt - 1.daglig, vedtaksperiode = 1)
+        håndterKorrigerendeArbeidsgiveropplysninger(
+            listOf(1.januar til 16.januar),
+            beregnetInntekt = beregnetInntekt - 1.daglig,
+            vedtaksperiode = 1,
+        )
         håndterYtelserTilUtbetalt()
         håndterYtelserTilGodkjenning()
         generasjoner {
@@ -812,7 +937,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 beregnetPeriode(0) fra 1.februar til 28.februar medTilstand TilGodkjenning medPeriodetype FORLENGELSE
-                beregnetPeriode(1) harTidslinje (1.januar til 31.januar to SykdomstidslinjedagType.FORELDET_SYKEDAG) medTilstand IngenUtbetaling medPeriodetype FØRSTEGANGSBEHANDLING
+                beregnetPeriode(1) harTidslinje (1.januar til 31.januar to SykdomstidslinjedagType.FORELDET_SYKEDAG) medTilstand
+                    IngenUtbetaling medPeriodetype
+                    FØRSTEGANGSBEHANDLING
             }
         }
     }
@@ -887,26 +1014,43 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
 
             0.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand TilGodkjenning
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(
+                    0,
+                ) er Ubetalt avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand
+                    TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
 
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
 
             2.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
 
             3.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -923,13 +1067,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand TilGodkjenning
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(
+                    0,
+                ) er Ubetalt avType REVURDERING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand
+                    TilGodkjenning
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (2.februar til 28.februar) medAntallDager 27 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -943,11 +1096,14 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(1, size)
-                annullertPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand TilAnnullering
+                annullertPeriode(0) er Overført avType ANNULLERING fra (1.januar til 31.januar) medAntallDager 0 forkastet true medTilstand
+                    TilAnnullering
             }
             1.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -962,13 +1118,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                annullertPeriode(0) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                annullertPeriode(
+                    0,
+                ) er Overført avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand
+                    TilAnnullering
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -986,14 +1151,26 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet false medTilstand Utbetalt
-                annullertPeriode(1) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet true medTilstand Annullert
-                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.april til 30.april) medAntallDager 30 forkastet
+                    false medTilstand
+                    Utbetalt
+                annullertPeriode(
+                    1,
+                ) er Utbetalingstatus.Annullert avType ANNULLERING fra (1.februar til 28.februar) medAntallDager 0 forkastet
+                    true medTilstand
+                    Annullert
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1008,13 +1185,21 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(2, size)
-                annullertPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand TilAnnullering
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                annullertPeriode(0) er Overført avType ANNULLERING fra (1.mars til 31.mars) medAntallDager 0 forkastet true medTilstand
+                    TilAnnullering
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(
+                    0,
+                ) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1035,14 +1220,25 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(2, size)
             0.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(
+                    0,
+                ) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1065,20 +1261,37 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand IngenUtbetaling
-                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.mars til 31.mars) medAntallDager 31 forkastet
+                    false medTilstand
+                    IngenUtbetaling
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(3, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(
+                    0,
+                ) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.mars til 31.mars) medAntallDager 31 forkastet false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er GodkjentUtenUtbetaling avType REVURDERING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(2) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             2.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand Utbetalt
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.februar til 28.februar) medAntallDager 28 forkastet
+                    false medTilstand
+                    Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1132,12 +1345,17 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+                beregnetPeriode(
+                    0,
+                ) er Ubetalt avType REVURDERING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand
+                    TilGodkjenning
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
             1.generasjon {
                 assertEquals(2, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (16.januar til 15.februar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
                 uberegnetPeriode(1) fra (1.januar til 15.januar) medAntallDager 15 forkastet false medTilstand IngenUtbetaling
             }
             2.generasjon {
@@ -1156,7 +1374,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) medTilstand VenterPåAnnenPeriode
-                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand
+                    TilGodkjenning
             }
         }
     }
@@ -1170,7 +1389,8 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
-                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+                beregnetPeriode(1) er Ubetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand
+                    TilGodkjenning
             }
         }
     }
@@ -1187,11 +1407,15 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, this.perioder.size)
                 uberegnetPeriode(0) medTilstand AvventerInntektsopplysninger
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
             1.generasjon {
                 assertEquals(1, this.perioder.size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1206,7 +1430,9 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand ForberederGodkjenning
-                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(1) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -1247,11 +1473,14 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             0.generasjon {
                 assertEquals(2, size)
                 uberegnetPeriode(0) fra (1.februar til 28.februar) medAntallDager 28 forkastet false medTilstand VenterPåAnnenPeriode
-                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand TilGodkjenning
+                beregnetPeriode(1) er Ubetalt avType REVURDERING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand
+                    TilGodkjenning
             }
             1.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet false medTilstand Utbetalt
+                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (1.januar til 31.januar) medAntallDager 31 forkastet
+                    false medTilstand
+                    Utbetalt
             }
         }
     }
@@ -2247,14 +2476,22 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         val søknad = håndterSøknad(Sykdom(4.januar, 19.januar, 100.prosent))
         val im = håndterKorrigerendeArbeidsgiveropplysninger(listOf(4.januar til 19.januar))
         val overstyring = UUID.randomUUID()
-        håndterOverstyrTidslinje(4.januar.til(19.januar).map { ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100) }, meldingsreferanseId = overstyring)
+        håndterOverstyrTidslinje(
+            4.januar.til(19.januar).map {
+                ManuellOverskrivingDag(it, Dagtype.SykedagNav, 100)
+            },
+            meldingsreferanseId = overstyring,
+        )
 
         håndterVilkårsgrunnlagTilUtbetalt()
         generasjoner {
             assertEquals(3, size)
             0.generasjon {
                 assertEquals(1, size)
-                beregnetPeriode(0) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 19.januar) medTilstand Utbetalt medHendelser setOf(søknad, im, overstyring)
+                beregnetPeriode(
+                    0,
+                ) er Utbetalingstatus.Utbetalt avType UTBETALING fra (4.januar til 19.januar) medTilstand Utbetalt medHendelser
+                    setOf(søknad, im, overstyring)
             }
             1.generasjon {
                 assertEquals(1, size)
@@ -2534,7 +2771,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             return this
         }
 
-        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag = requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) { "Forventet å finne vilkårsgrunnlag for periode" }
+        fun BeregnetPeriode.vilkårsgrunnlag(): no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag =
+            requireNotNull(vilkårsgrunnlag[this.vilkårsgrunnlagId]) {
+                "Forventet å finne vilkårsgrunnlag for periode"
+            }
 
         infix fun <T : SpeilTidslinjeperiode> T.forkastet(forkastet: Boolean): T {
             assertEquals(forkastet, this.erForkastet)
@@ -2598,6 +2838,10 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
         block: Arbeidsgivergenerasjoner.() -> Unit = {},
     ) {
         val d = speilApi()
-        Arbeidsgivergenerasjoner(organisasjonsnummer, d.vilkårsgrunnlag, d.arbeidsgivere.singleOrNull { it.organisasjonsnummer == organisasjonsnummer }?.generasjoner ?: emptyList()).apply(block)
+        Arbeidsgivergenerasjoner(
+            organisasjonsnummer,
+            d.vilkårsgrunnlag,
+            d.arbeidsgivere.singleOrNull { it.organisasjonsnummer == organisasjonsnummer }?.generasjoner ?: emptyList(),
+        ).apply(block)
     }
 }

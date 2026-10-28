@@ -46,13 +46,24 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT * 1.25, emptyList(), refusjonskravGyldigFra = null))
+            val korrigerteArbeidsgiveropplysninger =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittRefusjon(
+                        INNTEKT * 1.25,
+                        emptyList(),
+                        refusjonskravGyldigFra = null,
+                    ),
+                )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
         }
     }
 
@@ -60,7 +71,14 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert inntekt OG refusjon på en allerede utbetalt periode`() {
         a1 {
             nyttVedtak(januar)
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT * 1.25), OppgittRefusjon(INNTEKT * 1.25, emptyList(), refusjonskravGyldigFra = null))
+            val korrigerteArbeidsgiveropplysninger =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittInntekt(
+                        INNTEKT * 1.25,
+                    ),
+                    OppgittRefusjon(INNTEKT * 1.25, emptyList(), refusjonskravGyldigFra = null),
+                )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -68,7 +86,10 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 1.25)
             }
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, INNTEKT * 1.25, korrigerteArbeidsgiveropplysninger.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
             assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
@@ -90,14 +111,22 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            val korrigerteArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+            val korrigerteArbeidsgiveropplysninger =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittInntekt(INNTEKT),
+                    OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                )
             håndterYtelser(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
             // Burde vi unngått en overstyring her?
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, INNTEKT, korrigerteArbeidsgiveropplysninger.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
             assertVarsler(1.vedtaksperiode, RV_IM_4)
         }
     }
@@ -106,7 +135,15 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om korrigerert arbeidsgiverperiode`() {
         a1 {
             nyttVedtak(januar)
-            val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)))
+            val korrigeringId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(
+                        listOf(
+                            2.januar til 17.januar,
+                        ),
+                    ),
+                )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_24)
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
@@ -117,20 +154,64 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `Korrigert AGP opplysning brukes`() {
         a1 {
             nyPeriode(februar)
-            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(20.januar.somPeriode(), 10.januar til 12.januar, 1.februar til 12.februar))
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder =
+                    listOf(
+                        20.januar.somPeriode(),
+                        10.januar til 12.januar,
+                        1.februar til 12.februar,
+                    ),
+            )
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.februar, listOf(10.januar til 12.januar, 20.januar.somPeriode(), 1.februar til 12.februar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                1.februar,
+                listOf(
+                    10.januar til 12.januar,
+                    20.januar.somPeriode(),
+                    1.februar til 12.februar,
+                ),
+            )
 
-            håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(20.januar.somPeriode(), 10.januar.somPeriode(), 1.februar til 14.februar)))
+            håndterKorrigerteArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(
+                    listOf(
+                        20.januar.somPeriode(),
+                        10.januar.somPeriode(),
+                        1.februar til 14.februar,
+                    ),
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertVarsler(1.vedtaksperiode, RV_IM_24)
             assertForventetFeil(
-                nå = { assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.februar, listOf(10.januar til 12.januar, 20.januar.somPeriode(), 1.februar til 12.februar)) },
-                ønsket = { assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.februar, listOf(10.januar.somPeriode(), 20.januar.somPeriode(), 1.februar til 14.februar)) },
+                nå = {
+                    assertSkjæringstidspunktOgVenteperiode(
+                        1.vedtaksperiode,
+                        1.februar,
+                        listOf(
+                            10.januar til 12.januar,
+                            20.januar.somPeriode(),
+                            1.februar til 12.februar,
+                        ),
+                    )
+                },
+                ønsket = {
+                    assertSkjæringstidspunktOgVenteperiode(
+                        1.vedtaksperiode,
+                        1.februar,
+                        listOf(
+                            10.januar.somPeriode(),
+                            20.januar.somPeriode(),
+                            1.februar til 14.februar,
+                        ),
+                    )
+                },
             )
         }
     }
@@ -139,7 +220,15 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om lik arbeidsgiverperiode`() {
         a1 {
             nyttVedtak(januar)
-            val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            val korrigeringId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(
+                        listOf(
+                            1.januar til 16.januar,
+                        ),
+                    ),
+                )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
@@ -150,7 +239,16 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om at de kun UtbetaltDelerAvArbeidsgiverperioden læll`() {
         a1 {
             nyttVedtak(januar)
-            val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 10.januar)), UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 10.januar))
+            val korrigeringId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(
+                        listOf(
+                            1.januar til 10.januar,
+                        ),
+                    ),
+                    UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 10.januar),
+                )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_8)
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))
@@ -161,7 +259,16 @@ internal class KorrigerteArbeidsigveropplysningerTest : AbstractDslTest() {
     fun `opplyser om at de kun RedusertUtbetaltBeløpIArbeidsgiverperioden læll`() {
         a1 {
             nyttVedtak(januar)
-            val korrigeringId = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(2.januar til 17.januar)), RedusertUtbetaltBeløpIArbeidsgiverperioden(StreikEllerLockout))
+            val korrigeringId =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(
+                        listOf(
+                            2.januar til 17.januar,
+                        ),
+                    ),
+                    RedusertUtbetaltBeløpIArbeidsgiverperioden(StreikEllerLockout),
+                )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_24, RV_IM_8)
             assertTrue(observatør.inntektsmeldingHåndtert.contains(korrigeringId to 1.vedtaksperiode))

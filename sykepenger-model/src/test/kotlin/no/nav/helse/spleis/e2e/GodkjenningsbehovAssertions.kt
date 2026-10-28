@@ -127,7 +127,11 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
                         beløpTilBruker = it.getValue("beløpTilBruker") as Int,
                         sykdomsgrad = it.getValue("sykdomsgrad") as Int,
                         dekningsgrad = it.getValue("dekningsgrad") as Int,
-                        begrunnelser = (it.getValue("begrunnelser") as List<String>).takeUnless { it.isEmpty() }?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) },
+                        begrunnelser =
+                            (it.getValue("begrunnelser") as List<String>)
+                                .takeUnless {
+                                    it.isEmpty()
+                                }?.map { EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.valueOf(it) },
                     )
                 },
             yrkesaktivitetssporing = behandlingsporing,
@@ -218,7 +222,13 @@ private fun somSelvstendigSykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Map<S
         sykepengegrunnlag = sykepengegrunnlagsfakta.getValue("sykepengegrunnlag") as Double,
         seksG = sykepengegrunnlagsfakta.getValue("6G") as Double,
         pensjonsgivendeInntekter =
-            ((sykepengegrunnlagsfakta.getValue("selvstendig") as Map<String, Any>).getValue("pensjonsgivendeInntekter") as List<Map<String, Any>>).map {
+            (
+                (
+                    sykepengegrunnlagsfakta.getValue(
+                        "selvstendig",
+                    ) as Map<String, Any>
+                ).getValue("pensjonsgivendeInntekter") as List<Map<String, Any>>
+            ).map {
                 EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta.SelvstendigEtterHovedregel.PensjonsgivendeInntekt(
                     årstall = Year.of(it.getValue("årstall") as Int),
                     beløp = it.getValue("beløp") as Double,

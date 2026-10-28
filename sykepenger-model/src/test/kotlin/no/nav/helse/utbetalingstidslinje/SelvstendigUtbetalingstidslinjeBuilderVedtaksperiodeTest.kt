@@ -76,7 +76,13 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
     @Test
     fun `En dag som både er avslått på avslagstidslinjen og 'maskinelt' avslått`() {
         val periode = 1.januar til 10.januar
-        undersøke(10.YF(Pleiepenger), avslagstidslinje = Avslagstidslinje(periode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Test")))
+        undersøke(
+            10.YF(Pleiepenger),
+            avslagstidslinje =
+                Avslagstidslinje(
+                    periode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Test"),
+                ),
+        )
         periode.forEach { dato ->
             val avslagsdag = utbetalingstidslinje[dato] as? Utbetalingsdag.AvvistDag
             assertNotNull(avslagsdag)
@@ -102,10 +108,14 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiodeTest {
         )
         assertEquals(30, utbetalingstidslinje.size)
         for (dato in (14.januar til opphørsdato)) {
-            assertEquals(dekningsgradIForsikring.riktigProsent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) { "Frem til opphørsdato skal dekning i utbetaling være 100 %" }
+            assertEquals(dekningsgradIForsikring.riktigProsent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) {
+                "Frem til opphørsdato skal dekning i utbetaling være 100 %"
+            }
         }
         for (dato in opphørsdato.plusDays(1) til 30.januar) {
-            assertEquals(80.prosent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) { "Etter opphørsdato for forsikring skal dekningsgrad være 80 %" }
+            assertEquals(80.prosent, utbetalingstidslinje.inspektør.dekningsgrad(dato)) {
+                "Etter opphørsdato for forsikring skal dekningsgrad være 80 %"
+            }
         }
     }
 

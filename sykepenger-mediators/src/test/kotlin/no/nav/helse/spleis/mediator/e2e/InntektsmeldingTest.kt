@@ -34,6 +34,11 @@ internal class InntektsmeldingTest : AbstractEndToEndMediatorTest() {
         assertNotNull(inntektsmeldingHåndtertEvent)
         val perioderIder = listOf(testRapid.inspektør.vedtaksperiodeId(0), testRapid.inspektør.vedtaksperiodeId(1))
 
-        assertEquals(inntektsmeldingHåndtertEvent.path("vedtaksperioderMedSammeFørsteFraværsdag").asIterable().map { UUID.fromString(it.asText()) }, perioderIder)
+        assertEquals(
+            inntektsmeldingHåndtertEvent.path("vedtaksperioderMedSammeFørsteFraværsdag").asIterable().map {
+                UUID.fromString(it.asText())
+            },
+            perioderIder,
+        )
     }
 }

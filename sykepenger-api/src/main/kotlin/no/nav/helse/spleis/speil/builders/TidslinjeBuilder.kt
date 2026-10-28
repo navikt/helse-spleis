@@ -242,9 +242,22 @@ internal class UtbetalingstidslinjeBuilder(
     private val utbetalingstidslinje by lazy {
         dto.dager.map {
             when (it) {
-                is UtbetalingsdagUtDto.ArbeidsdagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.Arbeidsdag, dato = it.dato)
-                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, dato = it.dato)
-                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto -> mapUtbetalingsdag(it.dato, UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag, it.økonomi)
+                is UtbetalingsdagUtDto.ArbeidsdagDto ->
+                    UtbetalingstidslinjedagUtenGrad(
+                        type = UtbetalingstidslinjedagType.Arbeidsdag,
+                        dato = it.dato,
+                    )
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagDto ->
+                    UtbetalingstidslinjedagUtenGrad(
+                        type = UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
+                        dato = it.dato,
+                    )
+                is UtbetalingsdagUtDto.ArbeidsgiverperiodeDagNavDto ->
+                    mapUtbetalingsdag(
+                        it.dato,
+                        UtbetalingstidslinjedagType.ArbeidsgiverperiodeDag,
+                        it.økonomi,
+                    )
                 is UtbetalingsdagUtDto.AvvistDagDto ->
                     AvvistDag(
                         type = UtbetalingstidslinjedagType.AvvistDag,
@@ -253,7 +266,11 @@ internal class UtbetalingstidslinjeBuilder(
                         totalGrad = it.økonomi.totalGrad.prosentDesimal * 100,
                     )
 
-                is UtbetalingsdagUtDto.ForeldetDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.ForeldetDag, dato = it.dato)
+                is UtbetalingsdagUtDto.ForeldetDagDto ->
+                    UtbetalingstidslinjedagUtenGrad(
+                        type = UtbetalingstidslinjedagType.ForeldetDag,
+                        dato = it.dato,
+                    )
                 is UtbetalingsdagUtDto.FridagDto ->
                     UtbetalingstidslinjedagUtenGrad(
                         type = if (it.dato.erHelg()) UtbetalingstidslinjedagType.Helgedag else UtbetalingstidslinjedagType.Feriedag,
@@ -261,7 +278,11 @@ internal class UtbetalingstidslinjeBuilder(
                     )
 
                 is UtbetalingsdagUtDto.NavDagDto -> mapUtbetalingsdag(it.dato, UtbetalingstidslinjedagType.NavDag, it.økonomi)
-                is UtbetalingsdagUtDto.NavHelgDagDto -> UtbetalingstidslinjedagUtenGrad(type = UtbetalingstidslinjedagType.NavHelgDag, dato = it.dato)
+                is UtbetalingsdagUtDto.NavHelgDagDto ->
+                    UtbetalingstidslinjedagUtenGrad(
+                        type = UtbetalingstidslinjedagType.NavHelgDag,
+                        dato = it.dato,
+                    )
                 is UtbetalingsdagUtDto.UkjentDagDto ->
                     UtbetalingstidslinjedagUtenGrad(
                         type = UtbetalingstidslinjedagType.UkjentDag,

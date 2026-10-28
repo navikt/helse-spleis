@@ -24,7 +24,9 @@ internal class V321EgenmeldingsdagerPåBehandling : JsonMigration(version = 321)
 
     private fun migrerVedtaksperiode(vedtaksperiode: JsonNode) {
         vedtaksperiode as ObjectNode
-        val egenmeldingsperioder = vedtaksperiode.path("egenmeldingsperioder").takeIf(JsonNode::isArray)?.deepCopy<ArrayNode>() ?: serdeObjectMapper.createArrayNode()
+        val egenmeldingsperioder =
+            vedtaksperiode.path("egenmeldingsperioder").takeIf(JsonNode::isArray)?.deepCopy<ArrayNode>()
+                ?: serdeObjectMapper.createArrayNode()
         vedtaksperiode.path("behandlinger").forEach { behandling ->
             behandling.path("endringer").forEach { endring ->
                 (endring as ObjectNode).putArray("egenmeldingsdager")

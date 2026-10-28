@@ -61,7 +61,13 @@ class Inntektsmelding(
                 Inntektsdata(
                     hendelseId = meldingsreferanseId,
                     dato =
-                        when (førsteFraværsdag != null && (grupperteArbeidsgiverperioder.isEmpty() || førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag)) {
+                        when (
+                            førsteFraværsdag != null &&
+                                (
+                                    grupperteArbeidsgiverperioder.isEmpty() ||
+                                        førsteFraværsdag > grupperteArbeidsgiverperioder.last().endInclusive.nesteDag
+                                )
+                        ) {
                             true -> førsteFraværsdag
                             false -> grupperteArbeidsgiverperioder.maxOf { it.start }
                         },
@@ -86,7 +92,10 @@ class Inntektsmelding(
         }
     }
 
-    internal val refusjonsservitør get() = Refusjonsservitør.fra(refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt))
+    internal val refusjonsservitør get() =
+        Refusjonsservitør.fra(
+            refusjon.refusjonstidslinje(refusjonsdato, metadata.meldingsreferanseId, metadata.innsendt),
+        )
 
     private var håndtertInntekt = false
 
@@ -156,7 +165,11 @@ class Inntektsmelding(
                     EndringIRefusjon(Inntekt.INGEN, sisteRefusjonsdag.nesteDag)
                 }
 
-            val hovedopplysning = EndringIRefusjon(beløp ?: Inntekt.INGEN, refusjonsdato).takeUnless { it.endringsdato == opphørIRefusjon?.endringsdato }
+            val hovedopplysning =
+                EndringIRefusjon(beløp ?: Inntekt.INGEN, refusjonsdato).takeUnless {
+                    it.endringsdato ==
+                        opphørIRefusjon?.endringsdato
+                }
 
             val gyldigeEndringer =
                 endringerIRefusjon
@@ -164,9 +177,14 @@ class Inntektsmelding(
                     .filter { it.endringsdato < (opphørIRefusjon?.endringsdato ?: LocalDate.MAX) }
                     .distinctBy { it.endringsdato }
 
-            val alleRefusjonsopplysninger = listOfNotNull(hovedopplysning, *gyldigeEndringer.toTypedArray(), opphørIRefusjon).sortedBy { it.endringsdato }
+            val alleRefusjonsopplysninger =
+                listOfNotNull(hovedopplysning, *gyldigeEndringer.toTypedArray(), opphørIRefusjon).sortedBy {
+                    it.endringsdato
+                }
 
-            check(alleRefusjonsopplysninger.isNotEmpty()) { "Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?" }
+            check(
+                alleRefusjonsopplysninger.isNotEmpty(),
+            ) { "Inntektsmeldingen inneholder ingen refusjonsopplysninger. Hvordan er dette mulig?" }
 
             return alleRefusjonsopplysninger
                 .mapWithNext { nåværende, neste ->

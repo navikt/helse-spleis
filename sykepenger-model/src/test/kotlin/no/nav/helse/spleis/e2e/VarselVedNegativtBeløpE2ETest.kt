@@ -15,7 +15,10 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     fun `skal ikke få varsel når utbetaling flyttes fra arbeidsgiver til person`() {
         a1 {
             nyttVedtak(januar)
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, Inntekt.INGEN)))))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, Inntekt.INGEN)))),
+            )
             håndterYtelser(1.vedtaksperiode)
             assertEquals(
                 -15741,
@@ -36,7 +39,10 @@ internal class VarselVedNegativtBeløpE2ETest : AbstractDslTest() {
     fun `skal få varsel når utbetaling flyttes fra person til arbeidsgiver`() {
         a1 {
             nyttVedtak(januar, refusjon = Inntektsmelding.Refusjon(Inntekt.INGEN, null, emptyList()))
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, INNTEKT)))))
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT, listOf(Triple(1.januar, null, INNTEKT)))),
+            )
             håndterYtelser(1.vedtaksperiode)
             assertEquals(
                 15741,

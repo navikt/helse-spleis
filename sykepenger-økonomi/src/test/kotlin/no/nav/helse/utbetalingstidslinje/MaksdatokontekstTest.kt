@@ -86,7 +86,8 @@ internal class MaksdatokontekstTest {
     @Test
     fun `maksdato under 67 - alle dager forbrukt`() {
         val sekstisyvårsdagen = 1.januar(2021)
-        val kontekst = medBetalteDager(antallBetalteDager = 248, sekstisyvårsdagen, sisteVurderteDag = 31.januar, sisteBetalteDag = 10.januar)
+        val kontekst =
+            medBetalteDager(antallBetalteDager = 248, sekstisyvårsdagen, sisteVurderteDag = 31.januar, sisteBetalteDag = 10.januar)
         assertEquals(10.januar, kontekst.beregnMaksdato(sekstisyvårsdagen.plusYears(3), null).maksdato)
     }
 

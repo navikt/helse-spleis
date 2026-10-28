@@ -37,8 +37,12 @@ import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
 
 internal fun List<Vedtaksperiode>.harAvklartArbeidstakerinntekt(): Boolean {
     val første = firstOrNull() ?: return false
-    check(all { it.yrkesaktivitet === første.yrkesaktivitet && it.skjæringstidspunkt == første.skjæringstidspunkt }) { "Hva holder du på med?" }
-    check(første.yrkesaktivitet.yrkesaktivitetstype != Selvstendig) { "Selvstendig næringsdrivende har ikke arbeidstakerinntekt!! Hva er det du holder på med??" }
+    check(
+        all { it.yrkesaktivitet === første.yrkesaktivitet && it.skjæringstidspunkt == første.skjæringstidspunkt },
+    ) { "Hva holder du på med?" }
+    check(første.yrkesaktivitet.yrkesaktivitetstype != Selvstendig) {
+        "Selvstendig næringsdrivende har ikke arbeidstakerinntekt!! Hva er det du holder på med??"
+    }
     return any { it.tilstand.harAvklartArbeidstakerinntekt() }
 }
 

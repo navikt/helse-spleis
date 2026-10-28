@@ -776,7 +776,9 @@ internal class EventBusOversetter(
             ),
         )
 
-    private fun mapTrengerOppdatertHistorikkFraInfotrygd(event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent): Utboksmelding =
+    private fun mapTrengerOppdatertHistorikkFraInfotrygd(
+        event: EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent,
+    ): Utboksmelding =
         listOf(
             Behov(
                 Behov.Behovstype.Sykepengehistorikk,
@@ -1065,7 +1067,13 @@ internal class EventBusOversetter(
         )
     }
 
-    private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) = utgåendeSomBeholdesEtterSending("ny_informasjon_i_infotrygd", mapOf("fom" to event.fraOgMed))
+    private fun mapNyInformasjonIInfotrygdEvent(event: EventSubscription.NyInformasjonIInfotrygdEvent) =
+        utgåendeSomBeholdesEtterSending(
+            "ny_informasjon_i_infotrygd",
+            mapOf(
+                "fom" to event.fraOgMed,
+            ),
+        )
 
     private fun mapAvsluttetUtenVedtak(event: EventSubscription.AvsluttetUtenVedtakEvent): Utboksmelding =
         utgåendeSomBeholdesEtterSending(
@@ -1122,7 +1130,10 @@ internal class EventBusOversetter(
                                     "fastsatt" to "EtterHovedregel",
                                     "arbeidsgivere" to emptyList<Map<String, Any>>(),
                                 )
-                            Behandlingsporing.Yrkesaktivitet.Frilans -> TODO("avsluttet_med_vedtak for frilanser er ikke implementert, og vi burde aldri komme hit.")
+                            Behandlingsporing.Yrkesaktivitet.Frilans ->
+                                TODO(
+                                    "avsluttet_med_vedtak for frilanser er ikke implementert, og vi burde aldri komme hit.",
+                                )
                         },
                     ),
             ),
@@ -1206,9 +1217,11 @@ internal class EventBusOversetter(
             ),
         )
 
-    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): Utboksmelding = utgåendeSomBeholdesEtterSending("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
+    private fun mapTrengerInntektsmeldingReplay(event: EventSubscription.TrengerInntektsmeldingReplayEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending("trenger_inntektsmelding_replay", event.opplysninger.tilJsonMap())
 
-    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): Utboksmelding = utgåendeSomBeholdesEtterSending("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
+    private fun mapTrengerArbeidsgiveropplysninger(event: EventSubscription.TrengerArbeidsgiveropplysningerEvent): Utboksmelding =
+        utgåendeSomBeholdesEtterSending("trenger_opplysninger_fra_arbeidsgiver", event.opplysninger.tilJsonMap())
 
     private fun EventSubscription.TrengerArbeidsgiveropplysninger.tilJsonMap(): Map<String, Any> =
         mapOf(

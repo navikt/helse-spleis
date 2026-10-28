@@ -185,7 +185,10 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertEquals(emptySet<Any>(), annulleringskandidater)
 
             val feil = assertThrows<IllegalStateException> { håndterAnnullering(2.vedtaksperiode) }
-            assertEquals("Fant ingen annulleringskandidater for vedtaksperiode ${2.vedtaksperiode} i tilstand AVVENTER_GODKJENNING", feil.message)
+            assertEquals(
+                "Fant ingen annulleringskandidater for vedtaksperiode ${2.vedtaksperiode} i tilstand AVVENTER_GODKJENNING",
+                feil.message,
+            )
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
         }
     }
@@ -216,7 +219,11 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(3.vedtaksperiode, AVSLUTTET)
 
             // AUU-en skal utbetales allikevel
-            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiodeId = 1.vedtaksperiode)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                emptyList(),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -258,7 +265,11 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
             // AUU-en skal utbetales allikevel
-            håndterSelvbestemtArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiodeId = 1.vedtaksperiode)
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                emptyList(),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
@@ -1379,7 +1390,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                     .last()
                     .utbetaling
 
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
             assertAnnullering(-14300, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
@@ -1508,7 +1525,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
                     .last()
                     .utbetaling
 
-            assertForkastetPeriodeTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                2.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
             assertAnnullering(-14300, Utbetalingstatus.ANNULLERT, 1.februar, 1.februar til 28.februar, utførtAnnulleringFebruar!!)
             assertEquals(
                 Tilstand.AnnullertPeriode,
@@ -2410,7 +2433,14 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -2426,7 +2456,14 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -2440,7 +2477,14 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_ANNULLERING_TIL_UTBETALING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_ANNULLERING_TIL_UTBETALING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
         }
     }
 
@@ -2692,7 +2736,13 @@ internal class AnnullerUtbetalingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterAnnullering(1.vedtaksperiode)
             håndterUtbetalt()
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_ANNULLERING,
+                TIL_ANNULLERING,
+                TIL_INFOTRYGD,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_ANNULLERING, TIL_ANNULLERING)
         }
     }

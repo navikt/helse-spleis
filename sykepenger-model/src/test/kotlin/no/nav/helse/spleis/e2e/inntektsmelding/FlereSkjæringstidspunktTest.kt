@@ -82,7 +82,10 @@ internal class FlereSkjæringstidspunktTest : AbstractDslTest() {
     fun `AI fjerner gammel IM - Egenmeldingsdager fra sykmelding møter begrunnelseForReduksjonEllerIkkeUtbetalt`() {
         a1 {
             håndterSøknad(Sykdom(9.mars, 14.mars, 100.prosent), egenmeldinger = listOf(2.mars til 3.mars))
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(2.januar til 17.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(2.januar til 17.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
+            )
 
             observatør.vedtaksperiodeVenter.last().let {
                 assertEquals(

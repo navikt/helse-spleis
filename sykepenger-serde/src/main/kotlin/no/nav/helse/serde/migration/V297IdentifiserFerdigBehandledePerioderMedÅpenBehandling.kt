@@ -59,9 +59,26 @@ internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonM
             organisasjonsnummer: String,
         ): Pair<LocalDate, JsonNode>? {
             val vedtaksperiodeId = path("id").asText()
-            val sisteBehandling = sisteBehandlingOrNull() ?: return sikkerLogg.error("Avsluttet {} for {} på {} har ingen behandlinger", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)).let { null }
+            val sisteBehandling =
+                sisteBehandlingOrNull()
+                    ?: return sikkerLogg
+                        .error(
+                            "Avsluttet {} for {} på {} har ingen behandlinger",
+                            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                            keyValue("aktørId", aktørId),
+                            keyValue("organisasjonsnummer", organisasjonsnummer),
+                        ).let {
+                            null
+                        }
             val tilstand = sisteBehandling.path("tilstand").asText().takeUnless { it == "VEDTAK_IVERKSATT" } ?: return null
-            sikkerLogg.error("Avsluttet {} for {} på {} har siste {} i {}", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer), keyValue("behandlingId", sisteBehandling.path("id").asText()), keyValue("tilstand", tilstand))
+            sikkerLogg.error(
+                "Avsluttet {} for {} på {} har siste {} i {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer),
+                keyValue("behandlingId", sisteBehandling.path("id").asText()),
+                keyValue("tilstand", tilstand),
+            )
             return sisteBehandling.fom() to påminnelse(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, "AVSLUTTET")
         }
 
@@ -71,10 +88,28 @@ internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonM
             organisasjonsnummer: String,
         ): Pair<LocalDate, JsonNode>? {
             val vedtaksperiodeId = path("id").asText()
-            val sisteBehandling = sisteBehandlingOrNull() ?: return sikkerLogg.error("AvsluttetUtenUtbetaling {} for {} på {} har ingen behandlinger", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer)).let { null }
+            val sisteBehandling =
+                sisteBehandlingOrNull()
+                    ?: return sikkerLogg
+                        .error(
+                            "AvsluttetUtenUtbetaling {} for {} på {} har ingen behandlinger",
+                            keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                            keyValue("aktørId", aktørId),
+                            keyValue("organisasjonsnummer", organisasjonsnummer),
+                        ).let {
+                            null
+                        }
             val tilstand = sisteBehandling.path("tilstand").asText().takeUnless { it == "AVSLUTTET_UTEN_VEDTAK" } ?: return null
-            sikkerLogg.error("AvsluttetUtenUtbetaling {} for {} på {} har siste {} i {}", keyValue("vedtaksperiodeId", vedtaksperiodeId), keyValue("aktørId", aktørId), keyValue("organisasjonsnummer", organisasjonsnummer), keyValue("behandlingId", sisteBehandling.path("id").asText()), keyValue("tilstand", tilstand))
-            return sisteBehandling.fom() to påminnelse(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, "AVSLUTTET_UTEN_UTBETALING")
+            sikkerLogg.error(
+                "AvsluttetUtenUtbetaling {} for {} på {} har siste {} i {}",
+                keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                keyValue("aktørId", aktørId),
+                keyValue("organisasjonsnummer", organisasjonsnummer),
+                keyValue("behandlingId", sisteBehandling.path("id").asText()),
+                keyValue("tilstand", tilstand),
+            )
+            return sisteBehandling.fom() to
+                påminnelse(aktørId, fødselsnummer, organisasjonsnummer, vedtaksperiodeId, "AVSLUTTET_UTEN_UTBETALING")
         }
 
         @Language("JSON")
@@ -86,6 +121,8 @@ internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonM
             tilstand: String,
         ) = """
             { "@event_name": "påminnelse", "fødselsnummer": "$fødselsnummer", "aktørId": "$aktørId", "organisasjonsnummer": "$organisasjonsnummer", "vedtaksperiodeId": "$vedtaksperiode", "tilstand": "$tilstand", "påminnelsestidspunkt": "{{now}}", "nestePåminnelsestidspunkt": "{{now+1h}}", "tilstandsendringstidspunkt": "{{now-1h}}", "antallGangerPåminnet": 1, "ønskerReberegning": true }
-        """.let { objectMapper.readTree(it) }
+        """.let {
+            objectMapper.readTree(it)
+        }
     }
 }

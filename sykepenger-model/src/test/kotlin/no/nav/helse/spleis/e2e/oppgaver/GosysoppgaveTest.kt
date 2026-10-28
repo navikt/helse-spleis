@@ -87,7 +87,15 @@ internal class GosysoppgaveTest : AbstractDslTest() {
             )
             håndterAnmodningOmForkasting(1.vedtaksperiode, force = true)
             assertVarsler(1.vedtaksperiode, RV_VV_1, RV_IV_3)
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, TIL_INFOTRYGD)
+            assertForkastetPeriodeTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                TIL_INFOTRYGD,
+            )
             assertOppgaveIInfotrygdkø(1.vedtaksperiode)
         }
         a1 {

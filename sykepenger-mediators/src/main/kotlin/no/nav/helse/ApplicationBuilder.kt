@@ -65,5 +65,6 @@ class ApplicationBuilder(
         dataSourceBuilder.migrate()
     }
 
-    private fun versjonAvKode(env: Map<String, String>): String = env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
+    private fun versjonAvKode(env: Map<String, String>): String =
+        env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
 }

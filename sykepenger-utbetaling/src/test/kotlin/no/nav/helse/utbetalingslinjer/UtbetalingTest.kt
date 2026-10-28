@@ -695,7 +695,11 @@ internal class UtbetalingTest {
         if (utbetalingGodkjent) {
             utbetaling.godkjent(eventBus, aktivitetslogg, Utbetaling.Vurdering(true, "Z999999", "tbd@nav.no", LocalDateTime.now(), true))
         } else {
-            utbetaling.ikkeGodkjent(eventBus, aktivitetslogg, Utbetaling.Vurdering(false, "Z999999", "tbd@nav.no", LocalDateTime.now(), true))
+            utbetaling.ikkeGodkjent(
+                eventBus,
+                aktivitetslogg,
+                Utbetaling.Vurdering(false, "Z999999", "tbd@nav.no", LocalDateTime.now(), true),
+            )
         }
     }
 

@@ -77,8 +77,24 @@ internal class Ventetidberegner {
                     else -> ventetid.opphold(dato, ventetid.tilstand)
                 }
             VentetidFerdigAvklart -> ventetid.opphold(dato, OppholdEtterVentetidFerdigAvklart)
-            VentetidFerdigAvventerUtbetaltDag -> if (erImplsittHelg) ventetid.kjentDag(dato, VentetidFerdigAvventerUtbetaltDag) else avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
-            VentetidPåbegynt -> if (erImplsittHelg) ventetid.utvid(dato, vurderOmVentetidenErFerdig(ventetid)) else avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
+            VentetidFerdigAvventerUtbetaltDag ->
+                if (erImplsittHelg) {
+                    ventetid.kjentDag(
+                        dato,
+                        VentetidFerdigAvventerUtbetaltDag,
+                    )
+                } else {
+                    avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
+                }
+            VentetidPåbegynt ->
+                if (erImplsittHelg) {
+                    ventetid.utvid(
+                        dato,
+                        vurderOmVentetidenErFerdig(ventetid),
+                    )
+                } else {
+                    avslutt(ventetider, ventetid, OppholdPåbegyntVentetid)
+                }
             TilstrekkeligOppholdFerdigAvklart,
             OppholdPåbegyntVentetid,
             -> error("kan ikke ha opphold i en ventetid i tilstanden ${ventetid.tilstand}")

@@ -31,7 +31,14 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterKorrigerteArbeidsgiveropplysninger(listOf(agp))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
         }
@@ -41,7 +48,10 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
     fun `AI fjerner gammel IM - arbeidsgiver betviler arbeidsuførhet i korrigert inntektsmelding, forkaster periode`() {
         a1 {
             tilGodkjenning(januar)
-            håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet")
+            håndterKorrigerteArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "BetvilerArbeidsufoerhet",
+            )
 
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             assertVarsler(listOf(Varselkode.RV_IM_4, Varselkode.RV_IM_8), 1.vedtaksperiode.filter())
@@ -54,7 +64,11 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             håndterSøknad(Sykdom(11.januar, 17.januar, 100.prosent))
             assertEquals("SSSSSHH SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(listOf(11.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertVarsel(Varselkode.RV_IM_8, 2.vedtaksperiode.filter())
@@ -67,7 +81,11 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         a1 {
             håndterSøknad(Sykdom(1.januar, 10.januar, 100.prosent))
             assertEquals("SSSSSHH SSS", inspektør.sykdomshistorikk.sykdomstidslinje().toShortString())
-            håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT, begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening")
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = INNTEKT,
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+            )
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals(listOf(1.januar til 10.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -80,7 +98,10 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
                     assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
                 },
                 ønsket = {
-                    assertEquals(listOf(11.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+                    assertEquals(
+                        listOf(11.januar til 16.januar),
+                        inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar,
+                    )
                 },
             )
         }
@@ -91,7 +112,10 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         a1 {
             håndterSøknad(Sykdom(1.januar, 16.januar, 100.prosent))
             håndterSøknad(Sykdom(25.januar, 31.januar, 100.prosent))
-            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel")
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFullStillingsandel",
+            )
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(
@@ -127,7 +151,11 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
         a1 {
             nyPeriode(1.januar til 17.januar)
             nyPeriode(18.januar til 31.januar)
-            håndterArbeidsgiveropplysninger(emptyList(), begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening", vedtaksperiodeId = 1.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(
+                emptyList(),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "ManglerOpptjening",
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
             assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(emptyList<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             håndterVilkårsgrunnlag(1.vedtaksperiode)

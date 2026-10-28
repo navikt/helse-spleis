@@ -26,13 +26,26 @@ internal class FeriepengedatoerTest : AbstractDslTest() {
         opptjeningsår: Year,
         historikk: UtbetalingshistorikkForFeriepenger,
         sisteInfotrygdkjøring: LocalDate = LocalDate.MAX,
-    ) = Feriepengeberegner(alder, opptjeningsår, grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring), grunnlagFraSpleis = testperson.person.grunnlagForFeriepenger())
+    ) = Feriepengeberegner(
+        alder,
+        opptjeningsår,
+        grunnlagFraInfotrygd = historikk.grunnlagForFeriepenger(sisteInfotrygdkjøring),
+        grunnlagFraSpleis = testperson.person.grunnlagForFeriepenger(),
+    )
 
     @Test
     fun `Finner datoer for feriepengeberegning med 48 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk =
             utbetalingshistorikkForFeriepenger(
-                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(a1, 1.januar, 7.mars, 1000, 7.mars)),
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                        a1,
+                        1.januar,
+                        7.mars,
+                        1000,
+                        7.mars,
+                    ),
+                ),
             )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
@@ -48,7 +61,15 @@ internal class FeriepengedatoerTest : AbstractDslTest() {
     fun `Finner datoer for feriepengeberegning med 49 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk =
             utbetalingshistorikkForFeriepenger(
-                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(a1, 1.januar, 8.mars, 1000, 8.mars)),
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                        a1,
+                        1.januar,
+                        8.mars,
+                        1000,
+                        8.mars,
+                    ),
+                ),
             )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)
@@ -64,7 +85,15 @@ internal class FeriepengedatoerTest : AbstractDslTest() {
     fun `Finner datoer for feriepengeberegning med 47 sammenhengende utbetalingsdager i IT fra første januar`() {
         val historikk =
             utbetalingshistorikkForFeriepenger(
-                listOf(UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(a1, 1.januar, 6.mars, 1000, 6.mars)),
+                listOf(
+                    UtbetalingshistorikkForFeriepenger.Utbetalingsperiode.Arbeidsgiverutbetalingsperiode(
+                        a1,
+                        1.januar,
+                        6.mars,
+                        1000,
+                        6.mars,
+                    ),
+                ),
             )
 
         val beregner = feriepengerFor(Year.of(2018), historikk)

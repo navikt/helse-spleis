@@ -35,9 +35,7 @@ internal class Vedtaksperiodesamler(
         return forrigeFor(orgnummer)?.takeUnless { it == forrige }
     }
 
-    override fun vedtaksperiodeEndret(
-        event: EventSubscription.VedtaksperiodeEndretEvent,
-    ) {
+    override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
         vedtaksperioder.getOrPut(event.yrkesaktivitetssporing.somOrganisasjonsnummer) { mutableSetOf() }.add(event.vedtaksperiodeId)
     }
 }

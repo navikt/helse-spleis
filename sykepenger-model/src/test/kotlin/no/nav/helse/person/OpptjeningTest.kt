@@ -268,8 +268,21 @@ internal class OpptjeningTest {
     fun `slutter på lørdag, starter på mandag`() {
         val arbeidsforhold =
             listOf(
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = lørdag den 30.april(2022), deaktivert = false))),
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false))),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a1",
+                    listOf(
+                        Arbeidsforhold(
+                            ansattFom = søndag den 1.oktober(2017),
+                            ansattTom =
+                                lørdag den 30.april(2022),
+                            deaktivert = false,
+                        ),
+                    ),
+                ),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a2",
+                    listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)),
+                ),
             )
 
         val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 2.mai(2022))
@@ -282,8 +295,21 @@ internal class OpptjeningTest {
     fun `slutter på fredag, starter på mandag`() {
         val arbeidsforhold =
             listOf(
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = fredag den 29.april(2022), deaktivert = false))),
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false))),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a1",
+                    listOf(
+                        Arbeidsforhold(
+                            ansattFom = søndag den 1.oktober(2017),
+                            ansattTom =
+                                fredag den 29.april(2022),
+                            deaktivert = false,
+                        ),
+                    ),
+                ),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a2",
+                    listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)),
+                ),
             )
 
         val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, 3.mai(2022))
@@ -296,8 +322,21 @@ internal class OpptjeningTest {
     fun `slutter på torsdag, starter på mandag`() {
         val arbeidsforhold =
             listOf(
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a1", listOf(Arbeidsforhold(ansattFom = søndag den 1.oktober(2017), ansattTom = torsdag den 28.april(2022), deaktivert = false))),
-                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag("a2", listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false))),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a1",
+                    listOf(
+                        Arbeidsforhold(
+                            ansattFom = søndag den 1.oktober(2017),
+                            ansattTom =
+                                torsdag den 28.april(2022),
+                            deaktivert = false,
+                        ),
+                    ),
+                ),
+                ArbeidstakerOpptjening.ArbeidsgiverOpptjeningsgrunnlag(
+                    "a2",
+                    listOf(Arbeidsforhold(ansattFom = mandag den 2.mai(2022), ansattTom = null, deaktivert = false)),
+                ),
             )
 
         val opptjening = ArbeidstakerOpptjening.nyOpptjening(arbeidsforhold, tirsdag den 3.mai(2022))

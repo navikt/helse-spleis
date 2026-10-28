@@ -9,7 +9,11 @@ import java.util.UUID
 internal class InntektsopplysningerFraLagretInntektsmeldingTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `kan bruke inntektsopplysninger fra lagret navno-inntektsmelding`() {
-        val (meldingsreferanseIdInntektsmelding, _) = sendNavNoInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.Eksplisitt(UUID.randomUUID()))
+        val (meldingsreferanseIdInntektsmelding, _) =
+            sendNavNoInntektsmelding(
+                listOf(1.januar til 16.januar),
+                vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.Eksplisitt(UUID.randomUUID()),
+            )
         assertMeldingOmMeldingIkkeHåndtertFordiPersonIkkeFunnet("arbeidsgiveropplysninger", meldingsreferanseIdInntektsmelding.toString())
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 1.januar, tom = 31.januar, sykmeldingsgrad = 100)))
         assertTilstand(0, "AVVENTER_INNTEKTSMELDING")

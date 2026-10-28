@@ -43,7 +43,11 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon : JsonMigrat
                         set<ObjectNode>("vedtaksperiode", periode)
                     }
                 forkastede.add(forkastetPeriode)
-                val indeks = vedtaksperioder.indexOfFirst { vedtaksperiode -> vedtaksperiode.path("id").asText().uuid == periode.path("id").asText().uuid }
+                val indeks =
+                    vedtaksperioder.indexOfFirst { vedtaksperiode ->
+                        vedtaksperiode.path("id").asText().uuid ==
+                            periode.path("id").asText().uuid
+                    }
                 vedtaksperioder.remove(indeks)
             }
         }
@@ -64,11 +68,21 @@ internal class V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon : JsonMigrat
         val sisteIverksettingIndex = generasjoner.indexOfLast { it.path("tilstand").asText() == "VEDTAK_IVERKSATT" }
         val sisteIverksetting: JsonNode? = generasjoner.get(sisteIverksettingIndex)
         if (sisteIverksetting is ObjectNode) {
-            sikkerlogg.info("[V281] $aktørId Har UBEREGNET generasjon etter en VEDTAK_IVERKSATT ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()}) og vedtaksperioden er $tilstandForVedtaksperiode")
+            sikkerlogg.info(
+                "[V281] $aktørId Har UBEREGNET generasjon etter en VEDTAK_IVERKSATT ${periode.path(
+                    "fom",
+                ).asText()} - ${periode.path(
+                    "tom",
+                ).asText()} (${periode.path("id").asText()}) og vedtaksperioden er $tilstandForVedtaksperiode",
+            )
             return
         }
 
-        sikkerlogg.info("[V281] $aktørId Forkaster vedtaksperiode som er i AVSLUTTET, men med FORKASTET utbetaling og er UBEREGNET ${periode.path("fom").asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()})")
+        sikkerlogg.info(
+            "[V281] $aktørId Forkaster vedtaksperiode som er i AVSLUTTET, men med FORKASTET utbetaling og er UBEREGNET ${periode.path(
+                "fom",
+            ).asText()} - ${periode.path("tom").asText()} (${periode.path("id").asText()})",
+        )
         leggTilForkastet(periode)
     }
 

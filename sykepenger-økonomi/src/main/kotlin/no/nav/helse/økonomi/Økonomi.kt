@@ -74,9 +74,7 @@ data class Økonomi(
                 }.vektlagtGjennomsnitt()
         }
 
-        fun totalSykdomsgrad(
-            økonomiList: List<Økonomi>,
-        ): List<Økonomi> {
+        fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
             val totalSykdomsgrad = totalGrad(økonomiList, { it.sykdomsgrad - it.andreYtelserGrad })
             return økonomiList.map { økonomi ->
                 økonomi.copy(totalSykdomsgrad = totalSykdomsgrad)
@@ -85,9 +83,7 @@ data class Økonomi(
 
         fun List<Økonomi>.erUnderGrensen() = none { !it.totalSykdomsgrad.erUnderGrensen() }
 
-        internal fun totalUtbetalingsgrad(
-            økonomiList: List<Økonomi>,
-        ): Prosentdel {
+        internal fun totalUtbetalingsgrad(økonomiList: List<Økonomi>): Prosentdel {
             val totalGrad = totalGrad(økonomiList, { it.utbetalingsgrad })
             return totalGrad
         }
@@ -215,7 +211,9 @@ data class Økonomi(
     }
 
     init {
-        require(dekningsgrad == DekningsgradSelvstendig || dekningsgrad == DekningsgradArbeidstaker || dekningsgrad == DekningsgradInaktiv) {
+        require(
+            dekningsgrad == DekningsgradSelvstendig || dekningsgrad == DekningsgradArbeidstaker || dekningsgrad == DekningsgradInaktiv,
+        ) {
             "dekningsgrad må være 100 %, 80 % eller 65 % var $dekningsgrad."
         }
     }
@@ -263,6 +261,4 @@ data class Økonomi(
         )
 }
 
-fun List<Økonomi>.betal(
-    sykepengegrunnlagBegrenset6G: Inntekt,
-) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)
+fun List<Økonomi>.betal(sykepengegrunnlagBegrenset6G: Inntekt) = Økonomi.betal(sykepengegrunnlagBegrenset6G, this)

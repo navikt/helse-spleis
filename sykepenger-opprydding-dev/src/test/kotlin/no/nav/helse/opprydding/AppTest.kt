@@ -59,7 +59,8 @@ internal class AppTest : DBTest() {
         assertEquals(fnr, kvittering["fødselsnummer"].asText())
     }
 
-    private fun slettemelding(fødselsnummer: String) = JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
+    private fun slettemelding(fødselsnummer: String) =
+        JsonMessage.newMessage("slett_person", mapOf("fødselsnummer" to fødselsnummer)).toJson()
 
     private fun opprettPerson(fødselsnummer: String) {
         opprettDummyPerson(fødselsnummer)

@@ -28,7 +28,9 @@ internal class AvslåtteDagerUtbetaltIInfotrygdObservatør(
             val perioder = datoer.grupperSammenhengendePerioderMedHensynTilHelg()
             val dagformulering = if (datoer.size == 1) "dag" else "dager"
             val periodeformulering = if (perioder.size == 1) "perioden" else "periodene"
-            aktivitetslogg.info("Utbetalt ${datoer.size} $dagformulering i Infotrygd i $periodeformulering ${perioder.joinToString()}. Skulle vært avslått pga. ${begrunnelse::class.simpleName}")
+            aktivitetslogg.info(
+                "Utbetalt ${datoer.size} $dagformulering i Infotrygd i $periodeformulering ${perioder.joinToString()}. Skulle vært avslått pga. ${begrunnelse::class.simpleName}",
+            )
         }
     }
 }

@@ -287,8 +287,16 @@ internal class InfotrygdhistorikkTest {
                                     ferieperioder = listOf(PersonData.InfotrygdhistorikkElementData.FerieperiodeData(1.mars, 31.mars)),
                                     arbeidsgiverutbetalingsperioder =
                                         listOf(
-                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.februar, 28.februar),
-                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData("orgnr", 1.januar, 31.januar),
+                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
+                                                "orgnr",
+                                                1.februar,
+                                                28.februar,
+                                            ),
+                                            PersonData.InfotrygdhistorikkElementData.ArbeidsgiverutbetalingsperiodeData(
+                                                "orgnr",
+                                                1.januar,
+                                                31.januar,
+                                            ),
                                         ),
                                     personutbetalingsperioder = emptyList(),
                                     oppdatert = nå,
@@ -391,7 +399,11 @@ internal class InfotrygdhistorikkTest {
     private fun infotrygdhistorikkTest(
         historikk: Infotrygdhistorikk = Infotrygdhistorikk(),
         setup: (historikk: Infotrygdhistorikk, eventBus: EventBus, aktivitetslogg: Aktivitetslogg) -> Unit,
-        assertions: (historikk: Infotrygdhistorikk, nyeBehov: Set<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>, aktivitetslogg: Aktivitetslogg) -> Unit,
+        assertions: (
+            historikk: Infotrygdhistorikk,
+            nyeBehov: Set<Behovsoppsamler.Behovsdetaljer.OppdatertHistorikkFraInfotrygd>,
+            aktivitetslogg: Aktivitetslogg,
+        ) -> Unit,
     ) {
         resetSeed(1.januar)
         val aktivitetslogg = Aktivitetslogg()

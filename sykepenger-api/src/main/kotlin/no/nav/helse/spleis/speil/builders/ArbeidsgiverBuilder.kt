@@ -16,7 +16,17 @@ internal class ArbeidsgiverBuilder(
         ArbeidsgiverDTO(
             id = arbeidsgiverUtDto.id,
             organisasjonsnummer = arbeidsgiverUtDto.organisasjonsnummer,
-            generasjoner = pølsepakke?.let { SpeilGenerasjonerBuilder(arbeidsgiverUtDto.organisasjonsnummer, alder, arbeidsgiverUtDto, vilkårsgrunnlagHistorikk, pølsepakke).build() } ?: emptyList(),
+            generasjoner =
+                pølsepakke?.let {
+                    SpeilGenerasjonerBuilder(
+                        arbeidsgiverUtDto.organisasjonsnummer,
+                        alder,
+                        arbeidsgiverUtDto,
+                        vilkårsgrunnlagHistorikk,
+                        pølsepakke,
+                    ).build()
+                }
+                    ?: emptyList(),
         )
 
     internal companion object {

@@ -60,13 +60,23 @@ internal class TestArbeidsgiverInspektør(
                     feriepengeutbetalingslinjer =
                         listOfNotNull(
                             it.linje?.let { linje ->
-                                Feriepengeutbetalingslinje(linje.fom, linje.tom, linje.beløp, linje.klassekode, linje.endringskode, linje.statuskode)
+                                Feriepengeutbetalingslinje(
+                                    linje.fom,
+                                    linje.tom,
+                                    linje.beløp,
+                                    linje.klassekode,
+                                    linje.endringskode,
+                                    linje.statuskode,
+                                )
                             },
                         ),
                 )
             }
     internal val infotrygdFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger().map { it.infotrygdFeriepengebeløpPerson }
-    internal val infotrygdFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger().map { it.infotrygdFeriepengebeløpArbeidsgiver }
+    internal val infotrygdFeriepengebeløpArbeidsgiver =
+        yrkesaktivitet.feriepengeutbetalinger().map {
+            it.infotrygdFeriepengebeløpArbeidsgiver
+        }
     internal val spleisFeriepengebeløpArbeidsgiver = yrkesaktivitet.feriepengeutbetalinger().map { it.spleisFeriepengebeløpArbeidsgiver }
     internal val spleisFeriepengebeløpPerson = yrkesaktivitet.feriepengeutbetalinger().map { it.spleisFeriepengebeløpPerson }
 
@@ -102,11 +112,18 @@ internal class TestArbeidsgiverInspektør(
 
     private val UUID.indeks get() = vedtaksperiodeindekser[this] ?: fail { "Vedtaksperiode $this finnes ikke" }
 
-    internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) = avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
+    internal fun sisteAvsluttedeUtbetalingForVedtaksperiode(vedtaksperiodeId: UUID) =
+        avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId).last()
 
-    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.inspektør.erUbetalt }
+    internal fun ikkeUtbetalteUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) =
+        vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter {
+            it.inspektør.erUbetalt
+        }
 
-    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter { it.erAvsluttet() }
+    internal fun avsluttedeUtbetalingerForVedtaksperiode(vedtaksperiodeId: UUID) =
+        vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger.filter {
+            it.erAvsluttet()
+        }
 
     internal fun utbetalinger(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.utbetalinger
 

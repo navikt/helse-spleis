@@ -123,9 +123,26 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
             val utbetalingId = simuleringsutfisker.utbetalingId
             val fagsystemId = simuleringsutfisker.fagsystemId
             val fagområde = simuleringsutfisker.fagområde
-            person.håndterSimulering(eventBus, simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde), Aktivitetslogg())
-            person.håndterUtbetalingsgodkjenning(eventBus, utbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = utbetalingId), Aktivitetslogg())
-            person.håndterUtbetalingHendelse(eventBus, utbetaling(vedtaksperiodeId = vedtaksperiodeId, behandlingId = behandlingId, utbetalingId = utbetalingId, fagsystemId = fagsystemId), Aktivitetslogg())
+            person.håndterSimulering(
+                eventBus,
+                simulering(utbetalingId = utbetalingId, fagsystemId = fagsystemId, fagområde = fagområde),
+                Aktivitetslogg(),
+            )
+            person.håndterUtbetalingsgodkjenning(
+                eventBus,
+                utbetalingsgodkjenning(behandlingId = behandlingId, utbetalingId = utbetalingId),
+                Aktivitetslogg(),
+            )
+            person.håndterUtbetalingHendelse(
+                eventBus,
+                utbetaling(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    behandlingId = behandlingId,
+                    utbetalingId = utbetalingId,
+                    fagsystemId = fagsystemId,
+                ),
+                Aktivitetslogg(),
+            )
 
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
             lagreSykmelding(

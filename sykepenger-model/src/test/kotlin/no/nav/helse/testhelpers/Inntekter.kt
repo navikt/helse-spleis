@@ -23,11 +23,14 @@ internal class Inntektperioder(
                 inntekter
             }.map { (arbeidsgiver, inntekter) -> ArbeidsgiverInntekt(arbeidsgiver, inntekter.flatten()) }
 
-    internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) = lagInntekter("fastloenn", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
+    internal infix fun Periode.inntekter(block: Inntekter.() -> Unit) =
+        lagInntekter("fastloenn", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
 
-    internal infix fun Periode.sykepenger(block: Inntekter.() -> Unit) = lagInntekter("sykepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE, block)
+    internal infix fun Periode.sykepenger(block: Inntekter.() -> Unit) =
+        lagInntekter("sykepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.YTELSE_FRA_OFFENTLIGE, block)
 
-    internal infix fun Periode.feriepenger(block: Inntekter.() -> Unit) = lagInntekter("feriepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
+    internal infix fun Periode.feriepenger(block: Inntekter.() -> Unit) =
+        lagInntekter("feriepenger", ArbeidsgiverInntekt.MånedligInntekt.Inntekttype.LØNNSINNTEKT, block)
 
     private fun Periode.lagInntekter(
         beskrivelse: String = "fastloenn",

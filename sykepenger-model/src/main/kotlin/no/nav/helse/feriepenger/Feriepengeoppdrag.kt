@@ -47,7 +47,11 @@ data class Feriepengeoppdrag(
         utbetalingId: UUID,
     ) {
         val aktivitetsloggMedOppdragkontekst = aktivitetslogg.kontekst(this)
-        if (!skalSendeOppdrag) return aktivitetsloggMedOppdragkontekst.info("Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId")
+        if (!skalSendeOppdrag) {
+            return aktivitetsloggMedOppdragkontekst.info(
+                "Overfører ikke oppdrag uten endring for fagområde=$fagområde med fagsystemId=$fagsystemId",
+            )
+        }
         check(endringskode != Feriepengerendringskode.UEND)
 
         val mottaker =
@@ -55,7 +59,9 @@ data class Feriepengeoppdrag(
                 Feriepengerfagområde.SykepengerRefusjon -> "arbeidsgiver"
                 Feriepengerfagområde.Sykepenger -> "sykmeldt"
             }
-        aktivitetsloggMedOppdragkontekst.info("Sender ut event om at det skal utbetales feriepenger til $mottaker for organisasjonsnummer ${arbeidstaker.organisasjonsnummer}")
+        aktivitetsloggMedOppdragkontekst.info(
+            "Sender ut event om at det skal utbetales feriepenger til $mottaker for organisasjonsnummer ${arbeidstaker.organisasjonsnummer}",
+        )
         eventBus.utbetalFeriepenger(utbetalFeriepengerEvent(arbeidstaker, utbetalingId))
     }
 

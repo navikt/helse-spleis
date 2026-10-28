@@ -87,7 +87,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vilkårsgrunnlag - selvstendig`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             ventetid = 3.januar til 18.januar,
@@ -113,7 +116,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `vilkårsgrunnlag - jordbruker`() =
         Toggle.Jordbruker.enable {
-            sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+            sendNySøknadSelvstendig(
+                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
+            )
             sendSelvstendigsøknad(
                 perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
                 ventetid = 3.januar til 18.januar,
@@ -189,7 +195,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 OpptjeningsvurderingResultat,
                 MedlemskapsvurderingResultat,
             )
-            assertDoesNotThrow { UUID.fromString(behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asText()) }
+            assertDoesNotThrow {
+                UUID.fromString(
+                    behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asText(),
+                )
+            }
         }
 
     @Test
@@ -208,7 +218,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `godkjenning - selvstendig`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
         sendSelvstendigsøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
             ventetid = 3.januar til 18.januar,

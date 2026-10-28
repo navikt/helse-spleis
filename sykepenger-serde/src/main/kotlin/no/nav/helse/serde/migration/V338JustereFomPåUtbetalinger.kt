@@ -56,7 +56,9 @@ internal class V338JustereFomPåUtbetalinger : JsonMigration(338) {
 
                             if (minsteFom > utbetalingFom && utbetalingFom != minsteFom && minsteFom <= utbetalingTom) {
                                 sikkerlogg.info(
-                                    "Endrer fom fra=$utbetalingFom til fom=$minsteFom for utbetaling med id=${siste.path("id").asText()} fordi den overlappet med AUU-perioder.",
+                                    "Endrer fom fra=$utbetalingFom til fom=$minsteFom for utbetaling med id=${siste.path(
+                                        "id",
+                                    ).asText()} fordi den overlappet med AUU-perioder.",
                                     kv("fødselsnummer", fnr),
                                 )
                                 (siste as ObjectNode).putArray("fom").apply {

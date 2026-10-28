@@ -26,14 +26,42 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 11.januar, tom = 17.januar, sykmeldingsgrad = 100)),
         )
-        sendNavNoSelvbestemtInntektsmelding(listOf(1.januar til 16.januar), vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.IndexForArbeidsgiver(ORGNUMMER, 0))
+        sendNavNoSelvbestemtInntektsmelding(
+            listOf(1.januar til 16.januar),
+            vedtaksperiodeUtfisker = VedtaksperiodeUtfisker.IndexForArbeidsgiver(ORGNUMMER, 0),
+        )
         sendVilkårsgrunnlag(2)
         sendYtelser(2)
         sendSimulering(2, SimuleringMessage.Simuleringstatus.OK)
 
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(2, "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+        )
+        assertTilstander(
+            1,
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+        )
+        assertTilstander(
+            2,
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+        )
     }
 
     @Test
@@ -60,9 +88,33 @@ internal class RevurderingAvsluttetUtenUtbetalingTest : AbstractEndToEndMediator
         sendYtelser(1)
         sendSimulering(1, SimuleringMessage.Simuleringstatus.OK)
 
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING")
-        assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING", "AVVENTER_HISTORIKK", "AVVENTER_SIMULERING", "AVVENTER_GODKJENNING")
-        assertTilstander(2, "AVVENTER_INNTEKTSMELDING", "AVVENTER_AVSLUTTET_UTEN_UTBETALING", "AVSLUTTET_UTEN_UTBETALING", "AVVENTER_BLOKKERENDE_PERIODE")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+        )
+        assertTilstander(
+            1,
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+            "AVVENTER_HISTORIKK",
+            "AVVENTER_SIMULERING",
+            "AVVENTER_GODKJENNING",
+        )
+        assertTilstander(
+            2,
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_AVSLUTTET_UTEN_UTBETALING",
+            "AVSLUTTET_UTEN_UTBETALING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+        )
     }
 
     private val logCollector = LogCollector()

@@ -23,7 +23,10 @@ internal class Inntektshistorikk private constructor(
             )
     }
 
-    internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) = leggTil(Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata))
+    internal fun leggTil(arbeidstakerFaktaavklartInntekt: ArbeidstakerFaktaavklartInntekt) =
+        leggTil(
+            Inntektsmeldinginntekt(id = arbeidstakerFaktaavklartInntekt.id, inntektsdata = arbeidstakerFaktaavklartInntekt.inntektsdata),
+        )
 
     private fun leggTil(inntekt: Inntektsmeldinginntekt): Boolean {
         check(inntekt.kilde == Inntektsmeldinginntekt.Kilde.Arbeidsgiver) { "Hei! Slutt opp med det der!! Kilden må være Arbeidsgiver" }

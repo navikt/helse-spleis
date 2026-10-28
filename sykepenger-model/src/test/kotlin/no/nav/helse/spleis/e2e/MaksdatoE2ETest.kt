@@ -48,7 +48,10 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
             nyttVedtak(juli)
             assertUtbetalingsbeløp(1.vedtaksperiode, 1431, 1431, subset = 17.juli til 31.juli)
             assertEquals(27.juni(2019), inspektør.sisteMaksdato(1.vedtaksperiode).maksdato)
-            assertInfo("Utbetalt 42 dager i Infotrygd i perioden 01-02-2018 til 30-03-2018. Skulle vært avslått pga. SykepengedagerOppbrukt", 1.vedtaksperiode.filter())
+            assertInfo(
+                "Utbetalt 42 dager i Infotrygd i perioden 01-02-2018 til 30-03-2018. Skulle vært avslått pga. SykepengedagerOppbrukt",
+                1.vedtaksperiode.filter(),
+            )
         }
     }
 
@@ -210,10 +213,28 @@ internal class MaksdatoE2ETest : AbstractDslTest() {
         }
         a2 {
             nyPeriode(31.januar til 28.februar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), OppgittArbeidgiverperiode(listOf(31.januar til 15.februar)))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                OppgittArbeidgiverperiode(
+                    listOf(
+                        31.januar til 15.februar,
+                    ),
+                ),
+            )
         }
         a1 {
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                OppgittArbeidgiverperiode(
+                    listOf(
+                        1.januar til 16.januar,
+                    ),
+                ),
+            )
             håndterVilkårsgrunnlagFlereArbeidsgivere(1.vedtaksperiode, a1, a2)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)

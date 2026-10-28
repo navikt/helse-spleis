@@ -46,7 +46,18 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalt(status = Oppdragstatus.OVERFØRT)
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_REVURDERING_TIL_UTBETALING)
             håndterUtbetalt(status = Oppdragstatus.AKSEPTERT)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
         }
     }
 
@@ -67,7 +78,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
@@ -98,7 +118,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
         }
     }
@@ -121,7 +150,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
         }
     }
@@ -145,7 +183,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                3.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -169,7 +216,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
@@ -189,7 +245,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertVarsler(listOf(RV_UT_23), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertVarsler(emptyList(), 3.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
@@ -206,7 +269,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
             assertDiff(0)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
@@ -222,7 +291,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             assertDag<Dag.Feriedag, ArbeidsgiverperiodeDag>(1.vedtaksperiode, 5.januar, 0.0)
             assertDiff(0)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             assertEquals(3, inspektør.antallUtbetalinger)
@@ -261,7 +336,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
 
             assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
             assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(1.vedtaksperiode, 31.januar, 0.0)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
@@ -307,8 +388,25 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertDag<Dag.Feriedag, Utbetalingsdag.Fridag>(2.vedtaksperiode, 15.februar, 0.0)
             assertDiff(-1431)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
@@ -337,8 +435,25 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertDiff(-1431)
             assertVarsler(listOf(RV_UT_23), 2.vedtaksperiode.filter())
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
             assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
         }
     }
@@ -400,7 +515,16 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
+            assertTilstander(
+                3.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+            )
             assertTilstander(4.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             nullstillTilstandsendringer()
@@ -424,7 +548,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(4.vedtaksperiode, AVVENTER_REVURDERING)
@@ -535,7 +666,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertDiff(-1431)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Feriedag)))
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_REVURDERING,
+            )
         }
     }
 
@@ -554,7 +692,15 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.januar, Feriedag)))
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+            )
         }
     }
 
@@ -573,7 +719,15 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(5.januar, Feriedag)))
             assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+            )
         }
     }
 
@@ -616,7 +770,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode])
         }
     }
@@ -638,7 +798,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
 
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode])
         }
     }
@@ -759,7 +925,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertDiff(-1431)
             assertVarsler(listOf(RV_UT_23), 2.vedtaksperiode.filter())
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
 
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -785,7 +957,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
 
             nullstillTilstandsendringer()
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
@@ -830,7 +1009,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(4.vedtaksperiode, AVVENTER_REVURDERING)
@@ -867,7 +1053,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
             assertTilstander(3.vedtaksperiode, AVSLUTTET)
-            assertTilstander(4.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                4.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -909,7 +1102,14 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
             assertTilstander(3.vedtaksperiode, AVVENTER_REVURDERING)
             assertTilstander(4.vedtaksperiode, AVVENTER_REVURDERING)
@@ -1052,7 +1252,13 @@ internal class RevurderingV2E2ETest : AbstractDslTest() {
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Feriedag)))
             håndterYtelser(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 

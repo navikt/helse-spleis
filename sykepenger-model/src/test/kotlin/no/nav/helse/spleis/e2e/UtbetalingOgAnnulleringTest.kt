@@ -437,7 +437,12 @@ internal class UtbetalingOgAnnulleringTest : AbstractDslTest() {
             assertEquals(1, observatør.utbetalingMedUtbetalingEventer.size)
             assertEquals(7, avvisteDager.size)
             assertEquals(23, ikkeAvvisteDager.size)
-            assertTrue(avvisteDager.all { it.begrunnelser == listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad) })
+            assertTrue(
+                avvisteDager.all {
+                    it.begrunnelser ==
+                        listOf(EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.MinimumSykdomsgrad)
+                },
+            )
             assertTrue(ikkeAvvisteDager.all { it.begrunnelser == null })
         }
     }

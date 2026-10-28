@@ -21,7 +21,10 @@ internal class RevurderingFerieTest : AbstractDslTest() {
     fun `Periode med bare ferie, så kommer en tidligere periode med sykdom - ferie revurderes fordi senere periode sender IM med dager som overlapper`() {
         a1 {
             håndterSykmelding(Sykmeldingsperiode(5.februar, 28.februar))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(5.februar, 28.februar))
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(5.februar, 28.februar, 100.prosent),
+                Søknad.Søknadsperiode.Ferie(5.februar, 28.februar),
+            )
             håndterSelvbestemtArbeidsgiveropplysninger(listOf(5.februar til 20.februar))
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -68,7 +71,10 @@ internal class RevurderingFerieTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
-            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent), Søknad.Søknadsperiode.Ferie(1.februar, 28.februar))
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.februar, 28.februar, 100.prosent),
+                Søknad.Søknadsperiode.Ferie(1.februar, 28.februar),
+            )
             håndterYtelser(2.vedtaksperiode)
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             forlengVedtak(mars)

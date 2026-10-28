@@ -26,7 +26,12 @@ internal class Vilkårgrunnlagsinspektør(
 
     internal fun vilkårsgrunnlagHistorikkInnslag() = innslag.toList()
 
-    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) = grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second as? Grunnlagsdata ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
+    internal fun grunnlagsdata(skjæringstidspunkt: LocalDate) =
+        grunnlagsdata.firstOrNull { it.first == skjæringstidspunkt }?.second as? Grunnlagsdata
+            ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
 }
 
-internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = (this as? Grunnlagsdata ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt"))
+internal val VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.inspektør get() = (
+    this as? Grunnlagsdata
+        ?: fail("Fant ikke grunnlagsdata på skjæringstidspunkt $skjæringstidspunkt")
+)

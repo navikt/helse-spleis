@@ -257,7 +257,11 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                     .first() as BeregnetPeriode
             ).annulleringskandidater
 
-        val forventetJanuar = listOf(AnnulleringskandidatDto(1.vedtaksperiode(a1), a1, 1.januar, 31.januar), AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
+        val forventetJanuar =
+            listOf(
+                AnnulleringskandidatDto(1.vedtaksperiode(a1), a1, 1.januar, 31.januar),
+                AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar),
+            )
         val forventetFebruar = listOf(AnnulleringskandidatDto(2.vedtaksperiode(a1), a1, 1.februar, 28.februar))
         assertEquals(forventetJanuar, annulleringskandidaterJanuarVedtaksperiode)
         assertEquals(forventetFebruar, annulleringskandidaterFebruarVedtaksperiode)
@@ -364,7 +368,10 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
     @Test
     fun `nav skal ikke utbetale agp for kort periode likevel - perioden går så til AUU`() {
         håndterSøknad(1.januar til 16.januar)
-        håndterSelvbestemteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer")
+        håndterSelvbestemteArbeidsgiveropplysninger(
+            listOf(1.januar til 16.januar),
+            begrunnelseForReduksjonEllerIkkeUtbetalt = "IkkeFravaer",
+        )
         håndterVilkårsgrunnlag()
         håndterYtelserTilGodkjenning()
         val idOverstyring = UUID.randomUUID()
@@ -807,7 +814,10 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(20.0, (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad)
+        assertEquals(
+            20.0,
+            (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad,
+        )
     }
 
     @Test
@@ -821,13 +831,19 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser()
 
         val personDto = speilApi()
-        assertEquals(19.99, (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad)
+        assertEquals(
+            19.99,
+            (personDto.arbeidsgivere[0].generasjoner[0].perioder[0] as BeregnetPeriode).sammenslåttTidslinje[28].utbetalingsinfo!!.totalGrad,
+        )
     }
 
     @Test
     fun `Skatteinntekt vises som AO`() {
         håndterSøknad(1.januar til 31.januar)
-        håndterPåminnelse(tilstand = TilstandType.AVVENTER_INNTEKTSMELDING, tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(4L))
+        håndterPåminnelse(
+            tilstand = TilstandType.AVVENTER_INNTEKTSMELDING,
+            tilstandsendringstidspunkt = LocalDateTime.now().minusMonths(4L),
+        )
         håndterVilkårsgrunnlag()
         håndterYtelser()
         håndterSimulering()

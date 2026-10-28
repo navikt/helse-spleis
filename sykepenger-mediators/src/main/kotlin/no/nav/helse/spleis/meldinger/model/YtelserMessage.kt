@@ -43,13 +43,19 @@ internal class YtelserMessage(
     internal val svangerskapspenger = Svangerskapspenger(svangerskapsytelse = svangerskapsytelse)
 
     internal val pleiepenger =
-        Pleiepenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Pleiepenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
+        Pleiepenger(
+            packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Pleiepenger.utgåendeNavn}", "perioder", ::asGradertPeriode),
+        )
 
     internal val omsorgspenger =
-        Omsorgspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Omsorgspenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
+        Omsorgspenger(
+            packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Omsorgspenger.utgåendeNavn}", "perioder", ::asGradertPeriode),
+        )
 
     internal val opplæringspenger =
-        Opplæringspenger(packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Opplæringspenger.utgåendeNavn}", "perioder", ::asGradertPeriode))
+        Opplæringspenger(
+            packet.mapFraArrayEllerObjectMedArray("@løsning.${Behovstype.Opplæringspenger.utgåendeNavn}", "perioder", ::asGradertPeriode),
+        )
 
     internal val institusjonsopphold =
         Institusjonsopphold(
@@ -129,7 +135,9 @@ internal class YtelserMessage(
                 )
             }
 
-    internal val opptjeningsvurderingResultatOk: Boolean = packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"].asBoolean()
+    internal val opptjeningsvurderingResultatOk: Boolean =
+        packet["@løsning.${Behovstype.OpptjeningsvurderingResultat.utgåendeNavn}.ok"]
+            .asBoolean()
 
     internal val medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? =
         packet["@løsning.${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}.svar"]

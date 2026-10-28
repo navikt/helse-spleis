@@ -215,7 +215,13 @@ internal class YrkesaktivitetHendelsefabrikk(
             ),
     )
 
-    internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) = InntektsmeldingerReplay(MeldingsreferanseId(UUID.randomUUID()), behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker, vedtaksperiodeId, emptyList())
+    internal fun lagInntektsmeldingReplayUtført(vedtaksperiodeId: UUID) =
+        InntektsmeldingerReplay(
+            MeldingsreferanseId(UUID.randomUUID()),
+            behandlingsporing as Behandlingsporing.Yrkesaktivitet.Arbeidstaker,
+            vedtaksperiodeId,
+            emptyList(),
+        )
 
     internal fun lagUtbetalingshistorikk(
         vedtaksperiodeId: UUID,

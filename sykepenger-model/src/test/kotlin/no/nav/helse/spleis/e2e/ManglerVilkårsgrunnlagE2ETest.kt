@@ -215,7 +215,14 @@ internal class ManglerVilkårsgrunnlagE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_IM_24, 1.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_REVURDERING)
         }
     }

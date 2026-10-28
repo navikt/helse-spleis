@@ -78,7 +78,13 @@ internal class OverstyrInntektTest : AbstractDslTest() {
             )
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, INNTEKT, INNTEKT)
-                assertInntektsgrunnlag(a2, INGEN, 500.daglig, forventetKorrigertInntekt = 500.daglig, forventetkilde = Arbeidstakerkilde.AOrdningen)
+                assertInntektsgrunnlag(
+                    a2,
+                    INGEN,
+                    500.daglig,
+                    forventetKorrigertInntekt = 500.daglig,
+                    forventetkilde = Arbeidstakerkilde.AOrdningen,
+                )
             }
         }
     }

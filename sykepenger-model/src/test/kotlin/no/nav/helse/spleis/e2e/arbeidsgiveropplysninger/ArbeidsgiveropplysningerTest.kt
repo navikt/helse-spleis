@@ -51,7 +51,15 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `Med arbeidsgiveropplysninger kan man opplyse om hullete agp og begrunnelse for reduksjon eller ikke utbetalt`() {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 10.januar, 20.januar til 25.januar), begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer")
+            håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                arbeidsgiverperioder =
+                    listOf(
+                        1.januar til 10.januar,
+                        20.januar til 25.januar,
+                    ),
+                begrunnelseForReduksjonEllerIkkeUtbetalt = "LovligFravaer",
+            )
             assertEquals(listOf(1.januar til 10.januar, 20.januar til 25.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
@@ -83,14 +91,25 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVSLUTTET)
 
             håndterSøknad(mars)
-            assertSkjæringstidspunktOgVenteperiode(3.vedtaksperiode, forventetSkjæringstidspunkt = 1.mars, forventetVenteperiode = listOf(1.januar til 16.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                3.vedtaksperiode,
+                forventetSkjæringstidspunkt = 1.mars,
+                forventetVenteperiode =
+                    listOf(
+                        1.januar til 16.januar,
+                    ),
+            )
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
             with(observatør.trengerArbeidsgiveropplysningerVedtaksperioder) {
                 assertEquals(2, size)
                 assertEquals(3.vedtaksperiode, last().opplysninger.vedtaksperiodeId)
             }
 
-            håndterArbeidsgiveropplysninger(3.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INGEN, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                3.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INGEN, emptyList(), refusjonskravGyldigFra = null),
+            )
             assertSisteTilstand(3.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
@@ -164,8 +183,17 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(18.januar, 31.januar, 100.prosent))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER)
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
+            )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
         }
         a2 {
@@ -177,16 +205,30 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `Arbeidsgiver korrigerer ubrukte refusjonsopplysninger`() {
         a1 {
             håndterSøknad(januar)
-            val id1 = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(1.februar, 0.daglig)), refusjonskravGyldigFra = null))
+            val id1 =
+                håndterArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                    OppgittInntekt(INNTEKT),
+                    OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(1.februar, 0.daglig)), refusjonskravGyldigFra = null),
+                )
             val kilde1 = Kilde(MeldingsreferanseId(id1), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 0.daglig, kilde1),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar),
             )
-            val id2 = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig)), refusjonskravGyldigFra = null))
+            val id2 =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittRefusjon(INNTEKT, endringer = listOf(Refusjonsendring(2.februar, 0.daglig)), refusjonskravGyldigFra = null),
+                )
             val kilde2 = Kilde(MeldingsreferanseId(id2), ARBEIDSGIVER, LocalDateTime.now())
             assertBeløpstidslinje(
-                Beløpstidslinje.fra(1.februar.somPeriode(), INNTEKT, kilde2) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
+                Beløpstidslinje.fra(
+                    1.februar.somPeriode(),
+                    INNTEKT,
+                    kilde2,
+                ) + Beløpstidslinje.fra(2.februar.somPeriode(), 0.daglig, kilde2),
                 inspektør.ubrukteRefusjonsopplysninger.refusjonsrester().getValue(1.januar),
             )
         }
@@ -228,13 +270,31 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             nyttVedtak(1.januar til fredag(19.januar))
             håndterSøknad(Sykdom(15.februar, 20.februar, 100.prosent), egenmeldinger = listOf(mandag(5.februar).somPeriode()))
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.februar, listOf(1.januar til 16.januar), listOf(5.februar.somPeriode()))
+            assertSkjæringstidspunktOgVenteperiode(
+                2.vedtaksperiode,
+                15.februar,
+                listOf(1.januar til 16.januar),
+                listOf(5.februar.somPeriode()),
+            )
 
-            val forespørselPgaEgenmeldingsdager = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
+            val forespørselPgaEgenmeldingsdager =
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single {
+                    it.opplysninger.vedtaksperiodeId ==
+                        2.vedtaksperiode
+                }
             assertEquals(setOf(Inntekt, Refusjon), forespørselPgaEgenmeldingsdager.opplysninger.forespurteOpplysninger)
             observatør.trengerArbeidsgiveropplysningerVedtaksperioder.clear()
 
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)))
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                OppgittArbeidgiverperiode(
+                    listOf(
+                        1.januar til 16.januar,
+                    ),
+                ),
+            )
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 15.februar, listOf(15.februar til 20.februar))
             assertEquals(0, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
@@ -260,7 +320,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(4.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 3.vedtaksperiode })
+            assertNotNull(
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single {
+                    it.opplysninger.vedtaksperiodeId ==
+                        3.vedtaksperiode
+                },
+            )
         }
     }
 
@@ -277,7 +342,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             // Litt tøysete forespørsler
             assertEquals(1, observatør.trengerArbeidsgiveropplysningerVedtaksperioder.size)
-            assertNotNull(observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode })
+            assertNotNull(
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.single {
+                    it.opplysninger.vedtaksperiodeId ==
+                        2.vedtaksperiode
+                },
+            )
         }
     }
 
@@ -292,7 +362,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittInntekt(INNTEKT),
                 OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
             )
-            assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "AAAAARR AAAAARR AAAAARR AAAAARR AAA",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             håndterKorrigerteArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
@@ -312,7 +385,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                     OppgittInntekt(25_000.månedlig),
                     OppgittRefusjon(25_000.månedlig, listOf(Refusjonsendring(1.februar, INGEN)), refusjonskravGyldigFra = null),
                 )
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver1.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), INGEN, arbeidsgiver1.arbeidsgiver),
                 inspektør.ubrukteRefusjonsopplysninger
@@ -327,7 +403,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                     OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null),
                 )
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, 25_000.månedlig, arbeidsgiver2.arbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
             assertBeløpstidslinje(
                 Beløpstidslinje.fra(1.februar.somPeriode(), 25_000.månedlig, arbeidsgiver2.arbeidsgiver),
                 inspektør.ubrukteRefusjonsopplysninger
@@ -346,7 +425,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         }
         a2 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(25_000.månedlig),
+                OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a1 {
             håndterYtelser(1.vedtaksperiode)
@@ -360,7 +443,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, 20_000.månedlig, 20_000.månedlig)
                 assertInntektsgrunnlag(a2, 25_000.månedlig, 25_000.månedlig)
             }
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, 25_000.månedlig),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
         }
     }
 
@@ -376,7 +463,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, 20_000.månedlig)
                 assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(25_000.månedlig), OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(25_000.månedlig),
+                OppgittRefusjon(25_000.månedlig, emptyList(), refusjonskravGyldigFra = null),
+            )
         }
         a2 {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
@@ -384,7 +475,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, 20_000.månedlig)
                 assertInntektsgrunnlag(a2, INNTEKT, forventetkilde = Arbeidstakerkilde.AOrdningen)
             }
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(februar, 25_000.månedlig),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
         }
     }
 
@@ -392,9 +487,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at det ikke er noen ny arbeidsgiverperiode på lang periode`() {
         a1 {
             håndterSøknad(januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeNyArbeidsgiverperiode)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeNyArbeidsgiverperiode,
+            )
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_25), 1.vedtaksperiode.filter())
         }
@@ -405,10 +511,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(3.januar, 18.januar, 50.prosent), egenmeldinger = listOf(1.januar til 2.januar))
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                3.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 2.januar),
+            )
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeNyArbeidsgiverperiode)
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeNyArbeidsgiverperiode,
+            )
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar))
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -423,9 +539,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de ikke har utbetalt arbeidsgiverperioden på lang periode`() {
         a1 {
             håndterSøknad(januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening),
+            )
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertEquals(listOf(1.januar til 16.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
@@ -443,10 +570,20 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 Arbeidsgiverperiode::class,
             )
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(1.januar til 16.januar), listOf(1.januar til 2.januar))
+            assertSkjæringstidspunktOgVenteperiode(
+                1.vedtaksperiode,
+                3.januar,
+                listOf(1.januar til 16.januar),
+                listOf(1.januar til 2.januar),
+            )
             assertEquals(emptyList<Periode>(), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
 
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening),
+            )
             assertEquals("SSSHH SSSSSHH SSSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 3.januar, listOf(3.januar til 18.januar))
             assertEquals(listOf(3.januar til 18.januar), inspektør.dagerNavOvertarAnsvar(1.vedtaksperiode))
@@ -470,7 +607,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(11.januar til 31.januar)
             assertEquals("SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals("SSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening),
+            )
             assertEquals("SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals("SSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals(listOf(11.januar til 16.januar), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
@@ -487,7 +629,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSøknad(17.januar til 31.januar)
             assertEquals("SSSSSHH SSSSSHH SS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals("SSSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            håndterArbeidsgiveropplysninger(2.vedtaksperiode, OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null), IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening))
+            håndterArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                IkkeUtbetaltArbeidsgiverperiode(ManglerOpptjening),
+            )
             assertEquals("SSSSSHH SSSSSHH SS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
             assertEquals("SSSHH SSSSSHH SSS", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
@@ -500,7 +647,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de har utbetalt redusert beløp i hullete arbeidsgiverperiode`() {
         a1 {
             håndterSøknad(januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             håndterArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
@@ -508,8 +658,14 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening),
             )
-            assertEquals("SSSSSHR AASSSHH SAAAAHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertEquals(listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
+            assertEquals(
+                "SSSSSHR AASSSHH SAAAAHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
+            assertEquals(
+                listOf(1.januar til 6.januar, 10.januar til 15.januar, 20.januar til 23.januar),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar,
+            )
             assertEquals(20.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             assertEquals(listOf(20.januar, 10.januar, 1.januar), inspektør.skjæringstidspunkter(1.vedtaksperiode))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
@@ -521,7 +677,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de kun har utbetalt deler av hullete arbeidsgiverperiode`() {
         a1 {
             håndterSøknad(januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             håndterArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
@@ -529,7 +688,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(1.januar til 6.januar, 10.januar til 15.januar)),
                 UtbetaltDelerAvArbeidsgiverperioden(ManglerOpptjening, 15.januar),
             )
-            assertEquals("SSSSSHR AASSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHR AASSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertEquals(listOf(16.januar til 19.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
@@ -572,7 +734,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     fun `oppgir at de har utbetalt redusert beløp med arbeidsgiverperiode flyttet litt frem`() {
         a1 {
             håndterSøknad(januar)
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             håndterArbeidsgiveropplysninger(
                 1.vedtaksperiode,
                 OppgittInntekt(INNTEKT),
@@ -580,7 +745,10 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
                 OppgittArbeidgiverperiode(listOf(5.januar til 20.januar)),
                 RedusertUtbetaltBeløpIArbeidsgiverperioden(ManglerOpptjening),
             )
-            assertEquals("AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "AAAASHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør.vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertEquals(listOf(5.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
             assertVarsler(listOf(RV_IM_8), 1.vedtaksperiode.filter())
@@ -602,7 +770,12 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             håndterSøknad(Sykdom(2.januar, 17.januar, 100.prosent), egenmeldinger = listOf(1.januar.somPeriode()))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
-            håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+            håndterArbeidsgiveropplysninger(
+                1.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.januar til 16.januar)),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+            )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
         }
     }
@@ -617,7 +790,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_GODKJENNING)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_INNTEKTSMELDING)
 
-            val id = håndterArbeidsgiveropplysninger(1.vedtaksperiode, OppgittArbeidgiverperiode(listOf(1.april til 16.april)), OppgittInntekt(INNTEKT), OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null))
+            val id =
+                håndterArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    OppgittArbeidgiverperiode(listOf(1.april til 16.april)),
+                    OppgittInntekt(INNTEKT),
+                    OppgittRefusjon(INNTEKT, emptyList(), refusjonskravGyldigFra = null),
+                )
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
             assertTrue(id to 1.vedtaksperiode in observatør.inntektsmeldingHåndtert)
 
@@ -639,7 +818,11 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE)
             assertEquals(agp, inspektør.venteperiode(1.vedtaksperiode))
             assertEquals(agp, inspektør.venteperiode(2.vedtaksperiode))
-            val forespørselFebruar = observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last { it.opplysninger.vedtaksperiodeId == 2.vedtaksperiode }
+            val forespørselFebruar =
+                observatør.trengerArbeidsgiveropplysningerVedtaksperioder.last {
+                    it.opplysninger.vedtaksperiodeId ==
+                        2.vedtaksperiode
+                }
             assertEquals(
                 0,
                 forespørselFebruar.opplysninger.forespurteOpplysninger

@@ -33,7 +33,13 @@ internal fun skattSykepengegrunnlag(
     inntektsopplysninger: List<Skatteopplysning>,
 ) = ArbeidstakerFaktaavklartInntekt(
     id = UUID.randomUUID(),
-    inntektsdata = Inntektsdata(MeldingsreferanseId(hendelseId), dato, Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger), LocalDateTime.now()),
+    inntektsdata =
+        Inntektsdata(
+            MeldingsreferanseId(hendelseId),
+            dato,
+            Skatteopplysning.omregnetÅrsinntekt(inntektsopplysninger),
+            LocalDateTime.now(),
+        ),
     inntektsopplysningskilde = Arbeidstakerinntektskilde.AOrdningen(inntektsopplysninger),
 )
 

@@ -56,7 +56,12 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             // Så kommer det en korrigert IM
-            val im3 = håndterKorrigerteArbeidsgiveropplysninger(listOf(5.januar til 20.januar), beregnetInntekt = INNTEKT * 1.15, vedtaksperiodeId = 1.vedtaksperiode)
+            val im3 =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(5.januar til 20.januar),
+                    beregnetInntekt = INNTEKT * 1.15,
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                )
             assertVarsel(RV_IM_4, 1.vedtaksperiode.filter())
             assertVarsel(RV_IM_4, 2.vedtaksperiode.filter())
             // Før beregning har vi rett inntekt på behandlingene
@@ -129,7 +134,16 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `korrigert inntekt blir med når skjæringstidspunktet flyttes`() {
         a1 {
             nyttVedtak(2.januar til 31.januar)
-            håndterOverstyrArbeidsgiveropplysninger(2.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = "a1", inntekt = INNTEKT * 1.1)))
+            håndterOverstyrArbeidsgiveropplysninger(
+                2.januar,
+                listOf(
+                    OverstyrtArbeidsgiveropplysning(
+                        orgnummer = "a1",
+                        inntekt =
+                            INNTEKT * 1.1,
+                    ),
+                ),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
@@ -294,7 +308,8 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
     fun `Arbeidstaker får faktaavklart inntekt fra korrigerende arbeidsgiveropplysninger`() {
         a1 {
             håndterSøknad(januar)
-            val hendelseIdArbeidsgiveropplysninger = håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
+            val hendelseIdArbeidsgiveropplysninger =
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
@@ -307,7 +322,13 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdArbeidsgiveropplysninger, faktaavklartInntekt.hendelseId)
             }
 
-            val hendelseIdKorrigerendeArbeidsgiveropplysninger = håndterKorrigerteArbeidsgiveropplysninger(1.vedtaksperiode, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT * 1.1))
+            val hendelseIdKorrigerendeArbeidsgiveropplysninger =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    1.vedtaksperiode,
+                    Arbeidsgiveropplysning.OppgittInntekt(
+                        INNTEKT * 1.1,
+                    ),
+                )
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeidstakerFaktaavklartInntekt).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
@@ -348,7 +369,12 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
                 assertEquals(hendelseIdIM, faktaavklartInntekt.hendelseId)
             }
 
-            val hendelseIdKorrigerendeIM = håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1)
+            val hendelseIdKorrigerendeIM =
+                håndterKorrigerteArbeidsgiveropplysninger(
+                    listOf(1.januar til 16.januar),
+                    beregnetInntekt =
+                        INNTEKT * 1.1,
+                )
             (inspektør.faktaavklartInntekt(1.vedtaksperiode) as? ArbeidstakerFaktaavklartInntekt).also { faktaavklartInntekt ->
                 assertNotNull(faktaavklartInntekt)
                 assertEquals(INNTEKT * 1.1, faktaavklartInntekt.beløp)
@@ -403,7 +429,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             assertNull(inspektør.korrigertInntekt(1.vedtaksperiode))
-            val overstyringId = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+            val overstyringId =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    1.januar,
+                    listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)),
+                ).metadata.meldingsreferanseId.id
             inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
                 assertEquals(INNTEKT * 1.1, inntektsdata.beløp)
                 assertEquals(overstyringId, inntektsdata.hendelseId.id)
@@ -416,7 +446,11 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             assertNull(inspektør.korrigertInntekt(1.vedtaksperiode))
-            val overstyringId1 = håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+            val overstyringId1 =
+                håndterOverstyrArbeidsgiveropplysninger(
+                    1.januar,
+                    listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)),
+                ).metadata.meldingsreferanseId.id
             inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
                 assertEquals(INNTEKT * 1.1, inntektsdata.beløp)
                 assertEquals(overstyringId1, inntektsdata.hendelseId.id)
@@ -427,7 +461,10 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
             håndterUtbetalt()
 
             nullstillTilstandsendringer()
-            håndterOverstyrArbeidsgiveropplysninger(1.januar, listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1))).metadata.meldingsreferanseId.id
+            håndterOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(OverstyrtArbeidsgiveropplysning(a1, INNTEKT * 1.1)),
+            ).metadata.meldingsreferanseId.id
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             inspektør.korrigertInntekt(1.vedtaksperiode)!!.apply {
@@ -437,11 +474,14 @@ internal class FaktaavklartInntektPåBehandlingTest : AbstractDslTest() {
         }
     }
 
-    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) = inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeidstakerFaktaavklartInntekt
+    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerInntekt(vedtaksperiodeId: UUID) =
+        inspektør.faktaavklartInntekt(vedtaksperiodeId) as? ArbeidstakerFaktaavklartInntekt
 
-    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) = (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
+    private fun TestPerson.TestArbeidsgiver.faktaavvklartArbeidstakerBeløp(vedtaksperiodeId: UUID) =
+        (faktaavvklartArbeidstakerInntekt(vedtaksperiodeId))?.beløp
 
     private fun TestPerson.TestArbeidsgiver.korrigertInntekt(vedtaksperiodeId: UUID) = inspektør.korrigertInntekt(vedtaksperiodeId)
 
-    private fun TestPerson.TestArbeidsgiver.korrigertInntektBeløp(vedtaksperiodeId: UUID) = korrigertInntekt(vedtaksperiodeId)?.inntektsdata?.beløp
+    private fun TestPerson.TestArbeidsgiver.korrigertInntektBeløp(vedtaksperiodeId: UUID) =
+        korrigertInntekt(vedtaksperiodeId)?.inntektsdata?.beløp
 }

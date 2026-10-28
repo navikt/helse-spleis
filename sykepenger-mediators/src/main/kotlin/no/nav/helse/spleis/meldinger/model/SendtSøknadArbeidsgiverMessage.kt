@@ -23,6 +23,18 @@ internal class SendtSøknadArbeidsgiverMessage(
     ) {
         builder.sendt(packet["sendtArbeidsgiver"].asLocalDateTime())
         SendtSøknadNavMessage.byggSendtSøknad(builder, packet)
-        mediator.behandle(personopplysninger, this, builder.build(meldingsporing), context, packet["historiskeFolkeregisteridenter"].map(JsonNode::asText).map { Personidentifikator(it) }.toSet())
+        mediator.behandle(
+            personopplysninger,
+            this,
+            builder.build(
+                meldingsporing,
+            ),
+            context,
+            packet["historiskeFolkeregisteridenter"]
+                .map(JsonNode::asText)
+                .map {
+                    Personidentifikator(it)
+                }.toSet(),
+        )
     }
 }

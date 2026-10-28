@@ -63,14 +63,21 @@ internal class SubsumsjonsmeldingTest {
     private val schema by lazy {
         JsonSchemaFactory
             .getInstance(SpecVersion.VersionFlag.V7)
-            .getSchema(URI("https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json"))
+            .getSchema(
+                URI(
+                    "https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json",
+                ),
+            )
     }
 
     private fun assertSubsumsjonsmelding(melding: JsonNode) {
         try {
             assertEquals(emptySet<ValidationMessage>(), schema.validate(melding))
         } catch (_: Exception) {
-            LoggerFactory.getLogger(SubsumsjonsmeldingTest::class.java).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
+            LoggerFactory
+                .getLogger(
+                    SubsumsjonsmeldingTest::class.java,
+                ).warn("Kunne ikke kjøre kontrakttest for subsumsjoner. Mangler du internett?")
         }
     }
 

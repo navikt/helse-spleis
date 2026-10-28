@@ -12,8 +12,16 @@ import java.util.UUID
 internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Selvstendig med forsikringsvurdering går videre`() {
-        sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
-        sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE)
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid =
+                3.januar til 18.januar,
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
         val forsikringsvurderingId = UUID.randomUUID()
         sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
         sendYtelser(
@@ -44,8 +52,16 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
     @Test
     fun `Jordbruker med kollektiv forsikring går videre når Jordbruker-toggle er enabled`() =
         Toggle.Jordbruker.enable {
-            sendNySøknadSelvstendig(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
-            sendSelvstendigsøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)), ventetid = 3.januar til 18.januar, arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER)
+            sendNySøknadSelvstendig(
+                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
+            )
+            sendSelvstendigsøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                ventetid =
+                    3.januar til 18.januar,
+                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
+            )
             val forsikringsvurderingId = UUID.randomUUID()
             sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
             sendYtelser(

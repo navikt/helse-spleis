@@ -288,7 +288,8 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             val søknadId4 = UUID.randomUUID()
             håndterSøknad(Sykdom(21.januar, 26.januar, 100.prosent), søknadId = søknadId4)
             val søknad4 = MeldingsreferanseId(søknadId4)
-            val im = MeldingsreferanseId(håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 3.vedtaksperiode))
+            val im =
+                MeldingsreferanseId(håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 3.vedtaksperiode))
 
             assertEquals(
                 setOf(
@@ -597,7 +598,14 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
                 håndterArbeidsgiveropplysninger(
                     listOf(Periode(3.januar, 18.januar)),
                 )
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))
             assertFalse(im in observatør.inntektsmeldingIkkeHåndtert)
         }
@@ -628,7 +636,14 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(2.vedtaksperiode)
             håndterUtbetalt()
 
-            val im2 = MeldingsreferanseId(håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), beregnetInntekt = INNTEKT * 1.1))
+            val im2 =
+                MeldingsreferanseId(
+                    håndterKorrigerteArbeidsgiveropplysninger(
+                        listOf(1.januar til 16.januar),
+                        beregnetInntekt =
+                            INNTEKT * 1.1,
+                    ),
+                )
 
             assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())
 

@@ -74,7 +74,10 @@ internal class FjerneGodkjenningsbehovTest : AbstractDslTest() {
             assertVarsler(listOf(Varselkode.RV_UT_24), 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(IKKE_GODKJENT, inspektør.utbetalingtilstand(1))
-            assertInfo("Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck", 1.vedtaksperiode.filter())
+            assertInfo(
+                "Revurderingen ble avvist automatisk - hindrer tilstandsendring for å unngå saker som blir stuck",
+                1.vedtaksperiode.filter(),
+            )
         }
     }
 

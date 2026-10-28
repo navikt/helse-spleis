@@ -23,7 +23,11 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
 
     override fun timeout() =
         Timeout.Etter(Period.ofDays(90), Flagg("ønskerInntektFraAOrdningen")) { vedtaksperiode, eventBus, påminnelse, aktivitetslogg ->
-            if (vedtaksperiode.refusjonstidslinje.isEmpty() && vedtaksperiode.vilkårsgrunnlag != null) aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
+            if (vedtaksperiode.refusjonstidslinje.isEmpty() &&
+                vedtaksperiode.vilkårsgrunnlag != null
+            ) {
+                aktivitetslogg.varsel(Varselkode.RV_IV_10) // Burde dette være et eget varsel? Har jo bare brukt 0kr i refusjon 🤔
+            }
             vedtaksperiode.nullKronerRefusjonOmViManglerRefusjonsopplysninger(eventBus, påminnelse.metadata, aktivitetslogg)
             vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
             Revurderingseventyr.inntektsmeldingSomAldriKom(påminnelse, vedtaksperiode.periode)
@@ -34,7 +38,9 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) { "Forventer kun arbeidstakere her" }
+        check(vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker) {
+            "Forventer kun arbeidstakere her"
+        }
         trengerInntektsmeldingReplay(vedtaksperiode, eventBus)
     }
 
@@ -54,7 +60,9 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
         if (vurderOmKanGåVidere(vedtaksperiode, eventBus, aktivitetslogg)) {
-            aktivitetslogg.info("Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.")
+            aktivitetslogg.info(
+                "Gikk videre fra AvventerInntektsmelding til ${vedtaksperiode.tilstand::class.simpleName} som følge av en vanlig påminnelse.",
+            )
             return null
         }
         when (påminnelse.når(Flagg("trengerReplay"))) {
@@ -193,7 +201,10 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
         val vedtaksperioder =
             when {
                 // For å beregne riktig arbeidsgiverperiode/første fraværsdag
-                EventSubscription.Arbeidsgiverperiode in forespurteOpplysninger -> vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(vedtaksperiode)
+                EventSubscription.Arbeidsgiverperiode in forespurteOpplysninger ->
+                    vedtaksperioderIArbeidsgiverperiodeTilOgMedDenne(
+                        vedtaksperiode,
+                    )
                 // Dersom vi ikke trenger å beregne arbeidsgiverperiode/første fravarsdag trenger vi bare denne sykemeldingsperioden
                 else -> listOf(vedtaksperiode)
             }
@@ -234,7 +245,10 @@ internal data object AvventerInntektsmelding : Vedtaksperiodetilstand {
             vedtaksperiode.behandlinger
                 .ventedager()
                 .dagerUtenNavAnsvar.periode ?: return listOf(vedtaksperiode)
-        return vedtaksperiode.yrkesaktivitet.vedtaksperioderKnyttetTilArbeidsgiverperiode(arbeidsgiverperiode).filter { it <= vedtaksperiode }
+        return vedtaksperiode.yrkesaktivitet
+            .vedtaksperioderKnyttetTilArbeidsgiverperiode(
+                arbeidsgiverperiode,
+            ).filter { it <= vedtaksperiode }
     }
 
     private fun Vedtaksperiode.trengerIkkeArbeidsgiveropplysninger(eventBus: EventBus) {

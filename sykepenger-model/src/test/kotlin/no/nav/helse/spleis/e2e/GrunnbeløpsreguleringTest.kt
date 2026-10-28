@@ -73,7 +73,16 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -112,7 +121,16 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -158,7 +176,16 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -210,7 +237,16 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -247,7 +283,16 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterGrunnbeløpsregulering(1.januar)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -264,7 +309,14 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             håndterGrunnbeløpsregulering(1.januar)
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVVENTER_GODKJENNING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_GODKJENNING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+            )
             assertTrue(
                 observatør.utkastTilVedtakEventer
                     .last()
@@ -323,9 +375,30 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
                 1.mai(år) til 31.mai(år),
                 pensjonsgivendeInntekter =
                     listOf(
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 1), pensjonsgivendeInntektÅr3, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 2), pensjonsgivendeInntektÅr2, INGEN, INGEN, INGEN, erFerdigLignet = true),
-                        Søknad.PensjonsgivendeInntekt(Year.of(år - 3), pensjonsgivendeInntektÅr1, INGEN, INGEN, INGEN, erFerdigLignet = true),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år - 1),
+                            pensjonsgivendeInntektÅr3,
+                            INGEN,
+                            INGEN,
+                            INGEN,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år - 2),
+                            pensjonsgivendeInntektÅr2,
+                            INGEN,
+                            INGEN,
+                            INGEN,
+                            erFerdigLignet = true,
+                        ),
+                        Søknad.PensjonsgivendeInntekt(
+                            Year.of(år - 3),
+                            pensjonsgivendeInntektÅr1,
+                            INGEN,
+                            INGEN,
+                            INGEN,
+                            erFerdigLignet = true,
+                        ),
                     ),
             )
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)

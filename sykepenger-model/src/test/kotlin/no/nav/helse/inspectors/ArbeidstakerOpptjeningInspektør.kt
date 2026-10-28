@@ -7,5 +7,10 @@ internal val ArbeidstakerOpptjening.inspektør get() = ArbeidstakerOpptjeningIns
 internal class ArbeidstakerOpptjeningInspektør(
     opptjening: ArbeidstakerOpptjening,
 ) {
-    val arbeidsforhold = opptjening.arbeidsforhold.groupBy(keySelector = { it.orgnummer }) { it.ansattPerioder.map { periode -> Triple(periode.ansattFom, periode.ansattTom, periode.deaktivert) } }
+    val arbeidsforhold =
+        opptjening.arbeidsforhold.groupBy(keySelector = { it.orgnummer }) {
+            it.ansattPerioder.map { periode ->
+                Triple(periode.ansattFom, periode.ansattTom, periode.deaktivert)
+            }
+        }
 }

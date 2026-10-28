@@ -215,7 +215,12 @@ internal class SendtNavSøknaderRiverTest : RiverTest() {
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = emptyList()).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = null).toJson())
         assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("UGYLDIG_TILBAKEDATERING", null))).toJson())
-        assertNoErrors(validSøknad().copy(merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse"))).toJson())
+        assertNoErrors(
+            validSøknad()
+                .copy(
+                    merknaderFraSykmelding = listOf(MerknadDTO("TILBAKEDATERING_KREVER_FLERE_OPPLYSNINGER", "En beskrivelse")),
+                ).toJson(),
+        )
     }
 
     private fun SykepengesoknadDTO.toJson(): String = asObjectNode().medFelterFraSpedisjon().toString()

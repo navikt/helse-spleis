@@ -37,7 +37,9 @@ internal class VilkårsgrunnlagRiver(
         message.require("${Arbeidsforhold.utgåendeNavn}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.require("${Medlemskap.utgåendeNavn}.skjæringstidspunkt", JsonNode::asLocalDate)
         message.interestedIn("@løsning.${Medlemskap.utgåendeNavn}.resultat.svar") {
-            require(it.asText() in listOf("JA", "NEI", "UAVKLART", "UAVKLART_MED_BRUKERSPORSMAAL")) { "svar (${it.asText()}) er ikke JA, NEI, UAVKLART, eller UAVKLART_MED_BRUKERSPORSMAAL" }
+            require(it.asText() in listOf("JA", "NEI", "UAVKLART", "UAVKLART_MED_BRUKERSPORSMAAL")) {
+                "svar (${it.asText()}) er ikke JA, NEI, UAVKLART, eller UAVKLART_MED_BRUKERSPORSMAAL"
+            }
         }
         message.requireArrayEllerObjectMedArray("@løsning.${InntekterForSykepengegrunnlag.utgåendeNavn}", "inntekter") {
             require("årMåned", JsonNode::asYearMonth)

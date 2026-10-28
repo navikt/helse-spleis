@@ -190,7 +190,8 @@ internal class TestRapid(
         private fun sisteBehovsmeldingSomInneholder(
             behovstype: Behov.Behovstype,
             filter: (behovsmelding: JsonNode) -> Boolean = { true },
-        ) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull() ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.utgåendeNavn}")
+        ) = alleBehovsmeldingerSomInneholder(behovstype, filter).lastOrNull()
+            ?: fail("Finner ingen behovsmeldinger som inneholder ${behovstype.utgåendeNavn}")
 
         private fun events(
             name: String,
@@ -222,7 +223,8 @@ internal class TestRapid(
             organisasjonsummer: String,
         ) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).elementAt(indeks)
 
-        fun sisteVedtaksperiodeIdFor(organisasjonsummer: String) = vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).last()
+        fun sisteVedtaksperiodeIdFor(organisasjonsummer: String) =
+            vedtaksperiodeIderPerOrganisasjonsnummer.getValue(organisasjonsummer).last()
 
         fun utbetalingtilstander(utbetalingIndeks: Int) =
             utbetalinger.elementAt(utbetalingIndeks).let { utbetalingId ->

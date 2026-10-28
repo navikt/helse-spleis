@@ -15,7 +15,12 @@ internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         eventBus: EventBus,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(
+            aktivitetslogg,
+            eventBus,
+            vedtaksperiode.id,
+            vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+        )
     }
 
     override fun gjenopptaBehandling(
@@ -24,7 +29,12 @@ internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         hendelse: Hendelse,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(
+            aktivitetslogg,
+            eventBus,
+            vedtaksperiode.id,
+            vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+        )
     }
 
     override fun håndterPåminnelse(
@@ -33,7 +43,12 @@ internal data object AvventerInfotrygdHistorikk : Vedtaksperiodetilstand {
         påminnelse: Påminnelse,
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
-        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(aktivitetslogg, eventBus, vedtaksperiode.id, vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype)
+        vedtaksperiode.person.trengerInitiellHistorikkFraInfotrygd(
+            aktivitetslogg,
+            eventBus,
+            vedtaksperiode.id,
+            vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype,
+        )
         return null
     }
 }

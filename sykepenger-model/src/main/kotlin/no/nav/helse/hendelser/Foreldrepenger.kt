@@ -38,7 +38,10 @@ data class Foreldrepenger(
         sykdomsperiode: Periode,
     ) {
         val foreldrepengeperiodeFør = foreldrepengeytelse.lastOrNull { it.periode.endInclusive < sykdomsperiode.start } ?: return
-        val harForeldrepengerAlleDager = foreldrepengeperiodeFør.periode.erRettFør(sykdomsperiode) && foreldrepengeperiodeFør.periode.count() > 14 && foreldrepengeperiodeFør.grad == 100
+        val harForeldrepengerAlleDager =
+            foreldrepengeperiodeFør.periode.erRettFør(sykdomsperiode) &&
+                foreldrepengeperiodeFør.periode.count() > 14 &&
+                foreldrepengeperiodeFør.grad == 100
         if (!harForeldrepengerAlleDager) return
         aktivitetslogg.varsel(Varselkode.`Forlenger foreldrepenger med mer enn 14 dager`)
     }

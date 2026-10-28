@@ -29,9 +29,7 @@ internal fun List<Arbeidsgiverberegning>.avvisMaksimumSykepengerdager(maksdatobe
     return avvisteTidslinjer
 }
 
-internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(
-    sykepengegrunnlagBegrenset6G: Inntekt,
-): List<Arbeidsgiverberegning> {
+internal fun List<Arbeidsgiverberegning>.maksimumUtbetalingsberegning(sykepengegrunnlagBegrenset6G: Inntekt): List<Arbeidsgiverberegning> {
     val betalteTidslinjer =
         Utbetalingstidslinje
             .betale(

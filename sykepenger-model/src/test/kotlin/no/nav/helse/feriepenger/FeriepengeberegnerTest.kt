@@ -62,7 +62,10 @@ internal class FeriepengeberegnerTest {
                 spleisArbeidsgiver = spleisArbeidsgiver(1.januar til 10.februar),
             )
 
-        assertEquals((1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(), feriepengeberegner.beregnFeriepenger(a1).second.datoer)
+        assertEquals(
+            (1.januar til 10.februar).toList() + (1.mars til 7.mars).toList(),
+            feriepengeberegner.beregnFeriepenger(a1).second.datoer,
+        )
     }
 
     @Test
@@ -719,7 +722,12 @@ internal class FeriepengeberegnerTest {
     ): Feriepengeberegner {
         val builder = Feriepengegrunnlagstidslinje.Builder()
         leggTilGrunnlag(builder, infotrygdPerson, Feriepengegrunnlagsdag.Mottaker.PERSON, Feriepengegrunnlagsdag.Kilde.INFOTRYGD)
-        leggTilGrunnlag(builder, infotrygdArbeidsgiver, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, Feriepengegrunnlagsdag.Kilde.INFOTRYGD)
+        leggTilGrunnlag(
+            builder,
+            infotrygdArbeidsgiver,
+            Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER,
+            Feriepengegrunnlagsdag.Kilde.INFOTRYGD,
+        )
         leggTilGrunnlag(builder, spleisArbeidsgiver, Feriepengegrunnlagsdag.Mottaker.ARBEIDSGIVER, Feriepengegrunnlagsdag.Kilde.SPLEIS)
         leggTilGrunnlag(builder, spleisPerson, Feriepengegrunnlagsdag.Mottaker.PERSON, Feriepengegrunnlagsdag.Kilde.SPLEIS)
         val tidslinje = builder.build()

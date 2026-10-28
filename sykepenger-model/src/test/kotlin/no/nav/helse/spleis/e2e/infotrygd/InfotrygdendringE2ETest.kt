@@ -24,7 +24,15 @@ internal class InfotrygdendringE2ETest : AbstractDslTest() {
         a1 {
             håndterSøknad(16.desember(2024) til 19.desember(2024))
             håndterSøknad(2.januar(2025) til 15.januar(2025))
-            håndterArbeidsgiveropplysninger(arbeidsgiverperioder = listOf(16.desember(2024) til 19.desember(2024), 2.januar(2025) til 13.januar(2025)), beregnetInntekt = INNTEKT, vedtaksperiodeId = 2.vedtaksperiode)
+            håndterArbeidsgiveropplysninger(
+                arbeidsgiverperioder =
+                    listOf(
+                        16.desember(2024) til 19.desember(2024),
+                        2.januar(2025) til 13.januar(2025),
+                    ),
+                beregnetInntekt = INNTEKT,
+                vedtaksperiodeId = 2.vedtaksperiode,
+            )
             håndterVilkårsgrunnlag(2.vedtaksperiode)
             håndterYtelser(2.vedtaksperiode)
             håndterSimulering(2.vedtaksperiode)

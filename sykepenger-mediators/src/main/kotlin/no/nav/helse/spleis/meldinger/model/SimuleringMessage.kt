@@ -25,7 +25,13 @@ internal class SimuleringMessage(
     private val fagområde = packet["Simulering.fagområde"].asText()
     private val status = valueOf(packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.status"].asText())
     private val simuleringOK = status == OK
-    private val melding = if (!simuleringOK) packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.feilmelding"].asText() + " (status=$status)" else ""
+    private val melding =
+        if (!simuleringOK) {
+            packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.feilmelding"].asText() +
+                " (status=$status)"
+        } else {
+            ""
+        }
     private val simuleringResultat =
         if (simuleringOK) {
             packet["@løsning.${Behovstype.Simulering.utgåendeNavn}.simulering"].let {

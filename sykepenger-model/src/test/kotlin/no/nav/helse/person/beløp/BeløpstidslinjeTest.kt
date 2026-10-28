@@ -40,10 +40,12 @@ internal class BeløpstidslinjeTest {
             (Arbeidsgiver oppgir 1000.daglig fra 2.januar til 30.januar).fremOgTilbakeViaRefusjonstidslinje()
 
         val (overstyring, overstyringRefusjonstidslinje) =
-            ((Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar) og (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar)).fremOgTilbakeViaRefusjonstidslinje()
+            ((Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar) og (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar))
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         val (forventetDiff, forventetDiffRefusjonstidslinje) =
-            ((Saksbehandler oppgir 1000.daglig kun 1.januar) og (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar)).fremOgTilbakeViaRefusjonstidslinje()
+            ((Saksbehandler oppgir 1000.daglig kun 1.januar) og (Saksbehandler oppgir 1500.daglig fra 21.januar til 31.januar))
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventetDiff, overstyring - fraInntektsmelding)
         assertRefusjonstidslinje(forventetDiffRefusjonstidslinje, overstyringRefusjonstidslinje - fraInntektsmeldingRefusjonstidslinje)
@@ -53,7 +55,9 @@ internal class BeløpstidslinjeTest {
     fun `fylle en hullete beløpstidslinje`() {
         val (beløpstidslinje1, refusjonstidslinje1) = (Arbeidsgiver oppgir 1000.daglig hele januar).fremOgTilbakeViaRefusjonstidslinje()
         val (beløpstidslinje2, refusjonstidslinje2) = (Saksbehandler oppgir 2000.daglig hele mars).fremOgTilbakeViaRefusjonstidslinje()
-        val (beløpstidslinje3, refusjonstidslinje3) = (Systemet oppgir 3000.daglig fra 2.april til 30.april).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje3, refusjonstidslinje3) =
+            (Systemet oppgir 3000.daglig fra 2.april til 30.april)
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         val sammenslått = beløpstidslinje1 + beløpstidslinje2 + beløpstidslinje3
         val sammenslåttRefusjonstidslinje = refusjonstidslinje1 + refusjonstidslinje2 + refusjonstidslinje3
@@ -66,7 +70,11 @@ internal class BeløpstidslinjeTest {
         assertEquals(listOf(1.januar til 30.april), fylt.perioderMedBeløp)
         assertEquals(listOf(1.januar til 30.april), fyltRefusjonstdslinje.perioderMedBeløp)
 
-        val (forventet, forventetRefusjonstidslinje) = ((Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)).fremOgTilbakeViaRefusjonstidslinje()
+        val (forventet, forventetRefusjonstidslinje) =
+            (
+                (Arbeidsgiver oppgir 1000.daglig fra 1.januar til 28.februar) og
+                    (Saksbehandler oppgir 2000.daglig fra 1.mars til 1.april) + (Systemet oppgir 3000.daglig fra 2.april til 30.april)
+            ).fremOgTilbakeViaRefusjonstidslinje()
         assertEquals(forventet, fylt)
         assertRefusjonstidslinje(forventetRefusjonstidslinje, fyltRefusjonstdslinje)
     }
@@ -76,8 +84,16 @@ internal class BeløpstidslinjeTest {
         val (beløpstidslinje1, refusjonstidslinje1) = (Arbeidsgiver oppgir 1000.daglig hele januar).fremOgTilbakeViaRefusjonstidslinje()
         val (beløpstidslinje2, refusjonstidslinje2) = (Arbeidsgiver oppgir 1000.daglig hele januar).fremOgTilbakeViaRefusjonstidslinje()
         val (beløpstidslinje3, refusjonstidslinje3) = (Saksbehandler oppgir 1000.daglig hele januar).fremOgTilbakeViaRefusjonstidslinje()
-        val (beløpstidslinje4, refusjonstidslinje4) = ((Saksbehandler oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)).fremOgTilbakeViaRefusjonstidslinje()
-        val (beløpstidslinje5, refusjonstidslinje5) = ((Saksbehandler oppgir 1000.daglig hele januar) og (Saksbehandler oppgir 2000.daglig hele mars)).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje4, refusjonstidslinje4) =
+            (
+                (Saksbehandler oppgir 1000.daglig hele januar) og
+                    (Saksbehandler oppgir 2000.daglig hele mars)
+            ).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje5, refusjonstidslinje5) =
+            (
+                (Saksbehandler oppgir 1000.daglig hele januar) og
+                    (Saksbehandler oppgir 2000.daglig hele mars)
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(beløpstidslinje1, beløpstidslinje2)
         assertRefusjonstidslinje(refusjonstidslinje1, refusjonstidslinje2)
@@ -104,7 +120,9 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `frem til og med`() {
-        val (beløpstidslinje, refusjonstidslinje) = (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje, refusjonstidslinje) =
+            (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar)
+                .fremOgTilbakeViaRefusjonstidslinje()
         val subset = beløpstidslinje.tilOgMed(10.januar)
         val subsetRefusjonstidslinje = refusjonstidslinje.tilOgMed(10.januar)
 
@@ -117,7 +135,9 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `fra og med`() {
-        val (beløpstidslinje, refusjonstidslinje) = (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje, refusjonstidslinje) =
+            (Saksbehandler oppgir 1000.daglig fra 1.januar til 20.januar)
+                .fremOgTilbakeViaRefusjonstidslinje()
         val subset = beløpstidslinje.fraOgMed(10.januar)
         val subsetRefusjonstidslinje = refusjonstidslinje.fraOgMed(10.januar)
 
@@ -130,7 +150,11 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `beløpstidlinje lager en tidslinje med beløp og kilde`() {
-        val (beløpstidslinje, refusjonstidslinje) = ((Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)).fremOgTilbakeViaRefusjonstidslinje()
+        val (beløpstidslinje, refusjonstidslinje) =
+            (
+                (Arbeidsgiver oppgir 31000.månedlig fra 1.januar til 10.januar) og
+                    (Saksbehandler oppgir 15500.månedlig fra 11.januar til 31.januar)
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(10, beløpstidslinje.count { it.kilde == Arbeidsgiver })
         assertEquals(21, beløpstidslinje.count { it.kilde == Saksbehandler })
@@ -161,15 +185,24 @@ internal class BeløpstidslinjeTest {
             Beløpstidslinje(Beløpsdag(1.januar, 1.daglig, Arbeidsgiver), Beløpsdag(1.januar, 2.daglig, Sykmeldt))
         }
         assertThrows<IllegalArgumentException> {
-            Refusjonstidslinje(1.januar.somPeriode() to Refusjonsdag(1.daglig, Arbeidsgiver), 1.januar.somPeriode() to Refusjonsdag(2.daglig, Sykmeldt))
+            Refusjonstidslinje(
+                1.januar.somPeriode() to Refusjonsdag(1.daglig, Arbeidsgiver),
+                1.januar.somPeriode() to Refusjonsdag(2.daglig, Sykmeldt),
+            )
         }
     }
 
     @Test
     fun `Du haver to stykk beløpstidslinje, som du ønsker forent`() {
-        val (gammelTidslinje, gammelRefusjonstidslinje) = ((Arbeidsgiver oppgir 31000.månedlig hele januar) og (Arbeidsgiver oppgir 0.daglig hele mars)).fremOgTilbakeViaRefusjonstidslinje()
+        val (gammelTidslinje, gammelRefusjonstidslinje) =
+            (
+                (Arbeidsgiver oppgir 31000.månedlig hele januar) og
+                    (Arbeidsgiver oppgir 0.daglig hele mars)
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
-        val (nyTidslinje, nyRefusjonstidslinje) = ((Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars)).fremOgTilbakeViaRefusjonstidslinje()
+        val (nyTidslinje, nyRefusjonstidslinje) =
+            ((Saksbehandler oppgir 31005.månedlig fra 20.januar til 10.mars))
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         val (forventetTidslinje, forventetRefusjonstidslinje) =
             (
@@ -187,7 +220,13 @@ internal class BeløpstidslinjeTest {
         val kilde1 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now().minusDays(1))
         val kilde2 = Kilde(MeldingsreferanseId(UUID.randomUUID()), ARBEIDSGIVER, LocalDateTime.now())
 
-        val (gammelTidslinje, gammelRefusjonstidslinje) = Beløpstidslinje.fra(januar, 500.daglig, kilde1).fremOgTilbakeViaRefusjonstidslinje()
+        val (gammelTidslinje, gammelRefusjonstidslinje) =
+            Beløpstidslinje
+                .fra(
+                    januar,
+                    500.daglig,
+                    kilde1,
+                ).fremOgTilbakeViaRefusjonstidslinje()
         val (nyTidslinje, nyRefusjonstidslinje) = Beløpstidslinje.fra(januar, 1000.daglig, kilde2).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(nyTidslinje, gammelTidslinje + nyTidslinje)
@@ -240,7 +279,9 @@ internal class BeløpstidslinjeTest {
         assertEquals(beløpstidslinje, beløpstidslinje.strekk(2.februar til 28.februar))
         assertRefusjonstidslinje(refusjonstidslinje, refusjonstidslinje.strekk(2.februar til 28.februar))
 
-        val (forventetBeløpstidslinje, forventetRefusjonstidslinje) = (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 28.februar).fremOgTilbakeViaRefusjonstidslinje()
+        val (forventetBeløpstidslinje, forventetRefusjonstidslinje) =
+            (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 28.februar)
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventetBeløpstidslinje, beløpstidslinje.strekk(31.januar til 28.februar))
         assertRefusjonstidslinje(forventetRefusjonstidslinje, forventetRefusjonstidslinje.strekk(31.januar til 28.februar))
@@ -255,7 +296,9 @@ internal class BeløpstidslinjeTest {
         assertEquals(tidslinje, tidslinje.strekk(1.februar til 27.februar))
         assertRefusjonstidslinje(refusjonstidslinje, refusjonstidslinje.strekk(1.februar til 27.februar))
 
-        val (forventetBeløpstidslinje, forventetRefusjonstidslinje) = (Arbeidsgiver oppgir 1000.daglig fra 1.februar til 1.mars).fremOgTilbakeViaRefusjonstidslinje()
+        val (forventetBeløpstidslinje, forventetRefusjonstidslinje) =
+            (Arbeidsgiver oppgir 1000.daglig fra 1.februar til 1.mars)
+                .fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventetBeløpstidslinje, tidslinje.strekk(1.februar til 1.mars))
         assertRefusjonstidslinje(forventetRefusjonstidslinje, refusjonstidslinje.strekk(1.februar til 1.mars))
@@ -263,8 +306,16 @@ internal class BeløpstidslinjeTest {
 
     @Test
     fun `Strekker en beløpstidslinje i snuten og halen`() {
-        val (tidslinje, refusjonstidslinje) = ((Arbeidsgiver oppgir 1000.daglig kun 1.februar) og (Saksbehandler oppgir 2000.daglig kun 28.februar)).fremOgTilbakeViaRefusjonstidslinje()
-        val (forventet, forventetRefusjonstidslinje) = ((Arbeidsgiver oppgir 1000.daglig fra 31.januar til 1.februar) og (Saksbehandler oppgir 2000.daglig fra 28.februar til 1.mars)).fremOgTilbakeViaRefusjonstidslinje()
+        val (tidslinje, refusjonstidslinje) =
+            (
+                (Arbeidsgiver oppgir 1000.daglig kun 1.februar) og
+                    (Saksbehandler oppgir 2000.daglig kun 28.februar)
+            ).fremOgTilbakeViaRefusjonstidslinje()
+        val (forventet, forventetRefusjonstidslinje) =
+            (
+                (Arbeidsgiver oppgir 1000.daglig fra 31.januar til 1.februar) og
+                    (Saksbehandler oppgir 2000.daglig fra 28.februar til 1.mars)
+            ).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventet, tidslinje.strekk(31.januar til 1.mars))
         assertRefusjonstidslinje(forventetRefusjonstidslinje, refusjonstidslinje.strekk(31.januar til 1.mars))
@@ -274,7 +325,9 @@ internal class BeløpstidslinjeTest {
         assertEquals(UkjentDag, forventet[27.februar])
         assertNull(forventetRefusjonstidslinje[27.februar])
 
-        val (forventet2, forventetRefusjonstidslinje2) = (Systemet oppgir 100.daglig fra 5.januar til 7.januar).fremOgTilbakeViaRefusjonstidslinje()
+        val (forventet2, forventetRefusjonstidslinje2) =
+            (Systemet oppgir 100.daglig fra 5.januar til 7.januar)
+                .fremOgTilbakeViaRefusjonstidslinje()
         val (faktisk, faktiskRefusjonstidslinje) = (Systemet oppgir 100.daglig kun 6.januar).fremOgTilbakeViaRefusjonstidslinje()
 
         assertEquals(forventet2, faktisk.strekk(5.januar til 7.januar))
@@ -298,11 +351,19 @@ internal class BeløpstidslinjeTest {
 
         val medBeløp = beløpstidslinje.medBeløp()
         assertEquals(15, medBeløp.size)
-        assertEquals(listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map { it.januar.somPeriode() }, medBeløp.perioderMedBeløp)
+        assertEquals(
+            listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map { it.januar.somPeriode() },
+            medBeløp.perioderMedBeløp,
+        )
 
         val medBeløpRefusjonstidslinje = refusjonstidslinje.medBeløp()
         assertEquals(15, medBeløpRefusjonstidslinje.size)
-        assertEquals(listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map { it.januar.somPeriode() }, medBeløpRefusjonstidslinje.perioderMedBeløp)
+        assertEquals(
+            listOf(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30).map {
+                it.januar.somPeriode()
+            },
+            medBeløpRefusjonstidslinje.perioderMedBeløp,
+        )
 
         val gjenopprettet = Beløpstidslinje.gjenopprett(medBeløp.dto()) // TODO: dto/gjenopprett
         assertEquals(medBeløp, gjenopprettet)
@@ -316,7 +377,12 @@ internal class BeløpstidslinjeTest {
                 (Arbeidsgiver oppgir 250.daglig fra 2.februar til 10.februar) og
                 (Arbeidsgiver oppgir 500.daglig fra 11.februar til 12.februar)
 
-        val kilde = BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(Arbeidsgiver.meldingsreferanseId.dto(), Arbeidsgiver.avsender.dto(), Arbeidsgiver.tidsstempel)
+        val kilde =
+            BeløpstidslinjeDto.BeløpstidslinjedagKildeDto(
+                Arbeidsgiver.meldingsreferanseId.dto(),
+                Arbeidsgiver.avsender.dto(),
+                Arbeidsgiver.tidsstempel,
+            )
         assertEquals(
             BeløpstidslinjeDto(
                 perioder =
@@ -375,7 +441,9 @@ internal class BeløpstidslinjeTest {
             ignoreAvsender: Boolean = false,
         ) {
             val tøyseteMeldingsreferanseId = UUID.randomUUID()
-            val meldingsreferanseId: (ekte: UUID) -> UUID = if (ignoreMeldingsreferanseId) { _ -> tøyseteMeldingsreferanseId } else { ekte -> ekte }
+            val meldingsreferanseId: (
+                ekte: UUID,
+            ) -> UUID = if (ignoreMeldingsreferanseId) { _ -> tøyseteMeldingsreferanseId } else { ekte -> ekte }
             val avsender: (ekte: Avsender) -> Avsender = if (ignoreAvsender) { _ -> SYSTEM } else { ekte -> ekte }
             assertEquals(expected.besudlet(meldingsreferanseId, avsender), actual.besudlet(meldingsreferanseId, avsender))
         }

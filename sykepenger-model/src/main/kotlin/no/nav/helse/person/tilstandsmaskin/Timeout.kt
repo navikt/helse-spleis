@@ -34,7 +34,12 @@ internal sealed interface Timeout {
     data class Etter(
         private val periode: Period,
         private val tvingFremTimeoutoppførselFlagg: Flagg,
-        private val vedTimeout: (vedtaksperiode: Vedtaksperiode, eventBus: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg) -> Revurderingseventyr,
+        private val vedTimeout: (
+            vedtaksperiode: Vedtaksperiode,
+            eventBus: EventBus,
+            påminnelse: Påminnelse,
+            aktivitetslogg: IAktivitetslogg,
+        ) -> Revurderingseventyr,
     ) : Timeout {
         override fun tidspunkt(tilstandsendringstidspunkt: LocalDateTime) = tilstandsendringstidspunkt.plus(periode)
 
@@ -49,12 +54,16 @@ internal sealed interface Timeout {
             val dagerVentet = DAYS.between(påminnelse.tilstandsendringstidspunkt, nå)
 
             if (nå >= timeoutTidspunkt) {
-                aktivitetslogg.info("Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager. (Timeout for tiltanden er ${periode.days} dager.)")
+                aktivitetslogg.info(
+                    "Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager. (Timeout for tiltanden er ${periode.days} dager.)",
+                )
                 return vedTimeout(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
             }
 
             if (påminnelse.når(tvingFremTimeoutoppførselFlagg)) {
-                aktivitetslogg.info("Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager ettersom flagget '$tvingFremTimeoutoppførselFlagg' var satt i påminnelsen. (Timeout for tiltanden er ${periode.days} dager.)")
+                aktivitetslogg.info(
+                    "Gir opp å vente i tilstand ${vedtaksperiode.tilstand::class.simpleName} etter $dagerVentet dager ettersom flagget '$tvingFremTimeoutoppførselFlagg' var satt i påminnelsen. (Timeout for tiltanden er ${periode.days} dager.)",
+                )
                 return vedTimeout(vedtaksperiode, eventBus, påminnelse, aktivitetslogg)
             }
             return null

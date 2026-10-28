@@ -204,7 +204,11 @@ internal class UtbetalingkontraktTest : AbstractEndToEndMediatorTest() {
             SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15),
         )
         sendSøknad(
-            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100), SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15)),
+            perioder =
+                listOf(
+                    SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+                    SoknadsperiodeDTO(fom = 27.januar, tom = 30.januar, sykmeldingsgrad = 15),
+                ),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
         sendVilkårsgrunnlag(0)

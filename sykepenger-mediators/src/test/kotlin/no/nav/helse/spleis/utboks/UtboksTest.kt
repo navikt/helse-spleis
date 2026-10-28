@@ -82,7 +82,8 @@ internal class UtboksTest {
     fun `forårsaket av for behov`() {
         val dao = InMemoryUtboksDao()
         val innkommendeMeldingId: UUID = UUID.randomUUID()
-        val utboks = utboks(innkommendeMelding(meldingsreferanseId = innkommendeMeldingId, navn = "behov", behov = listOf("Behov1", "Behov2")), dao)
+        val utboks =
+            utboks(innkommendeMelding(meldingsreferanseId = innkommendeMeldingId, navn = "behov", behov = listOf("Behov1", "Behov2")), dao)
         utboks.nyMelding { personidentifikator ->
             Utboksmelding.ForkastEtterSending(
                 UtgåendeMelding.nyRapidmelding(

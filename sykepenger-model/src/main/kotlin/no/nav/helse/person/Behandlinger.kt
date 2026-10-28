@@ -57,7 +57,11 @@ internal class Behandlinger private constructor(
     internal constructor() : this(emptyList())
 
     companion object {
-        internal fun Map<UUID, Pair<Yrkesaktivitet, Behandlinger>>.berik(builder: UtkastTilVedtakBuilder) = mapValues { (_, yrkesaktivitetOgBehandlinger) -> yrkesaktivitetOgBehandlinger.first to yrkesaktivitetOgBehandlinger.second.sisteBehandling }.berik(builder)
+        internal fun Map<UUID, Pair<Yrkesaktivitet, Behandlinger>>.berik(builder: UtkastTilVedtakBuilder) =
+            mapValues { (_, yrkesaktivitetOgBehandlinger) ->
+                yrkesaktivitetOgBehandlinger.first to
+                    yrkesaktivitetOgBehandlinger.second.sisteBehandling
+            }.berik(builder)
 
         fun gjenopprett(
             dto: BehandlingerInnDto,
@@ -99,7 +103,8 @@ internal class Behandlinger private constructor(
 
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
 
-    internal fun erTidligereVilkårsprøvd() = åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
+    internal fun erTidligereVilkårsprøvd() =
+        åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
 
     internal fun åpenForEndring() = åpenBehandling != null
 
@@ -142,7 +147,9 @@ internal class Behandlinger private constructor(
             avslagstidslinje = sisteBehandling.avslagstidslinje,
         )
 
-    internal fun utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat: ForsikringsvurderingResultat?): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode =
+    internal fun utbetalingstidslinjeBuilderForSelvstendig(
+        forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+    ): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode =
         SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar,
@@ -189,7 +196,9 @@ internal class Behandlinger private constructor(
         vedtaksperiodeId: UUID,
     ): AnalytiskDatapakkeEvent {
         // Sender analytisk datapakke for siste avsluttet behandling, da det er den vi nødvendigvis må ha fått utbetalingshendelse for.
-        val sisteAvsluttetBehandling = behandlinger.lastOrNull { it.erAvsluttet() } ?: error("Kan ikke lage analytisk datapakke uten at det er fattet vedtak på noen behandling")
+        val sisteAvsluttetBehandling =
+            behandlinger.lastOrNull { it.erAvsluttet() }
+                ?: error("Kan ikke lage analytisk datapakke uten at det er fattet vedtak på noen behandling")
         val forrigeAvsluttetBehandling = behandlinger.filter { it.erAvsluttet() }.dropLast(1).lastOrNull()
         return sisteAvsluttetBehandling.analytiskDatapakke(forrigeAvsluttetBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
@@ -220,7 +229,12 @@ internal class Behandlinger private constructor(
 
     internal fun harUtbetalinger() = sisteBehandling.harOppdragMedUtbetalinger()
 
-    internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) = sisteBehandling.kanForkastes(andreBehandlinger.map { it.sisteBehandling })
+    internal fun kanForkastes(andreBehandlinger: List<Behandlinger>) =
+        sisteBehandling.kanForkastes(
+            andreBehandlinger.map {
+                it.sisteBehandling
+            },
+        )
 
     internal fun forventerUtbetaling(
         periodeSomBeregner: Periode,
@@ -292,7 +306,9 @@ internal class Behandlinger private constructor(
         automatiskBehandling: Boolean,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        checkNotNull(åpenBehandling).forkastBehandling(eventBus, behandlingEventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg, automatiskBehandling)
+        checkNotNull(
+            åpenBehandling,
+        ).forkastBehandling(eventBus, behandlingEventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg, automatiskBehandling)
     }
 
     internal fun forkastBeregning(
@@ -309,7 +325,10 @@ internal class Behandlinger private constructor(
         yrkesaktivitet: Yrkesaktivitet,
         utbetalingsavgjørelse: Behandlingsavgjørelse,
         aktivitetslogg: IAktivitetslogg,
-    ): Behandling = checkNotNull(åpenBehandling).also { it.vedtakFattet(behandlingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg) }
+    ): Behandling =
+        checkNotNull(åpenBehandling).also {
+            it.vedtakFattet(behandlingEventBus, yrkesaktivitet, utbetalingsavgjørelse, aktivitetslogg)
+        }
 
     fun vedtakAvvist(
         behandlingEventBus: BehandlingEventBus,
@@ -412,7 +431,8 @@ internal class Behandlinger private constructor(
         )
     }
 
-    internal fun endretRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) = sisteBehandling.endretRefusjonstidslinje(refusjonstidslinje)
+    internal fun endretRefusjonstidslinje(refusjonstidslinje: Beløpstidslinje) =
+        sisteBehandling.endretRefusjonstidslinje(refusjonstidslinje)
 
     internal fun håndterRefusjonstidslinje(
         behandlingEventBus: BehandlingEventBus,
@@ -420,7 +440,9 @@ internal class Behandlinger private constructor(
         aktivitetslogg: IAktivitetslogg,
         benyttetRefusjonsopplysninger: Beløpstidslinje,
     ) {
-        checkNotNull(åpenBehandling).håndterRefusjonsopplysninger(behandlingEventBus, dokumentsporing, aktivitetslogg, benyttetRefusjonsopplysninger)
+        checkNotNull(
+            åpenBehandling,
+        ).håndterRefusjonsopplysninger(behandlingEventBus, dokumentsporing, aktivitetslogg, benyttetRefusjonsopplysninger)
     }
 
     internal fun håndterFaktaavklartInntekt(
@@ -429,8 +451,12 @@ internal class Behandlinger private constructor(
         dokumentsporing: Dokumentsporing,
         aktivitetslogg: IAktivitetslogg,
     ) {
-        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) { "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!" }
-        checkNotNull(åpenBehandling).håndterFaktaavklartInntekt(behandlingEventBus, arbeidstakerFaktaavklartInntekt, dokumentsporing, aktivitetslogg)
+        check(arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde is Arbeidstakerinntektskilde.Arbeidsgiver) {
+            "Inntekt med kilde ${arbeidstakerFaktaavklartInntekt.inntektsopplysningskilde::class.simpleName} skal ikke lagres på behandlingen!"
+        }
+        checkNotNull(
+            åpenBehandling,
+        ).håndterFaktaavklartInntekt(behandlingEventBus, arbeidstakerFaktaavklartInntekt, dokumentsporing, aktivitetslogg)
     }
 
     internal fun håndterKorrigertInntekt(
@@ -548,7 +574,14 @@ internal class Behandlinger private constructor(
         val behandlingOpprettetTidspunkt: LocalDateTime get() = endringer.first().tidsstempel
         val avslagstidslinje get() = gjeldende.avslagstidslinje
 
-        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(UUID.randomUUID(), tilstand, endringer.toMutableList(), null, avsluttet, kilde)
+        constructor(tilstand: Tilstand, endringer: List<Endring>, avsluttet: LocalDateTime?, kilde: Behandlingkilde) : this(
+            UUID.randomUUID(),
+            tilstand,
+            endringer.toMutableList(),
+            null,
+            avsluttet,
+            kilde,
+        )
 
         init {
             check(endringer.isNotEmpty()) {
@@ -587,7 +620,16 @@ internal class Behandlinger private constructor(
                     -> endringer.dokumentsporing.søknadIder()
                 }
 
-            behandlingEventBus.nyBehandling(id, periode, kilde.meldingsreferanseId, kilde.innsendt, kilde.registert, kilde.avsender, type, søknadIder)
+            behandlingEventBus.nyBehandling(
+                id,
+                periode,
+                kilde.meldingsreferanseId,
+                kilde.innsendt,
+                kilde.registert,
+                kilde.avsender,
+                type,
+                søknadIder,
+            )
         }
 
         override fun toString() = "$periode - $tilstand"
@@ -596,9 +638,12 @@ internal class Behandlinger private constructor(
 
         fun periode() = periode
 
-        fun nettobeløpTilBruker(forrigeBehandling: Behandling?): Double = this.utbetalingstidslinje.totalbeløpPerson.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpPerson?.daglig ?: 0.0)
+        fun nettobeløpTilBruker(forrigeBehandling: Behandling?): Double =
+            this.utbetalingstidslinje.totalbeløpPerson.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpPerson?.daglig ?: 0.0)
 
-        fun nettobeløpTilArbeidsgiver(forrigeBehandling: Behandling?): Double = this.utbetalingstidslinje.totalbeløpRefusjon.daglig - (forrigeBehandling?.utbetalingstidslinje?.totalbeløpRefusjon?.daglig ?: 0.0)
+        fun nettobeløpTilArbeidsgiver(forrigeBehandling: Behandling?): Double =
+            this.utbetalingstidslinje.totalbeløpRefusjon.daglig -
+                (forrigeBehandling?.utbetalingstidslinje?.totalbeløpRefusjon?.daglig ?: 0.0)
 
         fun analytiskDatapakke(
             forrigeBehandling: Behandling?,
@@ -653,7 +698,15 @@ internal class Behandlinger private constructor(
                         utbetalingstidslinje = gjeldende.utbetalingstidslinje,
                         grunnlagsdata = gjeldende.grunnlagsdata!!,
                         alleInntektjusteringer = gjeldende.inntektjusteringer,
-                    ).lagUtbetaling(aktivitetslogg, gjeldende.periode, utbetalinger, mottakerRefusjon, mottakerBruker, tilstand is Tilstand.BeregnetRevurdering, gjeldende.arbeidssituasjon)
+                    ).lagUtbetaling(
+                        aktivitetslogg,
+                        gjeldende.periode,
+                        utbetalinger,
+                        mottakerRefusjon,
+                        mottakerBruker,
+                        tilstand is Tilstand.BeregnetRevurdering,
+                        gjeldende.arbeidssituasjon,
+                    )
 
                 this.nyEndring(gjeldende.kopierMedUtbetaling(utbetalingen))
                 utbetalingen
@@ -704,7 +757,12 @@ internal class Behandlinger private constructor(
                         )
                     val sykdomstidslinje = nySykdomstidslinje.subset(oppdatertPeriode)
 
-                    val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(nyeSkjæringstidspunkter, sykdomstidslinje, oppdatertPeriode)
+                    val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) =
+                        bestemSkjæringstidspunkt(
+                            nyeSkjæringstidspunkter,
+                            sykdomstidslinje,
+                            oppdatertPeriode,
+                        )
                     val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(oppdatertPeriode, nyePerioderUtenNavAnsvar)
 
                     gjeldende
@@ -974,7 +1032,8 @@ internal class Behandlinger private constructor(
                 }
             }
 
-            override fun toString() = "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
+            override fun toString() =
+                "$periode - $dokumentsporing - ${sykdomstidslinje.toShortString()}${utbetaling?.let { " - $it" } ?: ""}"
 
             // kopierer dataklassen og lager ny, men sørger for at den nye endringen får ny id og tidsstempel (!!)
             private fun kopierMed(
@@ -1021,7 +1080,12 @@ internal class Behandlinger private constructor(
                 beregnetSkjæringstidspunkter: Skjæringstidspunkter,
                 beregnetPerioderUtenNavAnsvar: List<PeriodeUtenNavAnsvar>,
             ): Endring? {
-                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) = bestemSkjæringstidspunkt(beregnetSkjæringstidspunkter, sykdomstidslinje, periode)
+                val (nyttSkjæringstidspunkt, alleSkjæringstidspunkter) =
+                    bestemSkjæringstidspunkt(
+                        beregnetSkjæringstidspunkter,
+                        sykdomstidslinje,
+                        periode,
+                    )
                 val dagerUtenNavAnsvar = bestemDagerUtenNavAnsvar(periode, beregnetPerioderUtenNavAnsvar)
                 if (nyttSkjæringstidspunkt == this.skjæringstidspunkt && dagerUtenNavAnsvar == this.dagerUtenNavAnsvar) return null
                 return kopierMed(
@@ -1242,9 +1306,12 @@ internal class Behandlinger private constructor(
 
         internal fun erAvvist() = tilstand == Tilstand.RevurdertVedtakAvvist
 
-        internal fun harÅpenBehandling() = this.tilstand in setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
+        internal fun harÅpenBehandling() =
+            this.tilstand in
+                setOf(Tilstand.UberegnetRevurdering, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
 
-        internal fun harIkkeUtbetaling() = this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
+        internal fun harIkkeUtbetaling() =
+            this.tilstand in setOf(Tilstand.Uberegnet, Tilstand.UberegnetOmgjøring, Tilstand.TilInfotrygd, Tilstand.UberegnetAnnullering)
 
         internal fun harOppdragMedUtbetalinger() = gjeldende.utbetaling?.harOppdragMedUtbetalinger() == true
 
@@ -1328,7 +1395,15 @@ internal class Behandlinger private constructor(
             aktivitetslogg: IAktivitetslogg,
             automatiskBehandling: Boolean,
         ) {
-            tilstand.forkastBehandling(this, eventBus, behandlingEventBus, yrkesaktivitet, behandlingkilde, aktivitetslogg, automatiskBehandling)
+            tilstand.forkastBehandling(
+                this,
+                eventBus,
+                behandlingEventBus,
+                yrkesaktivitet,
+                behandlingkilde,
+                aktivitetslogg,
+                automatiskBehandling,
+            )
         }
 
         private fun tilstand(nyTilstand: Tilstand) {
@@ -1363,7 +1438,14 @@ internal class Behandlinger private constructor(
             forrigeVedtak: Behandling,
             aktivitetslogg: IAktivitetslogg,
         ) {
-            tilstand.leggTilAnnullering(this, behandlingEventBus, annullering, vurdering, forrigeVedtak.gjeldende.grunnlagsdata!!, aktivitetslogg)
+            tilstand.leggTilAnnullering(
+                this,
+                behandlingEventBus,
+                annullering,
+                vurdering,
+                forrigeVedtak.gjeldende.grunnlagsdata!!,
+                aktivitetslogg,
+            )
         }
 
         fun dokumentHåndtert(dokumentsporing: Dokumentsporing) = dokumentsporing in this.dokumentsporing
@@ -1401,8 +1483,10 @@ internal class Behandlinger private constructor(
             if (forsikringsvurderingResultat?.dekning?.iVentetid == true) {
                 dagerUtenNavAnsvar.dager.flatMap { periode ->
                     periode
-                        .filterNot { dato -> gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavDag || gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavHelgedag }
-                        .grupperSammenhengendePerioder()
+                        .filterNot { dato ->
+                            gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavDag ||
+                                gjeldende.sykdomstidslinje[dato] is Dag.MeldingTilNavHelgedag
+                        }.grupperSammenhengendePerioder()
                         .mapNotNull { filteredPeriode ->
                             if (forsikringsvurderingResultat.opphørsdato == null) {
                                 filteredPeriode
@@ -1432,7 +1516,9 @@ internal class Behandlinger private constructor(
             check(endringer.none { it.id == endring.id }) { "Endringer må ha unik ID" }
             check(endringer.none { it.tidsstempel == endring.tidsstempel }) { "Endringer må ha unik tidsstempel" }
             check(endringer.none { it.tidsstempel > endring.tidsstempel }) { "Endringer må ha nyere tidsstempel" }
-            check(endring.beregningId == gjeldende.beregningId) { "Den nye endringen har annen beregningId enn forrige, som ikke burde skje på utsiden av inneværende funksjon" }
+            check(endring.beregningId == gjeldende.beregningId) {
+                "Den nye endringen har annen beregningId enn forrige, som ikke burde skje på utsiden av inneværende funksjon"
+            }
 
             // det skal være ny beregningId når vi går fra Beregnet til en Uberegnet tilstand
             if (this.tilstand.erBeregnet() && !nesteTilstand.erBeregnet()) {
@@ -1642,7 +1728,9 @@ internal class Behandlinger private constructor(
 
         internal companion object {
             val List<Behandling>.sykmeldingsperiode get() = first().periode
-            val List<Behandling>.dokumentsporing get() = map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus) ?: emptySet()
+            val List<Behandling>.dokumentsporing get() =
+                map { it.dokumentsporing }.takeUnless { it.isEmpty() }?.reduce(Set<Dokumentsporing>::plus)
+                    ?: emptySet()
 
             fun initiellBehandling(
                 sykdomstidslinje: Sykdomstidslinje,
@@ -1693,7 +1781,13 @@ internal class Behandlinger private constructor(
                 faktaavklartInntekt: ArbeidstakerFaktaavklartInntekt,
                 skalFattesVedtakPåPerioden: Boolean,
             ): VurderbarArbeidstakerFaktaavklartInntekt {
-                val førsteEndringMedInntekten = firstNotNullOf { behandling -> behandling.endringer.firstOrNull { endring -> endring.faktaavklartInntekt == faktaavklartInntekt } }
+                val førsteEndringMedInntekten =
+                    firstNotNullOf { behandling ->
+                        behandling.endringer.firstOrNull { endring ->
+                            endring.faktaavklartInntekt ==
+                                faktaavklartInntekt
+                        }
+                    }
 
                 return VurderbarArbeidstakerFaktaavklartInntekt(
                     faktaavklartInntekt = faktaavklartInntekt,
@@ -1716,7 +1810,9 @@ internal class Behandlinger private constructor(
 
             internal fun List<Behandling>.grunnbeløpsregulert(): Boolean {
                 val gjeldende = gjeldendeEndring().takeIf { it.grunnlagsdata != null } ?: return false
-                val forrige = forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null && it.utbetaling != null } ?: return false
+                val forrige =
+                    forrigeEndringMed { it.tidsstempel < gjeldende.tidsstempel && it.grunnlagsdata != null && it.utbetaling != null }
+                        ?: return false
                 if (forrige.skjæringstidspunkt != gjeldende.skjæringstidspunkt) return false
                 return listOf(forrige.grunnlagsdata!!, gjeldende.grunnlagsdata!!).harUlikeGrunnbeløp()
             }
@@ -1725,7 +1821,13 @@ internal class Behandlinger private constructor(
                 forEach { (vedtaksperiodeId, yrkesaktivitetOgBehandling) ->
                     val yrkesaktivitet = yrkesaktivitetOgBehandling.first.yrkesaktivitetstype
                     val behandling = yrkesaktivitetOgBehandling.second
-                    builder.relevantPeriode(vedtaksperiodeId, behandling.id, behandling.skjæringstidspunkt, behandling.periode, yrkesaktivitet)
+                    builder.relevantPeriode(
+                        vedtaksperiodeId,
+                        behandling.id,
+                        behandling.skjæringstidspunkt,
+                        behandling.periode,
+                        yrkesaktivitet,
+                    )
                 }
 
             internal fun gjenopprett(
@@ -1861,7 +1963,11 @@ internal class Behandlinger private constructor(
                 meldingsreferanseId: MeldingsreferanseId,
                 aktivitetslogg: IAktivitetslogg,
             ) {
-                behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}")
+                behandling.valideringFeilet(
+                    meldingsreferanseId,
+                    aktivitetslogg,
+                    "Behandling ${behandling.id} burde vært ferdig behandlet, men står i tilstand ${behandling.tilstand::class.simpleName}",
+                )
             }
 
             fun validerIkkeFerdigBehandlet(
@@ -1870,7 +1976,11 @@ internal class Behandlinger private constructor(
                 aktivitetslogg: IAktivitetslogg,
             ) {
                 if (behandling.avsluttet == null) return
-                behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} burde ikke ha avsluttet tidspunkt, fordi den ikke er ferdig behandlet")
+                behandling.valideringFeilet(
+                    meldingsreferanseId,
+                    aktivitetslogg,
+                    "Behandling ${behandling.id} burde ikke ha avsluttet tidspunkt, fordi den ikke er ferdig behandlet",
+                )
             }
 
             data object Uberegnet : Tilstand {
@@ -1921,7 +2031,10 @@ internal class Behandlinger private constructor(
                     inntekterForBeregning: Map<Inntektskilde, Beløpstidslinje>,
                 ) {
                     behandling.behandlingLukket(behandlingEventBus, yrkesaktivitet)
-                    behandling.nyEndring(behandling.gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning), AvsluttetUtenVedtak)
+                    behandling.nyEndring(
+                        behandling.gjeldende.kopierMedUtbetalingstidslinje(utbetalingstidslinje, inntekterForBeregning),
+                        AvsluttetUtenVedtak,
+                    )
                 }
             }
 
@@ -2179,7 +2292,11 @@ internal class Behandlinger private constructor(
                     aktivitetslogg: IAktivitetslogg,
                 ) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
-                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(
+                        meldingsreferanseId,
+                        aktivitetslogg,
+                        "Behandling ${behandling.id} er ferdig behandlet i tilstand AvsluttetUtenVedtak, men med uventede tidsstempler.",
+                    )
                 }
             }
 
@@ -2200,7 +2317,11 @@ internal class Behandlinger private constructor(
                     aktivitetslogg: IAktivitetslogg,
                 ) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet != null) return
-                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(
+                        meldingsreferanseId,
+                        aktivitetslogg,
+                        "Behandling ${behandling.id} er ferdig behandlet i tilstand VedtakIverksatt, men med uventede tidsstempler.",
+                    )
                 }
             }
 
@@ -2288,7 +2409,11 @@ internal class Behandlinger private constructor(
                     aktivitetslogg: IAktivitetslogg,
                 ) {
                     if (behandling.avsluttet != null && behandling.vedtakFattet == null) return
-                    behandling.valideringFeilet(meldingsreferanseId, aktivitetslogg, "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.")
+                    behandling.valideringFeilet(
+                        meldingsreferanseId,
+                        aktivitetslogg,
+                        "Behandling ${behandling.id} er ferdig behandlet i tiltand TilInfotrygd, men med uventede tidsstempler.",
+                    )
                 }
             }
         }

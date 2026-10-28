@@ -87,7 +87,13 @@ internal class RevurderKorrigertSøknadFlereArbeidsgivereTest : AbstractDslTest(
             assertVarsler(listOf(Varselkode.RV_SØ_13, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertEquals(1.januar til 31.januar, inspektør.periode(1.vedtaksperiode))
             assertEquals(15.januar til 15.februar, inspektør.periode(2.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
             assertForkastetPeriodeTilstander(2.vedtaksperiode, START, TIL_INFOTRYGD)
             val utbetalingstidslinje = inspektør.utbetalingstidslinjer(1.vedtaksperiode)
             (17.januar til 31.januar).forEach {

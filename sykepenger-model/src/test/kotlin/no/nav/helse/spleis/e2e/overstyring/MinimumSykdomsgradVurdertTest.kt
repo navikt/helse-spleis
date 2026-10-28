@@ -129,7 +129,10 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
         a1 {
             settOppAvslagPåMinimumSykdomsgrad()
             assertThrows<IllegalStateException> {
-                håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = listOf(januar), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+                håndterMinimumSykdomsgradVurdert(
+                    perioderMedMinimumSykdomsgradVurdertOK = listOf(januar),
+                    perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar),
+                )
             }
         }
     }
@@ -165,7 +168,10 @@ internal class MinimumSykdomsgradVurdertTest : AbstractDslTest() {
                     .utbetalingstidslinjer(1.vedtaksperiode)
                     .inspektør.navdager.size,
             )
-            håndterMinimumSykdomsgradVurdert(perioderMedMinimumSykdomsgradVurdertOK = emptyList(), perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar))
+            håndterMinimumSykdomsgradVurdert(
+                perioderMedMinimumSykdomsgradVurdertOK = emptyList(),
+                perioderMedMinimumSykdomsgradVurdertIkkeOK = listOf(januar),
+            )
             håndterYtelser(1.vedtaksperiode)
             assertEquals(
                 11,

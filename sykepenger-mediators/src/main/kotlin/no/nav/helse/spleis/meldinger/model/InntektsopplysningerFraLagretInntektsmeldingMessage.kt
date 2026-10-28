@@ -20,7 +20,8 @@ internal class InntektsopplysningerFraLagretInntektsmeldingMessage(
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val inntektsmeldingMeldingsreferanseId = MeldingsreferanseId(packet["inntektsmeldingMeldingsreferanseId"].asText().toUUID())
     private val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-    private val inntektsmeldingOrganisasjonsnummer = packet["inntektsmeldingOrganisasjonsnummer"].takeUnless { it.isMissingOrNull() }?.asText() ?: organisasjonsnummer
+    private val inntektsmeldingOrganisasjonsnummer =
+        packet["inntektsmeldingOrganisasjonsnummer"].takeUnless { it.isMissingOrNull() }?.asText() ?: organisasjonsnummer
 
     override fun behandle(
         mediator: IHendelseMediator,

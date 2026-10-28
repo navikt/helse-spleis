@@ -122,7 +122,8 @@ internal class InntektsmeldingTest {
             ),
             førsteFraværsdag = 25.januar,
         )
-        val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 20.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val tidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 20.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, tidslinje.førsteDag())
         assertEquals(18.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[1.januar] is Arbeidsgiverdag)
@@ -141,7 +142,9 @@ internal class InntektsmeldingTest {
             ),
             førsteFraværsdag = 25.januar,
         )
-        val tidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 31.desember(2017) til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val tidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 31.desember(2017) til 31.januar)?.sykdomstidslinje
+                ?: fail { "forventet sykdomstidslinje" }
         assertEquals(31.desember(2017), tidslinje.førsteDag())
         assertEquals(18.januar, tidslinje.sisteDag())
         assertTrue(tidslinje[31.desember(2017)] is FriskHelgedag)
@@ -161,7 +164,8 @@ internal class InntektsmeldingTest {
             ),
             førsteFraværsdag = 1.januar,
         )
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 10.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 10.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(24.januar, nyTidslinje.periode()?.endInclusive)
     }
@@ -172,7 +176,8 @@ internal class InntektsmeldingTest {
             arbeidsgiverperioder = listOf(Periode(1.januar, 2.januar), Periode(15.januar, 17.januar)),
             førsteFraværsdag = 1.januar,
         )
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 10.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 10.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(1.januar, nyTidslinje.periode()?.start)
         assertEquals(17.januar, nyTidslinje.periode()?.endInclusive)
     }
@@ -326,7 +331,8 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 22.januar,
         )
         assertEquals(5.januar til 21.januar, dager.inspektør.periode)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 5.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 5.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[5.januar]::class)
         assertEquals(ArbeidsgiverHelgedag::class, nyTidslinje[20.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[21.januar]::class)
@@ -360,7 +366,8 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 21.januar,
         )
         assertEquals(4.januar til 20.januar, dager.inspektør.periode)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
@@ -374,7 +381,8 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 22.januar,
         )
         assertEquals(4.januar til 21.januar, dager.inspektør.periode)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(FriskHelgedag::class, nyTidslinje[20.januar]::class)
@@ -389,7 +397,8 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 22.januar,
         )
         assertEquals(3.januar til 18.januar, dager.inspektør.periode)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 3.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 3.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[3.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[18.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[19.januar]::class)
@@ -405,7 +414,8 @@ internal class InntektsmeldingTest {
             førsteFraværsdag = 23.januar,
         )
         assertEquals(4.januar til 19.januar, dager.inspektør.periode)
-        val nyTidslinje = dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
+        val nyTidslinje =
+            dager.bitAvInntektsmelding(Aktivitetslogg(), 4.januar til 31.januar)?.sykdomstidslinje ?: fail { "forventet sykdomstidslinje" }
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[4.januar]::class)
         assertEquals(Arbeidsgiverdag::class, nyTidslinje[19.januar]::class)
         assertEquals(UkjentDag::class, nyTidslinje[20.januar]::class)

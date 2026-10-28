@@ -43,6 +43,8 @@ internal abstract class RiverMappingTest<H : HendelseMessage>(
         forrigeHendelseMessage = null
         rapid.sendTestMessage(json)
         checkNotNull(forrigeHendelseMessage) { "Det ble ikke registrert noen hendelse fra denne meldingen!" }
-        return checkNotNull(hendelse.safeCast(forrigeHendelseMessage)) { "Forventet ${hendelse.simpleName}, men var ${hendelse::class.simpleName}" }
+        return checkNotNull(
+            hendelse.safeCast(forrigeHendelseMessage),
+        ) { "Forventet ${hendelse.simpleName}, men var ${hendelse::class.simpleName}" }
     }
 }

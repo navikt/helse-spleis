@@ -99,15 +99,30 @@ internal class V320ManglendeRefusjonsopplysninger : JsonMigration(version = 320)
             when {
                 !path("skjønnsmessigFastsatt").isNull ->
                     path("skjønnsmessigFastsatt").let {
-                        FullRefusjon(månedligBeløp = it.path("beløp").asDouble(), tidsstempel = it.path("tidsstempel").asText(), meldingsreferanseId = it.path("hendelseId").asText(), avsender = "SAKSBEHANDLER")
+                        FullRefusjon(
+                            månedligBeløp = it.path("beløp").asDouble(),
+                            tidsstempel = it.path("tidsstempel").asText(),
+                            meldingsreferanseId = it.path("hendelseId").asText(),
+                            avsender = "SAKSBEHANDLER",
+                        )
                     }
                 !path("korrigertInntekt").isNull ->
                     path("korrigertInntekt").let {
-                        FullRefusjon(månedligBeløp = it.path("beløp").asDouble(), tidsstempel = it.path("tidsstempel").asText(), meldingsreferanseId = it.path("hendelseId").asText(), avsender = "SAKSBEHANDLER")
+                        FullRefusjon(
+                            månedligBeløp = it.path("beløp").asDouble(),
+                            tidsstempel = it.path("tidsstempel").asText(),
+                            meldingsreferanseId = it.path("hendelseId").asText(),
+                            avsender = "SAKSBEHANDLER",
+                        )
                     }
                 else ->
                     path("inntektsopplysning").let {
-                        FullRefusjon(månedligBeløp = it.path("beløp").asDouble(), tidsstempel = it.path("tidsstempel").asText(), meldingsreferanseId = it.path("hendelseId").asText(), avsender = "ARBEIDSGIVER")
+                        FullRefusjon(
+                            månedligBeløp = it.path("beløp").asDouble(),
+                            tidsstempel = it.path("tidsstempel").asText(),
+                            meldingsreferanseId = it.path("hendelseId").asText(),
+                            avsender = "ARBEIDSGIVER",
+                        )
                     }
             }
     }

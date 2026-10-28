@@ -55,7 +55,13 @@ internal class DelvisRefusjonRevurderingTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inspektør.skjæringstidspunkt(1.vedtaksperiode), 50000.månedlig)
             håndterYtelser(1.vedtaksperiode)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+            )
         }
     }
 

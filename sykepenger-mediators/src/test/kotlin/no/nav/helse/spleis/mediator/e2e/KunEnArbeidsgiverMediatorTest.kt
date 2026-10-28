@@ -75,7 +75,13 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.FERIE)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+        )
     }
 
     @Test
@@ -86,7 +92,13 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
             fravær = listOf(FravarDTO(19.januar, 26.januar, FravarstypeDTO.PERMISJON)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-        assertTilstander(0, "AVVENTER_INFOTRYGDHISTORIKK", "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE", "AVVENTER_VILKÅRSPRØVING")
+        assertTilstander(
+            0,
+            "AVVENTER_INFOTRYGDHISTORIKK",
+            "AVVENTER_INNTEKTSMELDING",
+            "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_VILKÅRSPRØVING",
+        )
     }
 
     @Test
@@ -215,7 +227,9 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         sendVilkårsgrunnlag(0)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
-        sendOverstyringTidslinje(listOf(ManuellOverskrivingDag(25.januar, Dagtype.Permisjonsdag), ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)))
+        sendOverstyringTidslinje(
+            listOf(ManuellOverskrivingDag(25.januar, Dagtype.Permisjonsdag), ManuellOverskrivingDag(26.januar, Dagtype.Feriedag)),
+        )
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         sendUtbetalingsgodkjenning(0, true)
@@ -310,7 +324,10 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `Behandler melding hvis den tidligere har prøvd å behandle melding, men kræsjet`() {
-        val (ugyldigSøknadId, ugyldigSøknad) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100))
+        val (ugyldigSøknadId, ugyldigSøknad) =
+            meldingsfabrikk.lagNySøknad(
+                SoknadsperiodeDTO(fom = 25.januar, tom = 1.januar, sykmeldingsgrad = 100),
+            )
         val meldingId = MeldingsreferanseId(ugyldigSøknadId.toUUID())
         assertThrows<IllegalArgumentException> {
             testRapid.sendTestMessage(ugyldigSøknad)

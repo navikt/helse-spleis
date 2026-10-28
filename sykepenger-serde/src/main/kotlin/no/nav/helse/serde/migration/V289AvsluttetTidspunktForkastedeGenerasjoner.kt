@@ -32,11 +32,22 @@ internal class V289AvsluttetTidspunktForkastedeGenerasjoner : JsonMigration(vers
         val generasjonerNode = vedtaksperiode.path("generasjoner") as ArrayNode
         val sisteGenerasjon = generasjonerNode.last() as ObjectNode
         if (sisteGenerasjon.path("tilstand").asText() != "TIL_INFOTRYGD") {
-            return sikkerLogg.info("[V289] siste generasjon er ikke TIL_INFOTRYGD for ${vedtaksperiode.path("fom").asText()} - ${vedtaksperiode.path("tom").asText()} {}, {}, {}", kv("aktørId", aktørId), kv("orgnr", orgnr), kv("vedtaksperiodeId", vedtaksperiode.path("id").asText()), kv("fødselsnummer", fnr))
+            return sikkerLogg.info(
+                "[V289] siste generasjon er ikke TIL_INFOTRYGD for ${vedtaksperiode.path(
+                    "fom",
+                ).asText()} - ${vedtaksperiode.path("tom").asText()} {}, {}, {}",
+                kv("aktørId", aktørId),
+                kv("orgnr", orgnr),
+                kv("vedtaksperiodeId", vedtaksperiode.path("id").asText()),
+                kv("fødselsnummer", fnr),
+            )
         }
 
         if (sisteGenerasjon.hasNonNull("avsluttet")) return
-        sikkerLogg.info("[V289] setter avsluttettidspunkt på generasjon ${sisteGenerasjon.path("id").asText()} for {}", kv("aktørId", aktørId))
+        sikkerLogg.info(
+            "[V289] setter avsluttettidspunkt på generasjon ${sisteGenerasjon.path("id").asText()} for {}",
+            kv("aktørId", aktørId),
+        )
         sisteGenerasjon.put(
             "avsluttet",
             sisteGenerasjon

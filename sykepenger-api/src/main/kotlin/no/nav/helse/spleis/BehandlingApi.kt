@@ -104,7 +104,14 @@ private fun Utbetalingsdag.tilResponse(refusjonstidslinje: BeløpstidslinjeDto):
                             AvsenderDto.SYKMELDT -> "SYKMELDT"
                             AvsenderDto.SYSTEM -> "SYSTEM"
                         },
-                    sasInternInntektsmeldingReferanse = if (it.kilde.avsender == AvsenderDto.ARBEIDSGIVER) it.kilde.meldingsreferanseId.id else null,
+                    sasInternInntektsmeldingReferanse =
+                        if (it.kilde.avsender ==
+                            AvsenderDto.ARBEIDSGIVER
+                        ) {
+                            it.kilde.meldingsreferanseId.id
+                        } else {
+                            null
+                        },
                 )
             },
     )

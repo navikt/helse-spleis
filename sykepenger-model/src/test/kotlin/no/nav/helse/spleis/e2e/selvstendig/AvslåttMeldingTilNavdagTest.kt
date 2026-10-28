@@ -71,7 +71,12 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
 
             assertEquals("ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toShortString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
-            assertEquals(Avslagstidslinje(1.januar.somPeriode() to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
+            assertEquals(
+                Avslagstidslinje(
+                    1.januar.somPeriode() to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler"),
+                ),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje,
+            )
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), begrunnelse(1.januar))
                 assertEquals(listOf(1.januar), avvistedatoer)
@@ -114,7 +119,12 @@ internal class AvslåttMeldingTilNavdagTest : AbstractDslTest() {
 
             assertEquals("ARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør.sykdomstidslinje.toString())
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 2.januar, listOf(2.januar til 17.januar))
-            assertEquals(Avslagstidslinje(avslagsperiode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
+            assertEquals(
+                Avslagstidslinje(
+                    avslagsperiode to Avslagstidslinje.Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler"),
+                ),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje,
+            )
 
             with(inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør) {
                 assertEquals(avslagsperiode.iterator().asSequence().toList(), avvistedatoer)

@@ -50,7 +50,9 @@ internal class OverstyrArbeidsgiveropplysningerMessage(
     )
 
     private companion object {
-        private fun JsonMessage.arbeidsgiveropplysninger(skjæringstidspunkt: LocalDate): List<OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning> {
+        private fun JsonMessage.arbeidsgiveropplysninger(
+            skjæringstidspunkt: LocalDate,
+        ): List<OverstyrArbeidsgiveropplysninger.KorrigertArbeidsgiverInntektsopplysning> {
             val arbeidsgivere = get("arbeidsgivere").takeUnless { it.isMissingOrNull() } ?: return emptyList()
             val id = meldingsreferanseId()
             val opprettet = get("@opprettet").asLocalDateTime()
@@ -111,7 +113,12 @@ internal class OverstyrArbeidsgiveropplysningerMessage(
                     val tom = node.path("tom").asOptionalLocalDate()
                     if (tom == null) strekkbar = true
                     val beløp = node.path("beløp").asDouble().månedlig
-                    val refusjonstidslinje = Beløpstidslinje.fra(fom til (tom ?: fom), beløp, Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet))
+                    val refusjonstidslinje =
+                        Beløpstidslinje.fra(
+                            fom til (tom ?: fom),
+                            beløp,
+                            Kilde(meldingsreferanseId, SAKSBEHANDLER, opprettet),
+                        )
                     refusjonstidslinje + acc
                 }
             return refusjonstidslinje to strekkbar

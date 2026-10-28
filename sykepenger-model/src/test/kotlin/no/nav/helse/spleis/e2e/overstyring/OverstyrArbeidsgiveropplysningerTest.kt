@@ -310,13 +310,28 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(februar, INNTEKT), inspektør.refusjon(2.vedtaksperiode), ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, INNTEKT),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(februar, INNTEKT),
+                inspektør.refusjon(2.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
             assertBeløpstidslinje(Beløpstidslinje.fra(mars, INNTEKT / 2, overstyringId.saksbehandler), inspektør.refusjon(3.vedtaksperiode))
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET)
             assertTilstander(2.vedtaksperiode, AVSLUTTET)
-            assertTilstander(3.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                3.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
         }
     }
 
@@ -352,7 +367,18 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                     meldingsreferanseId = UUID.randomUUID(),
                     arbeidsgiveropplysninger =
                         listOf(
-                            OverstyrtArbeidsgiveropplysning(a1, INNTEKT / 2, refusjonsopplysninger = listOf(Triple(1.januar, null, INNTEKT / 2))),
+                            OverstyrtArbeidsgiveropplysning(
+                                a1,
+                                INNTEKT / 2,
+                                refusjonsopplysninger =
+                                    listOf(
+                                        Triple(
+                                            1.januar,
+                                            null,
+                                            INNTEKT / 2,
+                                        ),
+                                    ),
+                            ),
                         ),
                 )
             }
@@ -382,7 +408,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         val vilkårsgrunnlagHistorikkInnslagFørOverstyring = inspektør(a1).vilkårsgrunnlagHistorikkInnslag().size
         val overstyringId = UUID.randomUUID()
         val a3RefusjonsopplysningerFørOverstyring = a3 { inspektør.refusjon(1.vedtaksperiode) }
-        a3 { assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver), a3RefusjonsopplysningerFørOverstyring, ignoreMeldingsreferanseId = true) }
+        a3 {
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver),
+                a3RefusjonsopplysningerFørOverstyring,
+                ignoreMeldingsreferanseId = true,
+            )
+        }
 
         håndterOverstyrArbeidsgiveropplysninger(
             skjæringstidspunkt = 1.januar,
@@ -426,18 +458,36 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 3) {
                 assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
-                assertInntektsgrunnlag(a2, inntektPerArbeidsgiver, inntektPerArbeidsgiver * 1.25, forventetKorrigertInntekt = inntektPerArbeidsgiver * 1.25)
-                assertInntektsgrunnlag(a3, inntektPerArbeidsgiver, inntektPerArbeidsgiver * 1.5, forventetKorrigertInntekt = inntektPerArbeidsgiver * 1.5)
+                assertInntektsgrunnlag(
+                    a2,
+                    inntektPerArbeidsgiver,
+                    inntektPerArbeidsgiver * 1.25,
+                    forventetKorrigertInntekt =
+                        inntektPerArbeidsgiver * 1.25,
+                )
+                assertInntektsgrunnlag(
+                    a3,
+                    inntektPerArbeidsgiver,
+                    inntektPerArbeidsgiver * 1.5,
+                    forventetKorrigertInntekt =
+                        inntektPerArbeidsgiver * 1.5,
+                )
             }
             assertBeløpstidslinje(
-                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, INGEN),
+                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) +
+                    SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, INGEN),
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true,
             )
         }
 
         // a2
-        a2 { assertBeløpstidslinje(Beløpstidslinje.fra(januar, inntektPerArbeidsgiver * 1.25, overstyringId.saksbehandler), inspektør.refusjon(1.vedtaksperiode)) }
+        a2 {
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(januar, inntektPerArbeidsgiver * 1.25, overstyringId.saksbehandler),
+                inspektør.refusjon(1.vedtaksperiode),
+            )
+        }
 
         // a3
         a3 { assertBeløpstidslinje(a3RefusjonsopplysningerFørOverstyring, inspektør.refusjon(1.vedtaksperiode)) }
@@ -508,7 +558,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
                 assertInntektsgrunnlag(a2, inntektPerArbeidsgiver)
             }
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver), a1RefusjonFørOverstyring, ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver),
+                a1RefusjonFørOverstyring,
+                ignoreMeldingsreferanseId = true,
+            )
         }
 
         håndterOverstyrArbeidsgiveropplysninger(
@@ -545,14 +599,21 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         a1 {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
-                assertInntektsgrunnlag(a2, inntektPerArbeidsgiver, inntektPerArbeidsgiver * 1.5, forventetKorrigertInntekt = inntektPerArbeidsgiver * 1.5)
+                assertInntektsgrunnlag(
+                    a2,
+                    inntektPerArbeidsgiver,
+                    inntektPerArbeidsgiver * 1.5,
+                    forventetKorrigertInntekt =
+                        inntektPerArbeidsgiver * 1.5,
+                )
             }
             assertBeløpstidslinje(a1RefusjonFørOverstyring, inspektør.refusjon(1.vedtaksperiode))
         }
 
         a2 {
             assertBeløpstidslinje(
-                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
+                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) +
+                    SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true,
             )
@@ -571,7 +632,13 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
         a2 { assertSisteTilstand(2.vedtaksperiode, AVSLUTTET) }
 
         val refusjonsopplysningerFørOverstyringA1 = a1 { inspektør.refusjon(1.vedtaksperiode) + inspektør.refusjon(2.vedtaksperiode) }
-        a1 { assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(1.januar til 28.februar, inntektPerArbeidsgiver), refusjonsopplysningerFørOverstyringA1, ignoreMeldingsreferanseId = true) }
+        a1 {
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(1.januar til 28.februar, inntektPerArbeidsgiver),
+                refusjonsopplysningerFørOverstyringA1,
+                ignoreMeldingsreferanseId = true,
+            )
+        }
 
         val overstyringId = UUID.randomUUID()
         håndterOverstyrArbeidsgiveropplysninger(
@@ -603,15 +670,31 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterYtelser(1.vedtaksperiode)
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
-                assertInntektsgrunnlag(a1, inntektPerArbeidsgiver, inntektPerArbeidsgiver * 1.5, forventetKorrigertInntekt = inntektPerArbeidsgiver * 1.5)
+                assertInntektsgrunnlag(
+                    a1,
+                    inntektPerArbeidsgiver,
+                    inntektPerArbeidsgiver * 1.5,
+                    forventetKorrigertInntekt =
+                        inntektPerArbeidsgiver * 1.5,
+                )
                 assertInntektsgrunnlag(a2, inntektPerArbeidsgiver)
             }
-            assertBeløpstidslinje(refusjonsopplysningerFørOverstyringA1, inspektør.refusjon(1.vedtaksperiode) + inspektør.refusjon(2.vedtaksperiode))
+            assertBeløpstidslinje(
+                refusjonsopplysningerFørOverstyringA1,
+                inspektør.refusjon(1.vedtaksperiode) + inspektør.refusjon(2.vedtaksperiode),
+            )
         }
 
         a2 {
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver), inspektør.refusjon(1.vedtaksperiode), ignoreMeldingsreferanseId = true)
-            assertBeløpstidslinje(Beløpstidslinje.fra(februar, inntektPerArbeidsgiver / 2, overstyringId.saksbehandler), inspektør.refusjon(2.vedtaksperiode))
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver),
+                inspektør.refusjon(1.vedtaksperiode),
+                ignoreMeldingsreferanseId = true,
+            )
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(februar, inntektPerArbeidsgiver / 2, overstyringId.saksbehandler),
+                inspektør.refusjon(2.vedtaksperiode),
+            )
         }
 
         a1 {
@@ -769,7 +852,11 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
                 assertInntektsgrunnlag(a2, inntektPerArbeidsgiver)
             }
-            assertBeløpstidslinje(ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver), a1RefusjonFørOverstyring, ignoreMeldingsreferanseId = true)
+            assertBeløpstidslinje(
+                ARBEIDSGIVER.beløpstidslinje(januar, inntektPerArbeidsgiver),
+                a1RefusjonFørOverstyring,
+                ignoreMeldingsreferanseId = true,
+            )
         }
 
         håndterOverstyrArbeidsgiveropplysninger(
@@ -797,12 +884,19 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 2) {
                 assertInntektsgrunnlag(a1, inntektPerArbeidsgiver)
-                assertInntektsgrunnlag(a2, inntektPerArbeidsgiver, inntektPerArbeidsgiver * 1.5, forventetKorrigertInntekt = inntektPerArbeidsgiver * 1.5)
+                assertInntektsgrunnlag(
+                    a2,
+                    inntektPerArbeidsgiver,
+                    inntektPerArbeidsgiver * 1.5,
+                    forventetKorrigertInntekt =
+                        inntektPerArbeidsgiver * 1.5,
+                )
             }
         }
         a2 {
             assertBeløpstidslinje(
-                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) + SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
+                ARBEIDSGIVER.beløpstidslinje(1.januar til 20.januar, inntektPerArbeidsgiver) +
+                    SAKSBEHANDLER.beløpstidslinje(21.januar til 31.januar, inntektPerArbeidsgiver * 1.5),
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true,
             )
@@ -874,7 +968,10 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
             håndterSimulering(2.vedtaksperiode)
 
             assertBeløpstidslinje(Beløpstidslinje.fra(januar, INNTEKT, im1.arbeidsgiver), inspektør.refusjon(1.vedtaksperiode))
-            assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver),
+                inspektør.refusjon(2.vedtaksperiode),
+            )
 
             nullstillTilstandsendringer()
 
@@ -888,7 +985,10 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                     ),
             )
 
-            assertBeløpstidslinje(Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver), inspektør.refusjon(2.vedtaksperiode))
+            assertBeløpstidslinje(
+                Beløpstidslinje.fra(5.februar til 28.februar, INNTEKT, im2.arbeidsgiver),
+                inspektør.refusjon(2.vedtaksperiode),
+            )
 
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertTilstander(2.vedtaksperiode, AVVENTER_GODKJENNING)

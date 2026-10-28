@@ -21,7 +21,11 @@ internal class HarFlereArbeidsforholdTest : AbstractDslTest() {
     fun `Får ikke varsel om flere arbeidsforhold når det ikke er flere arbeidsforhold`() {
         a1 {
             håndterSøknad(januar)
-            håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), arbeidsforholdId = "1")
+            håndterArbeidsgiveropplysninger(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                arbeidsgiverperioder = listOf(1.januar til 16.januar),
+                arbeidsforholdId = "1",
+            )
         }
     }
 
@@ -30,7 +34,15 @@ internal class HarFlereArbeidsforholdTest : AbstractDslTest() {
         a1 {
             val søknadId = UUID.randomUUID()
             håndterSøknad(januar, søknadId = søknadId)
-            val imId = håndterArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, arbeidsgiverperioder = listOf(1.januar til 16.januar), arbeidsforholdId = "1")
+            val imId =
+                håndterArbeidsgiveropplysninger(
+                    vedtaksperiodeId = 1.vedtaksperiode,
+                    arbeidsgiverperioder =
+                        listOf(
+                            1.januar til 16.januar,
+                        ),
+                    arbeidsforholdId = "1",
+                )
             assertSisteForkastetTilstand(1.vedtaksperiode, TilstandType.TIL_INFOTRYGD)
             assertFunksjonellFeil(RV_IM_28, 1.vedtaksperiode.filter())
             val vpForkastetEvent = observatør.forkastet(1.vedtaksperiode)
@@ -46,7 +58,11 @@ internal class HarFlereArbeidsforholdTest : AbstractDslTest() {
     fun `Får varsel om flere arbeidsforhold når det er flere arbeidsforhold på korrigerte arbeidsgiveropplysninger`() {
         a1 {
             nyttVedtak(januar)
-            håndterKorrigerteArbeidsgiveropplysninger(vedtaksperiodeId = 1.vedtaksperiode, Arbeidsgiveropplysning.HarFlereArbeidsforhold, Arbeidsgiveropplysning.OppgittInntekt(INNTEKT))
+            håndterKorrigerteArbeidsgiveropplysninger(
+                vedtaksperiodeId = 1.vedtaksperiode,
+                Arbeidsgiveropplysning.HarFlereArbeidsforhold,
+                Arbeidsgiveropplysning.OppgittInntekt(INNTEKT),
+            )
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
             assertVarsler(1.vedtaksperiode, RV_IM_28, RV_IM_4)
         }

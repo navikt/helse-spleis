@@ -210,7 +210,10 @@ internal class RevurderInntektTest : AbstractDslTest() {
 
             assertVarsler(listOf(Varselkode.RV_SV_1, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
             assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.fagsystemId, inspektør.utbetaling(1).arbeidsgiverOppdrag.fagsystemId)
-            assertEquals(inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(), -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp())
+            assertEquals(
+                inspektør.utbetaling(0).arbeidsgiverOppdrag.nettoBeløp(),
+                -1 * inspektør.utbetaling(1).arbeidsgiverOppdrag.nettoBeløp(),
+            )
         }
     }
 
@@ -332,7 +335,13 @@ internal class RevurderInntektTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(skjæringstidspunkt = 1.januar, INNTEKT * 1.05)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                TIL_UTBETALING,
+                AVVENTER_REVURDERING_TIL_UTBETALING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode])
         }
     }

@@ -49,7 +49,12 @@ internal class V323FikseFomPåUtbetalinger : JsonMigration(323) {
                                     // fom har endret seg ... spørsmålet er: var det riktig?
                                     if (utbetaling.tidligsteOppdragslinjefom == fomForutUtbetalingen.tidligsteOppdragslinjefom) {
                                         // fom har nok endret seg til feil ja
-                                        sikkerlogg.info("fikser fom for utbetaling ${utbetaling.underliggende.path("id").asText()} fra ${utbetaling.fom} til ${fomForutUtbetalingen.fom} for {}", kv("aktørId", jsonNode.path("aktørId").asText()))
+                                        sikkerlogg.info(
+                                            "fikser fom for utbetaling ${utbetaling.underliggende.path(
+                                                "id",
+                                            ).asText()} fra ${utbetaling.fom} til ${fomForutUtbetalingen.fom} for {}",
+                                            kv("aktørId", jsonNode.path("aktørId").asText()),
+                                        )
                                         utbetaling.fom = fomForutUtbetalingen.fom
                                         (utbetaling.underliggende as ObjectNode).put("fom", fomForutUtbetalingen.fom.toString())
                                     }

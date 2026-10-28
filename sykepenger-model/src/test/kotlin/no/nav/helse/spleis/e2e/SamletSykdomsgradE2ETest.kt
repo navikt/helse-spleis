@@ -29,7 +29,10 @@ internal class SamletSykdomsgradE2ETest : AbstractDslTest() {
         a1 {
             håndterYtelser(2.vedtaksperiode)
             assertVarsel(RV_VV_4, 2.vedtaksperiode.filter())
-            assertEquals(listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar), inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistedatoer)
+            assertEquals(
+                listOf(5.februar, 6.februar, 7.februar, 8.februar, 9.februar),
+                inspektør.utbetalingstidslinjer(2.vedtaksperiode).inspektør.avvistedatoer,
+            )
         }
     }
 

@@ -12,7 +12,8 @@ class Friperiode(
     fom: LocalDate,
     tom: LocalDate,
 ) : Infotrygdperiode(fom, tom) {
-    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje = Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
+    override fun sykdomstidslinje(kilde: Hendelseskilde): Sykdomstidslinje =
+        Sykdomstidslinje.feriedager(periode.start, periode.endInclusive, kilde)
 
     override fun utbetalingstidslinje(): Utbetalingstidslinje =
         Utbetalingstidslinje

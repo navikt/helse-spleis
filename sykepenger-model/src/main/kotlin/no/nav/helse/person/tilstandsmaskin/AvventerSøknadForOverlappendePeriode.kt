@@ -16,7 +16,10 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
     override val type: TilstandType = TilstandType.AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE
 
     override fun timeout() =
-        Timeout.Etter(Period.ofMonths(3), Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere")) { vedtaksperiode: Vedtaksperiode, _: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg ->
+        Timeout.Etter(
+            Period.ofMonths(3),
+            Flagg("forkastOverlappendeSykmeldingsperioderAndreArbeidsgivere"),
+        ) { vedtaksperiode: Vedtaksperiode, _: EventBus, påminnelse: Påminnelse, aktivitetslogg: IAktivitetslogg ->
             aktivitetslogg.varsel(Varselkode.RV_SY_4)
             vedtaksperiode.person.fjernSykmeldingsperiode(vedtaksperiode.periode)
             Revurderingseventyr.søknaderSomAldriKom(påminnelse, vedtaksperiode.periode)
@@ -42,7 +45,9 @@ internal data object AvventerSøknadForOverlappendePeriode : Vedtaksperiodetilst
         aktivitetslogg: IAktivitetslogg,
     ) {
         if (vedtaksperiode.avventerSøknad()) {
-            return aktivitetslogg.info("Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden")
+            return aktivitetslogg.info(
+                "Gjenopptar ikke behandling fordi minst én arbeidsgiver venter på søknad for sykmelding som er før eller overlapper med vedtaksperioden",
+            )
         }
         vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt(vedtaksperiode))
     }

@@ -31,15 +31,36 @@ internal class InntektsmeldingTilRefusjonstidslinjeTest {
 
     @Test
     fun `Endring av refusjon oppgitt etter opphørsdato`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(1.januar, 1000.daglig, opphørsdato = 15.februar, endringerIRefusjon = mapOf(28.februar to 500.daglig))
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                1.januar,
+                1000.daglig,
+                opphørsdato = 15.februar,
+                endringerIRefusjon =
+                    mapOf(
+                        28.februar to 500.daglig,
+                    ),
+            )
 
         assertEquals(16.februar, refusjonstidslinje.last().dato)
-        assertEquals(Beløpstidslinje.fra(1.januar til 15.februar, 1000.daglig, kilde) + Beløpstidslinje.fra(16.februar.somPeriode(), INGEN, kilde), refusjonstidslinje)
+        assertEquals(
+            Beløpstidslinje.fra(1.januar til 15.februar, 1000.daglig, kilde) + Beløpstidslinje.fra(16.februar.somPeriode(), INGEN, kilde),
+            refusjonstidslinje,
+        )
     }
 
     @Test
     fun `Endring av refusjon oppgitt før utløpet av en oppstykket agp`() {
-        val refusjonstidslinje = refusjonstidslinjeFra(15.januar, 1000.daglig, opphørsdato = null, endringerIRefusjon = mapOf(15.januar to 500.daglig))
+        val refusjonstidslinje =
+            refusjonstidslinjeFra(
+                15.januar,
+                1000.daglig,
+                opphørsdato = null,
+                endringerIRefusjon =
+                    mapOf(
+                        15.januar to 500.daglig,
+                    ),
+            )
         assertEquals(15.januar, refusjonstidslinje.last().dato)
         assertEquals(Beløpstidslinje.fra(15.januar.somPeriode(), 1000.daglig, kilde), refusjonstidslinje)
     }

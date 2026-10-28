@@ -93,7 +93,14 @@ class Sykdomstidslinje private constructor(
     /**
      * Uten å utvide tidslinjen
      */
-    internal fun fremTilOgMed(dato: LocalDate) = if (periode == null || dato < førsteDag()) Sykdomstidslinje() else subset(førsteDag() til dato)
+    internal fun fremTilOgMed(dato: LocalDate) =
+        if (periode == null ||
+            dato < førsteDag()
+        ) {
+            Sykdomstidslinje()
+        } else {
+            subset(førsteDag() til dato)
+        }
 
     internal fun fraOgMed(dato: LocalDate) = Sykdomstidslinje(dager.tailMap(dato).toMap())
 

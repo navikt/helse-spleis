@@ -87,7 +87,12 @@ internal object KontraktAssertions {
             return
         }
         val sisteKey = key.split(".").last()
-        val objekt = key.substringBeforeLast(".").split(".").fold(this as JsonNode) { result, nestedKey -> result.path(nestedKey) } as ObjectNode
+        val objekt =
+            key
+                .substringBeforeLast(
+                    ".",
+                ).split(".")
+                .fold(this as JsonNode) { result, nestedKey -> result.path(nestedKey) } as ObjectNode
         assertDoesNotThrow { validation(objekt.path(sisteKey)) }
         objekt.remove(sisteKey)
     }

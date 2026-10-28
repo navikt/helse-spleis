@@ -39,14 +39,24 @@ internal class Behovssamler : EventSubscription {
     // Det kan være to utbetalingsbehov & simuleringsbehov, et per oppdrag (Refusjon/ Sykmeldt) - derfor spesialhåndtert
     internal fun utbetalingsbehov(): Pair<EventSubscription.UtbetalingEvent?, EventSubscription.UtbetalingEvent?> {
         val førsteBehov = sisteEventuelle<EventSubscription.UtbetalingEvent>() ?: return null to null
-        val andreBehov = behov.filterIsInstance<EventSubscription.UtbetalingEvent>().lastOrNull { it.utbetalingId == førsteBehov.utbetalingId && it.oppdragsdetaljer.fagområde != førsteBehov.oppdragsdetaljer.fagområde }
+        val andreBehov =
+            behov.filterIsInstance<EventSubscription.UtbetalingEvent>().lastOrNull {
+                it.utbetalingId ==
+                    førsteBehov.utbetalingId &&
+                    it.oppdragsdetaljer.fagområde != førsteBehov.oppdragsdetaljer.fagområde
+            }
         andreBehov?.let { behov.remove(it) }
         return førsteBehov to andreBehov
     }
 
     internal fun simuleringsbehov(): Pair<EventSubscription.SimuleringEvent?, EventSubscription.SimuleringEvent?> {
         val førsteBehov = sisteEventuelle<EventSubscription.SimuleringEvent>() ?: return null to null
-        val andreBehov = behov.filterIsInstance<EventSubscription.SimuleringEvent>().lastOrNull { it.utbetalingId == førsteBehov.utbetalingId && it.oppdragsdetaljer.fagområde != førsteBehov.oppdragsdetaljer.fagområde }
+        val andreBehov =
+            behov.filterIsInstance<EventSubscription.SimuleringEvent>().lastOrNull {
+                it.utbetalingId ==
+                    førsteBehov.utbetalingId &&
+                    it.oppdragsdetaljer.fagområde != førsteBehov.oppdragsdetaljer.fagområde
+            }
         andreBehov?.let { behov.remove(it) }
         return førsteBehov to andreBehov
     }

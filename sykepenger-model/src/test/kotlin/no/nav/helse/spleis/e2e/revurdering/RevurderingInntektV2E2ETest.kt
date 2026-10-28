@@ -57,7 +57,16 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
         }
     }
 
@@ -128,7 +137,18 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
 
             assertDiff(-3047)
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_SIMULERING_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_SIMULERING_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             assertEquals(
@@ -249,7 +269,11 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             nyttVedtak(mars, 100.prosent)
             nullstillTilstandsendringer()
 
-            val korrelasjonsIdPåUtbetaling1 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
+            val korrelasjonsIdPåUtbetaling1 =
+                inspektør
+                    .sisteAvsluttedeUtbetalingForVedtaksperiode(
+                        1.vedtaksperiode,
+                    ).inspektør.korrelasjonsId
 
             håndterOverstyrInntekt(inntekt = 32000.månedlig, skjæringstidspunkt = 1.januar)
             håndterYtelser(1.vedtaksperiode)
@@ -269,8 +293,16 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             )
 
             assertEquals(3, inspektør.antallUtbetalinger)
-            val korrelasjonsIdPåUtbetaling2 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-            val korrelasjonsIdPåUtbetaling3 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
+            val korrelasjonsIdPåUtbetaling2 =
+                inspektør
+                    .sisteAvsluttedeUtbetalingForVedtaksperiode(
+                        1.vedtaksperiode,
+                    ).inspektør.korrelasjonsId
+            val korrelasjonsIdPåUtbetaling3 =
+                inspektør
+                    .sisteAvsluttedeUtbetalingForVedtaksperiode(
+                        2.vedtaksperiode,
+                    ).inspektør.korrelasjonsId
 
             assertEquals(korrelasjonsIdPåUtbetaling1, korrelasjonsIdPåUtbetaling2)
             assertNotEquals(korrelasjonsIdPåUtbetaling2, korrelasjonsIdPåUtbetaling3)
@@ -288,8 +320,16 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING)
 
             assertEquals(4, inspektør.antallUtbetalinger)
-            val korrelasjonsIdPåUtbetaling4 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(1.vedtaksperiode).inspektør.korrelasjonsId
-            val korrelasjonsIdPåUtbetaling5 = inspektør.sisteAvsluttedeUtbetalingForVedtaksperiode(2.vedtaksperiode).inspektør.korrelasjonsId
+            val korrelasjonsIdPåUtbetaling4 =
+                inspektør
+                    .sisteAvsluttedeUtbetalingForVedtaksperiode(
+                        1.vedtaksperiode,
+                    ).inspektør.korrelasjonsId
+            val korrelasjonsIdPåUtbetaling5 =
+                inspektør
+                    .sisteAvsluttedeUtbetalingForVedtaksperiode(
+                        2.vedtaksperiode,
+                    ).inspektør.korrelasjonsId
 
             assertEquals(korrelasjonsIdPåUtbetaling3, korrelasjonsIdPåUtbetaling5)
             assertNotEquals(korrelasjonsIdPåUtbetaling4, korrelasjonsIdPåUtbetaling5)
@@ -396,7 +436,10 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             nyttVedtak(januar, 100.prosent, beregnetInntekt = 5000.månedlig)
             nullstillTilstandsendringer()
             håndterOverstyrInntekt(inntekt = 3000.månedlig, skjæringstidspunkt = 1.januar)
-            håndterSkjønnsmessigFastsettelse(skjæringstidspunkt = 1.januar, arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 3000.månedlig)))
+            håndterSkjønnsmessigFastsettelse(
+                skjæringstidspunkt = 1.januar,
+                arbeidsgiveropplysninger = listOf(OverstyrtArbeidsgiveropplysning(a1, 3000.månedlig)),
+            )
             håndterYtelser(1.vedtaksperiode)
             håndterSimulering(1.vedtaksperiode)
 
@@ -544,7 +587,14 @@ internal class RevurderingInntektV2E2ETest : AbstractDslTest() {
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(1))
             assertEquals(Utbetalingstatus.GODKJENT_UTEN_UTBETALING, inspektør.utbetalingtilstand(2))
             assertEquals(Utbetalingstatus.UTBETALT, inspektør.utbetalingtilstand(3))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_HISTORIKK_REVURDERING, AVVENTER_GODKJENNING_REVURDERING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_HISTORIKK_REVURDERING,
+                AVVENTER_GODKJENNING_REVURDERING,
+                AVSLUTTET,
+            )
             assertTilstander(
                 2.vedtaksperiode,
                 AVSLUTTET,

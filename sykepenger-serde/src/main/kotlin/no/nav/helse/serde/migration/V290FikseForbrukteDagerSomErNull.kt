@@ -20,8 +20,10 @@ internal class V290FikseForbrukteDagerSomErNull : JsonMigration(version = 290) {
                     arbeidsgiver
                         .path("utbetalinger")
                         .filter { utbetaling -> utbetaling.path("type").asText() == "UTBETALING" }
-                        .filter { utbetaling -> !utbetaling.hasNonNull("forbrukteSykedager") || !utbetaling.hasNonNull("gjenståendeSykedager") }
-                        .forEach { utbetaling ->
+                        .filter { utbetaling ->
+                            !utbetaling.hasNonNull("forbrukteSykedager") ||
+                                !utbetaling.hasNonNull("gjenståendeSykedager")
+                        }.forEach { utbetaling ->
                             utbetaling as ObjectNode
                             sikkerLogg.info("migrerer forbrukteSykedager/gjenståendeSykedager for ${utbetaling.path("id").asText()}")
                             if (!utbetaling.hasNonNull("forbrukeSykedager")) {

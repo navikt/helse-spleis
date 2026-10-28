@@ -1190,7 +1190,8 @@ internal class UtbetalingslinjeForskjellTest {
         assertEquals(ENDR, actual.endringskode)
     }
 
-    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) = Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)
+    private fun tomtOppdrag(fagsystemId: String = genererUtbetalingsreferanse(UUID.randomUUID())) =
+        Oppdrag(ORGNUMMER, SykepengerRefusjon, fagsystemId = fagsystemId)
 
     private fun assertUtbetalinger(
         expected: Oppdrag,
@@ -1204,8 +1205,13 @@ internal class UtbetalingslinjeForskjellTest {
             assertEquals(a.grad, b.grad, "grad stemmer ikke overens")
             assertEquals(a.datoStatusFom, b.datoStatusFom)
             assertEquals(a.endringskode, b.endringskode) { "endringskode ${b.endringskode} matcher ikke forventet ${a.endringskode}" }
-            assertEquals(a.delytelseId, b.delytelseId) { "delytelseid ${b.delytelseId} matcher ikke forventet ${a.delytelseId} for ${a.fom} - ${a.tom}" }
-            assertEquals(a.refDelytelseId, b.refDelytelseId) { "refdelytelseid ${b.refDelytelseId} matcher ikke forventet ${a.refDelytelseId}" }
+            assertEquals(a.delytelseId, b.delytelseId) {
+                "delytelseid ${b.delytelseId} matcher ikke forventet ${a.delytelseId} for ${a.fom} - ${a.tom}"
+            }
+            assertEquals(
+                a.refDelytelseId,
+                b.refDelytelseId,
+            ) { "refdelytelseid ${b.refDelytelseId} matcher ikke forventet ${a.refDelytelseId}" }
         }
     }
 

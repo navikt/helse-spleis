@@ -27,7 +27,10 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             )
 
             assertEquals(6.juli til 18.august, inspektør.vedtaksperioder(2.vedtaksperiode).periode)
-            assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH",
+                inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(31.juli til 15.august))
             assertEquals(listOf(31.juli, 8.juli, 25.juni), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
@@ -38,8 +41,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
 
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
             assertEquals(listOf<Periode>(), inspektør.vedtaksperioder(2.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_24, Varselkode.RV_IM_8), 2.vedtaksperiode.filter())
-            assertEquals("ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertVarsler(
+                listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_24, Varselkode.RV_IM_8),
+                2.vedtaksperiode.filter(),
+            )
+            assertEquals(
+                "ARG UUUU??? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH",
+                inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(31.juli til 15.august))
             assertEquals(listOf(31.juli, 8.juli, 25.juni), inspektør.skjæringstidspunkter(2.vedtaksperiode))
 
@@ -47,12 +56,18 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterOverstyrTidslinje((9.juli til 13.juli).map { ManuellOverskrivingDag(it, Dagtype.Sykedag, 100) })
             val tidslinje = "ARG SSSSS?? ??????? ??????? ?SSSSHH SSSSSHH SSSSSH"
             assertEquals(tidslinje, inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
-            assertVarsler(listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_24, Varselkode.RV_IM_8, Varselkode.RV_IV_11), 2.vedtaksperiode.filter())
+            assertVarsler(
+                listOf(Varselkode.RV_IM_3, Varselkode.RV_IM_4, Varselkode.RV_IM_24, Varselkode.RV_IM_8, Varselkode.RV_IV_11),
+                2.vedtaksperiode.filter(),
+            )
             assertDoesNotThrow { håndterYtelser(2.vedtaksperiode) }
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
 
             håndterOverstyrTidslinje((14.juli til 6.august).map { ManuellOverskrivingDag(it, Dagtype.ArbeidIkkeGjenopptattDag) })
-            assertEquals("ARG SSSSSJJ JJJJJJJ JJJJJJJ JSSSSHH SSSSSHH SSSSSH", inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "ARG SSSSSJJ JJJJJJJ JJJJJJJ JSSSSHH SSSSSHH SSSSSH",
+                inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 31.juli, listOf(25.juni til 5.juli, 8.juli til 12.juli))
             assertEquals(listOf(31.juli, 8.juli, 25.juni), inspektør.skjæringstidspunkter(2.vedtaksperiode))
             håndterYtelser(2.vedtaksperiode)
@@ -238,7 +253,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             håndterSykmelding(Sykmeldingsperiode(17.januar, 31.januar))
             håndterSøknad(1.januar til 16.januar)
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
 
             nullstillTilstandsendringer()
 

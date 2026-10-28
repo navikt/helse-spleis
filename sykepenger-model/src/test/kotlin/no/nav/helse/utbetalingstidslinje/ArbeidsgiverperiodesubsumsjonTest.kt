@@ -267,7 +267,9 @@ internal class ArbeidsgiverperiodesubsumsjonTest {
     private class Dagobservatør(
         utbetalingstidslinje: Utbetalingstidslinje,
     ) {
-        val dager get() = fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager + ventetidsdager
+        val dager get() =
+            fridager + arbeidsdager + arbeidsgiverperiodedager + utbetalingsdager + foreldetdager + avvistdager +
+                ventetidsdager
         var fridager = 0
         var arbeidsdager = 0
         var arbeidsgiverperiodedager = 0

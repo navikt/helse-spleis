@@ -19,9 +19,7 @@ internal class BehandlingEventBus(
     private val vedtaksperiodeId: UUID,
     private val tidligereSøknadIder: Set<MeldingsreferanseId>,
 ) : UtbetalingObserver {
-    fun behandlingLukket(
-        behandlingId: UUID,
-    ) {
+    fun behandlingLukket(behandlingId: UUID) {
         eventBus.behandlingLukket(
             EventSubscription.BehandlingLukketEvent(
                 yrkesaktivitetssporing = yrkesaktivitetstype,

@@ -34,13 +34,29 @@ internal class V291FikseTidligereOmgjøringerSomErRevurderingFeilet : JsonMigrat
         val generasjoner = vedtaksperiode.path("generasjoner") as ArrayNode
         if (generasjoner.size() < 3) return
         val siste = generasjoner.last()
-        if (siste.path("tilstand").asText() != "TIL_INFOTRYGD") return sikkerLogg.info("siste generasjon ${siste.path("id").asText()} står i ${siste.path("tilstand").asText()}")
+        if (siste.path("tilstand").asText() !=
+            "TIL_INFOTRYGD"
+        ) {
+            return sikkerLogg.info("siste generasjon ${siste.path("id").asText()} står i ${siste.path("tilstand").asText()}")
+        }
         val nestSist = generasjoner[generasjoner.size() - 2]
-        if (nestSist.path("tilstand").asText() !in setOf("UBEREGNET_OMGJØRING", "BEREGNET_OMGJØRING")) return sikkerLogg.info("nest siste generasjon ${nestSist.path("id").asText()} står i ${nestSist.path("tilstand").asText()}")
+        if (nestSist.path("tilstand").asText() !in
+            setOf("UBEREGNET_OMGJØRING", "BEREGNET_OMGJØRING")
+        ) {
+            return sikkerLogg.info("nest siste generasjon ${nestSist.path("id").asText()} står i ${nestSist.path("tilstand").asText()}")
+        }
         val nestNestSist = generasjoner[generasjoner.size() - 3]
-        if (nestNestSist.path("tilstand").asText() != "AVSLUTTET_UTEN_VEDTAK") return sikkerLogg.info("nest-nest siste generasjon ${nestNestSist.path("id").asText()} står i ${nestNestSist.path("tilstand").asText()}")
+        if (nestNestSist.path("tilstand").asText() !=
+            "AVSLUTTET_UTEN_VEDTAK"
+        ) {
+            return sikkerLogg.info(
+                "nest-nest siste generasjon ${nestNestSist.path("id").asText()} står i ${nestNestSist.path("tilstand").asText()}",
+            )
+        }
 
-        val avsluttettidspunkt = siste.path("avsluttet").takeIf(JsonNode::isTextual)?.asText() ?: return sikkerLogg.info("siste generasjon ${siste.path("id").asText()} har ikke avsluttettidspunkt")
+        val avsluttettidspunkt =
+            siste.path("avsluttet").takeIf(JsonNode::isTextual)?.asText()
+                ?: return sikkerLogg.info("siste generasjon ${siste.path("id").asText()} har ikke avsluttettidspunkt")
 
         sikkerLogg.info("fjerner siste generasjon ${siste.path("id").asText()} som står i ${siste.path("tilstand").asText()}")
 

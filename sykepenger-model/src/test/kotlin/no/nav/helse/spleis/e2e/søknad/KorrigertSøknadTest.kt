@@ -123,7 +123,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Arbeid(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
             assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING)
         }
     }
@@ -158,7 +163,8 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
     fun `Korrigerer fridager til sykedag`() {
         a1 {
             håndterSykmelding(januar)
-            val søknadId = håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
+            val søknadId =
+                håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar))
             håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), korrigerer = søknadId, opprinneligSendt = 1.februar)
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[30.januar] is Sykedag)
@@ -173,7 +179,13 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Permisjon(30.januar, 30.januar), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Permisjon(30.januar, 30.januar),
+                Ferie(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[30.januar] is Permisjonsdag)
                 assertTrue(it[31.januar] is Feriedag)
@@ -301,7 +313,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(2.februar, 28.februar))
             val søknadId = håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent))
-            håndterSøknad(Sykdom(2.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
+            håndterSøknad(
+                Sykdom(2.februar, 28.februar, 100.prosent),
+                Ferie(28.februar, 28.februar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.mars,
+            )
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[28.februar] is Feriedag)
             }
@@ -320,7 +337,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             val søknadId = håndterSøknad(februar)
-            håndterSøknad(Sykdom(1.februar, 28.februar, 100.prosent), Ferie(28.februar, 28.februar), korrigerer = søknadId, opprinneligSendt = 1.mars)
+            håndterSøknad(
+                Sykdom(1.februar, 28.februar, 100.prosent),
+                Ferie(28.februar, 28.februar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.mars,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[28.februar] is Feriedag)
@@ -347,14 +369,43 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 listOf(1.januar til 16.januar),
             )
             håndterVilkårsgrunnlag(3.vedtaksperiode)
-            håndterSøknad(Sykdom(11.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(11.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[31.januar] is Feriedag)
             }
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_HISTORIKK)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_AVSLUTTET_UTEN_UTBETALING,
+                AVSLUTTET_UTEN_UTBETALING,
+            )
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_HISTORIKK,
+            )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
             assertVarsler(emptyList(), 3.vedtaksperiode.filter())
@@ -366,7 +417,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[31.januar] is Feriedag)
@@ -382,7 +438,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Arbeid(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Arbeid(17.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also { inspektør ->
                 (17.januar til 31.januar).forEach {
@@ -409,7 +470,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(17.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(17.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also { inspektør ->
                 (17.januar til 31.januar).forEach {
@@ -436,7 +502,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             håndterSykmelding(januar)
             val søknadId = håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[31.januar] is Feriedag)
@@ -462,7 +533,12 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             val søknadId = håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 1.vedtaksperiode)
             håndterVilkårsgrunnlag(1.vedtaksperiode)
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), korrigerer = søknadId, opprinneligSendt = 1.februar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                korrigerer = søknadId,
+                opprinneligSendt = 1.februar,
+            )
 
             inspektør.sykdomstidslinje.inspektør.also {
                 assertTrue(it[31.januar] is Feriedag)
@@ -554,7 +630,13 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                     .toShortString()
                     .trim(),
             )
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 30.september, korrigerer = søknadId, opprinneligSendt = 31.januar)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                sendtTilNAVEllerArbeidsgiver = 30.september,
+                korrigerer = søknadId,
+                opprinneligSendt = 31.januar,
+            )
             assertEquals(
                 "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSF",
                 inspektør.sykdomshistorikk
@@ -577,7 +659,13 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                     .toShortString()
                     .trim(),
             )
-            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Ferie(31.januar, 31.januar), sendtTilNAVEllerArbeidsgiver = 2.mai, korrigerer = søknadId, opprinneligSendt = 1.mai)
+            håndterSøknad(
+                Sykdom(1.januar, 31.januar, 100.prosent),
+                Ferie(31.januar, 31.januar),
+                sendtTilNAVEllerArbeidsgiver = 2.mai,
+                korrigerer = søknadId,
+                opprinneligSendt = 1.mai,
+            )
             assertEquals(
                 "KKKKKHH KKKKKHH KKKKKHH KKKKKHH KKF",
                 inspektør.sykdomshistorikk

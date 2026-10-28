@@ -127,7 +127,17 @@ internal class YtelserE2ETest : AbstractDslTest() {
             assertVarsel(Varselkode.RV_IM_8, 1.vedtaksperiode.filter())
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
 
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING, AVVENTER_GODKJENNING, TIL_UTBETALING, AVSLUTTET)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+                AVVENTER_GODKJENNING,
+                TIL_UTBETALING,
+                AVSLUTTET,
+            )
 
             val forlengelse = 16.januar til 31.januar
             håndterSøknad(forlengelse)
@@ -219,7 +229,10 @@ internal class YtelserE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         }
         a1 {
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
             håndterSimulering(1.vedtaksperiode)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
@@ -259,12 +272,18 @@ internal class YtelserE2ETest : AbstractDslTest() {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))
         }
         a1 {
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
 
             håndterYtelser(1.vedtaksperiode, foreldrepenger = listOf(GradertPeriode(januar, 100)))
 
             assertVarsel(RV_AY_5, 1.vedtaksperiode.filter())
-            assertEquals("SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS", inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString())
+            assertEquals(
+                "SSSSSHH SSSSSHH SSSSSHH SSSSSHH SSS",
+                inspektør(a1).vedtaksperioder(1.vedtaksperiode).sykdomstidslinje.toShortString(),
+            )
         }
         a2 {
             assertEquals(1.januar, inspektør(a2).skjæringstidspunkt(1.vedtaksperiode))

@@ -28,7 +28,11 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
         when (vedtaksperiode.yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker ->
                 when (val t = tilstand(vedtaksperiode)) {
-                    is TrengerInntektsopplysningerAnnenArbeidsgiver -> VenterPå.AnnenPeriode(t.trengerInntektsmelding.venter(), Venteårsak.INNTEKTSMELDING)
+                    is TrengerInntektsopplysningerAnnenArbeidsgiver ->
+                        VenterPå.AnnenPeriode(
+                            t.trengerInntektsmelding.venter(),
+                            Venteårsak.INNTEKTSMELDING,
+                        )
 
                     KlarForVilkårsprøving,
                     KlarForBeregning,

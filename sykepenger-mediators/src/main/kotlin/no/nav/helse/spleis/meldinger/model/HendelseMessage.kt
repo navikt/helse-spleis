@@ -49,7 +49,13 @@ internal sealed class HendelseMessage(
         safeLog: Logger,
     ) {
         insecureLog.info("gjenkjente {} med id={}", this::class.simpleName, meldingsporing.id)
-        safeLog.info("gjenkjente {} med id={} for fnr={}:\n{}", this::class.simpleName, meldingsporing.id, meldingsporing.fødselsnummer, toJson())
+        safeLog.info(
+            "gjenkjente {} med id={} for fnr={}:\n{}",
+            this::class.simpleName,
+            meldingsporing.id,
+            meldingsporing.fødselsnummer,
+            toJson(),
+        )
     }
 
     internal fun logDuplikat(logger: Logger) {

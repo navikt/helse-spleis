@@ -63,7 +63,10 @@ internal class VarselE2ETest : AbstractDslTest() {
         a1 {
             nyttVedtak(januar)
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(17.januar, Dagtype.Feriedag)))
-            håndterYtelser(1.vedtaksperiode, institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                institusjonsoppholdsperioder = listOf(Institusjonsopphold.Institusjonsoppholdsperiode(1.januar, 31.januar)),
+            )
 
             assertVarsler(listOf(RV_AY_9, Varselkode.RV_UT_23), 1.vedtaksperiode.filter())
         }
@@ -128,7 +131,14 @@ internal class VarselE2ETest : AbstractDslTest() {
             assertVarsler(listOf(RV_IT_14), 1.vedtaksperiode.filter())
 
             assertVarsler(emptyList(), 2.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING, AVVENTER_HISTORIKK, AVVENTER_SIMULERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_HISTORIKK,
+                AVVENTER_SIMULERING,
+            )
             assertTilstander(2.vedtaksperiode, AVVENTER_HISTORIKK, AVVENTER_BLOKKERENDE_PERIODE)
         }
     }

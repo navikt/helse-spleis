@@ -21,7 +21,8 @@ internal class SykmeldingsperioderTest {
             behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker("ORGNUMMER"),
         )
 
-    private fun Sykmeldingsperioder.lagre(periode: Periode) = lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
+    private fun Sykmeldingsperioder.lagre(periode: Periode) =
+        lagre(hendelsefabrikk.lagSykmelding(Sykmeldingsperiode(periode.start, periode.endInclusive)), Aktivitetslogg())
 
     @Test
     fun `Kan lagre Sykmeldingsperioder`() {

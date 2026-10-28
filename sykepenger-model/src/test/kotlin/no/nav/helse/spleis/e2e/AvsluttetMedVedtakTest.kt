@@ -324,5 +324,9 @@ internal class AvsluttetMedVedtakTest : AbstractDslTest() {
 
     private val UUID.avsluttetUtenVedtakEventer get() = observatør.avsluttetUtenVedtakEventer.getValue(this)
 
-    private fun UUID.assertIngenVedtakFattet() = assertEquals(emptyList<EventSubscription.AvsluttetMedVedtakEvent>(), observatør.avsluttetMedVedtakEventer[this] ?: emptyList<EventSubscription.AvsluttetMedVedtakEvent>())
+    private fun UUID.assertIngenVedtakFattet() =
+        assertEquals(
+            emptyList<EventSubscription.AvsluttetMedVedtakEvent>(),
+            observatør.avsluttetMedVedtakEventer[this] ?: emptyList<EventSubscription.AvsluttetMedVedtakEvent>(),
+        )
 }
