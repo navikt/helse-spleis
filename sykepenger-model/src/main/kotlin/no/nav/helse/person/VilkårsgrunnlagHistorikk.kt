@@ -209,6 +209,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             return when (val endretVurdering = hendelse.endretVurdering) {
                 is Vurdering.Forsikringsvurdering -> medEndretForsikringsvurdering(endretVurdering, aktivitetslogg)
                 is Vurdering.Opptjeningsvurdering -> medEndretOpptjeningsvurdering(endretVurdering, aktivitetslogg)
+                is Vurdering.Medlemskapsvurdering -> medEndretMedlemskapsvurdering(endretVurdering, aktivitetslogg)
             }
         }
 
@@ -321,12 +322,23 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             return kopierMed(nyOpptjeningsvurderingId = opptjeningsvurdering.id)
         }
 
+        internal fun medEndretMedlemskapsvurdering(
+            medlemskapsvurdering: Vurdering.Medlemskapsvurdering,
+            aktivitetslogg: IAktivitetslogg,
+        ): Grunnlagsdata? {
+            if (medlemskapsvurderingId == medlemskapsvurdering.id) {
+                return null.also { aktivitetslogg.info("Medlemskapsvurderingen er allerede lagt til grunn") }
+            }
+            return kopierMed(nyMedlemskapsvurderingId = medlemskapsvurdering.id)
+        }
+
         private fun kopierMed(
             nyttInntektsgrunnlag: Inntektsgrunnlag? = null,
             nyOpptjening: ArbeidstakerOpptjening? = null,
             nyttSkjæringstidspunkt: LocalDate? = null,
             nyOpptjeningsvurderingId: UUID? = null,
             nyForsikringsvurderingId: UUID? = null,
+            nyMedlemskapsvurderingId: UUID? = null,
         ): Grunnlagsdata {
             require(
                 listOfNotNull(
@@ -335,6 +347,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     nyttSkjæringstidspunkt,
                     nyOpptjeningsvurderingId,
                     nyForsikringsvurderingId,
+                    nyMedlemskapsvurderingId,
                 ).isNotEmpty(),
             ) {
                 "Må endre minst et felt for at det skal gi mening å lage et nytt grunnlag!"
@@ -348,7 +361,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 forsikringsvurderingId = nyForsikringsvurderingId ?: forsikringsvurderingId,
                 opptjeningsvurderingId = nyOpptjeningsvurderingId ?: opptjeningsvurderingId,
-                medlemskapsvurderingId = medlemskapsvurderingId,
+                medlemskapsvurderingId = nyMedlemskapsvurderingId ?: medlemskapsvurderingId,
                 rettighetskategoriId = rettighetskategoriId,
             )
         }

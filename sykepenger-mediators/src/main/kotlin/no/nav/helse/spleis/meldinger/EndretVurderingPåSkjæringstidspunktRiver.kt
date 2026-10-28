@@ -8,6 +8,7 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Forsikringsvurdering
+import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Medlemskapsvurdering
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Opptjeningsvurdering
 import java.util.UUID
 
@@ -19,6 +20,7 @@ internal class EndretVurderingPåSkjæringstidspunktRiver(
         setOf(
             Forsikringsvurdering,
             Opptjeningsvurdering,
+            Medlemskapsvurdering,
         )
 
     override val eventNames = vurderinger.map { it.eventName }.toSet()

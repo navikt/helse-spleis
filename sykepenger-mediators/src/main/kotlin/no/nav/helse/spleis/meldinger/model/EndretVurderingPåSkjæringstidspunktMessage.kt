@@ -21,6 +21,7 @@ internal class EndretVurderingPåSkjæringstidspunktMessage(
         when (vurderingsformat) {
             Vurderingsformat.Forsikringsvurdering -> Vurdering.Forsikringsvurdering(vurderingId)
             Vurderingsformat.Opptjeningsvurdering -> Vurdering.Opptjeningsvurdering(vurderingId)
+            Vurderingsformat.Medlemskapsvurdering -> Vurdering.Medlemskapsvurdering(vurderingId)
         }
     internal val avsender =
         when (packet["manuellVurdering"].asBoolean(false)) {
@@ -57,6 +58,11 @@ internal class EndretVurderingPåSkjæringstidspunktMessage(
         data object Opptjeningsvurdering : Vurderingsformat {
             override val eventName = "endret_opptjeningsvurdering"
             override val idPath = "opptjeningsvurderingId"
+        }
+
+        data object Medlemskapsvurdering : Vurderingsformat {
+            override val eventName = "endret_medlemskapsvurdering"
+            override val idPath = "medlemskapsvurderingId"
         }
     }
 }

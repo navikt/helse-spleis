@@ -1055,6 +1055,15 @@ internal class TestPerson(
                 .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
         }
 
+        internal fun håndterEndretMedlemskapsvurdering(
+            skjæringstidspunkt: LocalDate,
+            medlemskapsvurderingId: UUID,
+        ) {
+            personHendelsefabrikk
+                .lagEndretMedlemskapsvurdering(skjæringstidspunkt, medlemskapsvurderingId)
+                .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
+        }
+
         internal fun håndterEndretForsikringsvurdering(
             skjæringstidspunkt: LocalDate,
             forsikringsvurderingId: UUID,

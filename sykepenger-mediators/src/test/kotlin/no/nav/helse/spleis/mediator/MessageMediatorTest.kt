@@ -315,6 +315,27 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun `endret medlemskapsvurdering`() {
+        val medlemskapsvurderingId = UUID.randomUUID()
+
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagEndretMedlemskapsvurdering(
+                skjæringstidspunkt = 3.januar,
+                medlemskapsvurderingId = medlemskapsvurderingId,
+                manuellVurdering = true,
+            ),
+        )
+        val forventet =
+            TestHendelseMediator.EndretVurderingPåSkjæringstidspunktData(
+                skjæringstidspunkt = 3.januar,
+                vurderingId = medlemskapsvurderingId,
+                type = "Medlemskapsvurdering",
+                manuellVurdering = true,
+            )
+        assertEquals(forventet, hendelseMediator.lestEndretVurderingPåSkjæringstidspunkt)
+    }
+
+    @Test
     fun `avbrutt fisker søknad`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagAvbruttFiskerSøknad(1.januar, 31.januar))
         val forventet = TestHendelseMediator.AvbruttSøknadData(1.januar, 31.januar, Behandlingsporing.Yrkesaktivitet.Selvstendig)

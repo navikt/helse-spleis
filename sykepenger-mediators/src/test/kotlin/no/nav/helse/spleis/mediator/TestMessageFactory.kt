@@ -1761,6 +1761,20 @@ internal class TestMessageFactory(
         ),
     )
 
+    internal fun lagEndretMedlemskapsvurdering(
+        skjæringstidspunkt: LocalDate,
+        medlemskapsvurderingId: UUID,
+        manuellVurdering: Boolean,
+    ) = nyHendelse(
+        "endret_medlemskapsvurdering",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "skjæringstidspunkt" to skjæringstidspunkt.toString(),
+            "medlemskapsvurderingId" to medlemskapsvurderingId.toString(),
+            "manuellVurdering" to manuellVurdering,
+        ),
+    )
+
     internal fun lagInntektsendringer(fom: LocalDate) =
         nyHendelse(
             "inntektsendringer",

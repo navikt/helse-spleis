@@ -168,6 +168,11 @@ class Revurderingseventyr private constructor(
             skjæringstidspunkt: LocalDate,
         ) = Revurderingseventyr(RevurderingÅrsak.EndretOpptjenigsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
 
+        fun endretMedlemskapsvurdering(
+            hendelse: Hendelse,
+            skjæringstidspunkt: LocalDate,
+        ) = Revurderingseventyr(RevurderingÅrsak.EndretMedlemskapsvurdering, skjæringstidspunkt, skjæringstidspunkt.somPeriode(), hendelse)
+
         fun tidligsteEventyr(
             a: Revurderingseventyr?,
             b: Revurderingseventyr?,
@@ -278,6 +283,10 @@ class Revurderingseventyr private constructor(
 
         data object EndretOpptjenigsvurdering : RevurderingÅrsak {
             override fun navn(): String = "ENDRET_OPPTJENINGSVURDERING"
+        }
+
+        data object EndretMedlemskapsvurdering : RevurderingÅrsak {
+            override fun navn(): String = "ENDRET_MEDLEMSKAPSVURDERING"
         }
 
         data object Reberegning : RevurderingÅrsak {

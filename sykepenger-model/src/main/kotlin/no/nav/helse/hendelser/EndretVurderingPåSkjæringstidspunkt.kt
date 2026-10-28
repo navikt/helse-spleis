@@ -15,6 +15,10 @@ sealed interface Vurdering {
     data class Opptjeningsvurdering(
         override val id: UUID,
     ) : Vurdering
+
+    data class Medlemskapsvurdering(
+        override val id: UUID,
+    ) : Vurdering
 }
 
 class EndretVurderingPåSkjæringstidspunkt(
@@ -40,5 +44,6 @@ class EndretVurderingPåSkjæringstidspunkt(
         when (endretVurdering) {
             is Vurdering.Forsikringsvurdering -> Revurderingseventyr.endretForsikringsvurdering(this, skjæringstidspunkt)
             is Vurdering.Opptjeningsvurdering -> Revurderingseventyr.endretOpptjeningsvurdering(this, skjæringstidspunkt)
+            is Vurdering.Medlemskapsvurdering -> Revurderingseventyr.endretMedlemskapsvurdering(this, skjæringstidspunkt)
         }
 }

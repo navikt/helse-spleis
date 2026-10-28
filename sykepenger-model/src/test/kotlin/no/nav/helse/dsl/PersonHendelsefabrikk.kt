@@ -132,6 +132,16 @@ internal class PersonHendelsefabrikk {
         avsender = Avsender.SYSTEM,
     )
 
+    internal fun lagEndretMedlemskapsvurdering(
+        skjæringstidspunkt: LocalDate,
+        medlemskapsvurderingId: UUID,
+    ) = EndretVurderingPåSkjæringstidspunkt(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        skjæringstidspunkt = skjæringstidspunkt,
+        endretVurdering = Vurdering.Medlemskapsvurdering(medlemskapsvurderingId),
+        avsender = Avsender.SAKSBEHANDLER,
+    )
+
     internal fun lagEndretForsikrsingsvurdering(
         skjæringstidspunkt: LocalDate,
         forsikringsvurderingId: UUID,
