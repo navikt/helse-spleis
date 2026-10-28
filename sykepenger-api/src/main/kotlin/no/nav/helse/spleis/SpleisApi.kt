@@ -56,7 +56,12 @@ internal fun Application.spannerApi(
                     val vedtaksperiode =
                         personDto.arbeidsgivere.firstNotNullOfOrNull { arbeidsgiver ->
                             arbeidsgiver.vedtaksperioder.find { it.id.toString() == vedtaksperiodeId }?.let { vedtaksperiode ->
-                                VedtaksperiodeResponse(arbeidsgiver.organisasjonsnummer, arbeidsgiver.yrkesaktivitetstype, vedtaksperiode)
+                                VedtaksperiodeResponse(
+                                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                                    yrkesaktivitetstype = arbeidsgiver.yrkesaktivitetstype,
+                                    vedtaksperiode = vedtaksperiode,
+                                    vilkårsgrunnlag = personDto.gjeldendeVilkårsgrunnlag(vedtaksperiode),
+                                )
                             }
                         } ?: throw NotFoundException("Kunne ikke finne vedtaksperiode for vedtaksperiodeId = $vedtaksperiodeId")
 
@@ -108,7 +113,22 @@ private data class VedtaksperiodeResponse(
     val yrkesaktivitetstype: SpannerPersonDto.ArbeidsgiverData.YrkesaktivitetstypeData,
     @get:JsonUnwrapped
     val vedtaksperiode: SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData,
+    val vilkårsgrunnlag: SpannerPersonDto.VilkårsgrunnlagElementData?,
 )
+
+private fun SpannerPersonDto.gjeldendeVilkårsgrunnlag(
+    vedtaksperiode: SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData,
+): SpannerPersonDto.VilkårsgrunnlagElementData? {
+    val vilkårsgrunnlagId =
+        vedtaksperiode.behandlinger
+            .last()
+            .endringer
+            .last()
+            .vilkårsgrunnlagId ?: return null
+    return vilkårsgrunnlagHistorikk
+        .flatMap { it.vilkårsgrunnlag }
+        .firstOrNull { it.vilkårsgrunnlagId == vilkårsgrunnlagId }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
