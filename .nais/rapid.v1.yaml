@@ -206,3 +206,6 @@ spec:
     - team: tbd
       application: sp-medlemskap
       access: readwrite
+    - team: tbd
+      application: sp-rettighetskategori
+      access: readwrite

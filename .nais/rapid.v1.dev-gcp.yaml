@@ -56,3 +56,6 @@ spec:
     - team: tbd
       application: sp-medlemskap-opprydding-dev
       access: readwrite
+    - team: tbd
+      application: sp-rettighetskategori-opprydding-dev
+      access: readwrite
