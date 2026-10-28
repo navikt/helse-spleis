@@ -119,6 +119,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         val inntektsgrunnlag: Inntektsgrunnlag,
         val opptjeningsvurderingId: UUID,
         val medlemskapsvurderingId: UUID,
+        val rettighetskategoriId: UUID,
     ) : Aktivitetskontekst {
         internal open fun valider(
             aktivitetslogg: IAktivitetslogg,
@@ -221,6 +222,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         }
 
         internal companion object {
+            internal fun deterministiskRettighetskategoriId(vilkårsgrunnlagId: UUID): UUID =
+                UUID.nameUUIDFromBytes("$vilkårsgrunnlagId:Rettighetskategori".toByteArray())
+
             internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
                 val skjæringstidspunkter =
                     elementer
@@ -255,7 +259,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         val forsikringsvurderingId: UUID?,
         opptjeningsvurderingId: UUID,
         medlemskapsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId, medlemskapsvurderingId) {
+        rettighetskategoriId: UUID,
+    ) : VilkårsgrunnlagElement(
+            vilkårsgrunnlagId,
+            skjæringstidspunkt,
+            inntektsgrunnlag,
+            opptjeningsvurderingId,
+            medlemskapsvurderingId,
+            rettighetskategoriId,
+        ) {
         internal fun validerFørstegangsvurderingArbeidstaker(aktivitetslogg: IAktivitetslogg) {
             if (opptjening != null) inntektsgrunnlag.måHaRegistrertOpptjeningForArbeidsgivere(aktivitetslogg, opptjening)
         }
@@ -337,6 +349,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 forsikringsvurderingId = nyForsikringsvurderingId ?: forsikringsvurderingId,
                 opptjeningsvurderingId = nyOpptjeningsvurderingId ?: opptjeningsvurderingId,
                 medlemskapsvurderingId = medlemskapsvurderingId,
+                rettighetskategoriId = rettighetskategoriId,
             )
         }
 
@@ -357,6 +370,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId,
                 medlemskapsvurderingId = medlemskapsvurderingId,
+                rettighetskategoriId = rettighetskategoriId,
             )
 
         internal companion object {
@@ -377,6 +391,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     forsikringsvurderingId = dto.forsikringsvurderingId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
                     medlemskapsvurderingId = dto.medlemskapsvurderingId,
+                    rettighetskategoriId = dto.rettighetskategoriId,
                 )
         }
     }
@@ -387,7 +402,15 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         vilkårsgrunnlagId: UUID,
         opptjeningsvurderingId: UUID,
         medlemskapsvurderingId: UUID,
-    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, inntektsgrunnlag, opptjeningsvurderingId, medlemskapsvurderingId) {
+        rettighetskategoriId: UUID,
+    ) : VilkårsgrunnlagElement(
+            vilkårsgrunnlagId,
+            skjæringstidspunkt,
+            inntektsgrunnlag,
+            opptjeningsvurderingId,
+            medlemskapsvurderingId,
+            rettighetskategoriId,
+        ) {
         override fun vilkårsgrunnlagtype() = "Infotrygd"
 
         override fun dto() =
@@ -397,6 +420,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                 inntektsgrunnlag = inntektsgrunnlag.dto(),
                 opptjeningsvurderingId = opptjeningsvurderingId,
                 medlemskapsvurderingId = medlemskapsvurderingId,
+                rettighetskategoriId = rettighetskategoriId,
             )
 
         internal companion object {
@@ -407,6 +431,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
                     opptjeningsvurderingId = dto.opptjeningsvurderingId,
                     medlemskapsvurderingId = dto.medlemskapsvurderingId,
+                    rettighetskategoriId = dto.rettighetskategoriId,
                 )
         }
     }

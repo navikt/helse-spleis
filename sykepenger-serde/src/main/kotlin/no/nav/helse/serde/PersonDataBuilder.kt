@@ -910,6 +910,7 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() =
             },
         opptjeningsvurderingId = this.opptjeningsvurderingId,
         medlemskapsvurderingId = this.medlemskapsvurderingId,
+        rettighetskategoriId = this.rettighetskategoriId,
     )
 
 private fun OpptjeningUtDto.tilPersonData() =

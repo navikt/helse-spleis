@@ -135,6 +135,7 @@ class Vilkårsgrunnlag(
                 -> error("Støtter ikke Arbeidsledig/Frilans")
             }
 
+        val vilkårsgrunnlagId = UUID.randomUUID()
         grunnlagsdata =
             VilkårsgrunnlagHistorikk.Grunnlagsdata(
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -142,10 +143,14 @@ class Vilkårsgrunnlag(
                 opptjening = opptjening,
                 medlemskapstatus = medlemskapsvurdering.validert(aktivitetslogg),
                 meldingsreferanseId = metadata.meldingsreferanseId,
-                vilkårsgrunnlagId = UUID.randomUUID(),
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når vi alltid får
                 medlemskapsvurderingId = medlemskapsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når MEDLEMSKAPSVURDERINGBEHOV er på i prod og alle gamle behov er besvart
+                rettighetskategoriId =
+                    VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.deterministiskRettighetskategoriId(
+                        vilkårsgrunnlagId,
+                    ),
             )
         return aktivitetslogg
     }

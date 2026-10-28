@@ -2,76 +2,7 @@ package no.nav.helse.serde
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.dto.deserialisering.PersonInnDto
-import no.nav.helse.serde.migration.JsonMigration
-import no.nav.helse.serde.migration.JsonMigrationException
-import no.nav.helse.serde.migration.MeldingerSupplier
-import no.nav.helse.serde.migration.V279AvsluttettidspunktVedtakFattet
-import no.nav.helse.serde.migration.V280HengendeRevurderinger
-import no.nav.helse.serde.migration.V281ForkasteAvsluttedePerioderMedUberegnetGenerasjon
-import no.nav.helse.serde.migration.V282HengendeRevurderinger
-import no.nav.helse.serde.migration.V283BeregningsgrunnlagPåØkonomi
-import no.nav.helse.serde.migration.V284GjelderPeriodeArbeidsgiverInntektsopplysning
-import no.nav.helse.serde.migration.V285LoggeRareAnnulleringer
-import no.nav.helse.serde.migration.V286AnnullerteÅpneRevurderinger
-import no.nav.helse.serde.migration.V287AnnullerteÅpneRevurderingerEnGangTil
-import no.nav.helse.serde.migration.V288FjerneOverflødigeUberegnedeRevurderinger
-import no.nav.helse.serde.migration.V289AvsluttetTidspunktForkastedeGenerasjoner
-import no.nav.helse.serde.migration.V290FikseForbrukteDagerSomErNull
-import no.nav.helse.serde.migration.V291FikseTidligereOmgjøringerSomErRevurderingFeilet
-import no.nav.helse.serde.migration.V292AnnullertPeriode
-import no.nav.helse.serde.migration.V293AvsluttetUberegnedeOmgjøringer
-import no.nav.helse.serde.migration.V294RenameTilBehandlinger
-import no.nav.helse.serde.migration.V295BumpVersjon
-import no.nav.helse.serde.migration.V296SkjæringstidspunktPåBehandlinger
-import no.nav.helse.serde.migration.V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling
-import no.nav.helse.serde.migration.V298EgenmeldingsdagerPåVedtaksperiode
-import no.nav.helse.serde.migration.V299EgenmeldingerFraSykdomstidslinjeTilVedtaksperiode
-import no.nav.helse.serde.migration.V302MaksdatoresultatPåBehandling
-import no.nav.helse.serde.migration.V303KopiereMaksdatoFraUtbetalingTilBehandling
-import no.nav.helse.serde.migration.V304FjerneArbeidsledigSykmeldingsperioder
-import no.nav.helse.serde.migration.V305RenameSykepengegrunnlagTilInntektsgrunnlag
-import no.nav.helse.serde.migration.V306RefusjonstidslinjePåBehandling
-import no.nav.helse.serde.migration.V307RefusjonstidslinjePåBehandlingsendring
-import no.nav.helse.serde.migration.V308HendelseIdPåInfotrygdhistorikk
-import no.nav.helse.serde.migration.V309LeggeTilUbrukteRefusjonsopplysninger
-import no.nav.helse.serde.migration.V311AvsenderOgTidsstempelPåRefusjonsopplysning
-import no.nav.helse.serde.migration.V312AvsenderOgTidsstempelPåRefusjonsopplysningForDeaktiverteArbeidsforhold
-import no.nav.helse.serde.migration.V313OppryddingIUbrukteRefusjonsopplysninger
-import no.nav.helse.serde.migration.V314SkjæringstidspunkterSomListe
-import no.nav.helse.serde.migration.V315AuuerSomIkkeRapportertInntekt
-import no.nav.helse.serde.migration.V316BumpVersjon
-import no.nav.helse.serde.migration.V317SykNavIEgenListe
-import no.nav.helse.serde.migration.V318FjerneSykNavSomSykdomstidslinjedagtype
-import no.nav.helse.serde.migration.V319BumpVersjon
-import no.nav.helse.serde.migration.V320ManglendeRefusjonsopplysninger
-import no.nav.helse.serde.migration.V321EgenmeldingsdagerPåBehandling
-import no.nav.helse.serde.migration.V322YrkesaktivitetstypePåArbeidsgiver
-import no.nav.helse.serde.migration.V323FikseFomPåUtbetalinger
-import no.nav.helse.serde.migration.V324FjerneLinjerMed0KrSats
-import no.nav.helse.serde.migration.V325InntektjusteringPåØkonomi
-import no.nav.helse.serde.migration.V326DekningsgradPåØkonomi
-import no.nav.helse.serde.migration.V327ProsenterSomTallMellomNullOgEn
-import no.nav.helse.serde.migration.V328InntektjusteringerPåBehandling
-import no.nav.helse.serde.migration.V329ArbeidssituasjonPåBehandling
-import no.nav.helse.serde.migration.V330EpochSomArbeidsgiverperiodeForInfotrygdsaker
-import no.nav.helse.serde.migration.V331ArbeidsgiverperiodeFerdigAvklartBoolean
-import no.nav.helse.serde.migration.V332ArbeidsgiverperiodeFerdigAvklartBoolean
-import no.nav.helse.serde.migration.V333ArbeidsgiverperioderPåYrkesaktivitet
-import no.nav.helse.serde.migration.V334ArbeidsgiverperioderKunPåArbeidstakere
-import no.nav.helse.serde.migration.V335PerioderUtenNavAnsvar
-import no.nav.helse.serde.migration.V336PerioderUtenNavAnsvarPåBehandling
-import no.nav.helse.serde.migration.V337FjernerRevurderingFeilet
-import no.nav.helse.serde.migration.V339JustereFomPåSpesifikkeUtbetalinger
-import no.nav.helse.serde.migration.V340KonsekventNavngivningFaktaavklartInntekt
-import no.nav.helse.serde.migration.V341KonsekventNavngivningFaktaavklartInntektPåDeaktiverteArbeidsforhold
-import no.nav.helse.serde.migration.V342RenameAvventersøknadForTidligereEllerOverlappendePeriode
-import no.nav.helse.serde.migration.V343JordbrukerTilSelvstendigYrkesaktivitetstype
-import no.nav.helse.serde.migration.V344LeggeTilBeregningId
-import no.nav.helse.serde.migration.V345LeggeTilOpptjeningsvurderingId
-import no.nav.helse.serde.migration.V346OverskrivOpptjeningsvurderingId
-import no.nav.helse.serde.migration.V347RenameSelvstendigAvsluttetTilAvsluttet
-import no.nav.helse.serde.migration.V348LeggeTilMedlemskapsvurderingId
-import no.nav.helse.serde.migration.migrate
+import no.nav.helse.serde.migration.*
 
 class SerialisertPerson(
     val json: String,
@@ -146,6 +77,7 @@ class SerialisertPerson(
                 V346OverskrivOpptjeningsvurderingId(),
                 V347RenameSelvstendigAvsluttetTilAvsluttet(),
                 V348LeggeTilMedlemskapsvurderingId(),
+                V349LeggeTilRettighetskategoriId(),
             )
 
         fun gjeldendeVersjon() = JsonMigration.gjeldendeVersjon(migrations)

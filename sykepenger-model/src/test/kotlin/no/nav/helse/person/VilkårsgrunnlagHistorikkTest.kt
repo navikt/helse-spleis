@@ -59,6 +59,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = UUID.randomUUID(),
                 medlemskapsvurderingId = UUID.randomUUID(),
+                rettighetskategoriId = UUID.randomUUID(),
             )
         }
         val grunnlag1Januar = grunnlagMedSkjæringstidspunkt(1.januar)
@@ -90,6 +91,7 @@ internal class VilkårsgrunnlagHistorikkTest {
                 forsikringsvurderingId = null,
                 opptjeningsvurderingId = UUID.randomUUID(),
                 medlemskapsvurderingId = UUID.randomUUID(),
+                rettighetskategoriId = UUID.randomUUID(),
             ),
         )
 

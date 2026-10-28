@@ -133,6 +133,7 @@ data class PersonData(
         val forsikringsvurderingId: UUID?,
         val opptjeningsvurderingId: UUID,
         val medlemskapsvurderingId: UUID,
+        val rettighetskategoriId: UUID,
     ) {
         fun tilDto() =
             when (type) {
@@ -143,6 +144,7 @@ data class PersonData(
                         inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto(),
                         opptjeningsvurderingId = opptjeningsvurderingId,
                         medlemskapsvurderingId = medlemskapsvurderingId,
+                        rettighetskategoriId = rettighetskategoriId,
                     )
 
                 GrunnlagsdataType.Vilkårsprøving ->
@@ -156,6 +158,7 @@ data class PersonData(
                         forsikringsvurderingId = this.forsikringsvurderingId,
                         opptjeningsvurderingId = this.opptjeningsvurderingId,
                         medlemskapsvurderingId = this.medlemskapsvurderingId,
+                        rettighetskategoriId = this.rettighetskategoriId,
                     )
             }
 

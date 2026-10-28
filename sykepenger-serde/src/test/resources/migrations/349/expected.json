@@ -1,0 +1,49 @@
+{
+  "fødselsnummer": "12029240045",
+  "vilkårsgrunnlagHistorikk": [
+    {
+      "id": "471b6f9f-c23e-4329-843f-723cf2f1925c",
+      "opprettet": "2026-08-19T12:59:17.350711",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Infotrygd",
+          "vilkårsgrunnlagId": "3c1e7a22-6c0b-4b8e-9d0e-2f7a1b5e9c11",
+          "opptjeningsvurderingId": "c0b5f1a8-2f3e-3b0b-8d6c-1f8e2a9d4b11",
+          "medlemskapsvurderingId": "d1c6a2b9-3a4f-3c1c-9e7d-2a9f3b0e5c22",
+          "rettighetskategoriId": "668e9ffc-3f11-3c81-a7ee-6debc334c087"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-01",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "f49ee207-2a56-49e4-a854-77cf6e7845fa",
+          "opptjeningsvurderingId": "e2d7b3c0-4b5a-3d2d-8f8e-3b0a4c1f6d33",
+          "medlemskapsvurderingId": "f3e8c4d1-5c6b-3e3e-9a9f-4c1b5d2a7e44",
+          "rettighetskategoriId": "a9a19677-2036-33ee-bf5c-1c6eed0764e7"
+        }
+      ]
+    },
+    {
+      "id": "8a2c3d4e-5f60-4718-92a3-b4c5d6e7f809",
+      "opprettet": "2026-08-19T12:59:16.123456",
+      "vilkårsgrunnlag": [
+        {
+          "skjæringstidspunkt": "2018-01-01",
+          "type": "Infotrygd",
+          "vilkårsgrunnlagId": "3c1e7a22-6c0b-4b8e-9d0e-2f7a1b5e9c11",
+          "opptjeningsvurderingId": "c0b5f1a8-2f3e-3b0b-8d6c-1f8e2a9d4b11",
+          "medlemskapsvurderingId": "d1c6a2b9-3a4f-3c1c-9e7d-2a9f3b0e5c22",
+          "rettighetskategoriId": "668e9ffc-3f11-3c81-a7ee-6debc334c087"
+        },
+        {
+          "skjæringstidspunkt": "2018-03-01",
+          "type": "Vilkårsprøving",
+          "vilkårsgrunnlagId": "eb1ffaf2-aebb-48c1-8c4c-418b5d03473d",
+          "opptjeningsvurderingId": "e2d7b3c0-4b5a-3d2d-8f8e-3b0a4c1f6d33",
+          "medlemskapsvurderingId": "f3e8c4d1-5c6b-3e3e-9a9f-4c1b5d2a7e44",
+          "rettighetskategoriId": "910f9810-0ac4-394a-95a7-84a965b1206b"
+        }
+      ]
+    }
+  ]
+}

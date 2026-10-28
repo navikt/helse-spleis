@@ -3,7 +3,7 @@ package no.nav.helse.dto.deserialisering
 import no.nav.helse.dto.MedlemskapsvurderingDto
 import no.nav.helse.dto.MeldingsreferanseDto
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 sealed class VilkårsgrunnlagInnDto {
     abstract val vilkårsgrunnlagId: UUID
@@ -11,6 +11,7 @@ sealed class VilkårsgrunnlagInnDto {
     abstract val inntektsgrunnlag: InntektsgrunnlagInnDto
     abstract val opptjeningsvurderingId: UUID
     abstract val medlemskapsvurderingId: UUID
+    abstract val rettighetskategoriId: UUID
 
     data class Spleis(
         override val vilkårsgrunnlagId: UUID,
@@ -22,6 +23,7 @@ sealed class VilkårsgrunnlagInnDto {
         val forsikringsvurderingId: UUID?,
         override val opptjeningsvurderingId: UUID,
         override val medlemskapsvurderingId: UUID,
+        override val rettighetskategoriId: UUID,
     ) : VilkårsgrunnlagInnDto()
 
     data class Infotrygd(
@@ -30,5 +32,6 @@ sealed class VilkårsgrunnlagInnDto {
         override val inntektsgrunnlag: InntektsgrunnlagInnDto,
         override val opptjeningsvurderingId: UUID,
         override val medlemskapsvurderingId: UUID,
+        override val rettighetskategoriId: UUID,
     ) : VilkårsgrunnlagInnDto()
 }
