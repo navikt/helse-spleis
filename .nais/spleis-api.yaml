@@ -38,6 +38,7 @@ spec:
         - application: spanner
         - application: sp-vilkarsproving
         - application: sp-medlemskap
+        - application: sp-rettighetskategori
         - application: speil
         - application: sporbar
     outbound:

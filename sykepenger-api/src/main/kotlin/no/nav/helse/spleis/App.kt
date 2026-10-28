@@ -20,6 +20,7 @@ import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.medlemskap.medlemskapApi
 import no.nav.helse.spleis.opptjening.opptjeningApi
 import no.nav.helse.spleis.rest.personApi
+import no.nav.helse.spleis.rettighetskategori.rettighetskategoriApi
 import org.slf4j.LoggerFactory
 import javax.sql.DataSource
 
@@ -109,5 +110,6 @@ internal fun Application.lagApplikasjonsmodul(
     )
     opptjeningApi(personDao)
     medlemskapApi(personDao)
+    rettighetskategoriApi(personDao)
     behandlingApi(personDao)
 }
