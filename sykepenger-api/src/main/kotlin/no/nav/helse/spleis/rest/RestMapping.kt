@@ -562,6 +562,7 @@ internal fun mapVilkårsgrunnlag(
             arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) },
             forsikringsvurderingId = vilkårsgrunnlag.forsikringsvurderingId,
             opptjeningsvurderingId = vilkårsgrunnlag.opptjeningsvurderingId,
+            medlemskapsvurderingId = vilkårsgrunnlag.medlemskapsvurderingId,
             skjonnsmessigFastsattAarlig =
                 inntekter
                     .filter { it.deaktivert != true }
@@ -581,6 +582,7 @@ internal fun mapVilkårsgrunnlag(
             inntekter = vilkårsgrunnlag.inntekter.map { inntekt -> mapInntekt(vilkårsgrunnlag.skjæringstidspunkt, inntekt) },
             arbeidsgiverrefusjoner = vilkårsgrunnlag.arbeidsgiverrefusjoner.map { refusjon -> mapArbeidsgiverRefusjon(refusjon) },
             opptjeningsvurderingId = vilkårsgrunnlag.opptjeningsvurderingId,
+            medlemskapsvurderingId = vilkårsgrunnlag.medlemskapsvurderingId,
         )
 
     else -> throw IllegalStateException("har ikke mapping for vilkårsgrunnlag ${vilkårsgrunnlag::class.simpleName ?: "[ukjent klassenavn]"}")

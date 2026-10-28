@@ -12,6 +12,7 @@ interface Vilkårsgrunnlag {
     val inntekter: List<Arbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val opptjeningsvurderingId: UUID
+    val medlemskapsvurderingId: UUID
 }
 
 data class SpleisVilkårsgrunnlag(
@@ -30,6 +31,7 @@ data class SpleisVilkårsgrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     override val opptjeningsvurderingId: UUID,
+    override val medlemskapsvurderingId: UUID,
 ) : Vilkårsgrunnlag
 
 data class InfotrygdVilkårsgrunnlag(
@@ -39,6 +41,7 @@ data class InfotrygdVilkårsgrunnlag(
     override val inntekter: List<Arbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     override val opptjeningsvurderingId: UUID,
+    override val medlemskapsvurderingId: UUID,
 ) : Vilkårsgrunnlag
 
 data class Arbeidsgiverinntekt(

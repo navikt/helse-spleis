@@ -16,6 +16,7 @@ internal abstract class IVilkårsgrunnlag(
     val inntekter: List<IArbeidsgiverinntekt>,
     val id: UUID,
     val opptjeningsvurderingId: UUID,
+    val medlemskapsvurderingId: UUID,
 ) {
     abstract fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag
 
@@ -58,7 +59,8 @@ internal class ISpleisGrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     opptjeningsvurderingId: UUID,
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId) {
+    medlemskapsvurderingId: UUID,
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId, medlemskapsvurderingId) {
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag =
         SpleisVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -76,6 +78,7 @@ internal class ISpleisGrunnlag(
             oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
             forsikringsvurderingId = forsikringsvurderingId,
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
         )
 }
 
@@ -103,7 +106,8 @@ internal class IInfotrygdGrunnlag(
     sykepengegrunnlag: Double,
     id: UUID,
     opptjeningsvurderingId: UUID,
-) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId) {
+    medlemskapsvurderingId: UUID,
+) : IVilkårsgrunnlag(skjæringstidspunkt, beregningsgrunnlag, sykepengegrunnlag, inntekter, id, opptjeningsvurderingId, medlemskapsvurderingId) {
     override fun toDTO(refusjonsopplysningerFraBehandlinger: List<IArbeidsgiverrefusjon>): Vilkårsgrunnlag =
         InfotrygdVilkårsgrunnlag(
             skjæringstidspunkt = skjæringstidspunkt,
@@ -112,6 +116,7 @@ internal class IInfotrygdGrunnlag(
             inntekter = inntekter.map { it.toDTO() },
             arbeidsgiverrefusjoner = refusjonsopplysningerFraBehandlinger.map { it.toDTO() },
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
         )
 
     override fun potensiellGhostperiode(
@@ -234,6 +239,7 @@ internal class VilkårsgrunnlagBuilder(
             id = grunnlagsdata.vilkårsgrunnlagId,
             forsikringsvurderingId = grunnlagsdata.forsikringsvurderingId,
             opptjeningsvurderingId = grunnlagsdata.opptjeningsvurderingId,
+            medlemskapsvurderingId = grunnlagsdata.medlemskapsvurderingId,
         )
     }
 
@@ -319,5 +325,6 @@ internal class VilkårsgrunnlagBuilder(
             sykepengegrunnlag = infotrygdVilkårsgrunnlag.inntektsgrunnlag.sykepengegrunnlag.årlig.beløp,
             id = infotrygdVilkårsgrunnlag.vilkårsgrunnlagId,
             opptjeningsvurderingId = infotrygdVilkårsgrunnlag.opptjeningsvurderingId,
+            medlemskapsvurderingId = infotrygdVilkårsgrunnlag.medlemskapsvurderingId,
         )
 }

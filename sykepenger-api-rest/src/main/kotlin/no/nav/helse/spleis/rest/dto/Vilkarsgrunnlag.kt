@@ -19,6 +19,7 @@ sealed interface ApiVilkarsgrunnlag {
     val inntekter: List<ApiArbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>
     val opptjeningsvurderingId: UUID
+    val medlemskapsvurderingId: UUID
 }
 
 data class ApiSpleisVilkarsgrunnlag(
@@ -38,6 +39,7 @@ data class ApiSpleisVilkarsgrunnlag(
     val oppfyllerKravOmMedlemskap: Boolean?,
     val forsikringsvurderingId: UUID?,
     override val opptjeningsvurderingId: UUID,
+    override val medlemskapsvurderingId: UUID,
     val skjonnsmessigFastsattAarlig: Double?,
 ) : ApiVilkarsgrunnlag
 
@@ -49,6 +51,7 @@ data class ApiInfotrygdVilkarsgrunnlag(
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjon>,
     override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val opptjeningsvurderingId: UUID,
+    override val medlemskapsvurderingId: UUID,
 ) : ApiVilkarsgrunnlag
 
 data class ApiSykepengegrunnlagsgrense(

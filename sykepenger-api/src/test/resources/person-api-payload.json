@@ -616,6 +616,7 @@
             "oppfyllerKravOmMedlemskap": true,
             "forsikringsvurderingId": null,
             "opptjeningsvurderingId": "00000000-0000-0000-0000-000000000000",
+            "medlemskapsvurderingId": "00000000-0000-0000-0000-000000000000",
             "skjonnsmessigFastsattAarlig": null
         }
     ]
