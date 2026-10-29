@@ -1,0 +1,149 @@
+name: Kjør behandlingskobling
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Full image-navn med tag. Bygges av https://github.com/navikt/helse-spleis/actions/workflows/main-jobs.yml. Finn det med: kubectl get naisjob spleis-avstemming -n tbd -o jsonpath='{.spec.image}'"
+        required: true
+        type: string
+      cluster:
+        description: "Hvilket cluster jobben skal kjøres i"
+        required: true
+        type: choice
+        options:
+          - dev-gcp
+          - prod-gcp
+      arbeid_id:
+        description: "ArbeidId for batchen. Bruk en ny id for hver kjøring (f.eks. ulik for dryrun og ekte kjøring), ellers gjør jobben ingenting"
+        required: true
+        type: string
+      dryrun:
+        description: "Dryrun: spesialist teller utfallene, men endrer ingenting"
+        required: true
+        type: boolean
+        default: true
+      utvalg:
+        description: "Prosent av personene som tas med (1-100). 1 gir personene der fnr % 100 = 0"
+        required: true
+        type: string
+        default: "1"
+      parallelism:
+        description: "Parallelism for naisjob (heltall > 0)"
+        required: false
+        type: string
+        default: "5"
+      prod_bekreftelse:
+        description: "Må være START BEHANDLINGSKOBLING PROD ved prod-kjøring"
+        required: false
+        type: string
+      bekreft_arbeid_id:
+        description: "Må matche arbeid_id ved prod-kjøring"
+        required: false
+        type: string
+
+concurrency:
+  group: spleis-migrate-behandlingskobling-${{ github.event.inputs.cluster }}
+  cancel-in-progress: false
+
+jobs:
+  valider-og-forbered:
+    name: Valider input og klargjør deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      image: ${{ steps.prepare.outputs.image }}
+      vars_file: ${{ steps.prepare.outputs.vars_file }}
+      dryrun: ${{ steps.prepare.outputs.dryrun }}
+      ekstra_parametre: ${{ steps.prepare.outputs.ekstra_parametre }}
+    steps:
+      - name: Valider input
+        id: prepare
+        env:
+          IMAGE: ${{ github.event.inputs.image }}
+          CLUSTER: ${{ github.event.inputs.cluster }}
+          ARBEID_ID: ${{ github.event.inputs.arbeid_id }}
+          DRYRUN: ${{ github.event.inputs.dryrun }}
+          UTVALG: ${{ github.event.inputs.utvalg }}
+          PARALLELISM: ${{ github.event.inputs.parallelism }}
+          PROD_BEKREFTELSE: ${{ github.event.inputs.prod_bekreftelse }}
+          BEKREFT_ARBEID_ID: ${{ github.event.inputs.bekreft_arbeid_id }}
+        run: |
+          set -euo pipefail
+
+          if ! [[ "$IMAGE" == */*:* ]]; then
+            echo "::error::image må være full image-streng med tag."
+            exit 1
+          fi
+
+          if ! [[ "$UTVALG" =~ ^[1-9][0-9]*$ ]] || [ "$UTVALG" -gt 100 ]; then
+            echo "::error::utvalg må være et heltall fra 1 til 100."
+            exit 1
+          fi
+
+          if ! [[ "$PARALLELISM" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::parallelism må være et heltall større enn 0."
+            exit 1
+          fi
+
+          if [ "$CLUSTER" = "prod-gcp" ]; then
+            if [ "$PROD_BEKREFTELSE" != "START BEHANDLINGSKOBLING PROD" ]; then
+              echo "::error::prod_bekreftelse må være nøyaktig 'START BEHANDLINGSKOBLING PROD' for prod-kjøring."
+              exit 1
+            fi
+            if [ "$BEKREFT_ARBEID_ID" != "$ARBEID_ID" ]; then
+              echo "::error::bekreft_arbeid_id må matche arbeid_id for prod-kjøring."
+              exit 1
+            fi
+          fi
+
+          if [ "$CLUSTER" = "dev-gcp" ]; then
+            vars_file="deploy/job-dev.json"
+          else
+            vars_file="deploy/job-prod.json"
+          fi
+
+          # RUNTIME_OPTS i deploy/job.yml settes til "{{jobb}} {{arbeid_id}} {{ekstra_parametre}}",
+          # så utvalg må sendes med som ekstra_parametre.
+          ekstra_parametre="${UTVALG}"
+          runtime_opts="behandlingskobling ${ARBEID_ID} ${ekstra_parametre}"
+
+          {
+            echo "image=${IMAGE}"
+            echo "vars_file=${vars_file}"
+            echo "dryrun=${DRYRUN}"
+            echo "ekstra_parametre=${ekstra_parametre}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Valgte deploy-verdier"
+            echo ""
+            echo "- cluster: \`${CLUSTER}\`"
+            echo "- image: \`${IMAGE}\`"
+            echo "- arbeid_id: \`${ARBEID_ID}\`"
+            echo "- dryrun: \`${DRYRUN}\`"
+            echo "- runtime_opts: \`${runtime_opts}\`"
+            echo "- parallelism: \`${PARALLELISM}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy-behandlingskobling:
+    name: Deploy behandlingskobling-jobb
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: valider-og-forbered
+    if: ${{ needs.valider-og-forbered.result == 'success' }}
+    # Gjenbruker miljøene til feriepengejobben, som har godkjenning for prod
+    environment: ${{ github.event.inputs.cluster == 'prod-gcp' && 'spleis-feriepenger-prod' || 'spleis-feriepenger-dev' }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: nais/deploy/actions/deploy@7ad7c2b833e1db74a80954e3ee6bb6ac060a8ae7 # v2
+        env:
+          CLUSTER: ${{ github.event.inputs.cluster }}
+          RESOURCE: deploy/job.yml
+          VARS: ${{ needs.valider-og-forbered.outputs.vars_file }}
+          VAR: team=tbd,app=spleis-migrate,image=${{ needs.valider-og-forbered.outputs.image }},parallelism=${{ github.event.inputs.parallelism }},jobb=behandlingskobling,arbeid_id=${{ github.event.inputs.arbeid_id }},dryrun=${{ needs.valider-og-forbered.outputs.dryrun }},ekstra_parametre=${{ needs.valider-og-forbered.outputs.ekstra_parametre }}
