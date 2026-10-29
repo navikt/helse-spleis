@@ -48,6 +48,33 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
     }
 
     @Test
+    fun `Feilaktig varsel om gjenbruk når én IM med både agp og inntekt flytter agp som kun ligger i forutgående AUU`() {
+        a1 {
+            håndterSøknad(2.januar til 16.januar)
+            håndterSøknad(17.januar til 31.januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar), vedtaksperiodeId = 2.vedtaksperiode)
+            håndterVilkårsgrunnlag(2.vedtaksperiode)
+
+            /*
+            Ref.feil meldt på slack: https://nav-it.slack.com/archives/C014X6VBFPV/p1793172894422099
+            Årsak: Periode 2 får ingen bit av agp (alt ligger i AUU-en), så skjæringstidspunkt/agp på periode 2 oppdateres
+            først i igangsettOverstyring -> oppdaterSkjæringstidspunkt, ETTER at håndterOppgittInntekt har lagret inntekten.
+            Endringene blir: [inntekt + gammel stp/agp] -> [inntekt + ny stp/agp]. Behandlinger.vurderbarArbeidstakerFaktaavklartInntekt
+            sammenligner mot første endring med inntekten (mellomtilstanden) og tror agp er endret -> RV_IV_7.
+            Forslag til fiks:
+              B) (rotårsak) Oppdater skjæringstidspunkt/agp på berørte perioder etter håndterOppgittArbeidsgiverperiode og før
+                 håndterOppgittInntekt i Vedtaksperiode.håndterArbeidsgiveropplysninger. Da får også inntektsdata.dato riktig stp.
+              A) (symptom) Bruk siste endring med samme dokumentsporing som første endring med inntekten som referanse.
+             */
+            assertForventetFeil(
+                forklaring = "Inntekt lagres på behandlingen før agp/skjæringstidspunkt er oppdatert",
+                nå = { assertVarsler(2.vedtaksperiode, RV_IV_7) },
+                ønsket = { assertVarsler(emptyList(), 2.vedtaksperiode.filter()) },
+            )
+        }
+    }
+
+    @Test
     fun `Med arbeidsgiveropplysninger kan man opplyse om hullete agp og begrunnelse for reduksjon eller ikke utbetalt`() {
         a1 {
             håndterSøknad(januar)
