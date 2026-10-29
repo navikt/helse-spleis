@@ -69,6 +69,13 @@ fun main(cliArgs: Array<String>) {
                 opptjeningsår = Year.of(args[3].trim().toInt()),
                 dryrun = dryrun,
             )
+        "behandlingskobling" ->
+            startBehandlingskobling(
+                factory = factory,
+                arbeidId = args[1].trim(),
+                utvalg = args.getOrNull(2)?.trim()?.toIntOrNull() ?: 100,
+                dryrun = dryrun,
+            )
         else -> log.error("Unknown task $task")
     }
 }
@@ -152,15 +159,18 @@ private fun fåLås(
 private fun fyllArbeidstabell(
     connection: Connection,
     arbeidId: String,
+    utvalg: Int,
 ) {
+    // utvalg er prosent av personene: 100 gir alle, 1 gir personene der fnr % 100 = 0
     @Language("PostgreSQL")
     val query = """
         INSERT INTO arbeidstabell (arbeid_id,fnr,arbeid_startet,arbeid_ferdig)
-        SELECT ?, fnr, null, null from person
+        SELECT ?, fnr, null, null from person WHERE mod(fnr, 100) < ?
         ON CONFLICT (arbeid_id,fnr) DO NOTHING; 
     """
     connection.prepareStatement(query).use { stmt ->
         stmt.setString(1, arbeidId)
+        stmt.setInt(2, utvalg)
         stmt.execute()
     }
 }
@@ -233,10 +243,11 @@ private fun arbeidFinnes(
 private fun klargjørEllerVentPåTilgjengeligArbeid(
     connection: Connection,
     arbeidId: String,
+    utvalg: Int,
 ) {
     if (fåLås(connection, arbeidId)) {
         if (arbeidFinnes(connection, arbeidId)) return
-        return fyllArbeidstabell(connection, arbeidId)
+        return fyllArbeidstabell(connection, arbeidId, utvalg)
     }
 
     log.info("Venter på at arbeid skal bli tilgjengelig")
@@ -249,11 +260,12 @@ private fun klargjørEllerVentPåTilgjengeligArbeid(
 fun opprettOgUtførArbeid(
     arbeidId: String,
     size: Int = 1,
+    utvalg: Int = 100,
     arbeider: (connection: Connection, fnr: Long) -> Unit,
 ) {
     DataSourceConfiguration(DbUser.MIGRATE).dataSource(maximumPoolSize = 1).use { ds ->
         ds.connection {
-            klargjørEllerVentPåTilgjengeligArbeid(this, arbeidId)
+            klargjørEllerVentPåTilgjengeligArbeid(this, arbeidId, utvalg)
             do {
                 log.info("Forsøker å hente arbeid")
                 val arbeidsliste =
