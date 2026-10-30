@@ -1,10 +1,5 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.naisful.naisApp
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -12,6 +7,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.config.ApplicationConfiguration
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
@@ -22,19 +18,19 @@ import no.nav.helse.spleis.opptjening.opptjeningApi
 import no.nav.helse.spleis.rest.personApi
 import no.nav.helse.spleis.rettighetskategori.rettighetskategoriApi
 import org.slf4j.LoggerFactory
+import tools.jackson.core.util.DefaultIndenter
+import tools.jackson.core.util.DefaultPrettyPrinter
 import javax.sql.DataSource
 
 internal val nyObjectmapper
     get() =
-        jacksonObjectMapper()
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .registerModule(JavaTimeModule())
-            .setDefaultPrettyPrinter(
+        spleisJsonMapperBuilder()
+            .defaultPrettyPrinter(
                 DefaultPrettyPrinter().apply {
-                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance)
+                    indentArraysWith(DefaultPrettyPrinter.FixedSpaceIndenter.instance())
                     indentObjectsWith(DefaultIndenter("  ", "\n"))
                 },
-            )
+            ).build()
 
 internal val objectMapper = nyObjectmapper
 internal val logg = LoggerFactory.getLogger("no.nav.helse.spleis.api.Application")

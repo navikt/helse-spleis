@@ -1,9 +1,5 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.desember
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
@@ -16,9 +12,11 @@ import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SykmeldingstypeDTO
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.NyeSøknaderRiver
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -101,9 +99,7 @@ internal class NyeSøknaderRiverTest : RiverTest() {
 }
 
 private val objectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    spleisJsonMapperBuilder().build()
 
 private fun SykepengesoknadDTO.asObjectNode(): ObjectNode =
     objectMapper.valueToTree<ObjectNode>(this).apply {

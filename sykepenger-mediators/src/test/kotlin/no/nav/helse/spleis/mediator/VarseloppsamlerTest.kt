@@ -1,16 +1,16 @@
 package no.nav.helse.spleis.mediator
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_3
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IM_4
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.unike
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 internal class VarseloppsamlerTest {
@@ -92,6 +92,7 @@ internal class VarseloppsamlerTest {
                         val kontekster =
                             varsel
                                 .path("kontekster")
+                                .values()
                                 .map { it.path("kontekstmap") as ObjectNode }
                                 .flatMap { kontekstmap -> kontekstmap.properties().map { it.key to it.value.asText() } }
                                 .toMap()
@@ -165,7 +166,7 @@ internal class VarseloppsamlerTest {
             .replace("{{varsel-id}}", "$varselId")
             .replace("{{varselkode}}", varselkode.name)
             .let {
-                jacksonObjectMapper().readTree(it)
+                spleisJsonMapperBuilder().build().readTree(it)
             }
     }
 }

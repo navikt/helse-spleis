@@ -31,7 +31,7 @@ internal class UtboksRetryRiver(
         meterRegistry: MeterRegistry,
     ) {
         try {
-            val fraMelding = packet["personidentifikatorer"].map { Personidentifikator(it.asText()) }.toSet()
+            val fraMelding = packet["personidentifikatorer"].values().map { Personidentifikator(it.asText()) }.toSet()
 
             val personerMedUsendteMeldinger =
                 when (fraMelding.isNotEmpty()) {

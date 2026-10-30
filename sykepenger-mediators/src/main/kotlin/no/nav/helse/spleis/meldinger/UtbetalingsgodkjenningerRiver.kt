@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
@@ -9,6 +8,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
+import tools.jackson.databind.JsonNode
 
 internal class UtbetalingsgodkjenningerRiver(
     rapidsConnection: RapidsConnection,

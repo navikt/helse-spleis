@@ -38,12 +38,12 @@ internal class SimuleringMessage(
                 SimuleringResultatDto(
                     totalbeløp = it.path("totalBelop").asInt(),
                     perioder =
-                        it.path("periodeList").map { periode ->
+                        it.path("periodeList").values().map { periode ->
                             SimuleringResultatDto.SimulertPeriode(
                                 fom = periode.path("fom").asLocalDate(),
                                 tom = periode.path("tom").asLocalDate(),
                                 utbetalinger =
-                                    periode.path("utbetaling").map { utbetaling ->
+                                    periode.path("utbetaling").values().map { utbetaling ->
                                         SimuleringResultatDto.SimulertUtbetaling(
                                             forfallsdato = utbetaling.path("forfall").asLocalDate(),
                                             utbetalesTil =
@@ -53,7 +53,7 @@ internal class SimuleringMessage(
                                                 ),
                                             feilkonto = utbetaling.path("feilkonto").asBoolean(),
                                             detaljer =
-                                                utbetaling.path("detaljer").map { detalj ->
+                                                utbetaling.path("detaljer").values().map { detalj ->
                                                     SimuleringResultatDto.Detaljer(
                                                         fom = detalj.path("faktiskFom").asLocalDate(),
                                                         tom = detalj.path("faktiskTom").asLocalDate(),

@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,7 +16,7 @@ internal class V315AuuerSomIkkeRapportertInntekt : JsonMigration(version = 315) 
         if (jsonNode.path("vilkårsgrunnlagHistorikk").isEmpty) return
 
         val tidsstempel = LocalDateTime.now().toString()
-        val sisteInnslag = jsonNode.path("vilkårsgrunnlagHistorikk").path(0).deepCopy<ObjectNode>()
+        val sisteInnslag = jsonNode.path("vilkårsgrunnlagHistorikk").path(0).deepCopy() as ObjectNode
 
         val aktiveVilkårsgrunnlag =
             sisteInnslag.path("vilkårsgrunnlag").associate { element ->
@@ -31,6 +31,7 @@ internal class V315AuuerSomIkkeRapportertInntekt : JsonMigration(version = 315) 
                     val skjæringstidspunkter =
                         arbeidsgiver
                             .path("vedtaksperioder")
+                            .values()
                             .map { vedtaksperiode -> vedtaksperiode.path("skjæringstidspunkt").asText().dato }
                             .filter { it in aktiveVilkårsgrunnlag }
                             .toSet()

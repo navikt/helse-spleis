@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
 

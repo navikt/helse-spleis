@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.migration.JsonMigration.Companion.dato
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -34,11 +34,11 @@ internal class V331ArbeidsgiverperiodeFerdigAvklartBoolean : JsonMigration(331) 
             val behandlingstilstand = behandling.path("tilstand").asText()
             behandling.path("endringer").forEach { endring ->
                 endring as ObjectNode
-                val agp = endring.path("arbeidsgiverperioder").deepCopy<ArrayNode>()
+                val agp = endring.path("arbeidsgiverperioder").deepCopy() as ArrayNode
                 val ferdigAvklart = !erAGPRelevant || erFerdigAvklart(behandlingstilstand, agp)
                 endring.putObject("arbeidsgiverperiode").apply {
                     put("ferdigAvklart", ferdigAvklart)
-                    set<ArrayNode>("dager", agp.utenInfotrygd)
+                    set("dager", agp.utenInfotrygd)
                 }
             }
         }

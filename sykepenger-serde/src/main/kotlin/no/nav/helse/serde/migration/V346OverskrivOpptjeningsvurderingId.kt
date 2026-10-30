@@ -1,6 +1,6 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 
 internal class V346OverskrivOpptjeningsvurderingId : JsonMigration(version = 346) {

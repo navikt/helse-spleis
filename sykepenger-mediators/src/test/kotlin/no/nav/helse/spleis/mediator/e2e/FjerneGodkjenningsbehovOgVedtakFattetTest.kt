@@ -1,12 +1,12 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.spleis.mediator.e2e.KontraktAssertions.assertUtgåendeMelding
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 
 internal class FjerneGodkjenningsbehovOgVedtakFattetTest : AbstractEndToEndMediatorTest() {
     @Test

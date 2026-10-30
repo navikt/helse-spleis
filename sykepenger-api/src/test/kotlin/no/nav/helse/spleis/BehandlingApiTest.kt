@@ -52,7 +52,7 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
                 assertEquals(forventet.beløpTilBruker, dag["beløpTilBruker"].asInt())
                 assertEquals(forventet.sykdomsgrad, dag["sykdomsgrad"].asInt())
                 assertEquals(forventet.dekningsgrad, dag["dekningsgrad"].asInt())
-                assertEquals(forventet.begrunnelser.orEmpty().map { it.name }, dag["begrunnelser"].map { it.asText() })
+                assertEquals(forventet.begrunnelser.orEmpty().map { it.name }, dag["begrunnelser"].values().map { it.asText() })
             }
 
             val navDag = utbetalingstidslinje.first { it["type"].asText() == "NavDag" }

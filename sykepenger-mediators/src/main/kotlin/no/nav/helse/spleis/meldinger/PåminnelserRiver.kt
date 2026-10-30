@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -8,6 +7,7 @@ import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 
 internal class PåminnelserRiver(

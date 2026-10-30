@@ -1,9 +1,9 @@
 package no.nav.helse.spleis.dao
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.*
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.intellij.lang.annotations.Language
+import tools.jackson.databind.node.ObjectNode
 import java.util.*
 import javax.sql.DataSource
 
@@ -48,7 +48,7 @@ data class SendtDao(
     }
 
     internal companion object {
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = spleisJsonMapperBuilder().build()
 
         internal fun SendteMeldinger.responseJson() = objectMapper.writeValueAsString(this)
     }

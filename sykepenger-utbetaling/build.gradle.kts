@@ -15,8 +15,8 @@ dependencies {
 
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logging) {
-        exclude("com.fasterxml.jackson.core")
-        exclude("com.fasterxml.jackson.dataformat")
+        exclude("tools.jackson.core")
+        exclude("tools.jackson.dataformat")
     }
 
     testImplementation(testFixtures(project(":sykepenger-økonomi")))

@@ -1,8 +1,8 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.ser.std.StdSerializer
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.ser.std.StdSerializer
 
 internal class SetSerializer(
     t: Class<Set<*>>,
@@ -10,7 +10,7 @@ internal class SetSerializer(
     override fun serialize(
         value: Set<*>,
         jgen: JsonGenerator,
-        provider: SerializerProvider,
+        provider: SerializationContext,
     ) {
         jgen.writeStartArray()
         value.forEach {

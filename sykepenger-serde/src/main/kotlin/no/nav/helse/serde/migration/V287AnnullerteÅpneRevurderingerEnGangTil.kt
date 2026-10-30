@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V287AnnullerteÅpneRevurderingerEnGangTil : JsonMigration(version = 287) {
     override val description = "smelter sammen til_infotrygd-generasjonen og nest siste generasjon hvis den er en åpen revurdering"

@@ -1,16 +1,16 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.*
 
 internal class JsonMigrationTest {
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = spleisJsonMapperBuilder().build()
 
     @Test
     fun `henter bare meldinger én gang`() {

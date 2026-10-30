@@ -1,6 +1,5 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.DagData
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType
 import no.nav.helse.serde.PersonData.ArbeidsgiverData.SykdomstidslinjeData.KildeData
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -10,6 +9,7 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype.SykepengehistorikkForFeriepenger
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
+import tools.jackson.databind.JsonNode
 import java.time.Year
 
 // Understands a JSON message representing an Ytelserbehov
@@ -57,6 +57,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
 
     private val feriepengehistorikk =
         packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.feriepengehistorikk"]
+            .values()
             .map { feriepenge ->
                 UtbetalingshistorikkForFeriepenger.Feriepenger(
                     orgnummer = feriepenge["orgnummer"].asText(),
@@ -68,6 +69,7 @@ internal class UtbetalingshistorikkForFeriepengerMessage(
 
     private val arbeidskategorikoder =
         packet["@løsning.${SykepengehistorikkForFeriepenger.utgåendeNavn}.arbeidskategorikoder"]
+            .values()
             .map {
                 val fom = it["fom"].asLocalDate()
                 val tom = it["tom"].asLocalDate()

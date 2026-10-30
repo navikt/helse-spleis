@@ -14,6 +14,7 @@ internal class OverstyrArbeidsforholdMessage(
     private val skjæringstidspunkt = packet["skjæringstidspunkt"].asLocalDate()
     private val overstyrteArbeidsforhold =
         packet["overstyrteArbeidsforhold"]
+            .values()
             .map {
                 OverstyrArbeidsforhold.ArbeidsforholdOverstyrt(
                     orgnummer = it["orgnummer"].asText(),

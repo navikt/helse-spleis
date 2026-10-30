@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
@@ -8,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
 import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -52,6 +52,6 @@ internal class InntektsopplysningerFraLagretInntektsmeldingMessage(
     }
 
     private companion object {
-        private val objectmapper = jacksonObjectMapper()
+        private val objectmapper = spleisJsonMapperBuilder().build()
     }
 }

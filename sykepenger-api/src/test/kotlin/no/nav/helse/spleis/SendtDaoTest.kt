@@ -1,9 +1,8 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.dao.SendtDao
 import no.nav.helse.spleis.dao.SendtDao.Companion.responseJson
 import no.nav.helse.spleis.dao.SendtMelding
@@ -13,6 +12,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
+import tools.jackson.databind.node.ObjectNode
 import java.util.*
 import kotlin.test.assertEquals
 
@@ -102,7 +102,7 @@ internal class SendtDaoTest {
     private companion object {
         private val sendt1 = "2026-07-07T14:55:44.123456Z"
         private val sendt2 = "2026-07-07T14:55:44.654321Z"
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = spleisJsonMapperBuilder().build()
 
         // `sendt.lopenummer` er en unik kolonne (ikke en generert identitet), så vi må gi den
         // garantert unike verdier for å unngå kollisjon med andre tester i den delte databasen.

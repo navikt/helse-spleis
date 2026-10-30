@@ -1,10 +1,9 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.februar
 import no.nav.helse.januar
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.mediator.TestMessageFactory
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
@@ -17,6 +16,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.STRICT
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
 internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
@@ -290,14 +290,14 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
     private val testMessageFactory = TestMessageFactory(UNG_PERSON_FNR_2018, ORGNUMMER, INNTEKT, LocalDate.of(1992, 2, 12))
 
     private companion object {
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = spleisJsonMapperBuilder().build()
 
         private fun Pair<String, String>.json(vararg behold: String) =
             (objectMapper.readTree(second) as ObjectNode)
                 .let { json ->
                     json.remove(
                         json
-                            .fieldNames()
+                            .propertyNames()
                             .asSequence()
                             .minus(behold.toSet())
                             .toList(),

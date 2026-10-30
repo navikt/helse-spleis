@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.util.UUID
 

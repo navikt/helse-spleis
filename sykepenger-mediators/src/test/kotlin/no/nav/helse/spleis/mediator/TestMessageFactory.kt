@@ -1,10 +1,5 @@
 package no.nav.helse.spleis.mediator
 
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
@@ -30,6 +25,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
@@ -42,6 +38,8 @@ import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -56,9 +54,7 @@ internal class TestMessageFactory(
 ) {
     private companion object {
         private val objectMapper =
-            jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            spleisJsonMapperBuilder().build()
 
         private fun SykepengesoknadDTO.toMapMedFelterFraSpedisjon(
             fødselsdato: LocalDate,

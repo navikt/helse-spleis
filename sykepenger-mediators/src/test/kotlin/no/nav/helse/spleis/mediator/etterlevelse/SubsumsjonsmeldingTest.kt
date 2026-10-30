@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.mediator.etterlevelse
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import com.networknt.schema.JsonSchemaFactory
-import com.networknt.schema.SpecVersion
-import com.networknt.schema.ValidationMessage
+import com.networknt.schema.Error
+import com.networknt.schema.SchemaLocation
+import com.networknt.schema.SchemaRegistry
+import com.networknt.schema.SpecificationVersion
 import io.mockk.mockk
 import no.nav.helse.etterlevelse.Regelverksporing
 import no.nav.helse.etterlevelse.Tidslinjedag
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
-import java.net.URI
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 internal class SubsumsjonsmeldingTest {
@@ -61,10 +61,10 @@ internal class SubsumsjonsmeldingTest {
     }
 
     private val schema by lazy {
-        JsonSchemaFactory
-            .getInstance(SpecVersion.VersionFlag.V7)
+        SchemaRegistry
+            .withDefaultDialect(SpecificationVersion.DRAFT_7)
             .getSchema(
-                URI(
+                SchemaLocation.of(
                     "https://raw.githubusercontent.com/navikt/helse/6e2cd88991d8be659a179039b978aa91a0ff2092/subsumsjon/json-schema-1.0.0.json",
                 ),
             )
@@ -72,7 +72,7 @@ internal class SubsumsjonsmeldingTest {
 
     private fun assertSubsumsjonsmelding(melding: JsonNode) {
         try {
-            assertEquals(emptySet<ValidationMessage>(), schema.validate(melding))
+            assertEquals(emptyList<Error>(), schema.validate(melding))
         } catch (_: Exception) {
             LoggerFactory
                 .getLogger(

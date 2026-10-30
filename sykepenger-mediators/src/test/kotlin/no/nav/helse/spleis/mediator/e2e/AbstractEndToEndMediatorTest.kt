@@ -1,12 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
@@ -35,6 +28,7 @@ import no.nav.helse.januar
 import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spill_av_im.Forespørsel
 import no.nav.helse.spill_av_im.FørsteFraværsdag
 import no.nav.helse.spleis.Behov
@@ -76,6 +70,10 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.JsonNode
+import tools.jackson.module.kotlin.convertValue
+import tools.jackson.module.kotlin.treeToValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -1034,10 +1032,9 @@ internal abstract class AbstractEndToEndMediatorTest {
         private companion object {
             private val log = LoggerFactory.getLogger(InntektsmeldingerReplayObserver::class.java)
             private val objectMapper =
-                jacksonObjectMapper()
-                    .registerModule(JavaTimeModule())
+                spleisJsonMapperBuilder()
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .build()
         }
 
         private val håndterteInntektsmeldinger = mutableListOf<UUID>()
@@ -1070,20 +1067,20 @@ internal abstract class AbstractEndToEndMediatorTest {
                     vedtaksperiodeId = vedtaksperiodeId,
                     skjæringstidspunkt = node.path("skjæringstidspunkt").asLocalDate(),
                     førsteFraværsdager =
-                        node.path("førsteFraværsdager").map {
+                        node.path("førsteFraværsdager").values().map {
                             FørsteFraværsdag(it.path("organisasjonsnummer").textValue(), it.path("førsteFraværsdag").asLocalDate())
                         },
                     sykmeldingsperioder =
-                        node.path("sykmeldingsperioder").map {
+                        node.path("sykmeldingsperioder").values().map {
                             no.nav.helse.spill_av_im
                                 .Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate())
                         },
                     egenmeldinger =
-                        node.path("egenmeldinger").map {
+                        node.path("egenmeldinger").values().map {
                             no.nav.helse.spill_av_im
                                 .Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate())
                         },
-                    harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").booleanValue(),
+                    harForespurtArbeidsgiverperiode = node.path("trengerArbeidsgiverperiode").asBoolean(),
                 )
 
             val replayMessage = lagInntektsmeldingerReplayMessage(forespørsel)

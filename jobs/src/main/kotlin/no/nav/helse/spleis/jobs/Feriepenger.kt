@@ -2,11 +2,6 @@ package no.nav.helse.spleis.jobs
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import no.nav.helse.dto.UtbetalingTilstandDto
 import no.nav.helse.dto.deserialisering.ArbeidsgiverInnDto
@@ -14,7 +9,10 @@ import no.nav.helse.dto.deserialisering.OppdragInnDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.UtbetalingInnDto
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.apache.kafka.clients.producer.ProducerRecord
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.ObjectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
@@ -24,10 +22,9 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 private val objectMapper: ObjectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
+    spleisJsonMapperBuilder()
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .build()
 
 fun startFeriepenger(
     factory: ConsumerProducerFactory,

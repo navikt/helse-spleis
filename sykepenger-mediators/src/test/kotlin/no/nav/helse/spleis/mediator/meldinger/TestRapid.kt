@@ -1,9 +1,5 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
@@ -11,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel.Companion.finn
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.varsler
@@ -19,6 +16,7 @@ import no.nav.helse.spleis.utboks.TestUtsenderObservatør
 import no.nav.helse.spleis.utboks.UtgåendeMelding
 import org.junit.jupiter.api.fail
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 internal class TestRapid(
@@ -26,9 +24,7 @@ internal class TestRapid(
 ) : RapidsConnection() {
     private companion object {
         private val objectMapper =
-            jacksonObjectMapper()
-                .registerModule(JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            spleisJsonMapperBuilder().build()
 
         private val log = LoggerFactory.getLogger(TestRapid::class.java)
     }
@@ -182,7 +178,7 @@ internal class TestRapid(
         ) = mutableListOf<JsonNode>()
             .apply {
                 events("behov") { behovsmelding ->
-                    val etterspurteBehov = behovsmelding.path("@behov").map { it.asText() }
+                    val etterspurteBehov = behovsmelding.path("@behov").values().map { it.asText() }
                     if (behovstype.utgåendeNavn in etterspurteBehov && filter(behovsmelding)) this.add(behovsmelding)
                 }
             }.toList()

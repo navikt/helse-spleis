@@ -1,8 +1,8 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.spleisJsonMapperBuilder
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.io.File
 
 fun main() {
@@ -19,14 +19,14 @@ fun main() {
      */
     val path = "<Du må lese det som står over!>"
     val storPerson = File(path).readText()
-    val person = jacksonObjectMapper().readTree(storPerson)
+    val person = spleisJsonMapperBuilder().build().readTree(storPerson)
     trimPerson(person)
     println(person)
 }
 
 private fun JsonNode.fjernAltUntatt(felter: List<String>) {
     this as ObjectNode
-    fieldNames().asSequence().toSet().forEach { key ->
+    propertyNames().toSet().forEach { key ->
         if (key !in felter) {
             remove(key)
         }

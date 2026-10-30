@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.sql_dsl.connection
 import com.github.navikt.tbd_libs.sql_dsl.localDateTime
@@ -15,6 +13,7 @@ import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.januar
 import no.nav.helse.mai
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.Behov.Behovstype.Utbetaling
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Naturalytelse
@@ -25,6 +24,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.databind.node.ObjectNode
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -336,7 +336,7 @@ internal class KunEnArbeidsgiverMediatorTest : AbstractEndToEndMediatorTest() {
         assertFalse(hendelseRepository.erBehandlet(meldingId))
         val (_, message) = meldingsfabrikk.lagNySøknad(SoknadsperiodeDTO(fom = 1.januar, tom = 25.januar, sykmeldingsgrad = 100))
         val medSammeId =
-            (jacksonObjectMapper().readTree(message) as ObjectNode)
+            (spleisJsonMapperBuilder().build().readTree(message) as ObjectNode)
                 .also {
                     it.put("@id", meldingId.id.toString())
                 }.toString()

@@ -1,6 +1,6 @@
 package no.nav.helse.spleis.utboks
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
@@ -43,7 +43,7 @@ internal abstract class Utsender {
     ): Pair<List<UtgåendeMelding>, List<UtgåendeMelding>>
 
     protected companion object {
-        val objectmapper = jacksonObjectMapper()
+        val objectmapper = spleisJsonMapperBuilder().build()
         val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 

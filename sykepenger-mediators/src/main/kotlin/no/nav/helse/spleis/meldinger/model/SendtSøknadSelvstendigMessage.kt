@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -12,6 +11,7 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import tools.jackson.databind.JsonNode
 import java.time.Year
 
 internal class SendtSøknadSelvstendigMessage(
@@ -27,7 +27,7 @@ internal class SendtSøknadSelvstendigMessage(
     ) {
         builder.sendt(packet["sendtNav"].asLocalDateTime())
         val pensjonsgivendeInntekter =
-            packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].map {
+            packet["selvstendigNaringsdrivende.inntekt.inntektsAar"].values().map {
                 val pensjonsgivendeInntekt = it.path("pensjonsgivendeInntekt")
                 Søknad.PensjonsgivendeInntekt(
                     inntektsår = Year.parse(it.path("aar").asText()),
@@ -128,6 +128,7 @@ internal class SendtSøknadSelvstendigMessage(
             ),
             context,
             packet["historiskeFolkeregisteridenter"]
+                .values()
                 .map(JsonNode::asText)
                 .map {
                     Personidentifikator(it)

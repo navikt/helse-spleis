@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V330EpochSomArbeidsgiverperiodeForInfotrygdsaker : JsonMigration(330) {
     override val description = "Legger til EPOCH som Arbeidsgiverperiode på siste behandling på alle Infotrygd-saker"
