@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -13,6 +11,8 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
 import java.time.LocalDate
 
 // Understands a JSON message representing a Søknad that is sent to NAV
@@ -37,6 +37,7 @@ internal class SendtSøknadNavMessage(
             ),
             context,
             packet["historiskeFolkeregisteridenter"]
+                .values()
                 .map(JsonNode::asText)
                 .map {
                     Personidentifikator(it)
@@ -53,6 +54,7 @@ internal class SendtSøknadNavMessage(
             builder.egenmeldinger(
                 packet["egenmeldingsdagerFraSykmelding"]
                     .takeIf(JsonNode::isArray)
+                    ?.values()
                     ?.map { LocalDate.parse(it.asText()) }
                     ?.grupperSammenhengendePerioderMedHensynTilHelg()
                     ?: emptyList(),
@@ -96,6 +98,7 @@ internal class SendtSøknadNavMessage(
             if (andreInntektskilder !is ArrayNode) return emptyList()
             // fjerner ANDRE_ARBEIDSFORHOLD dersom <ikkeJobbetIDetSisteFraAnnetArbeidsforhold> er satt til true
             return andreInntektskilder
+                .values()
                 .map { it.path("type").asText() }
                 .filterNot { kilde -> kilde == "ANDRE_ARBEIDSFORHOLD" && ikkeJobbetIDetSisteFraAnnetArbeidsforhold }
         }

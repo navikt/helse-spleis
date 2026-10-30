@@ -1,12 +1,8 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.mai
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.NavNoKorrigerteInntektsmeldingerRiver
 import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
@@ -19,6 +15,8 @@ import no.nav.inntektsmeldingkontrakt.Periode
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -103,9 +101,7 @@ internal class NavNoKorrigerteInntektsmeldingerRiverTest : RiverTest() {
 }
 
 private val objectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    spleisJsonMapperBuilder().build()
 
 private fun Inntektsmeldingkontrakt.asObjectNode(): ObjectNode =
     objectMapper.valueToTree<ObjectNode>(this).apply {

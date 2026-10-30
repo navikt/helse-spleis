@@ -1,10 +1,8 @@
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dto.tilSpannerPersonDto
 import no.nav.helse.person.aktivitetslogg.Aktivitet
 import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.extension.TestWatcher
@@ -27,9 +25,7 @@ annotation class OpenInSpanner
 class SpannerEtterTestInterceptor : TestWatcher {
     companion object {
         private val objectMapper =
-            jacksonObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .registerModule(JavaTimeModule())
+            spleisJsonMapperBuilder().build()
     }
 
     override fun testFailed(

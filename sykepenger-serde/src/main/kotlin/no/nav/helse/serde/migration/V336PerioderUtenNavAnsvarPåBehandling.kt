@@ -1,8 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V336PerioderUtenNavAnsvarPåBehandling : JsonMigration(336) {
     override val description = "Renamer arbeidsgiverperiode til periodeUtenNavAnsvar på Behandling"
@@ -14,9 +13,9 @@ internal class V336PerioderUtenNavAnsvarPåBehandling : JsonMigration(336) {
         jsonNode.path("arbeidsgivere").forEach { arbeidsgiver ->
             arbeidsgiver.path("perioderUtenNavAnsvar").forEach { periodeUtenNavAnsvar ->
                 periodeUtenNavAnsvar as ObjectNode
-                periodeUtenNavAnsvar.set<ArrayNode>(
+                periodeUtenNavAnsvar.set(
                     "dagerUtenNavAnsvar",
-                    periodeUtenNavAnsvar.path("arbeidsgiverperiode").deepCopy<ArrayNode>(),
+                    periodeUtenNavAnsvar.path("arbeidsgiverperiode").deepCopy(),
                 )
                 periodeUtenNavAnsvar.remove("arbeidsgiverperiode")
             }
@@ -33,7 +32,7 @@ internal class V336PerioderUtenNavAnsvarPåBehandling : JsonMigration(336) {
         vedtaksperiode.path("behandlinger").forEach { behandling ->
             behandling.path("endringer").forEach { endring ->
                 endring as ObjectNode
-                endring.set<ArrayNode>("dagerUtenNavAnsvar", endring.path("arbeidsgiverperiode").deepCopy<ArrayNode>())
+                endring.set("dagerUtenNavAnsvar", endring.path("arbeidsgiverperiode").deepCopy())
                 endring.remove("arbeidsgiverperiode")
             }
         }

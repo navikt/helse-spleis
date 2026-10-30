@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.januar
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.meldinger.model.tilOpphørAvNaturalytelser
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -24,7 +24,7 @@ internal class InntektsmeldingMessageTest {
     }
 
     private companion object {
-        val objectMapper = jacksonObjectMapper()
+        val objectMapper = spleisJsonMapperBuilder().build()
         val naturalytelseTom = """[]"""
         val naturalytelse = """[{"naturalytelse":"ANNET", "beloepPrMnd":"1200.0", "fom":"2018-01-01"}]"""
         val naturalytelseUgyldig = """[{"beloepPrMnd":"1200.0"}]"""

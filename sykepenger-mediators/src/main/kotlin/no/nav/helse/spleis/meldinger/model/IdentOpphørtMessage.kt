@@ -12,7 +12,7 @@ internal class IdentOpphørtMessage(
     override val meldingsporing: Meldingsporing,
 ) : HendelseMessage(packet) {
     private val nyttFødselsnummer = packet["nye_identer.fødselsnummer"].asText()
-    private val gamleIdenter = packet["gamle_identer"].map { Personidentifikator(it.path("ident").asText()) }.toSet()
+    private val gamleIdenter = packet["gamle_identer"].values().map { Personidentifikator(it.path("ident").asText()) }.toSet()
 
     override fun behandle(
         mediator: IHendelseMediator,

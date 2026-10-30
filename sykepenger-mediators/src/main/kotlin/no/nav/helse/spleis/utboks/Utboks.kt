@@ -79,7 +79,11 @@ internal class Utboks(
         forEach { utgåendeMelding ->
             when (utgåendeMelding.eventName) {
                 "behov" -> {
-                    val behov = utgåendeMelding.json.path("@behov").map { it.asText() }
+                    val behov =
+                        utgåendeMelding.json
+                            .path("@behov")
+                            .values()
+                            .map { it.asText() }
                     sikkerLogg.info(
                         "sender behov til ${utgåendeMelding.mottaker.name} (${behov.joinToString()}):\n\t${utgåendeMelding.json}",
                     )

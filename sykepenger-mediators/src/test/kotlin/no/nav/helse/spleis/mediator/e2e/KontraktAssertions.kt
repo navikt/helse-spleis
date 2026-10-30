@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.skyscreamer.jsonassert.JSONAssert
 import org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
@@ -54,7 +54,7 @@ internal object KontraktAssertions {
         assertOgFjern: (faktiskJson: ObjectNode, key: String) -> Unit,
     ) {
         val (faktiskJson, forventetJson) = this
-        val uuidTemplates = forventetJson.properties().filter { it.value.asText() == template }.map { it.key }
+        val uuidTemplates = forventetJson.properties().filter { it.value.asString("") == template }.map { it.key }
         uuidTemplates.forEach {
             forventetJson.remove(it)
             assertOgFjern(faktiskJson, it)
@@ -97,5 +97,5 @@ internal object KontraktAssertions {
         objekt.remove(sisteKey)
     }
 
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = spleisJsonMapperBuilder().build()
 }

@@ -26,7 +26,7 @@ internal class OverstyrTidslinjeMessage(
                 ManuellOverskrivingDag(
                     dato = dato,
                     type = dag["type"].asText().dagtype,
-                    grad = dag.get("grad")?.intValue(),
+                    grad = dag.get("grad")?.asInt(),
                 )
             }
         }

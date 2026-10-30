@@ -1,8 +1,8 @@
 package no.nav.helse.serde
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.serde.migration.*
+import tools.jackson.module.kotlin.readValue
 
 class SerialisertPerson(
     val json: String,

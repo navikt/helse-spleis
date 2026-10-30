@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.mediator.meldinger
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
@@ -13,6 +11,7 @@ import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtel
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mars
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
@@ -25,6 +24,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.node.ObjectNode
 import java.util.*
 
 internal class YtelserRiverMappingTest :
@@ -136,7 +136,7 @@ internal class YtelserRiverMappingTest :
     private fun gradertAndreYtelse(
         type: String,
         yrkesaktivitet: String?,
-    ) = jacksonObjectMapper().createObjectNode().apply {
+    ) = spleisJsonMapperBuilder().build().createObjectNode().apply {
         put("graderteAndreYtelserType", type)
         if (yrkesaktivitet != null) put("yrkesaktivitet", yrkesaktivitet)
         putArray("graderteAndreYtelserPerioder").addObject().apply {
@@ -147,7 +147,7 @@ internal class YtelserRiverMappingTest :
     }
 
     private fun medGraderteAndreYtelser(vararg graderteAndreYtelser: ObjectNode): String {
-        val json = jacksonObjectMapper().readTree(medArray)
+        val json = spleisJsonMapperBuilder().build().readTree(medArray)
         val løsninger = json.path("@løsning") as ObjectNode
         løsninger.putArray("GraderteAndreYtelserForBeregning").addAll(graderteAndreYtelser.toList())
         return json.toString()
@@ -199,7 +199,7 @@ internal class YtelserRiverMappingTest :
         json: String,
         svar: String,
     ): String {
-        val json = jacksonObjectMapper().readTree(json)
+        val json = spleisJsonMapperBuilder().build().readTree(json)
         (json.path("@løsning") as ObjectNode).putObject("MedlemskapsvurderingResultat").apply {
             put("svar", svar)
             put("ok", svar != "NEI")
@@ -211,7 +211,7 @@ internal class YtelserRiverMappingTest :
         json: String,
         vararg fjern: String,
     ): String {
-        val json = jacksonObjectMapper().readTree(json)
+        val json = spleisJsonMapperBuilder().build().readTree(json)
         val løsninger = json.path("@løsning") as ObjectNode
         løsninger.remove(fjern.toList())
         return json.toString()

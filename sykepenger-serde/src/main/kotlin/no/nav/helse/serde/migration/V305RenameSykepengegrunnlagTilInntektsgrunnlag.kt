@@ -1,6 +1,6 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V305RenameSykepengegrunnlagTilInntektsgrunnlag : JsonMigration(version = 305) {
     override val description = "renamer sykepengegrunnlag til inntektsgrunnlag"

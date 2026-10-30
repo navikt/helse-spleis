@@ -1,7 +1,7 @@
 package no.nav.helse.dbscript
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.dbscript.DbScript.ConnectionInfo
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import java.util.Base64
 
 internal object ManuellOppkobling {
@@ -47,5 +47,5 @@ internal object ManuellOppkobling {
             null
         }
 
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = spleisJsonMapperBuilder().build()
 }

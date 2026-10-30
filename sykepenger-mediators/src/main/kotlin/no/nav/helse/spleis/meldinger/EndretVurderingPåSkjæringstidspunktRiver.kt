@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -10,6 +9,7 @@ import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunkt
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Forsikringsvurdering
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Medlemskapsvurdering
 import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage.Vurderingsformat.Opptjeningsvurdering
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 internal class EndretVurderingPåSkjæringstidspunktRiver(

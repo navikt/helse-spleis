@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -17,6 +16,7 @@ import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
+import tools.jackson.databind.JsonNode
 
 // Understands a JSON message representing an Ytelserbehov
 internal class UtbetalingshistorikkMessage(

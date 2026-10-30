@@ -1,7 +1,7 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V314SkjæringstidspunkterSomListe : JsonMigration(version = 314) {
     override val description = "Legger til liste av skjæringstidspunkter på behandling"

@@ -1,11 +1,11 @@
 package no.nav.helse.spleis.jobs
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
@@ -21,19 +21,19 @@ class SykepengehistorikkForFeriepengerTest {
                 datoForSisteFeriepengekjøringIInfotrygd = LocalDate.of(2021, 5, 10),
             )
         val result = event.tilJson()
-        val node = jacksonObjectMapper().readTree(result)
+        val node = spleisJsonMapperBuilder().build().readTree(result)
 
         assertDoesNotThrow { UUID.fromString(node.path("@id").asText()) }
         assertDoesNotThrow { LocalDateTime.parse(node.path("@opprettet").asText()) }
         assertEquals("behov", node.path("@event_name").asText())
-        assertEquals(listOf("SykepengehistorikkForFeriepenger"), node.path("@behov").map(JsonNode::asText))
+        assertEquals(listOf("SykepengehistorikkForFeriepenger"), node.path("@behov").values().map(JsonNode::asText))
         assertEquals("2020-01-01", node.path("SykepengehistorikkForFeriepenger").path("historikkFom").asText())
         assertEquals("2020-12-31", node.path("SykepengehistorikkForFeriepenger").path("historikkTom").asText())
         assertEquals("2021-05-10", node.path("SykepengehistorikkForFeriepenger").path("datoForSisteFeriepengekjøringIInfotrygd").asText())
 
         assertEquals(
             setOf("fødselsnummer", "@event_name", "@id", "@opprettet", "@behov", "SykepengehistorikkForFeriepenger"),
-            (node as ObjectNode).fieldNames().asSequence().toSet(),
+            (node as ObjectNode).propertyNames().toSet(),
         )
     }
 }

@@ -1,11 +1,11 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.intellij.lang.annotations.Language
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
 internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonMigration(version = 297) {
@@ -47,7 +47,7 @@ internal class V297IdentifiserFerdigBehandledePerioderMedÅpenBehandling : JsonM
 
     private companion object {
         private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-        private val objectMapper = jacksonObjectMapper()
+        private val objectMapper = spleisJsonMapperBuilder().build()
 
         private fun JsonNode.sisteBehandlingOrNull() = path("behandlinger").lastOrNull()
 

@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -15,6 +14,7 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 
 // Understands a JSON message representing an Inntektsmelding
@@ -27,7 +27,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
             beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
             opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
             endringerIRefusjon =
-                packet["endringIRefusjoner"].map {
+                packet["endringIRefusjoner"].values().map {
                     Inntektsmelding.Refusjon.EndringIRefusjon(
                         it.path("beloep").asDouble().månedlig,
                         it.path("endringsdato").asLocalDate(),
@@ -39,7 +39,7 @@ internal class NavNoSelvbestemtInntektsmeldingMessage(
 
     private val mottatt = packet["mottattDato"].asLocalDateTime()
     private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()
-    private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].map(::asPeriode)
+    private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].values().map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"].takeIf(JsonNode::isTextual)?.asText()
     private val opphørAvNaturalytelser = packet["opphoerAvNaturalytelser"].tilOpphørAvNaturalytelser()

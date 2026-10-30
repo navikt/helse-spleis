@@ -1,7 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -25,6 +23,8 @@ import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.yrkesaktivitetssporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import no.nav.helse.spleis.Behov.Behovstype.Medlemskapsvurdering as MedlemskapsvurderingBehov
 
 // Understands a JSON message representing a Vilkårsgrunnlagsbehov
@@ -137,7 +137,7 @@ internal class VilkårsgrunnlagMessage(
         private fun mapSkatteopplysninger(opplysninger: JsonNode) =
             opplysninger
                 .flatMap { måned ->
-                    måned["inntektsliste"].map { opplysning ->
+                    måned["inntektsliste"].values().map { opplysning ->
                         (opplysning as ObjectNode).put("årMåned", måned.path("årMåned").asText())
                     }
                 }.groupBy({ inntekt -> inntekt.arbeidsgiver() }) { inntekt ->

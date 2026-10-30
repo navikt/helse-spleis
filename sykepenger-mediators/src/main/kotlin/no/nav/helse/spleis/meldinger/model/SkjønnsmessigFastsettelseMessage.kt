@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
@@ -9,6 +8,7 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
+import tools.jackson.databind.JsonNode
 import java.time.LocalDateTime
 
 internal class SkjønnsmessigFastsettelseMessage(
@@ -33,7 +33,7 @@ internal class SkjønnsmessigFastsettelseMessage(
     )
 
     private fun JsonNode.asArbeidsgiveropplysninger() =
-        map { arbeidsgiveropplysning ->
+        values().map { arbeidsgiveropplysning ->
             val orgnummer = arbeidsgiveropplysning["organisasjonsnummer"].asText()
             val årlig = arbeidsgiveropplysning["årlig"].asDouble().årlig
 

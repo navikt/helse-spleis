@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.opptjening
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.spleis.AbstractApiTest
@@ -11,6 +10,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.skyscreamer.jsonassert.JSONAssert
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals

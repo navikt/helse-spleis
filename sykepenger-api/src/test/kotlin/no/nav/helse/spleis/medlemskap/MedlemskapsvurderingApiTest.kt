@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.medlemskap
 
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.april
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
@@ -29,6 +28,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.skyscreamer.jsonassert.JSONAssert
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth

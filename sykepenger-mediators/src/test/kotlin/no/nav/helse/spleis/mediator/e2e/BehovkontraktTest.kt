@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -328,7 +328,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDatotid(behov.path("@opprettet").asText())
         assertTrue(id.isNotEmpty())
         assertDoesNotThrow { UUID.fromString(id) }
-        assertTrue(typer.map(Behov.Behovstype::utgåendeNavn).containsAll(behov.path("@behov").map(JsonNode::asText)))
+        assertTrue(typer.map(Behov.Behovstype::utgåendeNavn).containsAll(behov.path("@behov").values().map(JsonNode::asText)))
     }
 
     private fun assertArbeidsavklaringspengerdetaljer(behov: JsonNode) {
@@ -370,7 +370,11 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
         assertEquals(
             forventedeSpesielleYrkesgrupper,
-            behov.path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn).path("spesielleYrkesgrupper").map(JsonNode::asText),
+            behov
+                .path(Behov.Behovstype.Forsikringsvurdering.utgåendeNavn)
+                .path("spesielleYrkesgrupper")
+                .values()
+                .map(JsonNode::asText),
         )
     }
 

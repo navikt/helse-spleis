@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.serde.migration.V280HengendeRevurderinger.Dokumentsporing.Companion.dokumentsporing
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -59,7 +59,7 @@ internal class V280HengendeRevurderinger : JsonMigration(280) {
         val dokumentsporing =
             uberegnede
                 .flatMap {
-                    it.path("endringer").map {
+                    it.path("endringer").values().map {
                         LocalDateTime.parse(it.path("tidsstempel").asText()) to it.path("dokumentsporing").dokumentsporing
                     }
                 }.toSet()
@@ -81,7 +81,7 @@ internal class V280HengendeRevurderinger : JsonMigration(280) {
         (sisteIverksetting.path("endringer") as ArrayNode).apply {
             val sisteEndring = last()
             dokumentsporing.forEach { (tidsstempel, dokumentsporing) ->
-                val kopi = sisteEndring.deepCopy<ObjectNode>()
+                val kopi = sisteEndring.deepCopy() as ObjectNode
                 kopi.put("id", "${UUID.randomUUID()}")
                 kopi.put("tidsstempel", "$tidsstempel")
                 (kopi.path("dokumentsporing") as ObjectNode).apply {

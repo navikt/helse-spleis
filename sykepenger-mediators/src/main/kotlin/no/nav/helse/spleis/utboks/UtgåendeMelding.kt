@@ -1,13 +1,13 @@
 package no.nav.helse.spleis.utboks
 
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.Personidentifikator
 import no.nav.helse.hendelser.MeldingsreferanseId
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.Behov
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.module.kotlin.readValue
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -40,7 +40,7 @@ data class UtgåendeMelding(
     constructor(key: String?, json: String, mottaker: Mottaker) : this(key, objectmapper.readValue<ObjectNode>(json), mottaker)
 
     companion object {
-        private val objectmapper = jacksonObjectMapper()
+        private val objectmapper = spleisJsonMapperBuilder().build()
 
         @OptIn(ExperimentalUuidApi::class)
         private fun nyUuidv7() = Uuid.generateV7().toString()

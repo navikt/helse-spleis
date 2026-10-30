@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.Personidentifikator
@@ -8,6 +7,7 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.Personopplysninger
+import tools.jackson.databind.JsonNode
 
 // Understands a JSON message representing a Søknad that is only sent to the employer
 internal class SendtSøknadArbeidsgiverMessage(
@@ -31,6 +31,7 @@ internal class SendtSøknadArbeidsgiverMessage(
             ),
             context,
             packet["historiskeFolkeregisteridenter"]
+                .values()
                 .map(JsonNode::asText)
                 .map {
                     Personidentifikator(it)

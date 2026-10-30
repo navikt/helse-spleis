@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
@@ -16,6 +15,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.daglig
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
 import java.util.*
 
 // Understands a JSON message representing an Ytelserbehov
@@ -33,10 +33,12 @@ internal class YtelserMessage(
     private val foreldrepengerytelse =
         packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Foreldrepengeytelse.perioder"]
             .takeIf(JsonNode::isArray)
+            ?.values()
             ?.map(::asGradertPeriode) ?: emptyList()
     private val svangerskapsytelse =
         packet["@løsning.${Behovstype.Foreldrepenger.utgåendeNavn}.Svangerskapsytelse.perioder"]
             .takeIf(JsonNode::isArray)
+            ?.values()
             ?.map(::asGradertPeriode) ?: emptyList()
 
     internal val foreldrepenger = Foreldrepenger(foreldrepengeytelse = foreldrepengerytelse)
@@ -71,7 +73,7 @@ internal class YtelserMessage(
         packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { gradertAndreYtelse ->
             GraderteAndreYtelserForBeregning(
                 graderteAndreYtelserForBeregningPeriodeList =
-                    gradertAndreYtelse.path("graderteAndreYtelserPerioder").map { graderteAndreYtelserPeriode ->
+                    gradertAndreYtelse.path("graderteAndreYtelserPerioder").values().map { graderteAndreYtelserPeriode ->
                         GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
                             fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
                             tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
@@ -91,7 +93,7 @@ internal class YtelserMessage(
 
     internal val inntekterForBeregning =
         InntekterForBeregning(
-            packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].map {
+            packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].values().map {
                 InntekterForBeregning.Inntektsperiode(
                     inntektskilde = it.path("inntektskilde").asText(),
                     periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
@@ -112,6 +114,7 @@ internal class YtelserMessage(
     internal val arbeidsavklaringspengerV2 =
         Arbeidsavklaringspenger(
             packet["@løsning.${Behovstype.Arbeidsavklaringspenger.utgåendeNavn}.utbetalingsperioder"]
+                .values()
                 .map { Periode(it.path("fom").asLocalDate(), it.path("tom").asLocalDate()) },
         )
 
@@ -155,6 +158,7 @@ internal class YtelserMessage(
     internal val dagpengerV2 =
         Dagpenger(
             packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
+                .values()
                 .map {
                     Periode(
                         it.path("fom").asLocalDate(),

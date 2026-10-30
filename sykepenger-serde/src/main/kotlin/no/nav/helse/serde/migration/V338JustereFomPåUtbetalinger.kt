@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.serde.migration.JsonMigration.Companion.dato
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 
 internal class V338JustereFomPåUtbetalinger : JsonMigration(338) {

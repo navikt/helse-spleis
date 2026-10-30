@@ -1,6 +1,5 @@
 package no.nav.helse.spleis
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.azure.AzureToken
 import com.github.navikt.tbd_libs.azure.AzureTokenProvider
 import com.github.navikt.tbd_libs.mock.MockHttpResponse
@@ -8,6 +7,7 @@ import com.github.navikt.tbd_libs.result_object.Result
 import com.github.navikt.tbd_libs.result_object.ok
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -25,7 +25,7 @@ class SpekematClientTest {
             ): Result<AzureToken> = throw NotImplementedError("ikke implementert i mock")
         }
     private var httpClientMock = mockk<HttpClient>()
-    private val client = SpekematClient(httpClientMock, azureTokenProvider, "scope-til-spekemat", jacksonObjectMapper())
+    private val client = SpekematClient(httpClientMock, azureTokenProvider, "scope-til-spekemat", spleisJsonMapperBuilder().build())
 
     @Test
     fun `tolker response fra spekemat`() {

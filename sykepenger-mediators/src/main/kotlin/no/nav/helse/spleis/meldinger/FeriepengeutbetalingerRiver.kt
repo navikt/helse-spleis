@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
@@ -9,6 +8,7 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
+import tools.jackson.databind.JsonNode
 
 internal class FeriepengeutbetalingerRiver(
     rapidsConnection: RapidsConnection,

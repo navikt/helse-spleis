@@ -1,10 +1,10 @@
 package no.nav.helse.serde.migration
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 
 internal class V292AnnullertPeriode : JsonMigration(version = 292) {
     override val description = "setter tilstand=ANNULLERT_PERIODE for annullerte behandlinger"
@@ -23,7 +23,7 @@ internal class V292AnnullertPeriode : JsonMigration(version = 292) {
                         arbeidsgiver
                             .path("utbetalinger")
                             .flatMap { utbetaling ->
-                                utbetaling.path("annulleringer").map { it.asText() }
+                                utbetaling.path("annulleringer").values().map { it.asText() }
                             }.toSet()
                     val utbetalinger =
                         arbeidsgiver
@@ -89,7 +89,7 @@ internal class V292AnnullertPeriode : JsonMigration(version = 292) {
         siste.put("tilstand", "ANNULLERT_PERIODE")
         val sisteEndringerSisteGenerasjon = siste.path("endringer").last() as ObjectNode
 
-        val kopi = sisteEndring.deepCopy<ObjectNode>()
+        val kopi = sisteEndring.deepCopy() as ObjectNode
         sisteEndringerSisteGenerasjon.put("utbetalingId", tilhørendeAnnullering.path("id").asText())
         kopi.path("vilkårsgrunnlagId").takeIf(JsonNode::isTextual)?.asText()?.also { vilkårsgrunnlagId ->
             sisteEndringerSisteGenerasjon.put("vilkårsgrunnlagId", vilkårsgrunnlagId)

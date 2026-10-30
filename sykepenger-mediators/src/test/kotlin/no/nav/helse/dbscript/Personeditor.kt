@@ -1,14 +1,14 @@
 package no.nav.helse.dbscript
 
-import com.fasterxml.jackson.core.util.DefaultIndenter
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.sql_dsl.firstOrNull
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.person.Person
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.skyscreamer.jsonassert.JSONCompare
 import org.skyscreamer.jsonassert.JSONCompareMode
+import tools.jackson.core.util.DefaultIndenter
+import tools.jackson.core.util.DefaultPrettyPrinter
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -82,7 +82,7 @@ internal object Personeditor : DbScript() {
             }
             with(resultatfil) {
                 createNewFile()
-                writeText(objectMapper.writer(printer).writeValueAsString(objectMapper.readTree(data)))
+                writeText(objectMapper.writer().with(printer).writeValueAsString(objectMapper.readTree(data)))
             }
 
             println("## Nå er vi klar får å endre personen her 🥷")
@@ -165,5 +165,5 @@ internal object Personeditor : DbScript() {
             indentArraysWith(DefaultIndenter.SYSTEM_LINEFEED_INSTANCE)
         }
 
-    private val objectMapper = jacksonObjectMapper()
+    private val objectMapper = spleisJsonMapperBuilder().build()
 }

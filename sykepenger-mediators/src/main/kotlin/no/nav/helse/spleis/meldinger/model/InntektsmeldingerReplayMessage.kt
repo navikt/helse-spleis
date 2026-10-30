@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.meldinger.model
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -16,6 +15,7 @@ import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
+import tools.jackson.databind.JsonNode
 import java.util.UUID
 
 // Understands a JSON message representing an Inntektsmelding replay
@@ -72,7 +72,7 @@ internal class InntektsmeldingerReplayMessage(
                         ?.månedlig,
                 opphørsdato = packet.path("refusjon").path("opphoersdato").asOptionalLocalDate(),
                 endringerIRefusjon =
-                    packet["endringIRefusjoner"].map {
+                    packet["endringIRefusjoner"].values().map {
                         Inntektsmelding.Refusjon.EndringIRefusjon(
                             it.path("beloep").asDouble().månedlig,
                             it.path("endringsdato").asLocalDate(),
@@ -83,7 +83,7 @@ internal class InntektsmeldingerReplayMessage(
         val mottatt = packet.path("mottattDato").asLocalDateTime()
         val førsteFraværsdag = packet.path("foersteFravaersdag").asOptionalLocalDate()
         val beregnetInntekt = packet.path("beregnetInntekt").asDouble()
-        val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").map(::asPeriode)
+        val arbeidsgiverperioder = packet.path("arbeidsgiverperioder").values().map(::asPeriode)
         val begrunnelseForReduksjonEllerIkkeUtbetalt =
             packet
                 .path(
@@ -110,7 +110,7 @@ internal class InntektsmeldingerReplayMessage(
 }
 
 internal fun JsonNode.tilOpphørAvNaturalytelser(): List<Inntektsmelding.OpphørAvNaturalytelse> =
-    map { naturalytelse ->
+    values().map { naturalytelse ->
         Inntektsmelding.OpphørAvNaturalytelse(
             beløp = naturalytelse["beloepPrMnd"].asDouble().månedlig,
             fom = naturalytelse["fom"].asLocalDate(),
