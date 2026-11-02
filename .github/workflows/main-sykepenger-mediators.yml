@@ -45,14 +45,14 @@ permissions:
 jobs:
   bygg-og-test:
     name: Bygg og test
-    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-og-test-med-gradle.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-og-test-med-gradle.yml@b34afa2e28c72e92d6c3ef2f9607f982b0a8283f # v1.0.14
     permissions:
       contents: read
 
   bygg-image:
     name: Bygg image
     needs: bygg-og-test
-    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-modul-image-med-jib.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/bygg-modul-image-med-jib.yml@b34afa2e28c72e92d6c3ef2f9607f982b0a8283f # v1.0.14
     with:
       modul: sykepenger-mediators
     permissions:
@@ -64,7 +64,7 @@ jobs:
   deploy-dev:
     name: Deploy til dev
     needs: bygg-image
-    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@b34afa2e28c72e92d6c3ef2f9607f982b0a8283f # v1.0.14
     with:
       manifest: .nais/spleis.yaml
       environment: dev-gcp
@@ -77,7 +77,7 @@ jobs:
   deploy-prod:
     name: Deploy til prod
     needs: bygg-image
-    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@77c349d62b631cf0fedc02278c68abd33bc8ea5b # v1.0.10
+    uses: navikt/sykepenger-github-workflows/.github/workflows/deploy-v2.yml@b34afa2e28c72e92d6c3ef2f9607f982b0a8283f # v1.0.14
     with:
       manifest: .nais/spleis.yaml
       environment: prod-gcp
