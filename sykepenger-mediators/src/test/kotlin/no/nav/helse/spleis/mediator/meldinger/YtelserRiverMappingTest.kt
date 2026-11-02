@@ -70,6 +70,22 @@ internal class YtelserRiverMappingTest :
     }
 
     @Test
+    fun `Mapping uten løsning på rettighetskategoriresultat`() {
+        assertNull(sendJson(medObject).rettighetskategoriResultat)
+    }
+
+    @Test
+    fun `Mapping av løsning på rettighetskategoriresultat`() {
+        Rettighetskategori.Hovedkategori.entries.forEach { hovedkategori ->
+            val json = medRettighetskategoriResultat(medObject, hovedkategori.name)
+            sendJson(json).apply {
+                assertForventetInnhold()
+                assertEquals(hovedkategori, rettighetskategoriResultat)
+            }
+        }
+    }
+
+    @Test
     fun `Mapping av graderte andre ytelser med yrkesaktivitet`() =
         Toggle.GraderteAndreYtelser.enable {
             val json =
@@ -204,6 +220,15 @@ internal class YtelserRiverMappingTest :
             put("svar", svar)
             put("ok", svar != "NEI")
         }
+        return json.toString()
+    }
+
+    private fun medRettighetskategoriResultat(
+        json: String,
+        hovedkategori: String,
+    ): String {
+        val json = spleisJsonMapperBuilder().build().readTree(json)
+        (json.path("@løsning") as ObjectNode).putObject("RettighetskategoriResultat").put("hovedkategori", hovedkategori)
         return json.toString()
     }
 

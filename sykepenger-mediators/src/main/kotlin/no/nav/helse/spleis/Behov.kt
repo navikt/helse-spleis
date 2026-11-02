@@ -115,6 +115,10 @@ data class Behov(
         data object Rettighetskategori : Behovstype {
             override val utgåendeNavn = "Rettighetskategori"
         }
+
+        data object RettighetskategoriResultat : Behovstype {
+            override val utgåendeNavn = "RettighetskategoriResultat"
+        }
     }
 
     companion object {

@@ -239,6 +239,39 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         }
 
     @Test
+    fun `ytelser med toggle for validering av rettighetskategori`() =
+        Toggle.ValidereRettighetskategori.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            sendVilkårsgrunnlag(0)
+            val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
+            assertVedtaksperiodeBehov(
+                behov,
+                Arbeidsavklaringspenger,
+                Dagpenger,
+                Foreldrepenger,
+                Institusjonsopphold,
+                Omsorgspenger,
+                Opplæringspenger,
+                Pleiepenger,
+                InntekterForBeregning,
+                OpptjeningsvurderingResultat,
+                RettighetskategoriResultat,
+            )
+            assertTrue(behov.path("@behov").values().map(JsonNode::asText).contains(RettighetskategoriResultat.utgåendeNavn))
+            assertDoesNotThrow {
+                UUID.fromString(
+                    behov.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText(),
+                )
+            }
+            sendYtelser(0)
+            assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Simulering))
+        }
+
+    @Test
     fun simulering() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(

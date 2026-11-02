@@ -818,6 +818,7 @@ internal class TestPerson(
             inntekterForBeregning: List<InntekterForBeregning.Inntektsperiode> = emptyList(),
             forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
             graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+            rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = arbeidsgiverHendelsefabrikk.standardHovedkategori,
         ) {
             behovshåndterer.bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
@@ -835,6 +836,7 @@ internal class TestPerson(
                     graderteAndreYtelser,
                     forsikringsvurderingResultat,
                     opptjeningsvurderingResultatOk = true,
+                    rettighetskategoriResultat = rettighetskategoriResultat,
                 ).håndter(Person::håndterYtelser)
         }
 
@@ -852,6 +854,7 @@ internal class TestPerson(
             graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
             opptjeningsvurderingResultatOk: Boolean? = null,
             medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
+            rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = arbeidsgiverHendelsefabrikk.standardHovedkategori,
         ) {
             val opptjeningsvurderingResultatOk =
                 opptjeningsvurderingResultatOk ?: if (inspektør.orgnummer == "SELVSTENDIG") {
@@ -882,6 +885,7 @@ internal class TestPerson(
                     null,
                     opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
                     medlemskapsvurderingResultat = medlemskapsvurderingResultat,
+                    rettighetskategoriResultat = rettighetskategoriResultat,
                 ).håndter(Person::håndterYtelser)
         }
 
@@ -900,6 +904,18 @@ internal class TestPerson(
             behovsoppsamler
                 .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Rettighetskategori>()
                 .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+
+        internal fun rettighetskategoriIdIBeregningsbehov(vedtaksperiodeId: UUID) =
+            behovsoppsamler
+                .behovsdetaljer<Behovsoppsamler.Behovsdetaljer>()
+                .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+                .mapNotNull {
+                    when (it) {
+                        is Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker -> it.rettighetskategoriId
+                        is Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig -> it.rettighetskategoriId
+                        else -> null
+                    }
+                }.last()
 
         internal fun håndterRettighetskategori(
             vedtaksperiodeId: UUID = 1.vedtaksperiode,

@@ -155,6 +155,11 @@ internal class YtelserMessage(
                 }
             }
 
+    internal val rettighetskategoriResultat: Rettighetskategori.Hovedkategori? =
+        packet["@løsning.${Behovstype.RettighetskategoriResultat.utgåendeNavn}.hovedkategori"]
+            .takeUnless { it.isMissingOrNull() }
+            ?.let { Rettighetskategori.Hovedkategori.valueOf(it.asText()) }
+
     internal val dagpengerV2 =
         Dagpenger(
             packet["@løsning.${Behovstype.Dagpenger.utgåendeNavn}.meldekortperioder"]
@@ -189,6 +194,7 @@ internal class YtelserMessage(
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
                 medlemskapsvurderingResultat = medlemskapsvurderingResultat,
+                rettighetskategoriResultat = rettighetskategoriResultat,
             )
 
     override fun behandle(

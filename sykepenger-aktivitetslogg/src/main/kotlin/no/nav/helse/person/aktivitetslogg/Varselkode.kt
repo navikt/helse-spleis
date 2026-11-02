@@ -389,6 +389,9 @@ enum class Varselkode(
 
     // YS: Yrkesskade
     RV_YS_1("Yrkesskade oppgitt i søknaden"),
+
+    // RK: Rettighetskategori
+    RV_RK_2("Perioden har en annen yrkesaktivitetstype enn rettighetskategorien"),
     ;
 
     init {

@@ -264,6 +264,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         opptjeningsvurderingResultatOk: Boolean,
         medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
+        rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = standardHovedkategori,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -301,8 +302,16 @@ internal class ArbeidsgiverHendelsefabrikk(
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
             medlemskapsvurderingResultat = medlemskapsvurderingResultat,
+            rettighetskategoriResultat = rettighetskategoriResultat,
         )
     }
+
+    internal val standardHovedkategori
+        get() =
+            when (behandlingsporing) {
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> Rettighetskategori.Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE
+                else -> Rettighetskategori.Hovedkategori.ARBEIDSTAKER
+            }
 
     internal fun lagRettighetskategori(
         vedtaksperiodeId: UUID,

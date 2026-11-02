@@ -589,6 +589,7 @@ internal abstract class AbstractEndToEndMediatorTest {
         inntekterForBeregning: List<InntektsperiodeTestData> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         orgnummer: String = ORGNUMMER,
+        rettighetskategoriResultat: String? = null,
     ) {
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Foreldrepenger))
         assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Pleiepenger))
@@ -606,6 +607,12 @@ internal abstract class AbstractEndToEndMediatorTest {
             forsikringsvurderingResultat != null,
             testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.ForsikringsvurderingResultat),
         )
+        val rettighetskategoriResultat =
+            if (testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.RettighetskategoriResultat)) {
+                rettighetskategoriResultat ?: if (yrkesaktivitetstype == "SELVSTENDIG") "SELVSTENDIG_NÆRINGSDRIVENDE" else "ARBEIDSTAKER"
+            } else {
+                null
+            }
         val (_, message) =
             meldingsfabrikk.lagYtelser(
                 vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
@@ -620,6 +627,7 @@ internal abstract class AbstractEndToEndMediatorTest {
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 orgnummer = orgnummer,
                 yrkesaktivitetstype = yrkesaktivitetstype,
+                rettighetskategoriResultat = rettighetskategoriResultat,
             )
         testRapid.sendTestMessage(message)
     }

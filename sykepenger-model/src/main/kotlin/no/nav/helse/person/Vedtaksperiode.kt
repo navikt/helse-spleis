@@ -1635,6 +1635,9 @@ internal class Vedtaksperiode private constructor(
             checkNotNull(vilkårsgrunnlag) {
                 "krever vilkårsgrunnlag for $skjæringstidspunkt, men har ikke. Lages det utbetaling for en periode som ikke skal lage utbetaling?"
             }
+        ytelser.validerRettighetskategori(aktivitetslogg, yrkesaktivitet.yrkesaktivitetstype)
+        // En periode med en annen yrkesaktivitetstype enn vilkårsgrunnlaget skal ikke beregnes, fordi det gir misvisende varsler som RV_VV_4
+        if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, ytelser, aktivitetslogg)
         // steg 1: sett sammen alle inntekter som skal brukes i beregning
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
@@ -3296,6 +3299,7 @@ internal class Vedtaksperiode private constructor(
                 forsikringsvurderingId = (grunnlag as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId,
                 opptjeningsvurderingId = grunnlag.opptjeningsvurderingId,
                 medlemskapsvurderingId = grunnlag.medlemskapsvurderingId,
+                rettighetskategoriId = grunnlag.rettighetskategoriId,
             )
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)

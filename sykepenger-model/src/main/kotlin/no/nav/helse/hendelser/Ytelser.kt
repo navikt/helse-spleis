@@ -32,6 +32,7 @@ class Ytelser(
     val opptjeningsvurderingResultatOk: Boolean,
     private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
     val medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
+    private val rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = null,
 ) : Hendelse {
     override val metadata =
         LocalDateTime.now().let { nå ->
@@ -49,6 +50,22 @@ class Ytelser(
     }
 
     internal fun erRelevant(other: UUID) = other.toString() == vedtaksperiodeId
+
+    internal fun validerRettighetskategori(
+        aktivitetslogg: IAktivitetslogg,
+        yrkesaktivitetstype: Behandlingsporing.Yrkesaktivitet,
+    ) {
+        val hovedkategori = rettighetskategoriResultat ?: return
+        val stemmer =
+            when (hovedkategori) {
+                Rettighetskategori.Hovedkategori.ARBEIDSTAKER -> yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Arbeidstaker
+                Rettighetskategori.Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE -> yrkesaktivitetstype is Behandlingsporing.Yrkesaktivitet.Selvstendig
+                Rettighetskategori.Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE -> false
+            }
+        if (stemmer) return
+        aktivitetslogg.info("Hovedkategorien $hovedkategori stemmer ikke med yrkesaktivitetstypen ${yrkesaktivitetstype::class.simpleName}")
+        aktivitetslogg.funksjonellFeil(Varselkode.RV_RK_2)
+    }
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,

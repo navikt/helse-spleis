@@ -168,17 +168,12 @@ class Behovshåndterer(
                         rettighetskategoriBehov.yrkesaktivitetssporing.somOrganisasjonsnummer,
                         rettighetskategoriBehov.yrkesaktivitetssporing,
                     )
-                val hovedkategori =
-                    when (rettighetskategoriBehov.yrkesaktivitetssporing) {
-                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> Rettighetskategori.Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE
-                        else -> Rettighetskategori.Hovedkategori.ARBEIDSTAKER
-                    }
                 val løsning =
                     fabrikk.lagRettighetskategori(
                         vedtaksperiodeId = rettighetskategoriBehov.vedtaksperiodeId,
                         skjæringstidspunkt = rettighetskategoriBehov.skjæringstidspunkt,
                         rettighetskategoriId = UUID.randomUUID(),
-                        hovedkategori = hovedkategori,
+                        hovedkategori = fabrikk.standardHovedkategori,
                     )
                 behovsoppsamler.besvart(rettighetskategoriBehov)
                 håndterRettighetskategori(løsning)

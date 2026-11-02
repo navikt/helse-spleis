@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.GraderteAndreYtelserType
+import no.nav.helse.hendelser.Rettighetskategori
 import no.nav.helse.spleis.Behov.Behovstype.*
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -72,6 +73,10 @@ internal class YtelserRiver(
         message.requireKey("@løsning.${OpptjeningsvurderingResultat.utgåendeNavn}.ok")
 
         message.interestedIn("@løsning.${MedlemskapsvurderingResultat.utgåendeNavn}.svar")
+
+        message.interestedIn("@løsning.${RettighetskategoriResultat.utgåendeNavn}.hovedkategori") { hovedkategori ->
+            Rettighetskategori.Hovedkategori.valueOf(hovedkategori.asText())
+        }
 
         // Dagpenger & AAP
         message.requireArray("@løsning.${Dagpenger.utgåendeNavn}.meldekortperioder") {

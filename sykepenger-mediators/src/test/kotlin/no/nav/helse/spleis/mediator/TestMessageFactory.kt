@@ -975,6 +975,7 @@ internal class TestMessageFactory(
         orgnummer: String = organisasjonsnummer,
         yrkesaktivitetstype: String = "ARBEIDSTAKER",
         opptjeningsvurderingResultatOk: Boolean = true,
+        rettighetskategoriResultat: String? = null,
     ): Pair<String, String> {
         val behovliste =
             mutableListOf(
@@ -992,6 +993,9 @@ internal class TestMessageFactory(
 
         if (forsikringsvurderingResultat != null) {
             behovliste.add("ForsikringsvurderingResultat")
+        }
+        if (rettighetskategoriResultat != null) {
+            behovliste.add(Behov.Behovstype.RettighetskategoriResultat.utgåendeNavn)
         }
 
         return lagBehovMedLøsning(
@@ -1098,7 +1102,14 @@ internal class TestMessageFactory(
                                     )
                                 },
                         ),
-                ).plus(forsikringsvurderingResultat(forsikringsvurderingResultat, yrkesaktivitetstype)),
+                ).plus(forsikringsvurderingResultat(forsikringsvurderingResultat, yrkesaktivitetstype))
+                    .plus(
+                        listOfNotNull(
+                            rettighetskategoriResultat?.let {
+                                Behov.Behovstype.RettighetskategoriResultat.utgåendeNavn to mapOf("hovedkategori" to it)
+                            },
+                        ),
+                    ),
         )
     }
 
