@@ -1,23 +1,18 @@
 package no.nav.helse.spleis.jobs
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.apache.kafka.clients.producer.ProducerRecord
+import tools.jackson.databind.ObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
 // Midlertidig: engangsmigrering som gir varsler i spesialist spleis-behandlingId. Slettes når migreringen er kjørt.
 
-private val objectMapper: ObjectMapper =
-    jacksonObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+private val objectMapper: ObjectMapper = spleisJsonMapperBuilder().build()
 
 fun startBehandlingskobling(
     factory: ConsumerProducerFactory,

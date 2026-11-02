@@ -1,8 +1,8 @@
 package no.nav.helse.spleis.jobs
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -55,14 +55,21 @@ class BehandlingskoblingTest {
 
         val node = jacksonObjectMapper().readTree(melding.tilJson())
 
-        assertEquals("spleis_behandlingskobling", node.path("@event_name").asText())
-        assertEquals("12345678910", node.path("fødselsnummer").asText())
+        assertEquals("spleis_behandlingskobling", node.path("@event_name").asString())
+        assertEquals("12345678910", node.path("fødselsnummer").asString())
         assertEquals(true, node.path("dryrun").asBoolean())
-        val vedtaksperiode = node.path("vedtaksperioder").single()
-        assertEquals(vedtaksperiodeId.toString(), vedtaksperiode.path("vedtaksperiodeId").asText())
-        val behandling = vedtaksperiode.path("behandlinger").single()
-        assertEquals(behandlingId.toString(), behandling.path("behandlingId").asText())
-        assertEquals("2024-01-01T12:00:00", behandling.path("opprettet").asText())
-        assertEquals(utbetalingId.toString(), behandling.path("utbetalinger").single().asText())
+        val vedtaksperiode = node.path("vedtaksperioder").values().single()
+        assertEquals(vedtaksperiodeId.toString(), vedtaksperiode.path("vedtaksperiodeId").asString())
+        val behandling = vedtaksperiode.path("behandlinger").values().single()
+        assertEquals(behandlingId.toString(), behandling.path("behandlingId").asString())
+        assertEquals("2024-01-01T12:00:00", behandling.path("opprettet").asString())
+        assertEquals(
+            utbetalingId.toString(),
+            behandling
+                .path("utbetalinger")
+                .values()
+                .single()
+                .asString(),
+        )
     }
 }
