@@ -66,7 +66,13 @@ internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
             håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
             assertEquals(15.desember(2017) til 31.januar, inspektør.periode(1.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            )
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)
             assertVarsler(listOf(Varselkode.RV_IV_7, RV_SØ_13), 1.vedtaksperiode.filter())
@@ -288,7 +294,13 @@ internal class RevurderKorrigertSoknadTest : AbstractDslTest() {
             håndterSøknad(Sykdom(15.desember(2017), 15.januar, 100.prosent))
 
             assertTilstand(3.vedtaksperiode, TIL_INFOTRYGD)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING, AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET,
+                AVVENTER_REVURDERING,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING_REVURDERING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET, AVVENTER_REVURDERING)
 
             håndterVilkårsgrunnlag(1.vedtaksperiode)

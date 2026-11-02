@@ -19,15 +19,6 @@ import java.util.*
 
 internal class RettighetskategoriIdTest : AbstractDslTest() {
     @Test
-    fun `nytt vilkårsgrunnlag får deterministisk rettighetskategoriId`() {
-        a1 {
-            nyttVedtak(januar)
-            val grunnlag = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
-            assertEquals(deterministisk(grunnlag.vilkårsgrunnlagId), grunnlag.rettighetskategoriId)
-        }
-    }
-
-    @Test
     fun `kopiert vilkårsgrunnlag beholder rettighetskategoriId`() {
         a1 {
             nyttVedtak(januar)
@@ -57,27 +48,32 @@ internal class RettighetskategoriIdTest : AbstractDslTest() {
             assertEquals(5.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
             val grunnlagEtter = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!
             assertNotEquals(grunnlagFør.rettighetskategoriId, grunnlagEtter.rettighetskategoriId)
-            assertEquals(deterministisk(grunnlagEtter.vilkårsgrunnlagId), grunnlagEtter.rettighetskategoriId)
         }
     }
 
     @Test
-    fun `migreringen gir samme rettighetskategoriId som Spleis lager for nye vilkårsgrunnlag`() {
+    fun `migrerte vilkårsgrunnlag får deterministisk rettighetskategoriId, mens nye får den fra sp-rettighetskategori`() {
         medJSONPerson("/personer/vedtak_januar_uten_opptjeningsvurderingid.json", 344)
         a1 {
             nyttVedtak(mars)
         }
-        val historikk = dto().vilkårsgrunnlagHistorikk.historikk
-        assertEquals(2, historikk.size)
-        val alleGrunnlag = historikk.flatMap { it.vilkårsgrunnlag }
-        assertEquals(listOf(1.januar, 1.mars, 1.januar), alleGrunnlag.map { it.skjæringstidspunkt })
-        alleGrunnlag.forEach { grunnlag ->
+        val alleGrunnlag =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .flatMap { it.vilkårsgrunnlag }
+                .filterIsInstance<VilkårsgrunnlagUtDto.Spleis>()
+        val (migrerte, nye) = alleGrunnlag.partition { it.skjæringstidspunkt == 1.januar }
+        assertTrue(migrerte.isNotEmpty())
+        migrerte.forEach { grunnlag ->
             assertEquals(deterministisk(grunnlag.vilkårsgrunnlagId), grunnlag.rettighetskategoriId)
             assertEquals(
                 VilkårsgrunnlagElement.deterministiskRettighetskategoriId(grunnlag.vilkårsgrunnlagId),
                 grunnlag.rettighetskategoriId,
             )
         }
+        val nytt = nye.single()
+        assertEquals(1.mars, nytt.skjæringstidspunkt)
+        assertNotEquals(deterministisk(nytt.vilkårsgrunnlagId), nytt.rettighetskategoriId)
         assertGjenoppbygget(dto())
     }
 
@@ -87,9 +83,13 @@ internal class RettighetskategoriIdTest : AbstractDslTest() {
         a1 {
             nyttVedtak(april)
         }
-        val alleGrunnlag = dto().vilkårsgrunnlagHistorikk.historikk.flatMap { it.vilkårsgrunnlag }
-        assertTrue(alleGrunnlag.any { it is VilkårsgrunnlagUtDto.Infotrygd })
-        alleGrunnlag.forEach { grunnlag ->
+        val infotrygdgrunnlag =
+            dto()
+                .vilkårsgrunnlagHistorikk.historikk
+                .flatMap { it.vilkårsgrunnlag }
+                .filterIsInstance<VilkårsgrunnlagUtDto.Infotrygd>()
+        assertTrue(infotrygdgrunnlag.isNotEmpty())
+        infotrygdgrunnlag.forEach { grunnlag ->
             assertEquals(deterministisk(grunnlag.vilkårsgrunnlagId), grunnlag.rettighetskategoriId)
         }
         assertGjenoppbygget(dto())

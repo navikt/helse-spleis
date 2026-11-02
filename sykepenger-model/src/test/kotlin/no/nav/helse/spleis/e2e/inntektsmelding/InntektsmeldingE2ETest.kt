@@ -254,6 +254,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }
@@ -690,7 +691,14 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
         }
     }
 
@@ -1014,7 +1022,14 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 6.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 9.januar, listOf(1.januar til 6.januar, 9.januar til 18.januar))
@@ -1074,6 +1089,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                         START,
                         AVVENTER_INNTEKTSMELDING,
                         AVVENTER_BLOKKERENDE_PERIODE,
+                        AVVENTER_RETTIGHETSKATEGORI,
                         AVVENTER_VILKÅRSPRØVING,
                         AVVENTER_HISTORIKK,
                         AVVENTER_SIMULERING,
@@ -1178,6 +1194,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1237,6 +1254,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1405,6 +1423,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1432,6 +1451,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1451,6 +1471,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -1485,6 +1506,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }
@@ -1518,6 +1540,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }
@@ -1664,7 +1687,13 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
             assertVarsel(RV_AO_3, 1.vedtaksperiode.filter())
             assertEquals(16.januar til 16.februar, inspektør.periode(1.vedtaksperiode))
             assertEquals(16.januar, inspektør.skjæringstidspunkt(1.vedtaksperiode))
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
         }
     }
 
@@ -1855,6 +1884,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertEquals(27.oktober til 8.november, inspektør.periode(1.vedtaksperiode))
@@ -1938,7 +1968,14 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_AVSLUTTET_UTEN_UTBETALING,
                 AVSLUTTET_UTEN_UTBETALING,
             )
-            assertTilstander(3.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                3.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
         }
     }
 
@@ -1976,6 +2013,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2021,6 +2059,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2077,6 +2116,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2179,6 +2219,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertTilstander(
@@ -2247,6 +2288,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2286,6 +2328,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }
@@ -2329,6 +2372,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2345,6 +2389,7 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -2706,7 +2751,14 @@ internal class InntektsmeldingE2ETest : AbstractDslTest() {
                 "UARR AAAAARR ASSSSHH SSSSSHH SSSSSHH SSSSSHH SS",
                 inspektør.vedtaksperioder(2.vedtaksperiode).sykdomstidslinje.toShortString(),
             )
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(RV_IM_3, 2.vedtaksperiode.filter())
         }
     }

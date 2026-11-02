@@ -100,6 +100,7 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_RETTIGHETSKATEGORI",
             "AVVENTER_VILKÅRSPRØVING",
         )
     }

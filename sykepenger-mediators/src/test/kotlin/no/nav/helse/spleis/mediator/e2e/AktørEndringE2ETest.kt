@@ -46,7 +46,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
         assertEquals(1, antallPersoner(FNR1, FNR2))
         assertEquals(2, antallPersonalias(FNR1, FNR2))
         val meldinger = testRapid.inspektør.meldinger("vedtaksperiode_endret")
-        assertEquals(8, meldinger.size)
+        assertEquals(9, meldinger.size)
         assertEquals(FNR1, meldinger[0].path("fødselsnummer").asText())
         assertEquals(FNR1, meldinger[1].path("fødselsnummer").asText())
         assertEquals(FNR2, meldinger[2].path("fødselsnummer").asText())
@@ -59,6 +59,7 @@ internal class AktørEndringE2ETest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_RETTIGHETSKATEGORI",
             "AVVENTER_VILKÅRSPRØVING",
         )
         assertTilstander(1, "AVVENTER_INNTEKTSMELDING", "AVVENTER_BLOKKERENDE_PERIODE")

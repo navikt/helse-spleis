@@ -309,7 +309,13 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
             nullstillTilstandsendringer()
             håndterSelvbestemtArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             assertVarsel(RV_AO_3, 2.vedtaksperiode.filter())
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertTilstander(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE)
             assertBeløpstidslinje(inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje, 1.januar til 20.januar, INNTEKT)
             assertBeløpstidslinje(inspektør.vedtaksperioder(2.vedtaksperiode).refusjonstidslinje, 21.januar til 25.januar, INNTEKT)
@@ -667,7 +673,13 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 Beløpstidslinje.fra(1.januar til 27.januar, 500.daglig, kildeNy) +
                     Beløpstidslinje.fra(28.januar til 31.januar, INGEN, kildeNy)
             assertEquals(forventetTidslinje, inspektør.vedtaksperioder(1.vedtaksperiode).refusjonstidslinje)
-            assertTilstander(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
         }
     }

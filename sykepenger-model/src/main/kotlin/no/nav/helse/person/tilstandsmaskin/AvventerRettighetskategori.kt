@@ -1,6 +1,5 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.Toggle
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.person.EventBus
@@ -30,10 +29,4 @@ internal data object AvventerRettighetskategori : Vedtaksperiodetilstand {
 
     internal fun nesteTilstand(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand =
         if (vedtaksperiode.erRevurdering()) AvventerVilkårsprøvingRevurdering else AvventerVilkårsprøving
-
-    internal val førVilkårsprøving: Vedtaksperiodetilstand
-        get() = if (Toggle.AvklareRettighetskategori.enabled) AvventerRettighetskategori else AvventerVilkårsprøving
-
-    internal val førVilkårsprøvingRevurdering: Vedtaksperiodetilstand
-        get() = if (Toggle.AvklareRettighetskategori.enabled) AvventerRettighetskategori else AvventerVilkårsprøvingRevurdering
 }

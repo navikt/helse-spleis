@@ -125,6 +125,7 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
                 Aktivitetslogg(),
             )
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
+            person.håndterRettighetskategori(eventBus, rettighetskategori(), Aktivitetslogg())
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val simuleringsutfisker = Simuleringsutfisker()
             eventBus.register(simuleringsutfisker)

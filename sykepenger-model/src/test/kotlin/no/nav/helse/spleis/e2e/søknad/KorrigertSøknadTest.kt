@@ -79,7 +79,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
             assertTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
             assertEquals("AAAAARR AAAAARR AAAAARR AAAAARR AAA", inspektør.sykdomstidslinje.toShortString())
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         }
     }
 
@@ -301,7 +301,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
         a1 {
             håndterUtbetalt()
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVSLUTTET)
-            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(2.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_RETTIGHETSKATEGORI, AVVENTER_VILKÅRSPRØVING)
         }
     }
 
@@ -401,6 +401,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
@@ -456,8 +457,10 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -488,8 +491,10 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -518,8 +523,10 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsler(emptyList(), 1.vedtaksperiode.filter())
@@ -549,6 +556,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
@@ -577,6 +585,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -607,6 +616,7 @@ internal class KorrigertSøknadTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

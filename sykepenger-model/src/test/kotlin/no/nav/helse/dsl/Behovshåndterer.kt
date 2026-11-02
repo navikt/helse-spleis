@@ -3,6 +3,7 @@ package no.nav.helse.dsl
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.Rettighetskategori
 import no.nav.helse.hendelser.Utbetalingshistorikk
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -21,6 +22,7 @@ class Behovshåndterer(
 ) : EventSubscription {
     private val tilstander = mutableMapOf<UUID, TilstandType>()
     private val uhåndterteInntektsmeldinger = mutableMapOf<UUID, Inntektsmeldingdetaljer>()
+    internal var besvarRettighetskategoriAutomatisk = true
 
     fun utbetalingsdetaljer(orgnummer: String): List<Behovsoppsamler.Behovsdetaljer.Utbetaling> =
         behovsoppsamler
@@ -112,6 +114,7 @@ class Behovshåndterer(
         operasjon: () -> Unit,
         håndterInntektsmeldingerReplay: (inntektsmeldingerReplay: InntektsmeldingerReplay) -> Unit,
         håndterInitiellHistorikkFraInfotrygd: (utbetalingshistorikk: Utbetalingshistorikk) -> Unit,
+        håndterRettighetskategori: (rettighetskategori: Rettighetskategori) -> Unit,
     ) {
         val nyeBehov =
             alleBehovSomOppstårSomFølgeAv {
@@ -153,6 +156,33 @@ class Behovshåndterer(
             behovsoppsamler.besvart(trengerInntektsmeldingReplayBehov)
             håndterInntektsmeldingerReplay(løsning)
         }
+
+        if (!besvarRettighetskategoriAutomatisk) return
+        nyeBehov
+            .filterIsInstance<Behovsoppsamler.Behovsdetaljer.Rettighetskategori>()
+            .filter { tilstander[it.vedtaksperiodeId] == TilstandType.AVVENTER_RETTIGHETSKATEGORI }
+            .distinctBy { it.vedtaksperiodeId }
+            .forEach { rettighetskategoriBehov ->
+                val fabrikk =
+                    ArbeidsgiverHendelsefabrikk(
+                        rettighetskategoriBehov.yrkesaktivitetssporing.somOrganisasjonsnummer,
+                        rettighetskategoriBehov.yrkesaktivitetssporing,
+                    )
+                val hovedkategori =
+                    when (rettighetskategoriBehov.yrkesaktivitetssporing) {
+                        Behandlingsporing.Yrkesaktivitet.Selvstendig -> Rettighetskategori.Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE
+                        else -> Rettighetskategori.Hovedkategori.ARBEIDSTAKER
+                    }
+                val løsning =
+                    fabrikk.lagRettighetskategori(
+                        vedtaksperiodeId = rettighetskategoriBehov.vedtaksperiodeId,
+                        skjæringstidspunkt = rettighetskategoriBehov.skjæringstidspunkt,
+                        rettighetskategoriId = UUID.randomUUID(),
+                        hovedkategori = hovedkategori,
+                    )
+                behovsoppsamler.besvart(rettighetskategoriBehov)
+                håndterRettighetskategori(løsning)
+            }
     }
 
     internal inline fun <reified R : Behovsoppsamler.Behovsdetaljer> behovSomOppstårSomFølgeAv(block: () -> Unit): Set<R> {

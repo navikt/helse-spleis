@@ -66,6 +66,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
             )
@@ -86,6 +87,7 @@ internal class FrilanserTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
             )

@@ -86,7 +86,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
         assertEquals(
             "VILKÅRSPRØVING",
             observatør.vedtaksperiodeVenter
-                .single()
+                .last()
                 .venterPå.venteårsak.hva,
         )
         a2 {
@@ -98,6 +98,7 @@ internal class FlereArbeidsgivereUlikFomTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
                 AVVENTER_SIMULERING_REVURDERING,

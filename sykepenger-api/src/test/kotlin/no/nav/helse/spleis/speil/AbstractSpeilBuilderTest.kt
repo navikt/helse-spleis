@@ -133,6 +133,16 @@ internal abstract class AbstractSpeilBuilderTest {
                     hendelselogg,
                 )
             }
+
+            generateSequence { behovssamler.sisteEventuelle<EventSubscription.TrengerRettighetskategoriEvent>() }.forEach { behov ->
+                hendelselogg = Aktivitetslogg()
+                person.håndterRettighetskategori(
+                    eventBus,
+                    YrkesaktivitetHendelsefabrikk(behov.yrkesaktivitetssporing)
+                        .lagRettighetskategori(behov.vedtaksperiodeId, behov.skjæringstidspunkt),
+                    hendelselogg,
+                )
+            }
         }
 
     protected fun håndterSykmelding(

@@ -188,7 +188,13 @@ internal class ArbeidsgiveropplysningerTest : AbstractDslTest() {
             )
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
 
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, arbeidsgiverperioden)
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.januar, arbeidsgiverperioden)

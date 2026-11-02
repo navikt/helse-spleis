@@ -123,6 +123,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -165,6 +166,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -269,7 +271,14 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
             assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<InntektsmeldingId, *>::first))
 
             assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_AVSLUTTET_UTEN_UTBETALING, AVSLUTTET_UTEN_UTBETALING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
         }
     }
 
@@ -287,6 +296,7 @@ internal class EnArbeidsgiverTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }

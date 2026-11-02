@@ -353,33 +353,33 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     }
 
     @Test
-    fun `minimalt vilkårsgrunnlag og AVVENTER_RETTIGHETSKATEGORI overlever serialisering`() =
-        Toggle.AvklareRettighetskategori.enable {
-            a1 {
-                håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-            }
-            val jsonIAvventerRettighetskategori = dto().tilPersonData().tilSerialisertPerson().json
-            assert("\"AVVENTER_RETTIGHETSKATEGORI\"" in jsonIAvventerRettighetskategori)
-            assertGjenoppbygget(dto())
-
-            val rettighetskategoriId = UUID.randomUUID()
-            a1 {
-                håndterRettighetskategori(1.vedtaksperiode, rettighetskategoriId)
-            }
-            val dto = dto()
-            val minimalt =
-                dto.vilkårsgrunnlagHistorikk.historikk
-                    .first()
-                    .vilkårsgrunnlag
-                    .single()
-            assertEquals(VilkårsgrunnlagUtDto.Rettighetskategori(minimalt.vilkårsgrunnlagId, 1.januar, rettighetskategoriId), minimalt)
-
-            val json = dto.tilPersonData().tilSerialisertPerson().json
-            assert("\"type\":\"Rettighetskategori\"" in json)
-            assert("hovedkategori" !in json && "ARBEIDSTAKER_OG_SELVSTENDIG" !in json)
-            assertGjenoppbygget(dto)
+    fun `minimalt vilkårsgrunnlag og AVVENTER_RETTIGHETSKATEGORI overlever serialisering`() {
+        testperson.behovshåndterer.besvarRettighetskategoriAutomatisk = false
+        a1 {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
         }
+        val jsonIAvventerRettighetskategori = dto().tilPersonData().tilSerialisertPerson().json
+        assert("\"AVVENTER_RETTIGHETSKATEGORI\"" in jsonIAvventerRettighetskategori)
+        assertGjenoppbygget(dto())
+
+        val rettighetskategoriId = UUID.randomUUID()
+        a1 {
+            håndterRettighetskategori(1.vedtaksperiode, rettighetskategoriId)
+        }
+        val dto = dto()
+        val minimalt =
+            dto.vilkårsgrunnlagHistorikk.historikk
+                .first()
+                .vilkårsgrunnlag
+                .single()
+        assertEquals(VilkårsgrunnlagUtDto.Rettighetskategori(minimalt.vilkårsgrunnlagId, 1.januar, rettighetskategoriId), minimalt)
+
+        val json = dto.tilPersonData().tilSerialisertPerson().json
+        assert("\"type\":\"Rettighetskategori\"" in json)
+        assert("hovedkategori" !in json && "ARBEIDSTAKER_OG_SELVSTENDIG" !in json)
+        assertGjenoppbygget(dto)
+    }
 
     @Test
     fun `forsikringsvurderingId lagres på vilkårsgrunnlag og overlever serialisering`() {
@@ -407,8 +407,8 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     }
 
     private fun assertVilkårsgrunnlaghistorikk(historikk: VilkårsgrunnlaghistorikkUtDto) {
-        assertEquals(6, historikk.historikk.size)
-        historikk.historikk[5].also { innslag ->
+        assertEquals(9, historikk.historikk.size)
+        historikk.historikk[7].also { innslag ->
             assertEquals(1, innslag.vilkårsgrunnlag.size)
             (innslag.vilkårsgrunnlag[0] as VilkårsgrunnlagUtDto.Komplett).also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)

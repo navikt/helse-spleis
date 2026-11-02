@@ -46,6 +46,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -63,7 +64,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
             assertEquals(506, inspektør.sisteUtbetaling().arbeidsgiverOppdrag.nettoBeløp())
 
             val vilkårgrunnlagsinspektør = inspektør.vilkårsgrunnlaghistorikk()
-            assertEquals(2, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
+            assertEquals(3, vilkårgrunnlagsinspektør.antallGrunnlagsdata())
 
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, 32000.månedlig)
@@ -121,6 +122,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -136,6 +138,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -164,6 +167,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -379,6 +383,7 @@ internal class RevurderInntektTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

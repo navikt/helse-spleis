@@ -69,19 +69,14 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
                 val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
                 when {
                     nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-                    vedtaksperiode.vilkårsgrunnlag == null ->
-                        vedtaksperiode.tilstand(
-                            eventBus,
-                            aktivitetslogg,
-                            AvventerRettighetskategori.førVilkårsprøving,
-                        )
+                    vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori)
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
                 }
             }
 
             Selvstendig ->
                 when (vedtaksperiode.vilkårsgrunnlag) {
-                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøving)
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori)
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
                 }
 

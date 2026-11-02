@@ -33,10 +33,10 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
     fun `ny opptjeningsvurdering`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val nyOpptjeningsvurderingId = UUID.randomUUID()
             håndterEndretOpptjeningsvurdering(1.januar, nyOpptjeningsvurderingId)
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(nyOpptjeningsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId)
         }
@@ -46,11 +46,11 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
     fun `samme opptjeningsvurdering som allerede er lagt til grunn`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val opptjeningsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.opptjeningsvurderingId
             håndterEndretOpptjeningsvurdering(1.januar, opptjeningsvurderingId)
             assertInfo("Opptjeningsvurderingen er allerede lagt til grunn")
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }
@@ -65,10 +65,10 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val nyForsikringsvurderingId = UUID.randomUUID()
             håndterEndretForsikringsvurdering(1.januar, nyForsikringsvurderingId)
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
             assertEquals(
                 nyForsikringsvurderingId,
@@ -89,7 +89,7 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val forsikringsvurderingIdFraVilkårsgrunnlag =
                 (
                     inspektør.vilkårsgrunnlag(
@@ -101,7 +101,7 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
 
             assertInfo("Forsikringsvurderingen er allerede lagt til grunn")
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         }
     }
 
@@ -123,7 +123,7 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
                 val nyMedlemskapsvurderingId = UUID.randomUUID()
                 håndterEndretMedlemskapsvurdering(1.januar, nyMedlemskapsvurderingId)
 
-                assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+                assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
                 assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
                 assertNotEquals(gammelMedlemskapsvurderingId, nyMedlemskapsvurderingId)
                 assertEquals(nyMedlemskapsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId)
@@ -171,11 +171,11 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
     fun `samme medlemskapsvurdering som allerede er lagt til grunn`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             val medlemskapsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId
             håndterEndretMedlemskapsvurdering(1.januar, medlemskapsvurderingId)
             assertInfo("Medlemskapsvurderingen er allerede lagt til grunn")
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
         }
     }

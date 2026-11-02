@@ -40,7 +40,7 @@ internal class InfotrygdTest : AbstractDslTest() {
             assertEquals(
                 "VILKÅRSPRØVING",
                 observatør.vedtaksperiodeVenter
-                    .single()
+                    .last()
                     .venterPå.venteårsak.hva,
             )
             nullstillTilstandsendringer()

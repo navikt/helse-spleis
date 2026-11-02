@@ -248,6 +248,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }
@@ -718,6 +719,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 TIL_INFOTRYGD,
             )
@@ -795,6 +797,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -809,6 +812,7 @@ internal class FlereArbeidsgivereFlytTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

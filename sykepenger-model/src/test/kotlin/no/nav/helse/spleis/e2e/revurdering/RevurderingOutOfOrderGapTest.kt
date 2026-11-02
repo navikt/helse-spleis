@@ -447,6 +447,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 START,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -634,6 +635,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
             )
@@ -825,6 +827,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             assertTilstander(
                 3.vedtaksperiode,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -852,7 +855,14 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
             håndterUtbetalt()
 
             assertTilstander(1.vedtaksperiode, TIL_UTBETALING, AVVENTER_REVURDERING_TIL_UTBETALING, AVVENTER_REVURDERING)
-            assertTilstander(2.vedtaksperiode, START, AVVENTER_INNTEKTSMELDING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                2.vedtaksperiode,
+                START,
+                AVVENTER_INNTEKTSMELDING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertNotNull(observatør.avsluttetMedVedtakEvent[1.vedtaksperiode])
 
             nullstillTilstandsendringer()
@@ -1270,6 +1280,7 @@ internal class RevurderingOutOfOrderGapTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET,
                 AVVENTER_REVURDERING,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 AVVENTER_HISTORIKK_REVURDERING,
             )

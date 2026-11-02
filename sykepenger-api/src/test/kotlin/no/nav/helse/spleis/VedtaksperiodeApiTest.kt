@@ -101,6 +101,7 @@ internal class VedtaksperiodeApiTest : AbstractSpleisApiTest() {
                 Aktivitetslogg(),
             )
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
+            person.håndterRettighetskategori(eventBus, rettighetskategori(), Aktivitetslogg())
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)

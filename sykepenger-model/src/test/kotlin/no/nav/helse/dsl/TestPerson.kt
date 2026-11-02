@@ -111,6 +111,7 @@ internal class TestPerson(
                 },
                 håndterInntektsmeldingerReplay = { it.håndter(Person::håndterInntektsmeldingerReplay) },
                 håndterInitiellHistorikkFraInfotrygd = { it.håndter(Person::håndterUtbetalingshistorikk) },
+                håndterRettighetskategori = { it.håndter(Person::håndterRettighetskategori) },
             )
         } finally {
             varslersamler.registrerVarsler(forrigeAktivitetslogg.varsel)

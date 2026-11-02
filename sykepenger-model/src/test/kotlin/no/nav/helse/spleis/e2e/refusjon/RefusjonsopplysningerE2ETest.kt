@@ -55,7 +55,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true,
             )
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterKorrigerteArbeidsgiveropplysninger(
                 arbeidsgiverperioder = arbeidsgiverperiode,
                 refusjon = Inntektsmelding.Refusjon(beløp = INGEN, opphørsdato = null),
@@ -63,7 +63,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                     INNTEKT * 1.1,
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertBeløpstidslinje(
                 ARBEIDSGIVER.beløpstidslinje(januar, INGEN),
                 inspektør.refusjon(1.vedtaksperiode),
@@ -113,7 +113,7 @@ internal class RefusjonsopplysningerE2ETest : AbstractDslTest() {
                 inspektør.refusjon(1.vedtaksperiode),
                 ignoreMeldingsreferanseId = true,
             )
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             håndterSykmelding(Sykmeldingsperiode(1.februar, 28.februar))
             håndterSøknad(februar)

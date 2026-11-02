@@ -66,60 +66,60 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         }
 
     @Test
-    fun `rettighetskategori`() =
-        Toggle.AvklareRettighetskategori.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            val søknadId =
-                sendSøknad(
-                    perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-                )
-            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-            val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
-            assertVedtaksperiodeBehov(behov, Rettighetskategori)
-            assertEquals("ARBEIDSTAKER", behov.path("yrkesaktivitetstype").asText())
-            assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
-            assertTrue(behov.path("behandlingId").asText().isNotEmpty())
-            val detaljer = behov.path(Rettighetskategori.utgåendeNavn)
-            assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asText())
-            assertEquals(listOf(søknadId.toString()), detaljer.path("søknader").values().map(JsonNode::asText))
-            assertTilstand(0, "AVVENTER_RETTIGHETSKATEGORI")
+    fun `rettighetskategori`() {
+        besvarRettighetskategoriAutomatisk = false
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        val søknadId =
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
+        assertVedtaksperiodeBehov(behov, Rettighetskategori)
+        assertEquals("ARBEIDSTAKER", behov.path("yrkesaktivitetstype").asText())
+        assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
+        assertTrue(behov.path("behandlingId").asText().isNotEmpty())
+        val detaljer = behov.path(Rettighetskategori.utgåendeNavn)
+        assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asText())
+        assertEquals(listOf(søknadId.toString()), detaljer.path("søknader").values().map(JsonNode::asText))
+        assertTilstand(0, "AVVENTER_RETTIGHETSKATEGORI")
 
-            sendRettighetskategori(0)
-            assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
-            assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Medlemskap))
-        }
+        sendRettighetskategori(0)
+        assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Medlemskap))
+    }
 
     @Test
-    fun `rettighetskategori - selvstendig`() =
-        Toggle.AvklareRettighetskategori.enable {
-            sendNySøknadSelvstendig(
-                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
-                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
-            )
-            sendSelvstendigsøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-                ventetid = 3.januar til 18.januar,
-                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
-            )
-            val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
+    fun `rettighetskategori - selvstendig`() {
+        besvarRettighetskategoriAutomatisk = false
+        sendNySøknadSelvstendig(
+            SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
+        sendSelvstendigsøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            ventetid = 3.januar til 18.januar,
+            arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+        )
+        val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
 
-            val id = behov.path("@id").asText()
-            assertTrue(id.isNotEmpty())
-            assertDoesNotThrow { UUID.fromString(id) }
+        val id = behov.path("@id").asText()
+        assertTrue(id.isNotEmpty())
+        assertDoesNotThrow { UUID.fromString(id) }
 
-            assertEquals("behov", behov.path("@event_name").asText())
-            assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
-            assertTrue(behov.path("@behov").isArray)
-            assertDatotid(behov.path("@opprettet").asText())
-            assertTrue(behov.path("organisasjonsnummer").isMissingNode)
-            assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
+        assertEquals("behov", behov.path("@event_name").asText())
+        assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
+        assertTrue(behov.path("@behov").isArray)
+        assertDatotid(behov.path("@opprettet").asText())
+        assertTrue(behov.path("organisasjonsnummer").isMissingNode)
+        assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
 
-            assertEquals(listOf(Rettighetskategori.utgåendeNavn), behov.path("@behov").values().map(JsonNode::asText))
-            assertEquals("SELVSTENDIG", behov.path("yrkesaktivitetstype").asText())
+        assertEquals(listOf(Rettighetskategori.utgåendeNavn), behov.path("@behov").values().map(JsonNode::asText))
+        assertEquals("SELVSTENDIG", behov.path("yrkesaktivitetstype").asText())
 
-            sendRettighetskategori(0, hovedkategori = "SELVSTENDIG_NÆRINGSDRIVENDE")
-            assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
-        }
+        sendRettighetskategori(0, hovedkategori = "SELVSTENDIG_NÆRINGSDRIVENDE")
+        assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
+    }
 
     @Test
     fun `vilkårsgrunnlag - selvstendig`() {

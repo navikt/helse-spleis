@@ -299,7 +299,7 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 assertEquals(715, oppdrag[0].inspektør.beløp)
                 assertEquals(NY, oppdrag[0].inspektør.endringskode)
             }
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             assertEquals(
                 1,
@@ -383,16 +383,16 @@ internal class OverstyrArbeidsgiveropplysningerTest : AbstractDslTest() {
                 )
             }
 
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             overstyr()
             håndterYtelser(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             nullstillTilstandsendringer()
 
             repeat(10) { overstyr() }
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertTilstander(1.vedtaksperiode, AVVENTER_SIMULERING_REVURDERING)
         }
     }

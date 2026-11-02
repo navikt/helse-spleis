@@ -26,6 +26,10 @@ internal class Behovssamler : EventSubscription {
         behov.add(event)
     }
 
+    override fun trengerRettighetskategori(event: EventSubscription.TrengerRettighetskategoriEvent) {
+        behov.add(event)
+    }
+
     override fun trengerInitiellHistorikkFraInfotrygd(event: EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent) {
         behov.add(event)
     }

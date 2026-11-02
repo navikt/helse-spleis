@@ -35,8 +35,10 @@ internal class BegrunnelseForReduksjonEllerIkkeUtbetaltTest : AbstractDslTest() 
                 2.vedtaksperiode,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsel(Varselkode.RV_IM_4, 2.vedtaksperiode.filter())

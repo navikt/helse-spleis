@@ -52,7 +52,7 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
             nyttVedtak(mars)
         }
         dto().vilkårsgrunnlagHistorikk.historikk.also { historikk ->
-            assertEquals(2, historikk.size)
+            assertEquals(3, historikk.size)
             historikk[0].also {
                 assertEquals(2, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
@@ -70,7 +70,7 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
                     )
                 }
             }
-            historikk[1].also {
+            historikk[2].also {
                 assertEquals(1, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
@@ -92,7 +92,7 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
             nyttVedtak(april)
         }
         dto().vilkårsgrunnlagHistorikk.historikk.also { historikk ->
-            assertEquals(3, historikk.size)
+            assertEquals(4, historikk.size)
             historikk[0].also {
                 assertEquals(2, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
@@ -111,14 +111,14 @@ internal class OpptjeningsvurderingIdTest : AbstractDslTest() {
                     )
                 }
             }
-            historikk[1].also {
+            historikk[2].also {
                 assertEquals(1, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertTrue(grunnlag is VilkårsgrunnlagUtDto.Infotrygd)
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
                 }
             }
-            historikk[2].also {
+            historikk[3].also {
                 assertEquals(1, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertTrue(grunnlag is VilkårsgrunnlagUtDto.Infotrygd)

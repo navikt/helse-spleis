@@ -77,6 +77,7 @@ internal class OutOfOrderSøknadTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

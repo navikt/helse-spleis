@@ -103,6 +103,19 @@ internal abstract class AbstractObservableTest {
             besvart = LocalDateTime.now(),
         )
 
+    protected fun rettighetskategori(
+        vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
+        orgnummer: String = ORGNUMMER,
+    ): Rettighetskategori =
+        Rettighetskategori(
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            vedtaksperiodeId = vedtaksperiodeIdInnhenter.id(orgnummer),
+            skjæringstidspunkt = FOM,
+            behandlingsporing = Behandlingsporing.Yrkesaktivitet.Arbeidstaker(orgnummer),
+            rettighetskategoriId = UUID.randomUUID(),
+            hovedkategori = Rettighetskategori.Hovedkategori.ARBEIDSTAKER,
+        )
+
     protected fun vilkårsgrunnlag(
         vedtaksperiodeIdInnhenter: IdInnhenter = 1.vedtaksperiode,
         medlemskapstatus: Medlemskapsvurdering.Medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Ja,

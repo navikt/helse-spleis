@@ -100,6 +100,7 @@ internal fun arbeidstakerMedInfotrygdforlengelse(): Person {
                 ),
             forsikringsvurderingId = null,
         )
+    person.håndterRettighetskategori(eventBus, fabrikk.lagRettighetskategori(vedtaksperiodeId, 1.april), Aktivitetslogg())
     person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, Aktivitetslogg())
 
     val overstyrArbeidsforhold =
@@ -175,6 +176,7 @@ internal fun selvstendig(fødselsnummer: String): Person {
             inntekterForOpptjeningsvurdering = InntekterForOpptjeningsvurdering(emptyList()),
             forsikringsvurderingId = null,
         )
+    person.håndterRettighetskategori(eventBus, fabrikk.lagRettighetskategori(vedtaksperiodeId, 1.april), aktivitetslogg)
     person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetslogg)
 
     return person

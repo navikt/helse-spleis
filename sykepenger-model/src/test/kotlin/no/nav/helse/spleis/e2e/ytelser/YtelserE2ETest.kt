@@ -131,6 +131,7 @@ internal class YtelserE2ETest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

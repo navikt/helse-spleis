@@ -18,17 +18,17 @@ internal class VedtaksperiodeVenterTest : AbstractEndToEndMediatorTest() {
         sendSøknad(perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)))
         assertAntallOgSisteÅrsak(3, "INNTEKTSMELDING")
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-        assertAntallOgSisteÅrsak(4, "VILKÅRSPRØVING")
+        assertAntallOgSisteÅrsak(5, "VILKÅRSPRØVING")
         sendVilkårsgrunnlag(0)
-        assertAntallOgSisteÅrsak(5, "BEREGNING")
+        assertAntallOgSisteÅrsak(6, "BEREGNING")
         sendYtelser(0)
-        assertAntallOgSisteÅrsak(6, "UTBETALING")
+        assertAntallOgSisteÅrsak(7, "UTBETALING")
         sendSimulering(0, OK)
-        assertAntallOgSisteÅrsak(7, "GODKJENNING")
+        assertAntallOgSisteÅrsak(8, "GODKJENNING")
         sendUtbetalingsgodkjenning(0)
-        assertAntallOgSisteÅrsak(8, "UTBETALING")
+        assertAntallOgSisteÅrsak(9, "UTBETALING")
         sendUtbetaling()
-        assertAntallOgSisteÅrsak(8)
+        assertAntallOgSisteÅrsak(9)
     }
 
     @Test

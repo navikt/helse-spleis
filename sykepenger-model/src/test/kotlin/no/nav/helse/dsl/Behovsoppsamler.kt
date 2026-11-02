@@ -150,6 +150,7 @@ sealed class Behovsoppsamler(
 
         data class Rettighetskategori(
             override val vedtaksperiodeId: UUID,
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
             val skjæringstidspunkt: LocalDate,
             val søknader: List<UUID>,
             override val id: UUID = UUID.randomUUID(),
@@ -211,6 +212,13 @@ sealed class Behovsoppsamler(
             registrer(Behovsdetaljer.InformasjonTilVilkårsprøving(event.vedtaksperiodeId))
 
         override fun trengerRettighetskategori(event: EventSubscription.TrengerRettighetskategoriEvent) =
-            registrer(Behovsdetaljer.Rettighetskategori(event.vedtaksperiodeId, event.skjæringstidspunkt, event.søknader))
+            registrer(
+                Behovsdetaljer.Rettighetskategori(
+                    event.vedtaksperiodeId,
+                    event.yrkesaktivitetssporing,
+                    event.skjæringstidspunkt,
+                    event.søknader,
+                ),
+            )
     }
 }

@@ -31,7 +31,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
     fun `Samme skjønnsmessig fastsettelse mange ganger`() {
         a1 {
             tilGodkjenning(januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             val skjønnsmessigFastsettelse1 = UUID.randomUUID()
             håndterSkjønnsmessigFastsettelse(
@@ -39,7 +39,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)),
                 meldingsreferanseId = skjønnsmessigFastsettelse1,
             )
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             // Samme ID
             håndterSkjønnsmessigFastsettelse(
@@ -47,7 +47,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)),
                 meldingsreferanseId = skjønnsmessigFastsettelse1,
             )
-            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
 
             // Ny ID
             håndterSkjønnsmessigFastsettelse(
@@ -55,7 +55,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 listOf(OverstyrtArbeidsgiveropplysning("a1", INNTEKT * 2)),
                 meldingsreferanseId = UUID.randomUUID(),
             )
-            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(5, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         }
     }
 
@@ -249,7 +249,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 { nyttVedtak(januar) }
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         a1 {
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, INNTEKT, forventetFastsattÅrsinntekt = INNTEKT * 2)
             }
@@ -320,7 +320,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, INNTEKT * 2, forventetKorrigertInntekt = INNTEKT * 2)
             }
-            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
         }
     }
 
@@ -329,7 +329,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
         a1 { nyttVedtak(januar) }
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
         håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)))
-        a1 { assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size) }
+        a1 { assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size) }
     }
 
     @Test
@@ -338,10 +338,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             tilGodkjenning(januar)
             val inntekt = INNTEKT
             håndterSkjønnsmessigFastsettelse(1.januar, listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = inntekt)))
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             nullstillTilstandsendringer()
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), inntekt)
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
@@ -407,10 +407,10 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = INNTEKT * 2)),
         )
         a1 {
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             håndterKorrigerteArbeidsgiveropplysninger(listOf(1.januar til 16.januar), INNTEKT * 3)
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())
-            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT * 3)
             }
@@ -480,7 +480,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, inntektsmeldingInntekt)
             }
@@ -494,7 +494,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 1.januar,
                 listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)),
             )
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
             }
@@ -516,7 +516,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 ),
                 hendelseId = overstyrInntektOgRefusjonId,
             )
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, inntektsmeldingInntekt, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
             }
@@ -547,7 +547,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             håndterUtbetalt()
 
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT)
             }
@@ -561,7 +561,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 1.januar,
                 listOf(OverstyrtArbeidsgiveropplysning(orgnummer = a1, inntekt = skjønnsfastsattInntekt)),
             )
-            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, forventetFastsattÅrsinntekt = skjønnsfastsattInntekt)
             }
@@ -583,7 +583,7 @@ internal class SkjønnsmessigFastsettelseTest : AbstractDslTest() {
                 ),
                 hendelseId = overstyrInntektOgRefusjonId,
             )
-            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(4, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInntektsgrunnlag(1.januar, forventetAntallArbeidsgivere = 1) {
                 assertInntektsgrunnlag(a1, INNTEKT, skjønnsfastsattInntekt, forventetKorrigertInntekt = skjønnsfastsattInntekt)
             }

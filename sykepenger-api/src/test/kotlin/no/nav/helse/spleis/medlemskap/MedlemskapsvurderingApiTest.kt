@@ -199,6 +199,7 @@ class MedlemskapsvurderingApiTest : AbstractApiTest() {
                     ),
                 forsikringsvurderingId = null,
             )
+        person.håndterRettighetskategori(eventBus, fabrikk.lagRettighetskategori(vedtaksperiodeId, 1.april), Aktivitetslogg())
         person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, Aktivitetslogg())
 
         val overstyrArbeidsforhold =

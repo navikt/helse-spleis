@@ -26,7 +26,7 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
     fun `Grunnbeløpsregulering med allerede riktig G-beløp`() {
         a1 {
             nyttVedtak(januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertEquals(
                 561804.årlig,
                 inspektør
@@ -36,7 +36,7 @@ internal class GrunnbeløpsreguleringTest : AbstractDslTest() {
             nullstillTilstandsendringer()
             inspektør.vilkårsgrunnlagHistorikkInnslag()
             håndterGrunnbeløpsregulering(1.januar)
-            assertEquals(1, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertEquals(2, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
             assertInfo("Grunnbeløpet i sykepengegrunnlaget 2018-01-01 er allerede korrekt.", 1.vedtaksperiode.filter())
             assertEquals(
                 561804.årlig,

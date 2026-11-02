@@ -604,6 +604,7 @@ internal class DokumentHåndteringTest : AbstractDslTest() {
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertTrue(im in observatør.inntektsmeldingHåndtert.map(Pair<UUID, *>::first))

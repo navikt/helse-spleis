@@ -55,7 +55,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
             Selvstendig -> {
                 aktivitetslogg.info("Gjenopptar behandling for revurdering")
                 when (vedtaksperiode.vilkårsgrunnlag) {
-                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøvingRevurdering)
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori)
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikkRevurdering)
                 }
             }
@@ -125,7 +125,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
             eventBus: EventBus,
             aktivitetslogg: IAktivitetslogg,
         ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøvingRevurdering) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori) {
                 aktivitetslogg.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
         }

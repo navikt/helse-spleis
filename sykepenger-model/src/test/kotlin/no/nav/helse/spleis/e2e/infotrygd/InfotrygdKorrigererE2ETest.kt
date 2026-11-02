@@ -49,6 +49,7 @@ internal class InfotrygdKorrigererE2ETest : AbstractDslTest() {
                 2.vedtaksperiode,
                 AVVENTER_GODKJENNING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,

@@ -169,6 +169,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -222,6 +223,7 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
                 START,
                 AVVENTER_INFOTRYGDHISTORIKK,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -239,7 +241,14 @@ internal class SelvstendigBarnepasserTest : AbstractDslTest() {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
             håndterFørstegangssøknadSelvstendig(mars, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)
 
-            assertTilstander(1.vedtaksperiode, START, AVVENTER_INFOTRYGDHISTORIKK, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                START,
+                AVVENTER_INFOTRYGDHISTORIKK,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertTilstander(2.vedtaksperiode, START, AVVENTER_BLOKKERENDE_PERIODE)
             assertSkjæringstidspunktOgVenteperiode(1.vedtaksperiode, 1.januar, listOf(1.januar til 16.januar))
             assertSkjæringstidspunktOgVenteperiode(2.vedtaksperiode, 1.mars, listOf(1.mars til 16.mars))

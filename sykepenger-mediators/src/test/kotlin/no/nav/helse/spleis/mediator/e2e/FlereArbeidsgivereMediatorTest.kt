@@ -57,6 +57,7 @@ internal class FlereArbeidsgivereMediatorTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_INFOTRYGDHISTORIKK",
             "AVVENTER_INNTEKTSMELDING",
             "AVVENTER_BLOKKERENDE_PERIODE",
+            "AVVENTER_RETTIGHETSKATEGORI",
             "AVVENTER_VILKÅRSPRØVING",
             "AVVENTER_HISTORIKK",
             "AVVENTER_SIMULERING",

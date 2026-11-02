@@ -545,6 +545,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_GODKJENNING,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertTilstander(
@@ -1062,7 +1063,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
 
         inspiser(personInspektør).also { inspektør ->
             val vilkårsgrunnlagInnslag = inspektør.vilkårsgrunnlagHistorikk.vilkårsgrunnlagHistorikkInnslag()
-            assertEquals(1, vilkårsgrunnlagInnslag.size)
+            assertEquals(2, vilkårsgrunnlagInnslag.size)
         }
     }
 
@@ -1256,6 +1257,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_INNTEKTSMELDING,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
@@ -1350,6 +1352,7 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
         }

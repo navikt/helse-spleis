@@ -113,6 +113,7 @@ internal abstract class AbstractSpleisApiTest : AbstractObservableTest() {
                 Aktivitetslogg(),
             )
             person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
+            person.håndterRettighetskategori(eventBus, rettighetskategori(), Aktivitetslogg())
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val ytelser = ytelser()
             val aktivitetslogg = Aktivitetslogg()

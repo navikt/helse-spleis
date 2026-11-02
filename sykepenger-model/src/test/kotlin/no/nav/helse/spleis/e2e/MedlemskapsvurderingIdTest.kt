@@ -72,7 +72,7 @@ internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
             nyttVedtak(mars)
         }
         dto().vilkårsgrunnlagHistorikk.historikk.also { historikk ->
-            assertEquals(2, historikk.size)
+            assertEquals(3, historikk.size)
             historikk[0].also {
                 assertEquals(2, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
@@ -90,7 +90,7 @@ internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
                     )
                 }
             }
-            historikk[1].also {
+            historikk[2].also {
                 assertEquals(1, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->
                     assertEquals(1.januar, grunnlag.skjæringstidspunkt)
@@ -112,7 +112,7 @@ internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
             nyttVedtak(april)
         }
         dto().vilkårsgrunnlagHistorikk.historikk.also { historikk ->
-            assertEquals(3, historikk.size)
+            assertEquals(4, historikk.size)
             historikk[0].also {
                 assertEquals(2, it.vilkårsgrunnlag.size)
                 it.vilkårsgrunnlag[0].also { grunnlag ->

@@ -32,6 +32,7 @@ import no.nav.helse.hendelser.OverstyrTidslinje
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Pleiepenger
 import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Rettighetskategori
 import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.Svangerskapspenger
@@ -253,6 +254,23 @@ internal class YrkesaktivitetHendelsefabrikk(
                 perioder = utbetalinger,
             ),
         besvart = LocalDateTime.now(),
+    )
+
+    internal fun lagRettighetskategori(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        rettighetskategoriId: UUID = UUID.randomUUID(),
+    ) = Rettighetskategori(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        behandlingsporing = behandlingsporing,
+        rettighetskategoriId = rettighetskategoriId,
+        hovedkategori =
+            when (behandlingsporing) {
+                Behandlingsporing.Yrkesaktivitet.Selvstendig -> Rettighetskategori.Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE
+                else -> Rettighetskategori.Hovedkategori.ARBEIDSTAKER
+            },
     )
 
     internal fun lagVilkårsgrunnlag(

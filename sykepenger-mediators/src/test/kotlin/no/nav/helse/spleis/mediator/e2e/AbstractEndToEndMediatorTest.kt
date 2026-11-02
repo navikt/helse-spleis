@@ -68,6 +68,7 @@ internal abstract class AbstractEndToEndMediatorTest {
     private lateinit var messageMediator: MessageMediator
     protected lateinit var dataSource: TestDataSource
     private val utsender = TestUtsender()
+    protected var besvarRettighetskategoriAutomatisk = true
     protected val subsumsjoner: List<JsonNode> get() = utsender.ok.filter { it.mottaker == SUBSUMSJON }.map { it.json }
 
     @BeforeEach
@@ -94,6 +95,7 @@ internal abstract class AbstractEndToEndMediatorTest {
             )
 
         testRapid.observer(InntektsmeldingerReplayObserver(testRapid, dataSource.ds))
+        testRapid.observer(RettighetskategoriObserver())
     }
 
     @BeforeEach
@@ -1014,6 +1016,39 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     protected fun assertIngenVarsler() {
         assertEquals(emptyList<Varsel>(), testRapid.inspektør.varsler())
+    }
+
+    private inner class RettighetskategoriObserver :
+        TestRapid.TestRapidObserver,
+        TestUtsenderObservatør {
+        private val objectMapper = spleisJsonMapperBuilder().build()
+        private val besvarteBehov = mutableSetOf<String>()
+
+        override fun okMelding(melding: UtgåendeMelding) {
+            onMessagePublish(melding.json.toString())
+        }
+
+        override fun onMessagePublish(message: String) {
+            if (!besvarRettighetskategoriAutomatisk) return
+            val behov = objectMapper.readTree(message)
+            if (behov.path("@event_name").asText() != "behov") return
+            if (Behov.Behovstype.Rettighetskategori.utgåendeNavn !in behov.path("@behov").values().map(JsonNode::asText)) return
+            if (!besvarteBehov.add(behov.path("@id").asText())) return
+            val detaljer = behov.path(Behov.Behovstype.Rettighetskategori.utgåendeNavn)
+            val yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText()
+            val (_, løsning) =
+                TestMessageFactory(behov.path("fødselsnummer").asText(), ORGNUMMER, INNTEKT, UNG_PERSON_FØDSELSDATO).lagRettighetskategori(
+                    vedtaksperiodeId = behov.path("vedtaksperiodeId").asText().toUUID(),
+                    behandlingId = behov.path("behandlingId").asText().toUUID(),
+                    skjæringstidspunkt = detaljer.path("skjæringstidspunkt").asLocalDate(),
+                    søknader = detaljer.path("søknader").values().map { it.asText().toUUID() },
+                    rettighetskategoriId = UUID.randomUUID(),
+                    hovedkategori = if (yrkesaktivitetstype == "SELVSTENDIG") "SELVSTENDIG_NÆRINGSDRIVENDE" else "ARBEIDSTAKER",
+                    yrkesaktivitetstype = yrkesaktivitetstype,
+                    orgnummer = behov.path("organisasjonsnummer").takeIf { it.isTextual }?.asText(),
+                )
+            testRapid.sendTestMessage(løsning)
+        }
     }
 
     private class InntektsmeldingerReplayObserver(

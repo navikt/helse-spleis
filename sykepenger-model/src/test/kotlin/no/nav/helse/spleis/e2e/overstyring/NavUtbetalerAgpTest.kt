@@ -169,7 +169,13 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             assertEquals("HH SSSSSHH SSSSSH", inspektør.sykdomstidslinje.toShortString())
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals(listOf(6.januar til 20.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertVarsel(Varselkode.RV_AO_3, 1.vedtaksperiode.filter())
         }
     }
@@ -185,7 +191,13 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
             )
             assertVarsel(RV_IM_8, 1.vedtaksperiode.filter())
             assertEquals(listOf(1.januar til 6.januar), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.dagerNavOvertarAnsvar)
-            assertTilstander(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING, AVVENTER_BLOKKERENDE_PERIODE, AVVENTER_VILKÅRSPRØVING)
+            assertTilstander(
+                1.vedtaksperiode,
+                AVSLUTTET_UTEN_UTBETALING,
+                AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
+                AVVENTER_VILKÅRSPRØVING,
+            )
             assertEquals(
                 UberegnetOmgjøring,
                 inspektør
@@ -247,6 +259,7 @@ internal class NavUtbetalerAgpTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVSLUTTET_UTEN_UTBETALING,
                 AVVENTER_BLOKKERENDE_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
