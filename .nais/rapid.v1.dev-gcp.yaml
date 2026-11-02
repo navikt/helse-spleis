@@ -27,6 +27,9 @@ spec:
       application: spleis-opprydding-dev
       access: readwrite
     - team: tbd
+      application: spleis-migrate
+      access: readwrite
+    - team: tbd
       application: spesialist-opprydding-dev
       access: readwrite
     - team: tbd

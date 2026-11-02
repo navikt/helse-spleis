@@ -28,11 +28,18 @@ fun startBehandlingskobling(
             val (skjemaVersjon, data) = hentPerson(connection, fnr)
             val dto = SerialisertPerson(data, skjemaVersjon).tilPersonDto()
             // Deler opp, så meldingene holder seg godt under maksstørrelsen på Kafka for personer med mange vedtaksperioder
-            dto.behandlingskobling().chunked(50).forEach { vedtaksperioder ->
-                val melding = Behandlingskobling(dto.fødselsnummer, dryrun = dryrun, vedtaksperioder = vedtaksperioder)
-                producer.send(ProducerRecord("tbd.rapid.v1", dto.fødselsnummer, melding.tilJson()))
-                antallSendt += 1
-            }
+            dto
+                .behandlingskobling()
+                .chunked(50)
+                .map { vedtaksperioder ->
+                    val melding = Behandlingskobling(dto.fødselsnummer, dryrun = dryrun, vedtaksperioder = vedtaksperioder)
+                    producer.send(ProducerRecord("tbd.rapid.v1", dto.fødselsnummer, melding.tilJson()))
+                }
+                // Venter på kvittering, så feil (f.eks. manglende tilgang til topicet) kastes og personen ikke markeres som ferdig
+                .forEach {
+                    it.get()
+                    antallSendt += 1
+                }
         }
         producer.flush()
     }
