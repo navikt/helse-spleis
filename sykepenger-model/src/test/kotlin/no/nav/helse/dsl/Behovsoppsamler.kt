@@ -148,6 +148,13 @@ sealed class Behovsoppsamler(
             override val id: UUID = UUID.randomUUID(),
         ) : Behovsdetaljer
 
+        data class Rettighetskategori(
+            override val vedtaksperiodeId: UUID,
+            val skjæringstidspunkt: LocalDate,
+            val søknader: List<UUID>,
+            override val id: UUID = UUID.randomUUID(),
+        ) : Behovsdetaljer
+
         data class InntektsmeldingReplay(
             override val vedtaksperiodeId: UUID,
             val forespørsel: Forespørsel,
@@ -202,5 +209,8 @@ sealed class Behovsoppsamler(
 
         override fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) =
             registrer(Behovsdetaljer.InformasjonTilVilkårsprøving(event.vedtaksperiodeId))
+
+        override fun trengerRettighetskategori(event: EventSubscription.TrengerRettighetskategoriEvent) =
+            registrer(Behovsdetaljer.Rettighetskategori(event.vedtaksperiodeId, event.skjæringstidspunkt, event.søknader))
     }
 }

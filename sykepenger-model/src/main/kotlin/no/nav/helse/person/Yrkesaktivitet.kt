@@ -15,47 +15,11 @@ import no.nav.helse.feriepenger.Feriepengegrunnlagsdag
 import no.nav.helse.feriepenger.Feriepengegrunnlagsdag.Mottaker
 import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
 import no.nav.helse.feriepenger.Feriepengeutbetaling
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Arbeidsgiveropplysning
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
-import no.nav.helse.hendelser.Arbeidsgiveropplysninger
-import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.Behandlingsavgjørelse
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
-import no.nav.helse.hendelser.DagerFraInntektsmelding
-import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
-import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.Hendelseskilde
-import no.nav.helse.hendelser.Inntektsmelding
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrInntektsgrunnlag
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.Periode.Companion.mursteinsperioder
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
-import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.erLik
-import no.nav.helse.hendelser.erSammeYrkesaktivtetstype
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingRefusjon
 import no.nav.helse.person.Dokumentsporing.Companion.overstyrArbeidsgiveropplysninger
 import no.nav.helse.person.ForkastetVedtaksperiode.Companion.blokkererBehandlingAv
@@ -91,12 +55,8 @@ import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.inntekt.Inntektshistorikk
 import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.refusjon.Refusjonsservitør
+import no.nav.helse.sykdomstidslinje.*
 import no.nav.helse.sykdomstidslinje.Dag.Companion.bareNyeDager
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkt
-import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
-import no.nav.helse.sykdomstidslinje.Sykdomshistorikk
-import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
-import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Oppdrag
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingslinjer.Utbetaling.Companion.aktive
@@ -112,8 +72,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.UUID
-import kotlin.collections.Collection
+import java.util.*
 import kotlin.math.absoluteValue
 
 internal class Yrkesaktivitet private constructor(
@@ -918,6 +877,17 @@ internal class Yrkesaktivitet private constructor(
         val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
         håndter {
             it.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag, aktivitetsloggMedYrkesaktivitetkontekst)
+        }
+    }
+
+    internal fun håndterRettighetskategori(
+        eventBus: EventBus,
+        rettighetskategori: Rettighetskategori,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
+        håndter {
+            it.håndterRettighetskategori(eventBus, rettighetskategori, aktivitetsloggMedYrkesaktivitetkontekst)
         }
     }
 

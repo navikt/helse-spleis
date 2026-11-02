@@ -32,7 +32,23 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
     private fun sisteInnlag() = historikk.firstOrNull()
 
-    internal fun lagre(vilkårsgrunnlag: VilkårsgrunnlagElement) {
+    internal fun lagre(vilkårsgrunnlag: KomplettVilkårsgrunnlag) {
+        leggTil(vilkårsgrunnlag)
+    }
+
+    internal fun lagre(
+        aktivitetslogg: IAktivitetslogg,
+        rettighetskategorigrunnlag: Rettighetskategorigrunnlag,
+    ) {
+        if (vilkårsgrunnlagFor(rettighetskategorigrunnlag.skjæringstidspunkt) != null) {
+            return aktivitetslogg.info(
+                "Lagrer ikke rettighetskategorigrunnlag fordi skjæringstidspunktet allerede har et komplett vilkårsgrunnlag",
+            )
+        }
+        leggTil(rettighetskategorigrunnlag)
+    }
+
+    private fun leggTil(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         val siste = sisteInnlag()
         val nytt = Innslag(siste, vilkårsgrunnlag)
         historikk.add(0, nytt)
@@ -48,6 +64,9 @@ internal class VilkårsgrunnlagHistorikk private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = sisteInnlag()?.vilkårsgrunnlagFor(skjæringstidspunkt)
 
+    internal fun rettighetskategorigrunnlagFor(skjæringstidspunkt: LocalDate) =
+        sisteInnlag()?.rettighetskategorigrunnlagFor(skjæringstidspunkt)
+
     internal class Innslag private constructor(
         internal val id: UUID,
         private val opprettet: LocalDateTime,
@@ -61,7 +80,10 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             (other?.vilkårsgrunnlag ?: emptyMap()) + mapOf(nyttElement.skjæringstidspunkt to nyttElement),
         )
 
-        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt]
+        internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlag[skjæringstidspunkt] as? KomplettVilkårsgrunnlag
+
+        internal fun rettighetskategorigrunnlagFor(skjæringstidspunkt: LocalDate) =
+            vilkårsgrunnlag[skjæringstidspunkt] as? Rettighetskategorigrunnlag
 
         internal fun oppdaterHistorikk(
             aktivitetslogg: IAktivitetslogg,
@@ -116,20 +138,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
     internal sealed class VilkårsgrunnlagElement(
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
-        val inntektsgrunnlag: Inntektsgrunnlag,
-        val opptjeningsvurderingId: UUID,
-        val medlemskapsvurderingId: UUID,
         val rettighetskategoriId: UUID,
     ) : Aktivitetskontekst {
-        internal open fun valider(
-            aktivitetslogg: IAktivitetslogg,
-            organisasjonsnummer: String,
-        ) = true
-
-        internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
-
-        internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = inntektsgrunnlag.inneholderInntekterFor(yrkesaktivitet)
-
         final override fun toSpesifikkKontekst() =
             SpesifikkKontekst(
                 kontekstType = "vilkårsgrunnlag",
@@ -140,6 +150,64 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                         "vilkårsgrunnlagtype" to vilkårsgrunnlagtype(),
                     ),
             )
+
+        protected abstract fun vilkårsgrunnlagtype(): String
+
+        internal abstract fun dto(): VilkårsgrunnlagUtDto
+
+        internal companion object {
+            internal fun deterministiskRettighetskategoriId(vilkårsgrunnlagId: UUID): UUID =
+                UUID.nameUUIDFromBytes("$vilkårsgrunnlagId:Rettighetskategori".toByteArray())
+
+            internal fun gjenopprett(dto: VilkårsgrunnlagInnDto): VilkårsgrunnlagElement =
+                when (dto) {
+                    is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(dto)
+                    is VilkårsgrunnlagInnDto.Spleis -> Grunnlagsdata.gjenopprett(dto)
+                    is VilkårsgrunnlagInnDto.Rettighetskategori -> Rettighetskategorigrunnlag.gjenopprett(dto)
+                }
+        }
+    }
+
+    internal class Rettighetskategorigrunnlag(
+        skjæringstidspunkt: LocalDate,
+        rettighetskategoriId: UUID,
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, rettighetskategoriId) {
+        override fun vilkårsgrunnlagtype() = "Rettighetskategori"
+
+        override fun dto() =
+            VilkårsgrunnlagUtDto.Rettighetskategori(
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                rettighetskategoriId = rettighetskategoriId,
+            )
+
+        internal companion object {
+            fun gjenopprett(dto: VilkårsgrunnlagInnDto.Rettighetskategori) =
+                Rettighetskategorigrunnlag(
+                    skjæringstidspunkt = dto.skjæringstidspunkt,
+                    rettighetskategoriId = dto.rettighetskategoriId,
+                    vilkårsgrunnlagId = dto.vilkårsgrunnlagId,
+                )
+        }
+    }
+
+    internal sealed class KomplettVilkårsgrunnlag(
+        vilkårsgrunnlagId: UUID,
+        skjæringstidspunkt: LocalDate,
+        val inntektsgrunnlag: Inntektsgrunnlag,
+        val opptjeningsvurderingId: UUID,
+        val medlemskapsvurderingId: UUID,
+        rettighetskategoriId: UUID,
+    ) : VilkårsgrunnlagElement(vilkårsgrunnlagId, skjæringstidspunkt, rettighetskategoriId) {
+        internal open fun valider(
+            aktivitetslogg: IAktivitetslogg,
+            organisasjonsnummer: String,
+        ) = true
+
+        internal fun erArbeidsgiverRelevant(organisasjonsnummer: String) = inntektsgrunnlag.erArbeidsgiverRelevant(organisasjonsnummer)
+
+        internal fun inneholderInntekterFor(yrkesaktivitet: Yrkesaktivitet) = inntektsgrunnlag.inneholderInntekterFor(yrkesaktivitet)
 
         internal fun overstyrArbeidsforhold(
             hendelse: OverstyrArbeidsforhold,
@@ -213,8 +281,6 @@ internal class VilkårsgrunnlagHistorikk private constructor(
             }
         }
 
-        protected abstract fun vilkårsgrunnlagtype(): String
-
         internal fun berik(builder: UtkastTilVedtakBuilder) {
             builder.vilkårsgrunnlagId(vilkårsgrunnlagId)
             builder.opptjeningsvurderingId(opptjeningsvurderingId)
@@ -223,10 +289,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         }
 
         internal companion object {
-            internal fun deterministiskRettighetskategoriId(vilkårsgrunnlagId: UUID): UUID =
-                UUID.nameUUIDFromBytes("$vilkårsgrunnlagId:Rettighetskategori".toByteArray())
-
-            internal fun skjæringstidspunktperioder(elementer: Collection<VilkårsgrunnlagElement>): List<Periode> {
+            internal fun skjæringstidspunktperioder(elementer: Collection<KomplettVilkårsgrunnlag>): List<Periode> {
                 val skjæringstidspunkter =
                     elementer
                         .map { it.skjæringstidspunkt }
@@ -238,16 +301,8 @@ internal class VilkårsgrunnlagHistorikk private constructor(
                     }
             }
 
-            internal fun List<VilkårsgrunnlagElement>.harUlikeGrunnbeløp(): Boolean = map { it.inntektsgrunnlag }.harUlikeGrunnbeløp()
-
-            internal fun gjenopprett(dto: VilkårsgrunnlagInnDto): VilkårsgrunnlagElement =
-                when (dto) {
-                    is VilkårsgrunnlagInnDto.Infotrygd -> InfotrygdVilkårsgrunnlag.gjenopprett(dto)
-                    is VilkårsgrunnlagInnDto.Spleis -> Grunnlagsdata.gjenopprett(dto)
-                }
+            internal fun List<KomplettVilkårsgrunnlag>.harUlikeGrunnbeløp(): Boolean = map { it.inntektsgrunnlag }.harUlikeGrunnbeløp()
         }
-
-        internal abstract fun dto(): VilkårsgrunnlagUtDto
     }
 
     internal class Grunnlagsdata(
@@ -261,7 +316,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         opptjeningsvurderingId: UUID,
         medlemskapsvurderingId: UUID,
         rettighetskategoriId: UUID,
-    ) : VilkårsgrunnlagElement(
+    ) : KomplettVilkårsgrunnlag(
             vilkårsgrunnlagId,
             skjæringstidspunkt,
             inntektsgrunnlag,
@@ -416,7 +471,7 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         opptjeningsvurderingId: UUID,
         medlemskapsvurderingId: UUID,
         rettighetskategoriId: UUID,
-    ) : VilkårsgrunnlagElement(
+    ) : KomplettVilkårsgrunnlag(
             vilkårsgrunnlagId,
             skjæringstidspunkt,
             inntektsgrunnlag,

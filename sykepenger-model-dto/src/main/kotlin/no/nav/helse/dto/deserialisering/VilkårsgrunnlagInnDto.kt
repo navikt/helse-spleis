@@ -8,10 +8,19 @@ import java.util.*
 sealed class VilkårsgrunnlagInnDto {
     abstract val vilkårsgrunnlagId: UUID
     abstract val skjæringstidspunkt: LocalDate
-    abstract val inntektsgrunnlag: InntektsgrunnlagInnDto
-    abstract val opptjeningsvurderingId: UUID
-    abstract val medlemskapsvurderingId: UUID
     abstract val rettighetskategoriId: UUID
+
+    sealed class Komplett : VilkårsgrunnlagInnDto() {
+        abstract val inntektsgrunnlag: InntektsgrunnlagInnDto
+        abstract val opptjeningsvurderingId: UUID
+        abstract val medlemskapsvurderingId: UUID
+    }
+
+    data class Rettighetskategori(
+        override val vilkårsgrunnlagId: UUID,
+        override val skjæringstidspunkt: LocalDate,
+        override val rettighetskategoriId: UUID,
+    ) : VilkårsgrunnlagInnDto()
 
     data class Spleis(
         override val vilkårsgrunnlagId: UUID,
@@ -24,7 +33,7 @@ sealed class VilkårsgrunnlagInnDto {
         override val opptjeningsvurderingId: UUID,
         override val medlemskapsvurderingId: UUID,
         override val rettighetskategoriId: UUID,
-    ) : VilkårsgrunnlagInnDto()
+    ) : Komplett()
 
     data class Infotrygd(
         override val vilkårsgrunnlagId: UUID,
@@ -33,5 +42,5 @@ sealed class VilkårsgrunnlagInnDto {
         override val opptjeningsvurderingId: UUID,
         override val medlemskapsvurderingId: UUID,
         override val rettighetskategoriId: UUID,
-    ) : VilkårsgrunnlagInnDto()
+    ) : Komplett()
 }

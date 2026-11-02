@@ -3,27 +3,12 @@ package no.nav.helse.spleis.mediator.e2e
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
-import com.github.navikt.tbd_libs.sql_dsl.connection
-import com.github.navikt.tbd_libs.sql_dsl.long
-import com.github.navikt.tbd_libs.sql_dsl.mapNotNull
-import com.github.navikt.tbd_libs.sql_dsl.prepareStatementWithNamedParameters
-import com.github.navikt.tbd_libs.sql_dsl.single
-import com.github.navikt.tbd_libs.sql_dsl.string
+import com.github.navikt.tbd_libs.sql_dsl.*
 import com.zaxxer.hikari.HikariDataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
-import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
-import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.hendelser.til
+import no.nav.helse.flex.sykepengesoknad.kafka.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.januar
 import no.nav.helse.nyttFødselsnummer
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -37,20 +22,9 @@ import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.db.HendelseRepository
 import no.nav.helse.spleis.db.PersonDao
 import no.nav.helse.spleis.mediator.TestMessageFactory
-import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold
+import no.nav.helse.spleis.mediator.TestMessageFactory.*
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsforhold.Arbeidsforholdtype.ORDINÆRT
-import no.nav.helse.spleis.mediator.TestMessageFactory.ArbeidsforholdOverstyrt
 import no.nav.helse.spleis.mediator.TestMessageFactory.Arbeidsgiveropplysning
-import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForOpptjeningsvurderingFraLøsning
-import no.nav.helse.spleis.mediator.TestMessageFactory.InntekterForSykepengegrunnlagFraLøsning
-import no.nav.helse.spleis.mediator.TestMessageFactory.InntektsperiodeTestData
-import no.nav.helse.spleis.mediator.TestMessageFactory.InstitusjonsoppholdTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.OmsorgspengerTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.OpplæringspengerTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.PleiepengerTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.SkjønnsmessigFastsatt
-import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkForFeriepengerTestdata
-import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata
 import no.nav.helse.spleis.mediator.VarseloppsamlerTest.Companion.Varsel
 import no.nav.helse.spleis.mediator.databaseContainer
 import no.nav.helse.spleis.mediator.meldinger.TestRapid
@@ -64,10 +38,7 @@ import no.nav.helse.testdatabase.TestDataSource
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
 import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 import tools.jackson.databind.DeserializationFeature
@@ -77,7 +48,7 @@ import tools.jackson.module.kotlin.treeToValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 
 internal abstract class AbstractEndToEndMediatorTest {
@@ -767,6 +738,27 @@ internal abstract class AbstractEndToEndMediatorTest {
             val mnd = YearMonth.from(skjæringstidspunkt).minusMonths(it)
             InntekterForSykepengegrunnlagFraLøsning(mnd, inntekter)
         }
+
+    protected fun sendRettighetskategori(
+        vedtaksperiodeIndeks: Int,
+        rettighetskategoriId: UUID = UUID.randomUUID(),
+        hovedkategori: String = "ARBEIDSTAKER",
+    ) {
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Rettighetskategori))
+        val behov = testRapid.inspektør.etterspurteBehov(vedtaksperiodeIndeks, Behov.Behovstype.Rettighetskategori)
+        val detaljer = behov.path(Behov.Behovstype.Rettighetskategori.utgåendeNavn)
+        val (_, message) =
+            meldingsfabrikk.lagRettighetskategori(
+                vedtaksperiodeId = testRapid.inspektør.vedtaksperiodeId(vedtaksperiodeIndeks),
+                behandlingId = behov.path("behandlingId").asText().toUUID(),
+                skjæringstidspunkt = detaljer.path("skjæringstidspunkt").asLocalDate(),
+                søknader = detaljer.path("søknader").values().map { it.asText().toUUID() },
+                rettighetskategoriId = rettighetskategoriId,
+                hovedkategori = hovedkategori,
+                yrkesaktivitetstype = behov.path("yrkesaktivitetstype").asText(),
+            )
+        testRapid.sendTestMessage(message)
+    }
 
     protected fun sendSimulering(
         vedtaksperiodeIndeks: Int,

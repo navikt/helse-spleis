@@ -43,6 +43,10 @@ object HendelseProbe {
         tell("Simulering")
     }
 
+    fun onRettighetskategori() {
+        tell("Rettighetskategori")
+    }
+
     fun onNavNoInntektsmelding() {
         tell("NavNoInntektsmelding")
     }

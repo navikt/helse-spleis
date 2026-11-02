@@ -1,28 +1,8 @@
 package no.nav.helse.spleis.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidsgiverDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.FravarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektFraNyttArbeidsforholdDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektsAarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.InntektskildeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.MerknadDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PensjonsgivendeInntektDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SelvstendigNaringsdrivendeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsstatusDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SoknadstypeDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SporsmalDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SvarDTO
-import no.nav.helse.flex.sykepengesoknad.kafka.SykepengesoknadDTO
-import no.nav.helse.hendelser.Arbeidsavklaringspenger
-import no.nav.helse.hendelser.Dagpenger
-import no.nav.helse.hendelser.ForsikringsvurderingResultat
-import no.nav.helse.hendelser.ManuellOverskrivingDag
-import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.flex.sykepengesoknad.kafka.*
+import no.nav.helse.hendelser.*
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.serde.spleisJsonMapperBuilder
@@ -30,20 +10,15 @@ import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.mediator.TestMessageFactory.UtbetalingshistorikkTestdata.Companion.toJson
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
-import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
-import no.nav.inntektsmeldingkontrakt.ArsakTilInnsending
-import no.nav.inntektsmeldingkontrakt.AvsenderSystem
+import no.nav.inntektsmeldingkontrakt.*
 import no.nav.inntektsmeldingkontrakt.Inntektsmelding
-import no.nav.inntektsmeldingkontrakt.OpphoerAvNaturalytelse
 import no.nav.inntektsmeldingkontrakt.Periode
-import no.nav.inntektsmeldingkontrakt.Refusjon
-import no.nav.inntektsmeldingkontrakt.Status
 import tools.jackson.databind.node.ObjectNode
 import tools.jackson.module.kotlin.convertValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 import no.nav.helse.hendelser.Periode as HendelsePeriode
 
 internal class TestMessageFactory(
@@ -1278,6 +1253,40 @@ internal class TestMessageFactory(
                 ),
         )
 
+    fun lagRettighetskategori(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
+        skjæringstidspunkt: LocalDate,
+        søknader: List<UUID>,
+        rettighetskategoriId: UUID,
+        hovedkategori: String = "ARBEIDSTAKER",
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        orgnummer: String? = organisasjonsnummer.takeIf { yrkesaktivitetstype == "ARBEIDSTAKER" },
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
+            behov = listOf("Rettighetskategori"),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            ekstraFelter =
+                mapOf(
+                    "Rettighetskategori" to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                            "søknader" to søknader,
+                        ),
+                ),
+            løsninger =
+                mapOf(
+                    "Rettighetskategori" to
+                        mapOf(
+                            "id" to rettighetskategoriId,
+                            "hovedkategori" to hovedkategori,
+                        ),
+                ),
+        )
+
     fun lagSimulering(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,
@@ -1814,7 +1823,7 @@ internal class TestMessageFactory(
         behov: List<String> = listOf(),
         vedtaksperiodeId: UUID?,
         behandlingId: UUID?,
-        orgnummer: String = organisasjonsnummer,
+        orgnummer: String? = organisasjonsnummer,
         løsninger: Map<String, Any> = emptyMap(),
         ekstraFelter: Map<String, Any> = emptyMap(),
         besvart: LocalDateTime = LocalDateTime.now(),

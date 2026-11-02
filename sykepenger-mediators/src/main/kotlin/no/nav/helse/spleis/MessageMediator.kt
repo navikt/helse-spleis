@@ -57,6 +57,7 @@ internal class MessageMediator(
             PersonPåminnelserRiver(it, this)
             GjenopptaBehandlingerRiver(it, this)
             SimuleringerRiver(it, this)
+            RettighetskategoriRiver(it, this)
             AnnullerUtbetalingerRiver(it, this)
             PersonAvstemmingRiver(it, this)
             MigrateRiver(it, this)
@@ -144,6 +145,7 @@ internal class MessageMediator(
             is AnnulleringMessage,
             is AvstemmingMessage,
             is SimuleringMessage,
+            is RettighetskategoriMessage,
             is UtbetalingMessage,
             is FeriepengeutbetalingMessage,
             is UtbetalingsgodkjenningMessage,

@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.opptjening
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.request.receive
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
@@ -26,17 +25,21 @@ private data class PersonRequest(
 
 internal data class Opptjeningsvurdering(
     val opprettet: LocalDateTime,
-    val vilkårsgrunnlag: VilkårsgrunnlagUtDto,
+    val vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
 )
 
 internal fun opptjeningsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto>): List<Opptjeningsvurdering> {
-    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto) =
+    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett) =
         historikk
-            .filter { innslag -> innslag.vilkårsgrunnlag.any { it.opptjeningsvurderingId == vilkårsgrunnlag.opptjeningsvurderingId } }
-            .minOf { it.opprettet }
+            .filter { innslag ->
+                innslag.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().any {
+                    it.opptjeningsvurderingId ==
+                        vilkårsgrunnlag.opptjeningsvurderingId
+                }
+            }.minOf { it.opprettet }
 
     return historikk
-        .flatMap { it.vilkårsgrunnlag }
+        .flatMap { it.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>() }
         .distinctBy { it.opptjeningsvurderingId }
         .map { Opptjeningsvurdering(tidligstOpprettet(it), it) }
 }
@@ -50,7 +53,7 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
 
     fun somJson(
         opprettet: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagUtDto,
+        vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
     ) = objectMapper.createObjectNode().apply {
         put("opptjeningsvurderingId", vilkårsgrunnlag.opptjeningsvurderingId.toString())
         put("opprettet", opprettet.toString())

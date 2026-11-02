@@ -7,36 +7,16 @@ import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.spleis.Behov
-import no.nav.helse.spleis.Behov.Behovstype.Arbeidsavklaringspenger
-import no.nav.helse.spleis.Behov.Behovstype.Arbeidsforhold
-import no.nav.helse.spleis.Behov.Behovstype.Dagpenger
-import no.nav.helse.spleis.Behov.Behovstype.Foreldrepenger
-import no.nav.helse.spleis.Behov.Behovstype.Godkjenning
-import no.nav.helse.spleis.Behov.Behovstype.InntekterForBeregning
-import no.nav.helse.spleis.Behov.Behovstype.InntekterForOpptjeningsvurdering
-import no.nav.helse.spleis.Behov.Behovstype.InntekterForSykepengegrunnlag
-import no.nav.helse.spleis.Behov.Behovstype.Institusjonsopphold
-import no.nav.helse.spleis.Behov.Behovstype.Medlemskap
-import no.nav.helse.spleis.Behov.Behovstype.MedlemskapsvurderingResultat
-import no.nav.helse.spleis.Behov.Behovstype.Omsorgspenger
-import no.nav.helse.spleis.Behov.Behovstype.Opplæringspenger
-import no.nav.helse.spleis.Behov.Behovstype.OpptjeningsvurderingResultat
-import no.nav.helse.spleis.Behov.Behovstype.Pleiepenger
-import no.nav.helse.spleis.Behov.Behovstype.Simulering
-import no.nav.helse.spleis.Behov.Behovstype.Sykepengehistorikk
-import no.nav.helse.spleis.Behov.Behovstype.Utbetaling
+import no.nav.helse.spleis.Behov.Behovstype.*
 import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.JsonNode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     @Test
@@ -83,6 +63,62 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("skjæringstidspunkt").asText())
             assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeFom").asText())
             assertDato(behov.path(Behov.Behovstype.Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeTom").asText())
+        }
+
+    @Test
+    fun `rettighetskategori`() =
+        Toggle.AvklareRettighetskategori.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            val søknadId =
+                sendSøknad(
+                    perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                )
+            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
+            assertVedtaksperiodeBehov(behov, Rettighetskategori)
+            assertEquals("ARBEIDSTAKER", behov.path("yrkesaktivitetstype").asText())
+            assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asText())
+            assertTrue(behov.path("behandlingId").asText().isNotEmpty())
+            val detaljer = behov.path(Rettighetskategori.utgåendeNavn)
+            assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asText())
+            assertEquals(listOf(søknadId.toString()), detaljer.path("søknader").values().map(JsonNode::asText))
+            assertTilstand(0, "AVVENTER_RETTIGHETSKATEGORI")
+
+            sendRettighetskategori(0)
+            assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
+            assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Medlemskap))
+        }
+
+    @Test
+    fun `rettighetskategori - selvstendig`() =
+        Toggle.AvklareRettighetskategori.enable {
+            sendNySøknadSelvstendig(
+                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            )
+            sendSelvstendigsøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                ventetid = 3.januar til 18.januar,
+                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            )
+            val behov = testRapid.inspektør.etterspurteBehov(Rettighetskategori)
+
+            val id = behov.path("@id").asText()
+            assertTrue(id.isNotEmpty())
+            assertDoesNotThrow { UUID.fromString(id) }
+
+            assertEquals("behov", behov.path("@event_name").asText())
+            assertTrue(behov.path("fødselsnummer").asText().isNotEmpty())
+            assertTrue(behov.path("@behov").isArray)
+            assertDatotid(behov.path("@opprettet").asText())
+            assertTrue(behov.path("organisasjonsnummer").isMissingNode)
+            assertTrue(behov.path("vedtaksperiodeId").asText().isNotEmpty())
+
+            assertEquals(listOf(Rettighetskategori.utgåendeNavn), behov.path("@behov").values().map(JsonNode::asText))
+            assertEquals("SELVSTENDIG", behov.path("yrkesaktivitetstype").asText())
+
+            sendRettighetskategori(0, hovedkategori = "SELVSTENDIG_NÆRINGSDRIVENDE")
+            assertTilstand(0, "AVVENTER_VILKÅRSPRØVING")
         }
 
     @Test

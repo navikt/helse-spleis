@@ -29,8 +29,9 @@ import no.nav.helse.person.Dokumentsporing.Companion.eksterneIder
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingIder
 import no.nav.helse.person.Dokumentsporing.Companion.søknadIder
 import no.nav.helse.person.EventSubscription.AnalytiskDatapakkeEvent
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.Companion.harUlikeGrunnbeløp
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
@@ -902,7 +903,7 @@ internal class Behandlinger private constructor(
             val sykmeldingsperiode: Periode,
             val periode: Periode,
             val arbeidssituasjon: Arbeidssituasjon,
-            val grunnlagsdata: VilkårsgrunnlagElement?,
+            val grunnlagsdata: KomplettVilkårsgrunnlag?,
             val utbetaling: Utbetaling?,
             val dokumentsporing: Dokumentsporing,
             val sykdomstidslinje: Sykdomstidslinje,
@@ -1000,7 +1001,7 @@ internal class Behandlinger private constructor(
                                 ArbeidssituasjonDto.FISKER -> Arbeidssituasjon.FISKER
                                 ArbeidssituasjonDto.ANNET -> Arbeidssituasjon.ANNET
                             },
-                        grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) },
+                        grunnlagsdata = dto.vilkårsgrunnlagId?.let { grunnlagsdata.getValue(it) as KomplettVilkårsgrunnlag },
                         utbetaling = utbetaling,
                         dokumentsporing = Dokumentsporing.gjenopprett(dto.dokumentsporing),
                         sykdomstidslinje = Sykdomstidslinje.gjenopprett(dto.sykdomstidslinje),
@@ -1039,7 +1040,7 @@ internal class Behandlinger private constructor(
             private fun kopierMed(
                 sykmeldingsperiode: Periode = this.sykmeldingsperiode,
                 periode: Periode = this.periode,
-                grunnlagsdata: VilkårsgrunnlagElement? = this.grunnlagsdata,
+                grunnlagsdata: KomplettVilkårsgrunnlag? = this.grunnlagsdata,
                 utbetaling: Utbetaling? = this.utbetaling,
                 dokumentsporing: Dokumentsporing = this.dokumentsporing,
                 sykdomstidslinje: Sykdomstidslinje = this.sykdomstidslinje,
@@ -1120,7 +1121,7 @@ internal class Behandlinger private constructor(
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
 
             internal fun kopierMedAnnullering(
-                grunnlagsdata: VilkårsgrunnlagElement,
+                grunnlagsdata: KomplettVilkårsgrunnlag,
                 annullering: Utbetaling,
             ) = kopierMed(
                 grunnlagsdata = grunnlagsdata,
@@ -1897,7 +1898,7 @@ internal class Behandlinger private constructor(
                 behandlingEventBus: BehandlingEventBus,
                 annullering: Utbetaling,
                 vurdering: Utbetaling.Vurdering,
-                grunnlagsdata: VilkårsgrunnlagElement,
+                grunnlagsdata: KomplettVilkårsgrunnlag,
                 aktivitetslogg: IAktivitetslogg,
             ) {
                 error("Kan ikke legge til annullering i $this")
@@ -2343,7 +2344,7 @@ internal class Behandlinger private constructor(
                     behandlingEventBus: BehandlingEventBus,
                     annullering: Utbetaling,
                     vurdering: Utbetaling.Vurdering,
-                    grunnlagsdata: VilkårsgrunnlagElement,
+                    grunnlagsdata: KomplettVilkårsgrunnlag,
                     aktivitetslogg: IAktivitetslogg,
                 ) {
                     annullering.godkjent(behandlingEventBus, aktivitetslogg, vurdering)
@@ -2456,7 +2457,7 @@ internal class Behandlinger private constructor(
 internal data class BeregnetBehandling(
     val maksdatoresultat: Maksdatoresultat,
     val utbetalingstidslinje: Utbetalingstidslinje,
-    val grunnlagsdata: VilkårsgrunnlagElement,
+    val grunnlagsdata: KomplettVilkårsgrunnlag,
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
 ) {

@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.rettighetskategori
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.request.receive
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
@@ -21,7 +20,7 @@ import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
@@ -42,7 +41,7 @@ internal data class Rettighetskategori(
 
 internal fun rettighetskategorier(person: PersonUtDto): List<Rettighetskategori> {
     val historikk = person.vilkårsgrunnlagHistorikk.historikk
-    val vilkårsgrunnlag = historikk.flatMap { it.vilkårsgrunnlag }
+    val vilkårsgrunnlag = historikk.flatMap { it.vilkårsgrunnlag }.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>()
 
     fun tidligstOpprettet(rettighetskategoriId: UUID) =
         historikk

@@ -304,6 +304,20 @@ internal class ArbeidsgiverHendelsefabrikk(
         )
     }
 
+    internal fun lagRettighetskategori(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+        rettighetskategoriId: UUID,
+        hovedkategori: Rettighetskategori.Hovedkategori,
+    ) = Rettighetskategori(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        behandlingsporing = behandlingsporing,
+        rettighetskategoriId = rettighetskategoriId,
+        hovedkategori = hovedkategori,
+    )
+
     internal fun lagSimulering(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

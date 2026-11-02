@@ -6,7 +6,7 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class EventBus {
     private val observers = mutableListOf<EventSubscription>()
@@ -278,6 +278,11 @@ class EventBus {
     internal fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilVilkårsprøving(event) }
+    }
+
+    internal fun trengerRettighetskategori(event: EventSubscription.TrengerRettighetskategoriEvent) {
+        _events.add(event)
+        observers.forEach { it.trengerRettighetskategori(event) }
     }
 
     internal fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) {

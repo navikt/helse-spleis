@@ -895,6 +895,24 @@ internal class TestPerson(
                 ).håndter(Person::håndterEndretGrunnlagForBeregning)
         }
 
+        internal fun rettighetskategoribehov(vedtaksperiodeId: UUID) =
+            behovsoppsamler
+                .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Rettighetskategori>()
+                .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+
+        internal fun håndterRettighetskategori(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            rettighetskategoriId: UUID = UUID.randomUUID(),
+            hovedkategori: Rettighetskategori.Hovedkategori = Rettighetskategori.Hovedkategori.ARBEIDSTAKER,
+            skjæringstidspunkt: LocalDate? = null,
+        ) {
+            behovshåndterer.bekreftForespurtRettighetskategori(vedtaksperiodeId)
+            val skjæringstidspunkt = skjæringstidspunkt ?: inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            arbeidsgiverHendelsefabrikk
+                .lagRettighetskategori(vedtaksperiodeId, skjæringstidspunkt, rettighetskategoriId, hovedkategori)
+                .håndter(Person::håndterRettighetskategori)
+        }
+
         internal fun håndterSimulering(
             vedtaksperiodeId: UUID,
             simuleringOK: Boolean = true,

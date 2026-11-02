@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 interface EventSubscription {
     sealed interface Event
@@ -720,6 +720,14 @@ interface EventSubscription {
         }
     }
 
+    data class TrengerRettighetskategoriEvent(
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val skjæringstidspunkt: LocalDate,
+        val søknader: List<UUID>,
+    ) : Event
+
     data class TrengerInformasjonTilBeregningEvent(
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -893,6 +901,8 @@ interface EventSubscription {
     fun utkastTilVedtak(event: UtkastTilVedtakEvent) {}
 
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøvingEvent) {}
+
+    fun trengerRettighetskategori(event: TrengerRettighetskategoriEvent) {}
 
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
 

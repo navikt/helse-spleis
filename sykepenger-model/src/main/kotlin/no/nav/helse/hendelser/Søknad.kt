@@ -14,31 +14,15 @@ import no.nav.helse.hendelser.Periode.Companion.periode
 import no.nav.helse.hendelser.Søknad.PensjonsgivendeInntekt.Companion.harFlereTyperPensjonsgivendeInntekt
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.inneholderDagerEtter
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Companion.subsumsjonsFormat
-import no.nav.helse.person.Behandlinger
-import no.nav.helse.person.Dokumentsporing
-import no.nav.helse.person.EventBus
-import no.nav.helse.person.Person
-import no.nav.helse.person.Sykmeldingsperioder
-import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
-import no.nav.helse.person.Yrkesaktivitet
+import no.nav.helse.person.*
+import no.nav.helse.person.VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode
+import no.nav.helse.person.aktivitetslogg.Varselkode.*
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Arbeidsledigsøknad er lagt til grunn`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Selvstendigsøknad med flere typer pensjonsgivende inntekter`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke førstegangsbehandlinger for arbeidsledigsøknader`
 import no.nav.helse.person.aktivitetslogg.Varselkode.Companion.`Støtter ikke søknadstypen`
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_1
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_17
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_2
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_22
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_29
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_3
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_30
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_56
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
-import no.nav.helse.person.aktivitetslogg.Varselkode.RV_YS_1
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.Inntektsdata
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
@@ -54,7 +38,7 @@ import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
-import java.util.UUID
+import java.util.*
 
 class Søknad(
     meldingsreferanseId: MeldingsreferanseId,
@@ -117,7 +101,7 @@ class Søknad(
 
     internal fun valider(
         aktivitetslogg: IAktivitetslogg,
-        vilkårsgrunnlag: VilkårsgrunnlagElement?,
+        vilkårsgrunnlag: KomplettVilkårsgrunnlag?,
         refusjonstidslinje: Beløpstidslinje,
         subsumsjonslogg: Subsumsjonslogg,
         skjæringstidspunkt: LocalDate,
@@ -165,7 +149,7 @@ class Søknad(
 
     private fun validerArbeidsledig(
         aktivitetslogg: IAktivitetslogg,
-        vilkårsgrunnlag: VilkårsgrunnlagElement?,
+        vilkårsgrunnlag: KomplettVilkårsgrunnlag?,
         periode: Periode?,
         refusjonstidslinje: Beløpstidslinje,
     ) {
@@ -180,7 +164,7 @@ class Søknad(
     private fun validerSelvstendig(
         aktivitetslogg: IAktivitetslogg,
         skjæringstidspunkt: LocalDate,
-        vilkårsgrunnlag: VilkårsgrunnlagElement?,
+        vilkårsgrunnlag: KomplettVilkårsgrunnlag?,
     ) {
         val ferdiglignetPensjonsgivendeInntekter = pensjonsgivendeInntekter?.filter { it.erFerdigLignet }
         val harMinst3årMedFerdiglignetInntekter =

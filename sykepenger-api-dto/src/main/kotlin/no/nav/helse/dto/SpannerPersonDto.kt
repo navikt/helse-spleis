@@ -1,59 +1,23 @@
 package no.nav.helse.dto
 
+import no.nav.helse.dto.SpannerPersonDto.*
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.RefusjonservitørData
 import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.DagData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.ArbeidssituasjonData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.AvsenderData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.PeriodeUtenNavAnsvarData
-import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.AORDNINGEN
-import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.ARBEIDSGIVER
-import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.INFOTRYGD
+import no.nav.helse.dto.SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.*
+import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.InntektsopplysningskildeData.*
 import no.nav.helse.dto.SpannerPersonDto.ArbeidstakerFaktaavklartInntektData.SkatteopplysningData
-import no.nav.helse.dto.SpannerPersonDto.UtbetalingData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.BegrunnelseData
 import no.nav.helse.dto.SpannerPersonDto.UtbetalingstidslinjeData.UtbetalingsdagData
-import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.ArbeidsgiverInntektsopplysningData
 import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagElementData.SelvstendigInntektsopplysningData
-import no.nav.helse.dto.SpannerPersonDto.VilkårsgrunnlagInnslagData
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
-import no.nav.helse.dto.serialisering.ArbeidsgiverInntektsopplysningUtDto
-import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerFaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
-import no.nav.helse.dto.serialisering.BehandlingUtDto
-import no.nav.helse.dto.serialisering.BehandlingendringUtDto
-import no.nav.helse.dto.serialisering.FaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.FeriepengeUtDto
-import no.nav.helse.dto.serialisering.FeriepengeoppdragUtDto
-import no.nav.helse.dto.serialisering.FeriepengeutbetalingslinjeUtDto
-import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.InfotrygdArbeidsgiverutbetalingsperiodeUtDto
-import no.nav.helse.dto.serialisering.InfotrygdPersonutbetalingsperiodeUtDto
-import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.InntektsmeldingUtDto
-import no.nav.helse.dto.serialisering.MaksdatoresultatUtDto
-import no.nav.helse.dto.serialisering.OppdragUtDto
-import no.nav.helse.dto.serialisering.OpptjeningUtDto
-import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.dto.serialisering.SaksbehandlerUtDto
-import no.nav.helse.dto.serialisering.SelvstendigFaktaavklartInntektUtDto
-import no.nav.helse.dto.serialisering.SkjønnsmessigFastsattUtDto
-import no.nav.helse.dto.serialisering.UtbetalingUtDto
-import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
-import no.nav.helse.dto.serialisering.UtbetalingslinjeUtDto
-import no.nav.helse.dto.serialisering.UtbetalingstidslinjeUtDto
-import no.nav.helse.dto.serialisering.UtbetaltDagUtDto
-import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
+import no.nav.helse.dto.serialisering.*
 import no.nav.helse.nesteDag
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Year
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 data class SpannerPersonDto(
     val fødselsnummer: String,
@@ -431,6 +395,7 @@ data class SpannerPersonDto(
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_REVURDERING,
                 AVVENTER_REVURDERING_TIL_UTBETALING,
@@ -1265,6 +1230,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
             VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
             VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
             VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING
+            VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_RETTIGHETSKATEGORI
             VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
             VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD
             VedtaksperiodetilstandDto.TIL_UTBETALING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_UTBETALING
@@ -1848,10 +1814,10 @@ private fun VilkårsgrunnlagInnslagUtDto.tilPersonData() =
     VilkårsgrunnlagInnslagData(
         id = this.id,
         opprettet = this.opprettet,
-        vilkårsgrunnlag = this.vilkårsgrunnlag.map { it.tilPersonData() },
+        vilkårsgrunnlag = this.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().map { it.tilPersonData() },
     )
 
-private fun VilkårsgrunnlagUtDto.tilPersonData() =
+private fun VilkårsgrunnlagUtDto.Komplett.tilPersonData() =
     VilkårsgrunnlagElementData(
         skjæringstidspunkt = this.skjæringstidspunkt,
         type =

@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.dto.deserialisering.PersonInnDto
+import no.nav.helse.dto.deserialisering.VilkårsgrunnlagInnDto
 import no.nav.helse.serde.SerialisertPerson
 import no.nav.helse.serde.spleisJsonMapperBuilder
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -13,7 +14,7 @@ import tools.jackson.databind.DeserializationFeature
 import tools.jackson.databind.ObjectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 private val objectMapper: ObjectMapper =
     spleisJsonMapperBuilder()
@@ -58,7 +59,7 @@ private fun finnGrunnbeløp(person: PersonInnDto): List<Grunnbeløp> {
     val historikk = person.vilkårsgrunnlagHistorikk.historikk
     if (historikk.isEmpty()) return emptyList()
     val siste = historikk.first()
-    return siste.vilkårsgrunnlag.filterNot { it.inntektsgrunnlag.vurdertInfotrygd }.map { spleisVilkårsgrunnlag ->
+    return siste.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagInnDto.Komplett>().filterNot { it.inntektsgrunnlag.vurdertInfotrygd }.map { spleisVilkårsgrunnlag ->
         Grunnbeløp(
             skjæringstidspunkt = spleisVilkårsgrunnlag.skjæringstidspunkt,
             `6G` = spleisVilkårsgrunnlag.inntektsgrunnlag.`6G`.beløp,

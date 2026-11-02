@@ -6,16 +6,11 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
-import no.nav.helse.person.EventSubscription.Arbeidsgiverperiode
+import no.nav.helse.person.EventSubscription.*
 import no.nav.helse.person.EventSubscription.GodkjenningEvent.Sykepengegrunnlagsfakta
-import no.nav.helse.person.EventSubscription.Inntekt
-import no.nav.helse.person.EventSubscription.Refusjon
-import no.nav.helse.person.EventSubscription.Utbetalingsdag
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.Dagtype
 import no.nav.helse.person.EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
-import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
+import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.*
 import no.nav.helse.spleis.Behov
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 
@@ -64,6 +59,7 @@ internal class EventBusOversetter(
                     is EventSubscription.SelvstendigIngenDagerIgjenEvent -> mapSelvstendigIngenDagerIgjen(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
+                    is EventSubscription.TrengerRettighetskategoriEvent -> mapTrengerRettighetskategori(event)
                     is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
                     is EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent -> mapTrengerInitiellHistorikkFraInfotrygd(event)
                     is EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent -> mapTrengerOppdatertHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
@@ -649,6 +645,26 @@ internal class EventBusOversetter(
             ),
         )
     }
+
+    private fun mapTrengerRettighetskategori(event: EventSubscription.TrengerRettighetskategoriEvent): Utboksmelding =
+        listOf(
+            Behov(
+                Behov.Behovstype.Rettighetskategori,
+                mapOf(
+                    "skjæringstidspunkt" to event.skjæringstidspunkt,
+                    "søknader" to event.søknader,
+                ),
+            ),
+        ).utgåendeBehov(
+            message.meldingsporing.id,
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                ),
+            ),
+        )
 
     private fun mapTrengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent): Utboksmelding {
         val behov =

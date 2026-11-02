@@ -92,6 +92,7 @@ class Vilkårsgrunnlag(
         aktivitetslogg: IAktivitetslogg,
         inntektsgrunnlag: Inntektsgrunnlag,
         subsumsjonslogg: Subsumsjonslogg,
+        rettighetskategoriId: UUID? = null,
     ): IAktivitetslogg {
         arbeidsforhold.forEach {
             it.validerFrilans(
@@ -148,7 +149,7 @@ class Vilkårsgrunnlag(
                 opptjeningsvurderingId = opptjeningsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når vi alltid får
                 medlemskapsvurderingId = medlemskapsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når MEDLEMSKAPSVURDERINGBEHOV er på i prod og alle gamle behov er besvart
                 rettighetskategoriId =
-                    VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.deterministiskRettighetskategoriId(
+                    rettighetskategoriId ?: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.deterministiskRettighetskategoriId(
                         vilkårsgrunnlagId,
                     ),
             )

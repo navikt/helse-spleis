@@ -205,7 +205,7 @@ internal class VilkårsgrunnlagBuilder(
     init {
         vilkårsgrunnlagHistorikk.historikk.asReversed().forEach {
             historikk.addFirst(
-                it.vilkårsgrunnlag.associate {
+                it.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().associate {
                     it.vilkårsgrunnlagId to
                         when (it) {
                             is VilkårsgrunnlagUtDto.Infotrygd -> mapInfotrygd(it)

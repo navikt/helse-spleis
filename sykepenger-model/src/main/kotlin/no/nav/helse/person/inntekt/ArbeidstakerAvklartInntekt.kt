@@ -2,32 +2,7 @@ package no.nav.helse.person.inntekt
 
 import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
 import no.nav.helse.person.Vedtaksperiode
-import no.nav.helse.person.tilstandsmaskin.Avsluttet
-import no.nav.helse.person.tilstandsmaskin.AvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAnnullering
-import no.nav.helse.person.tilstandsmaskin.AvventerAnnulleringTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerAvsluttetUtenUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerBlokkerendePeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenning
-import no.nav.helse.person.tilstandsmaskin.AvventerGodkjenningRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerHistorikk
-import no.nav.helse.person.tilstandsmaskin.AvventerHistorikkRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerInfotrygdHistorikk
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsmelding
-import no.nav.helse.person.tilstandsmaskin.AvventerInntektsopplysningerForAnnenArbeidsgiver
-import no.nav.helse.person.tilstandsmaskin.AvventerRefusjonsopplysningerAnnenPeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerRevurderingTilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.AvventerSimulering
-import no.nav.helse.person.tilstandsmaskin.AvventerSimuleringRevurdering
-import no.nav.helse.person.tilstandsmaskin.AvventerSøknadForOverlappendePeriode
-import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøving
-import no.nav.helse.person.tilstandsmaskin.AvventerVilkårsprøvingRevurdering
-import no.nav.helse.person.tilstandsmaskin.Start
-import no.nav.helse.person.tilstandsmaskin.TilAnnullering
-import no.nav.helse.person.tilstandsmaskin.TilInfotrygd
-import no.nav.helse.person.tilstandsmaskin.TilUtbetaling
-import no.nav.helse.person.tilstandsmaskin.Vedtaksperiodetilstand
+import no.nav.helse.person.tilstandsmaskin.*
 
 /**
  * I de tilfellene vi aldri mottar inntektsmelding (ingen perioder på skjæringstidspunktet har en faktaavklartInntekt)
@@ -72,6 +47,7 @@ private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
         AvventerHistorikkRevurdering,
         AvventerInntektsopplysningerForAnnenArbeidsgiver,
         AvventerRefusjonsopplysningerAnnenPeriode,
+        AvventerRettighetskategori,
         AvventerRevurdering,
         AvventerRevurderingTilUtbetaling,
         AvventerSimulering,

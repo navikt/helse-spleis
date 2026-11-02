@@ -66,6 +66,16 @@ class Behovshåndterer(
             "Forventet at det skulle være forspurt informasjon til vilkårsprøving. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
+    fun bekreftForespurtRettighetskategori(vedtaksperiodeId: UUID) =
+        assertNotNull(
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Rettighetskategori>().filter {
+                it.vedtaksperiodeId ==
+                    vedtaksperiodeId
+            },
+        ) {
+            "Forventet at det skulle være forespurt rettighetskategori. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
+        }
+
     fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID) =
         assertNotNull(
             behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig>().filter {
@@ -108,9 +118,7 @@ class Behovshåndterer(
                 operasjon()
             }
 
-        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach {
-            initiellHistorikFraInfotrygdBehov,
-            ->
+        nyeBehov.filterIsInstance<Behovsoppsamler.Behovsdetaljer.InitiellHistorikFraInfotrygd>().forEach { initiellHistorikFraInfotrygdBehov ->
             val fabrikk =
                 initiellHistorikFraInfotrygdBehov.yrkesaktivitetssporing.let {
                     ArbeidsgiverHendelsefabrikk(

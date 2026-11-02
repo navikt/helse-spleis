@@ -352,6 +352,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() =
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AVVENTER_SIMULERING
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING
+                VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI -> AVVENTER_RETTIGHETSKATEGORI
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AVVENTER_VILKÅRSPRØVING_REVURDERING
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TIL_INFOTRYGD
                 VedtaksperiodetilstandDto.TIL_UTBETALING -> TIL_UTBETALING
@@ -878,13 +879,10 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() =
             when (this) {
                 is VilkårsgrunnlagUtDto.Infotrygd -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Infotrygd
                 is VilkårsgrunnlagUtDto.Spleis -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Vilkårsprøving
+                is VilkårsgrunnlagUtDto.Rettighetskategori -> PersonData.VilkårsgrunnlagElementData.GrunnlagsdataType.Rettighetskategori
             },
-        inntektsgrunnlag = this.inntektsgrunnlag.tilPersonData(),
-        opptjening =
-            when (this) {
-                is VilkårsgrunnlagUtDto.Spleis -> this.opptjening?.tilPersonData()
-                is VilkårsgrunnlagUtDto.Infotrygd -> null
-            },
+        inntektsgrunnlag = (this as? VilkårsgrunnlagUtDto.Komplett)?.inntektsgrunnlag?.tilPersonData(),
+        opptjening = (this as? VilkårsgrunnlagUtDto.Spleis)?.opptjening?.tilPersonData(),
         medlemskapstatus =
             when (this) {
                 is VilkårsgrunnlagUtDto.Spleis ->
@@ -897,19 +895,11 @@ private fun VilkårsgrunnlagUtDto.tilPersonData() =
 
                 else -> null
             },
-        meldingsreferanseId =
-            when (this) {
-                is VilkårsgrunnlagUtDto.Spleis -> this.meldingsreferanseId?.id
-                else -> null
-            },
+        meldingsreferanseId = (this as? VilkårsgrunnlagUtDto.Spleis)?.meldingsreferanseId?.id,
         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
-        forsikringsvurderingId =
-            when (this) {
-                is VilkårsgrunnlagUtDto.Spleis -> this.forsikringsvurderingId
-                is VilkårsgrunnlagUtDto.Infotrygd -> null
-            },
-        opptjeningsvurderingId = this.opptjeningsvurderingId,
-        medlemskapsvurderingId = this.medlemskapsvurderingId,
+        forsikringsvurderingId = (this as? VilkårsgrunnlagUtDto.Spleis)?.forsikringsvurderingId,
+        opptjeningsvurderingId = (this as? VilkårsgrunnlagUtDto.Komplett)?.opptjeningsvurderingId,
+        medlemskapsvurderingId = (this as? VilkårsgrunnlagUtDto.Komplett)?.medlemskapsvurderingId,
         rettighetskategoriId = this.rettighetskategoriId,
     )
 

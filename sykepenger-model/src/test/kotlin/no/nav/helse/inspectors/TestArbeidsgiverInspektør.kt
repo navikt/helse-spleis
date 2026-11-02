@@ -159,6 +159,8 @@ internal class TestArbeidsgiverInspektør(
 
     internal fun vilkårsgrunnlag(skjæringstidspunkt: LocalDate) = person.vilkårsgrunnlagFor(skjæringstidspunkt)
 
+    internal fun rettighetskategorigrunnlag(skjæringstidspunkt: LocalDate) = person.rettighetskategorigrunnlagFor(skjæringstidspunkt)
+
     internal fun sisteTilstand(vedtaksperiodeId: UUID) = vedtaksperiodeId.finn(tilstander)
 
     internal fun skjæringstidspunkt(vedtaksperiodeId: UUID) = vedtaksperioder(vedtaksperiodeId).inspektør.skjæringstidspunkt

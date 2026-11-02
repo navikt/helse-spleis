@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
@@ -13,6 +14,22 @@ class MedlemskapsvurderingerTest {
     @Test
     fun `tom historikk gir ingen medlemskapsvurderinger`() {
         assertEquals(emptyList(), medlemskapsvurderinger(emptyList()))
+    }
+
+    @Test
+    fun `hopper over rettighetskategorigrunnlag`() {
+        val komplett = vilkårsgrunnlag()
+        val rettighetskategorigrunnlag =
+            VilkårsgrunnlagUtDto.Rettighetskategori(
+                vilkårsgrunnlagId = UUID.randomUUID(),
+                skjæringstidspunkt = LocalDate.of(2026, 1, 1),
+                rettighetskategoriId = UUID.randomUUID(),
+            )
+        val historikk = listOf(historikkinnslag("2026-01-01T12:00:00", rettighetskategorigrunnlag, komplett))
+
+        val resultat = medlemskapsvurderinger(historikk)
+
+        assertEquals(listOf(komplett), resultat.map { it.vilkårsgrunnlag })
     }
 
     @Test
@@ -74,7 +91,7 @@ class MedlemskapsvurderingerTest {
     }
 
     private fun vilkårsgrunnlag(medlemskapsvurderingId: UUID = UUID.randomUUID()) =
-        mockk<VilkårsgrunnlagUtDto> {
+        mockk<VilkårsgrunnlagUtDto.Komplett> {
             every { this@mockk.medlemskapsvurderingId } returns medlemskapsvurderingId
         }
 

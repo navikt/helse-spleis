@@ -1,9 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -58,7 +55,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
             Selvstendig -> {
                 aktivitetslogg.info("Gjenopptar behandling for revurdering")
                 when (vedtaksperiode.vilkårsgrunnlag) {
-                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøvingRevurdering)
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøvingRevurdering)
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikkRevurdering)
                 }
             }
@@ -128,7 +125,7 @@ internal data object AvventerRevurdering : Vedtaksperiodetilstand {
             eventBus: EventBus,
             aktivitetslogg: IAktivitetslogg,
         ) {
-            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøvingRevurdering) {
+            vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøvingRevurdering) {
                 aktivitetslogg.info("Trenger å utføre vilkårsprøving før vi kan beregne utbetaling for revurderingen.")
             }
         }

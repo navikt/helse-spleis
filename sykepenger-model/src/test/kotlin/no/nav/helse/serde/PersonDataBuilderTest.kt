@@ -3,11 +3,7 @@ package no.nav.helse.serde
 import no.nav.helse.*
 import no.nav.helse.dsl.*
 import no.nav.helse.dto.*
-import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.dto.serialisering.ArbeidstakerinntektskildeUtDto
-import no.nav.helse.dto.serialisering.UtbetalingsdagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.dto.serialisering.*
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.Sykmeldingsperiode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Arbeid
@@ -357,6 +353,35 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     }
 
     @Test
+    fun `minimalt vilkårsgrunnlag og AVVENTER_RETTIGHETSKATEGORI overlever serialisering`() =
+        Toggle.AvklareRettighetskategori.enable {
+            a1 {
+                håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            }
+            val jsonIAvventerRettighetskategori = dto().tilPersonData().tilSerialisertPerson().json
+            assert("\"AVVENTER_RETTIGHETSKATEGORI\"" in jsonIAvventerRettighetskategori)
+            assertGjenoppbygget(dto())
+
+            val rettighetskategoriId = UUID.randomUUID()
+            a1 {
+                håndterRettighetskategori(1.vedtaksperiode, rettighetskategoriId)
+            }
+            val dto = dto()
+            val minimalt =
+                dto.vilkårsgrunnlagHistorikk.historikk
+                    .first()
+                    .vilkårsgrunnlag
+                    .single()
+            assertEquals(VilkårsgrunnlagUtDto.Rettighetskategori(minimalt.vilkårsgrunnlagId, 1.januar, rettighetskategoriId), minimalt)
+
+            val json = dto.tilPersonData().tilSerialisertPerson().json
+            assert("\"type\":\"Rettighetskategori\"" in json)
+            assert("hovedkategori" !in json && "ARBEIDSTAKER_OG_SELVSTENDIG" !in json)
+            assertGjenoppbygget(dto)
+        }
+
+    @Test
     fun `forsikringsvurderingId lagres på vilkårsgrunnlag og overlever serialisering`() {
         val forsikringsvurderingId = UUID.randomUUID()
         a1 {
@@ -385,7 +410,7 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
         assertEquals(6, historikk.historikk.size)
         historikk.historikk[5].also { innslag ->
             assertEquals(1, innslag.vilkårsgrunnlag.size)
-            innslag.vilkårsgrunnlag[0].also { vilkårsgrunnlagDto ->
+            (innslag.vilkårsgrunnlag[0] as VilkårsgrunnlagUtDto.Komplett).also { vilkårsgrunnlagDto ->
                 assertEquals(2, vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger.size)
                 vilkårsgrunnlagDto.inntektsgrunnlag.arbeidsgiverInntektsopplysninger[0].also { arbeidsgiverInntektsopplysningDto ->
                     val inntektsopplysningskilde = arbeidsgiverInntektsopplysningDto.faktaavklartInntekt.inntektsopplysningskilde

@@ -1,17 +1,10 @@
 package no.nav.helse.spleis.mediator
 
 import io.mockk.mockk
-import no.nav.helse.april
-import no.nav.helse.desember
-import no.nav.helse.februar
+import no.nav.helse.*
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Medlemskapsvurdering
-import no.nav.helse.januar
-import no.nav.helse.juli
-import no.nav.helse.juni
-import no.nav.helse.mai
-import no.nav.helse.mars
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
@@ -20,17 +13,13 @@ import no.nav.helse.spleis.meldinger.model.SimuleringMessage
 import no.nav.helse.spleis.utboks.InMemoryUtboksDao
 import no.nav.helse.spleis.utboks.TestUtsender
 import no.nav.inntektsmeldingkontrakt.Periode
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 internal class MessageMediatorTest {
     @Test
@@ -106,6 +95,49 @@ internal class MessageMediatorTest {
     fun `anmodning om forkasting`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagAnmodningOmForkasting())
         assertTrue(hendelseMediator.lestAnmodningOmForkasting)
+    }
+
+    @Test
+    fun rettighetskategori() {
+        fun løsning(hovedkategori: String) =
+            meldingsfabrikk.lagRettighetskategori(
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+                søknader = listOf(UUID.randomUUID()),
+                rettighetskategoriId = UUID.randomUUID(),
+                hovedkategori = hovedkategori,
+            )
+
+        listOf("ARBEIDSTAKER", "SELVSTENDIG_NÆRINGSDRIVENDE", "ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE").forEach {
+            testRapid.sendTestMessage(løsning(it))
+            assertTrue(hendelseMediator.lestRettighetskategori) { "Skal lese løsning med hovedkategori $it" }
+            hendelseMediator.reset()
+        }
+
+        testRapid.sendTestMessage(løsning("UKJENT"))
+        assertFalse(hendelseMediator.lestRettighetskategori) { "Skal ikke lese løsning med ukjent hovedkategori" }
+    }
+
+    @Test
+    fun `rettighetskategori krever organisasjonsnummer bare for arbeidstaker`() {
+        fun løsning(yrkesaktivitetstype: String) =
+            meldingsfabrikk.lagRettighetskategori(
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+                søknader = listOf(UUID.randomUUID()),
+                rettighetskategoriId = UUID.randomUUID(),
+                orgnummer = null,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+            )
+
+        testRapid.sendTestMessage(løsning("SELVSTENDIG"))
+        assertTrue(hendelseMediator.lestRettighetskategori) { "Skal lese løsning for selvstendig uten organisasjonsnummer" }
+        hendelseMediator.reset()
+
+        testRapid.sendTestMessage(løsning("ARBEIDSTAKER"))
+        assertFalse(hendelseMediator.lestRettighetskategori) { "Skal ikke lese løsning for arbeidstaker uten organisasjonsnummer" }
     }
 
     @Test

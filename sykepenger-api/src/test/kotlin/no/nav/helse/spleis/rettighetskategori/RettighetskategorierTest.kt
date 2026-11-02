@@ -5,18 +5,11 @@ import io.mockk.mockk
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto.ARBEIDSTAKER
 import no.nav.helse.dto.deserialisering.YrkesaktivitetstypeDto.SELVSTENDIG
-import no.nav.helse.dto.serialisering.ArbeidsgiverUtDto
-import no.nav.helse.dto.serialisering.ForkastetVedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.InntektsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.PersonUtDto
-import no.nav.helse.dto.serialisering.VedtaksperiodeUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagInnslagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
-import no.nav.helse.dto.serialisering.VilkårsgrunnlaghistorikkUtDto
+import no.nav.helse.dto.serialisering.*
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -257,6 +250,44 @@ class RettighetskategorierTest {
         assertEquals(emptyList(), rettighetskategori.forkastede)
         assertTrue(rettighetskategori.harSelvstendigInntekt)
     }
+
+    @Test
+    fun `minimalt vilkårsgrunnlag er ikke med`() {
+        val minimalt = minimalt(skjæringstidspunkt = "2018-01-01")
+        val person =
+            person(
+                historikk = listOf(innslag("2018-02-01T12:00:00", minimalt)),
+                arbeidsgivere = listOf(arbeidsgiver(ARBEIDSTAKER, aktive = listOf(periode("2018-01-01")))),
+            )
+
+        assertEquals(emptyList(), rettighetskategorier(person))
+    }
+
+    @Test
+    fun `fullt vilkårsgrunnlag som har erstattet et minimalt gir én oppføring`() {
+        val minimalt = minimalt(skjæringstidspunkt = "2018-01-01")
+        val fullt = kopi(minimalt)
+        val person =
+            person(
+                historikk =
+                    listOf(
+                        innslag("2018-02-02T12:00:00", fullt),
+                        innslag("2018-02-01T12:00:00", minimalt),
+                    ),
+                arbeidsgivere = listOf(arbeidsgiver(ARBEIDSTAKER, aktive = listOf(periode("2018-01-01")))),
+            )
+
+        val rettighetskategori = rettighetskategorier(person).single()
+        assertEquals(minimalt.rettighetskategoriId, rettighetskategori.rettighetskategoriId)
+        assertEquals(Rettighetskategori.Kilde.SPLEIS, rettighetskategori.kilde)
+    }
+
+    private fun minimalt(skjæringstidspunkt: String) =
+        VilkårsgrunnlagUtDto.Rettighetskategori(
+            vilkårsgrunnlagId = UUID.randomUUID(),
+            skjæringstidspunkt = LocalDate.parse(skjæringstidspunkt),
+            rettighetskategoriId = UUID.randomUUID(),
+        )
 
     private fun spleis(
         skjæringstidspunkt: String,

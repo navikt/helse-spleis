@@ -1,13 +1,12 @@
 package no.nav.helse.spleis.medlemskap
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import io.ktor.http.ContentType
-import io.ktor.server.application.Application
-import io.ktor.server.auth.authenticate
-import io.ktor.server.request.receive
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.post
-import io.ktor.server.routing.routing
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.helse.dto.MedlemskapsvurderingDto
@@ -27,17 +26,21 @@ private data class PersonRequest(
 
 internal data class Medlemskapsvurdering(
     val opprettet: LocalDateTime,
-    val vilkårsgrunnlag: VilkårsgrunnlagUtDto,
+    val vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
 )
 
 internal fun medlemskapsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto>): List<Medlemskapsvurdering> {
-    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto) =
+    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett) =
         historikk
-            .filter { innslag -> innslag.vilkårsgrunnlag.any { it.medlemskapsvurderingId == vilkårsgrunnlag.medlemskapsvurderingId } }
-            .minOf { it.opprettet }
+            .filter { innslag ->
+                innslag.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().any {
+                    it.medlemskapsvurderingId ==
+                        vilkårsgrunnlag.medlemskapsvurderingId
+                }
+            }.minOf { it.opprettet }
 
     return historikk
-        .flatMap { it.vilkårsgrunnlag }
+        .flatMap { it.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>() }
         .distinctBy { it.medlemskapsvurderingId }
         .map { Medlemskapsvurdering(tidligstOpprettet(it), it) }
 }
@@ -51,7 +54,7 @@ internal fun Application.medlemskapApi(personDao: PersonDao) {
 
     fun somJson(
         opprettet: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagUtDto,
+        vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
     ) = objectMapper.createObjectNode().apply {
         put("medlemskapsvurderingId", vilkårsgrunnlag.medlemskapsvurderingId.toString())
         put("opprettet", opprettet.toString())

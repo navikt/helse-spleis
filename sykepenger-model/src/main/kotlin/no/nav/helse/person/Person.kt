@@ -8,48 +8,8 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.feriepenger.Feriepengeberegner
 import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Arbeidsgiveropplysninger
-import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Dødsmelding
-import no.nav.helse.hendelser.EndretGrunnlagForBeregning
-import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
-import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
-import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.Hendelse
-import no.nav.helse.hendelser.IdentOpphørt
-import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
-import no.nav.helse.hendelser.KanIkkeBehandlesHer
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.Periode
-import no.nav.helse.hendelser.PersonPåminnelse
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.Revurderingseventyr
+import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
-import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.VedtakFattet
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.aktiveSkjæringstidspunkter
@@ -81,7 +41,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class Person private constructor(
     personidentifikator: Personidentifikator,
@@ -619,6 +579,18 @@ class Person private constructor(
         håndterGjenoppta(eventBus, vilkårsgrunnlag, aktivitetsloggMedPersonkontekst)
     }
 
+    fun håndterRettighetskategori(
+        eventBus: EventBus,
+        rettighetskategori: Rettighetskategori,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler rettighetskategori")
+        finnYrkesaktivitet(
+            rettighetskategori.behandlingsporing,
+        ).håndterRettighetskategori(eventBus, rettighetskategori, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, rettighetskategori, aktivitetsloggMedPersonkontekst)
+    }
+
     fun håndterSimulering(
         eventBus: EventBus,
         simulering: Simulering,
@@ -839,7 +811,17 @@ class Person private constructor(
 
     internal fun vilkårsgrunnlagFor(skjæringstidspunkt: LocalDate) = vilkårsgrunnlagHistorikk.vilkårsgrunnlagFor(skjæringstidspunkt)
 
-    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagElement) {
+    internal fun rettighetskategorigrunnlagFor(skjæringstidspunkt: LocalDate) =
+        vilkårsgrunnlagHistorikk.rettighetskategorigrunnlagFor(skjæringstidspunkt)
+
+    internal fun lagreRettighetskategorigrunnlag(
+        aktivitetslogg: IAktivitetslogg,
+        rettighetskategorigrunnlag: VilkårsgrunnlagHistorikk.Rettighetskategorigrunnlag,
+    ) {
+        vilkårsgrunnlagHistorikk.lagre(aktivitetslogg, rettighetskategorigrunnlag)
+    }
+
+    internal fun lagreVilkårsgrunnlag(vilkårsgrunnlag: VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag) {
         vilkårsgrunnlagHistorikk.lagre(vilkårsgrunnlag)
     }
 

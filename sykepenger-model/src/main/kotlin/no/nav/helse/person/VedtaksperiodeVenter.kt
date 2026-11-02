@@ -7,7 +7,7 @@ import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.person.EventSubscription.VedtaksperiodeVenterEvent
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 internal data class VedtaksperiodeVenterdata(
     val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
@@ -128,6 +128,7 @@ internal data class Venteårsak(
         val BEREGNING = Venteårsak("BEREGNING", null)
         val UTBETALING = Venteårsak("UTBETALING", null)
         val VILKÅRSPRØVING = Venteårsak("VILKÅRSPRØVING", null)
+        val RETTIGHETSKATEGORI = Venteårsak("RETTIGHETSKATEGORI", null)
         val INFOTRYGDHISTORIKK = Venteårsak("INFOTRYGDHISTORIKK", null)
         val HJELP = Venteårsak("HJELP", null)
 

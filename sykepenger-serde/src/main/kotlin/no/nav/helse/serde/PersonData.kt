@@ -125,14 +125,14 @@ data class PersonData(
     data class VilkårsgrunnlagElementData(
         val skjæringstidspunkt: LocalDate,
         val type: GrunnlagsdataType,
-        val inntektsgrunnlag: InntektsgrunnlagData,
+        val inntektsgrunnlag: InntektsgrunnlagData?,
         val opptjening: OpptjeningData?,
         val medlemskapstatus: JsonMedlemskapstatus?,
         val meldingsreferanseId: UUID?,
         val vilkårsgrunnlagId: UUID,
         val forsikringsvurderingId: UUID?,
-        val opptjeningsvurderingId: UUID,
-        val medlemskapsvurderingId: UUID,
+        val opptjeningsvurderingId: UUID?,
+        val medlemskapsvurderingId: UUID?,
         val rettighetskategoriId: UUID,
     ) {
         fun tilDto() =
@@ -141,9 +141,9 @@ data class PersonData(
                     VilkårsgrunnlagInnDto.Infotrygd(
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         skjæringstidspunkt = this.skjæringstidspunkt,
-                        inntektsgrunnlag = inntektsgrunnlag.tilInfotrygdDto(),
-                        opptjeningsvurderingId = opptjeningsvurderingId,
-                        medlemskapsvurderingId = medlemskapsvurderingId,
+                        inntektsgrunnlag = inntektsgrunnlag!!.tilInfotrygdDto(),
+                        opptjeningsvurderingId = opptjeningsvurderingId!!,
+                        medlemskapsvurderingId = medlemskapsvurderingId!!,
                         rettighetskategoriId = rettighetskategoriId,
                     )
 
@@ -151,13 +151,20 @@ data class PersonData(
                     VilkårsgrunnlagInnDto.Spleis(
                         vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                         skjæringstidspunkt = this.skjæringstidspunkt,
-                        inntektsgrunnlag = this.inntektsgrunnlag.tilSpleisDto(),
+                        inntektsgrunnlag = this.inntektsgrunnlag!!.tilSpleisDto(),
                         opptjening = this.opptjening?.tilDto(),
                         medlemskapstatus = this.medlemskapstatus!!.tilDto(),
                         meldingsreferanseId = this.meldingsreferanseId?.let { MeldingsreferanseDto(it) },
                         forsikringsvurderingId = this.forsikringsvurderingId,
-                        opptjeningsvurderingId = this.opptjeningsvurderingId,
-                        medlemskapsvurderingId = this.medlemskapsvurderingId,
+                        opptjeningsvurderingId = this.opptjeningsvurderingId!!,
+                        medlemskapsvurderingId = this.medlemskapsvurderingId!!,
+                        rettighetskategoriId = this.rettighetskategoriId,
+                    )
+
+                GrunnlagsdataType.Rettighetskategori ->
+                    VilkårsgrunnlagInnDto.Rettighetskategori(
+                        vilkårsgrunnlagId = this.vilkårsgrunnlagId,
+                        skjæringstidspunkt = this.skjæringstidspunkt,
                         rettighetskategoriId = this.rettighetskategoriId,
                     )
             }
@@ -165,6 +172,7 @@ data class PersonData(
         enum class GrunnlagsdataType {
             Infotrygd,
             Vilkårsprøving,
+            Rettighetskategori,
         }
 
         data class InntektsgrunnlagData(
@@ -717,6 +725,7 @@ data class PersonData(
                 AVVENTER_SØKNAD_FOR_OVERLAPPENDE_PERIODE,
                 AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER,
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
+                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_REVURDERING,
                 AVVENTER_REVURDERING_TIL_UTBETALING,
@@ -751,6 +760,7 @@ data class PersonData(
                             TilstandTypeData.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
                             TilstandTypeData.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
                             TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+                            TilstandTypeData.AVVENTER_RETTIGHETSKATEGORI -> VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI
                             TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
                             TilstandTypeData.AVVENTER_REVURDERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING
                             TilstandTypeData.AVVENTER_HISTORIKK_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING

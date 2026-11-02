@@ -1,9 +1,6 @@
 package no.nav.helse.person.tilstandsmaskin
 
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidsledig
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Arbeidstaker
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Frilans
-import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.Selvstendig
+import no.nav.helse.hendelser.Behandlingsporing.Yrkesaktivitet.*
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.Påminnelse
 import no.nav.helse.hendelser.Revurderingseventyr
@@ -72,14 +69,19 @@ internal data object AvventerBlokkerendePeriode : Vedtaksperiodetilstand {
                 val nesteTilstandEtterInntekt = tilstandHvisBlokkeresAvAndre(vedtaksperiode)
                 when {
                     nesteTilstandEtterInntekt != null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, nesteTilstandEtterInntekt)
-                    vedtaksperiode.vilkårsgrunnlag == null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+                    vedtaksperiode.vilkårsgrunnlag == null ->
+                        vedtaksperiode.tilstand(
+                            eventBus,
+                            aktivitetslogg,
+                            AvventerRettighetskategori.førVilkårsprøving,
+                        )
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
                 }
             }
 
             Selvstendig ->
                 when (vedtaksperiode.vilkårsgrunnlag) {
-                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerVilkårsprøving)
+                    null -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerRettighetskategori.førVilkårsprøving)
                     else -> vedtaksperiode.tilstand(eventBus, aktivitetslogg, AvventerHistorikk)
                 }
 

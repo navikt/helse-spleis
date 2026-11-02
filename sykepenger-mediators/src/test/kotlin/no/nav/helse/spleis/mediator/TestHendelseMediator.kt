@@ -1,96 +1,13 @@
 package no.nav.helse.spleis.mediator
 
 import no.nav.helse.Personidentifikator
-import no.nav.helse.hendelser.AnmodningOmForkasting
-import no.nav.helse.hendelser.AnnullerUtbetaling
-import no.nav.helse.hendelser.Arbeidsgiveropplysninger
-import no.nav.helse.hendelser.AvbruttSøknad
-import no.nav.helse.hendelser.Avsender
-import no.nav.helse.hendelser.Behandlingsporing
-import no.nav.helse.hendelser.Dødsmelding
-import no.nav.helse.hendelser.EndretGrunnlagForBeregning
-import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
-import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
-import no.nav.helse.hendelser.ForkastSykmeldingsperioder
-import no.nav.helse.hendelser.GjenopptaBehandling
-import no.nav.helse.hendelser.Grunnbeløpsregulering
-import no.nav.helse.hendelser.IdentOpphørt
-import no.nav.helse.hendelser.Infotrygdendring
-import no.nav.helse.hendelser.InntektsmeldingerReplay
-import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.MeldingsreferanseId
-import no.nav.helse.hendelser.Migrate
-import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
-import no.nav.helse.hendelser.OverstyrArbeidsforhold
-import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
-import no.nav.helse.hendelser.OverstyrTidslinje
-import no.nav.helse.hendelser.PersonPåminnelse
-import no.nav.helse.hendelser.Påminnelse
-import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
-import no.nav.helse.hendelser.Simulering
-import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
-import no.nav.helse.hendelser.Sykmelding
-import no.nav.helse.hendelser.Søknad
-import no.nav.helse.hendelser.UtbetalingHendelse
-import no.nav.helse.hendelser.Utbetalingsgodkjenning
-import no.nav.helse.hendelser.Utbetalingshistorikk
-import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
-import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
-import no.nav.helse.hendelser.Vilkårsgrunnlag
-import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.*
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.IHendelseMediator
 import no.nav.helse.spleis.Personopplysninger
-import no.nav.helse.spleis.meldinger.model.AnmodningOmForkastingMessage
-import no.nav.helse.spleis.meldinger.model.AnnulleringMessage
-import no.nav.helse.spleis.meldinger.model.AvbruttSøknadMessage
-import no.nav.helse.spleis.meldinger.model.AvstemmingMessage
-import no.nav.helse.spleis.meldinger.model.DødsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
-import no.nav.helse.spleis.meldinger.model.EndretVurderingPåSkjæringstidspunktMessage
-import no.nav.helse.spleis.meldinger.model.FeriepengeutbetalingMessage
-import no.nav.helse.spleis.meldinger.model.ForkastSykmeldingsperioderMessage
-import no.nav.helse.spleis.meldinger.model.GjenopptaBehandlingMessage
-import no.nav.helse.spleis.meldinger.model.GrunnbeløpsreguleringMessage
-import no.nav.helse.spleis.meldinger.model.HendelseMessage
-import no.nav.helse.spleis.meldinger.model.IdentOpphørtMessage
-import no.nav.helse.spleis.meldinger.model.InfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.InntektsmeldingerReplayMessage
-import no.nav.helse.spleis.meldinger.model.InntektsopplysningerFraLagretInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.MigrateMessage
-import no.nav.helse.spleis.meldinger.model.MinimumSykdomsgradVurdertMessage
-import no.nav.helse.spleis.meldinger.model.NavNoInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoKorrigertInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NavNoSelvbestemtInntektsmeldingMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyArbeidsledigTidligereArbeidstakerSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NyFrilansSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySelvstendigSøknadMessage
-import no.nav.helse.spleis.meldinger.model.NySøknadMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsforholdMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrArbeidsgiveropplysningerMessage
-import no.nav.helse.spleis.meldinger.model.OverstyrTidslinjeMessage
-import no.nav.helse.spleis.meldinger.model.PersonPåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.PåminnelseMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadAnnetMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsgiverMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadArbeidsledigTidligereArbeidstakerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFiskerMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadFrilansMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadNavMessage
-import no.nav.helse.spleis.meldinger.model.SendtSøknadSelvstendigMessage
-import no.nav.helse.spleis.meldinger.model.SimuleringMessage
-import no.nav.helse.spleis.meldinger.model.SkjønnsmessigFastsettelseMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingsgodkjenningMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkEtterInfotrygdendringMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkForFeriepengerMessage
-import no.nav.helse.spleis.meldinger.model.UtbetalingshistorikkMessage
-import no.nav.helse.spleis.meldinger.model.VilkårsgrunnlagMessage
-import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.spleis.meldinger.model.*
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 internal class TestHendelseMediator : IHendelseMediator {
     val lestNySøknad get() = lestNySøknadVerdi.get()
@@ -107,6 +24,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestYtelser get() = lestYtelserVerdi.get()
     val lestVilkårsgrunnlag get() = lestVilkårsgrunnlagVerdi.get()
     val lestSimulering get() = lestSimuleringVerdi.get()
+    val lestRettighetskategori get() = lestRettighetskategoriVerdi.get()
     val lestUtbetalingsgodkjenning get() = lestUtbetalingsgodkjenningVerdi.get()
     val lestUtbetaling get() = lestUtbetalingVerdi.get()
     val lestAnnullerUtbetaling get() = lestAnnullerUtbetalingVerdi.get()
@@ -132,6 +50,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestYtelserVerdi = ThreadLocal.withInitial { false }
     private val lestVilkårsgrunnlagVerdi = ThreadLocal.withInitial { false }
     private val lestSimuleringVerdi = ThreadLocal.withInitial { false }
+    private val lestRettighetskategoriVerdi = ThreadLocal.withInitial { false }
     private val lestUtbetalingsgodkjenningVerdi = ThreadLocal.withInitial { false }
     private val lestUtbetalingVerdi = ThreadLocal.withInitial { false }
     private val lestAnnullerUtbetalingVerdi = ThreadLocal.withInitial { false }
@@ -161,6 +80,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestYtelserVerdi.remove()
         lestVilkårsgrunnlagVerdi.remove()
         lestSimuleringVerdi.remove()
+        lestRettighetskategoriVerdi.remove()
         lestUtbetalingsgodkjenningVerdi.remove()
         lestUtbetalingVerdi.remove()
         lestAnnullerUtbetalingVerdi.remove()
@@ -430,6 +350,14 @@ internal class TestHendelseMediator : IHendelseMediator {
         context: BehandlingContext,
     ) {
         lestSimuleringVerdi.set(true)
+    }
+
+    override fun behandle(
+        message: RettighetskategoriMessage,
+        rettighetskategori: Rettighetskategori,
+        context: BehandlingContext,
+    ) {
+        lestRettighetskategoriVerdi.set(true)
     }
 
     override fun behandle(

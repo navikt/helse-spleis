@@ -3,7 +3,7 @@ package no.nav.helse.dto
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.util.UUID
+import java.util.*
 
 data class InntektskildeDto(
     val id: String,
@@ -183,6 +183,8 @@ sealed class VedtaksperiodetilstandDto {
     data object AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER : VedtaksperiodetilstandDto()
 
     data object AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE : VedtaksperiodetilstandDto()
+
+    data object AVVENTER_RETTIGHETSKATEGORI : VedtaksperiodetilstandDto()
 
     data object AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
 
