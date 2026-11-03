@@ -709,6 +709,7 @@ interface EventSubscription {
         val periodeForMedlemskapsvurdering: Periode,
         val beregningsperiodeForOpptjeningsvurdering: Beregningsperiode,
         val beregningsperiodeForSykepengegrunnlagsvurdering: Beregningsperiode,
+        val rettighetskategoriId: UUID?,
     ) : Event {
         data class Beregningsperiode(
             val start: YearMonth,

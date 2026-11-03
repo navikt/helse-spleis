@@ -3333,6 +3333,7 @@ internal class Vedtaksperiode private constructor(
                         start = beregningSlutt.minusMonths(2),
                         slutt = beregningSlutt,
                     ),
+                rettighetskategoriId = person.rettighetskategorigrunnlagFor(skjæringstidspunkt)?.rettighetskategoriId,
             )
 
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til vilkårsprøving")

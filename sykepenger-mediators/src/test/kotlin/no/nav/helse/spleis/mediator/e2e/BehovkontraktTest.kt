@@ -42,6 +42,24 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun `vilkårsgrunnlag - opptjeningsvurdering med rettighetskategoriId`() {
+        besvarRettighetskategoriAutomatisk = false
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+        )
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        val rettighetskategoriId = UUID.randomUUID()
+        sendRettighetskategori(0, rettighetskategoriId = rettighetskategoriId)
+
+        val behov = testRapid.inspektør.etterspurteBehov(Behov.Behovstype.Opptjeningsvurdering)
+        val detaljer = behov.path(Behov.Behovstype.Opptjeningsvurdering.utgåendeNavn)
+        assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asText())
+        assertEquals("Arbeidstaker", detaljer.path("arbeidssituasjon").asText())
+        assertEquals(rettighetskategoriId.toString(), detaljer.path("rettighetskategoriId").asText())
+    }
+
+    @Test
     fun `vilkårsgrunnlag med toggle for medlemskapsvurdering`() =
         Toggle.MedlemskapsvurderingBehov.enable {
             sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
