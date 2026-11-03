@@ -997,6 +997,7 @@ internal class EventBusOversetter(
                 "skjæringstidspunkt" to "${event.skjæringstidspunkt}",
                 "vilkårsgrunnlagId" to "${event.vilkårsgrunnlagId}",
                 "opptjeningsvurderingId" to "${event.opptjeningsvurderingId}",
+                "medlemskapsvurderingId" to "${event.medlemskapsvurderingId}",
                 event.forsikringsvurderingId?.let { "forsikringsvurderingId" to "$it" },
                 "periodetype" to event.periodetype,
                 "førstegangsbehandling" to event.førstegangsbehandling,

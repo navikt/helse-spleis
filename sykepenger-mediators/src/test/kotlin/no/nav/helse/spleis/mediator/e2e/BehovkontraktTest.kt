@@ -345,18 +345,20 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     @Test
     fun godkjenning() {
         val opptjeningsvurderingId = UUID.randomUUID()
+        val medlemskapsvurderingId = UUID.randomUUID()
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
         )
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-        sendVilkårsgrunnlag(0, opptjeningsvurderingId = opptjeningsvurderingId)
+        sendVilkårsgrunnlag(0, opptjeningsvurderingId = opptjeningsvurderingId, medlemskapsvurderingId = medlemskapsvurderingId)
         sendYtelser(0)
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
         assertGodkjenningdetaljer(behov, erSelvstendig = false, "ARBEIDSTAKER")
         assertEquals(opptjeningsvurderingId.toString(), behov.path(Godkjenning.utgåendeNavn).path("opptjeningsvurderingId").asText())
+        assertEquals(medlemskapsvurderingId.toString(), behov.path(Godkjenning.utgåendeNavn).path("medlemskapsvurderingId").asText())
     }
 
     @Test
@@ -527,6 +529,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertTrue(godkjenning.path("periodetype").asText().isNotEmpty())
         assertTrue(godkjenning.path("vilkårsgrunnlagId").asText().isNotEmpty())
         assertTrue(godkjenning.path("opptjeningsvurderingId").asText().isNotEmpty())
+        assertTrue(godkjenning.path("medlemskapsvurderingId").asText().isNotEmpty())
         assertTrue(godkjenning.path("førstegangsbehandling").isBoolean)
         assertTrue(godkjenning.path("utbetalingtype").asText().isNotEmpty())
         assertTrue(godkjenning.path("inntektskilde").asText().isNotEmpty())

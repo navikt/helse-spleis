@@ -92,6 +92,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
     actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning,
     forsikringsvurderingId: UUID? = null,
     opptjeningsvurderingId: UUID = inspektør.vilkårsgrunnlag(vedtaksperiodeId)!!.opptjeningsvurderingId,
+    medlemskapsvurderingId: UUID = inspektør.vilkårsgrunnlag(vedtaksperiodeId)!!.medlemskapsvurderingId,
 ) {
     val benyttetUtbetalingId = UUID.randomUUID()
     val benyttetVilkårsgrunnlagId = UUID.randomUUID()
@@ -101,6 +102,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
             utbetalingId = benyttetUtbetalingId,
             vilkårsgrunnlagId = benyttetVilkårsgrunnlagId,
             opptjeningsvurderingId = opptjeningsvurderingId,
+            medlemskapsvurderingId = medlemskapsvurderingId,
             forsikringsvurderingId = forsikringsvurderingId,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

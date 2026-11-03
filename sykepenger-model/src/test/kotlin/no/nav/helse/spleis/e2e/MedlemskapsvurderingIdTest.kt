@@ -4,6 +4,7 @@ import no.nav.helse.april
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
+import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.dto.serialisering.VilkårsgrunnlagUtDto
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -20,6 +21,18 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class MedlemskapsvurderingIdTest : AbstractDslTest() {
+    @Test
+    fun `godkjenningsbehovet inneholder medlemskapsvurderingId fra vilkårsgrunnlaget`() {
+        a1 {
+            val godkjenningsbehov =
+                enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) {
+                    tilGodkjenning(januar)
+                }
+            val medlemskapsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId
+            assertEquals(medlemskapsvurderingId, godkjenningsbehov.event.medlemskapsvurderingId)
+        }
+    }
+
     @Test
     fun `medlemskapsvurderingId fra sp-medlemskap blir lagt på`() {
         a1 {

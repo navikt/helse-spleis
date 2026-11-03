@@ -585,6 +585,7 @@ interface EventSubscription {
         val periode: Periode,
         val vilkårsgrunnlagId: UUID,
         val opptjeningsvurderingId: UUID,
+        val medlemskapsvurderingId: UUID,
         val forsikringsvurderingId: UUID?,
         val skjæringstidspunkt: LocalDate,
         val førstegangsbehandling: Boolean,
