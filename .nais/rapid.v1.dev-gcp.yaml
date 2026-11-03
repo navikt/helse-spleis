@@ -65,3 +65,6 @@ spec:
     - team: tbd
       application: sp-andre-ytelser-opprydding-dev
       access: readwrite
+    - team: tbd
+      application: sp-avslagsdager-opprydding-dev
+      access: readwrite

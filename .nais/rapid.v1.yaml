@@ -212,3 +212,6 @@ spec:
     - team: tbd
       application: sp-andre-ytelser
       access: readwrite
+    - team: tbd
+      application: sp-avslagsdager
+      access: readwrite
