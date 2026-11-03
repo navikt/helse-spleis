@@ -279,7 +279,13 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 OpptjeningsvurderingResultat,
                 RettighetskategoriResultat,
             )
-            assertTrue(behov.path("@behov").values().map(JsonNode::asText).contains(RettighetskategoriResultat.utgåendeNavn))
+            assertTrue(
+                behov
+                    .path("@behov")
+                    .values()
+                    .map(JsonNode::asText)
+                    .contains(RettighetskategoriResultat.utgåendeNavn),
+            )
             assertDoesNotThrow {
                 UUID.fromString(
                     behov.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText(),

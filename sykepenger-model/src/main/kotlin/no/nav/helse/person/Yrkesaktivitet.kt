@@ -538,13 +538,8 @@ internal class Yrkesaktivitet private constructor(
             arbeidsgiver.forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)
         }
 
-        val overlappendeYrkesaktivitet =
-            yrkesaktiviteter.any { yrkesaktivitet ->
-                !yrkesaktivitet.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype) &&
-                    erPeriodeKantIKantEllerOverlapper(yrkesaktivitet.vedtaksperioder, nyPeriode)
-            }
-
-        if (overlappendeYrkesaktivitet) {
+        // Med togglen på vurderes kombinasjonen først når skjæringstidspunktet er kjent, se Vedtaksperiode.håndterSøknadFørsteGang
+        if (Toggle.ValidereRettighetskategori.disabled && perioderMedAnnenYrkesaktivitetstype(nyPeriode, yrkesaktiviteter).isNotEmpty()) {
             aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_53)
         }
 
@@ -564,6 +559,23 @@ internal class Yrkesaktivitet private constructor(
             aktivitetslogg.varsel(Varselkode.RV_SØ_54)
         }
     }
+
+    internal fun perioderMedAnnenYrkesaktivitetstype(
+        nyPeriode: Periode,
+        yrkesaktiviteter: List<Yrkesaktivitet>,
+    ): List<Vedtaksperiode> =
+        yrkesaktiviteter
+            .filterNot { it.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype) }
+            .flatMap { it.vedtaksperioder }
+            .filter { erPeriodeKantIKantEllerOverlapper(listOf(it), nyPeriode) }
+
+    internal fun harForkastetPeriodeMedAnnenYrkesaktivitetstypeInntil(
+        periode: Periode,
+        yrkesaktiviteter: List<Yrkesaktivitet>,
+    ) = yrkesaktiviteter
+        .filterNot { it.yrkesaktivitetstype.erSammeYrkesaktivtetstype(this.yrkesaktivitetstype) }
+        .flatMap { it.forkastede.perioder() }
+        .any { it.overlapperMed(periode) || it.erRettFør(periode) || periode.erRettFør(it) }
 
     internal fun håndterSøknad(
         eventBus: EventBus,

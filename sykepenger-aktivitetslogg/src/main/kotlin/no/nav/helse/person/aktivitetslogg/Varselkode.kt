@@ -391,7 +391,9 @@ enum class Varselkode(
     RV_YS_1("Yrkesskade oppgitt i søknaden"),
 
     // RK: Rettighetskategori
+    RV_RK_1("Støtter ikke kombinasjonen arbeidstaker og selvstendig næringsdrivende"),
     RV_RK_2("Perioden har en annen yrkesaktivitetstype enn rettighetskategorien"),
+    RV_RK_3("Perioden overlapper med eller ligger inntil en forkastet periode med en annen yrkesaktivitetstype"),
     ;
 
     init {

@@ -205,11 +205,33 @@ internal class Vedtaksperiode private constructor(
         yrkesaktivitet.vurderOmSøknadIkkeKanHåndteres(aktivitetsloggMedVedtaksperiodekontekst, periode, yrkesaktiviteter)
 
         infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetsloggMedVedtaksperiodekontekst, periode)
+
+        // Hentes før søknaden legges til, fordi den nye perioden kan flytte skjæringstidspunktet til de andre periodene
+        val perioderMedFulltVilkårsgrunnlag =
+            if (Toggle.ValidereRettighetskategori.enabled) person.vedtaksperioder { it.vilkårsgrunnlag != null } else emptyList()
+
         håndterSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
+
+        if (Toggle.ValidereRettighetskategori.enabled && !aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) {
+            val harFulltVilkårsgrunnlag = vilkårsgrunnlag != null
+            val perioderMedAnnenYrkesaktivitetstype = yrkesaktivitet.perioderMedAnnenYrkesaktivitetstype(periode, yrkesaktiviteter)
+            val kanForkasteVedtakperioden =
+                perioderMedAnnenYrkesaktivitetstype.any { harFulltVilkårsgrunnlag || it in perioderMedFulltVilkårsgrunnlag } ||
+                    (perioderMedAnnenYrkesaktivitetstype.isNotEmpty() && førstePeriodeHarSpurtUtenDenneSøknaden())
+            if (kanForkasteVedtakperioden) aktivitetsloggMedVedtaksperiodekontekst.funksjonellFeil(Varselkode.RV_SØ_53)
+        }
         aktivitetsloggMedVedtaksperiodekontekst.info("Fullført behandling av søknad")
 
         if (aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) forkast(eventBus, søknad, aktivitetslogg)
         return Revurderingseventyr.nyPeriode(søknad, skjæringstidspunkt, behandlinger.egenmeldingsdager().plusElement(periode).periode()!!)
+    }
+
+    // Den første perioden i sykefraværstilfellet spør ikke på nytt når en søknad etter den kommer inn,
+    // så svaret den har fått eller venter på, tar ikke med denne søknaden
+    private fun førstePeriodeHarSpurtUtenDenneSøknaden(): Boolean {
+        val første = person.vedtaksperioder { it != this && it.skjæringstidspunkt == skjæringstidspunkt }.minOrNull() ?: return false
+        if (første.periode.endInclusive >= periode.start) return false
+        return første.tilstand == AvventerRettighetskategori || person.rettighetskategorigrunnlagFor(skjæringstidspunkt) != null
     }
 
     internal fun håndterKorrigertSøknad(
@@ -1638,6 +1660,11 @@ internal class Vedtaksperiode private constructor(
         ytelser.validerRettighetskategori(aktivitetslogg, yrkesaktivitet.yrkesaktivitetstype)
         // En periode med en annen yrkesaktivitetstype enn vilkårsgrunnlaget skal ikke beregnes, fordi det gir misvisende varsler som RV_VV_4
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, ytelser, aktivitetslogg)
+        if (Toggle.ValidereRettighetskategori.enabled &&
+            yrkesaktivitet.harForkastetPeriodeMedAnnenYrkesaktivitetstypeInntil(periode, person.yrkesaktiviteter)
+        ) {
+            aktivitetslogg.varsel(Varselkode.RV_RK_3)
+        }
         // steg 1: sett sammen alle inntekter som skal brukes i beregning
         // steg 2: lag utbetalingstidslinjer for alle vedtaksperiodene
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
@@ -2120,6 +2147,11 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         if (tilstand != AvventerRettighetskategori) {
             return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke rettighetskategori i %s".format(tilstand.type))
+        }
+        val ikkeStøttet = rettighetskategori.ikkeStøttet()
+        if (Toggle.ValidereRettighetskategori.enabled && !erRevurdering() && ikkeStøttet != null) {
+            aktivitetsloggMedVedtaksperiodekontekst.funksjonellFeil(ikkeStøttet)
+            return forkast(eventBus, rettighetskategori, aktivitetslogg)
         }
         person.lagreRettighetskategorigrunnlag(
             aktivitetsloggMedVedtaksperiodekontekst,

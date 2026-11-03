@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.hendelser.Avsender.SYSTEM
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -13,7 +14,7 @@ class Rettighetskategori(
     override val behandlingsporing: Behandlingsporing.Yrkesaktivitet,
     val rettighetskategoriId: UUID,
     // Hovedkategorien lagres ikke i Spleis (ADR 0001)
-    @Suppress("unused") private val hovedkategori: Hovedkategori,
+    private val hovedkategori: Hovedkategori,
 ) : Hendelse {
     override val metadata =
         LocalDateTime.now().let { nå ->
@@ -38,6 +39,15 @@ class Rettighetskategori(
         )
         return false
     }
+
+    internal fun ikkeStøttet(): Varselkode? =
+        when (hovedkategori) {
+            Hovedkategori.ARBEIDSTAKER,
+            Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE,
+            -> null
+
+            Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE -> Varselkode.RV_RK_1
+        }
 
     enum class Hovedkategori {
         ARBEIDSTAKER,

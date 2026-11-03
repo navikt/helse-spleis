@@ -62,13 +62,20 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
 
             val behov = rettighetskategoriResultatBehov()
             assertEquals(2, behov.size)
-            assertEquals(1, behov.map { it.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText() }.toSet().size)
+            assertEquals(
+                1,
+                behov.map { it.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText() }.toSet().size,
+            )
             assertTilstand(0, "AVVENTER_HISTORIKK")
         }
 
     private fun rettighetskategoriResultatBehov() =
         testRapid.inspektør.meldinger("behov").filter { behov ->
-            behov.path("@behov").values().map(JsonNode::asText).contains(RettighetskategoriResultat.utgåendeNavn)
+            behov
+                .path("@behov")
+                .values()
+                .map(JsonNode::asText)
+                .contains(RettighetskategoriResultat.utgåendeNavn)
         }
 
     @Test
