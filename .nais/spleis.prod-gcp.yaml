@@ -54,5 +54,7 @@ spec:
       value: tbd.teknisk.v1
     - name: KAFKA_RESET_POLICY
       value: NONE
+    - name: MEDLEMSKAPSVURDERINGRESULTATBEHOV
+      value: "true"
     - name: JAVA_TOOL_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1
