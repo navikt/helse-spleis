@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.januar
 import no.nav.helse.person.tilstandsmaskin.TilstandType
@@ -48,26 +47,25 @@ internal class PåminnelserTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `ubesvart RettighetskategoriResultat sendes på nytt ved påminnelse`() =
-        Toggle.ValidereRettighetskategori.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            )
-            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-            sendVilkårsgrunnlag(0)
-            assertEquals(1, rettighetskategoriResultatBehov().size)
+    fun `ubesvart RettighetskategoriResultat sendes på nytt ved påminnelse`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+        )
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        sendVilkårsgrunnlag(0)
+        assertEquals(1, rettighetskategoriResultatBehov().size)
 
-            sendNyPåminnelse(0, TilstandType.AVVENTER_HISTORIKK)
+        sendNyPåminnelse(0, TilstandType.AVVENTER_HISTORIKK)
 
-            val behov = rettighetskategoriResultatBehov()
-            assertEquals(2, behov.size)
-            assertEquals(
-                1,
-                behov.map { it.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText() }.toSet().size,
-            )
-            assertTilstand(0, "AVVENTER_HISTORIKK")
-        }
+        val behov = rettighetskategoriResultatBehov()
+        assertEquals(2, behov.size)
+        assertEquals(
+            1,
+            behov.map { it.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText() }.toSet().size,
+        )
+        assertTilstand(0, "AVVENTER_HISTORIKK")
+    }
 
     private fun rettighetskategoriResultatBehov() =
         testRapid.inspektør.meldinger("behov").filter { behov ->

@@ -755,16 +755,12 @@ internal class EventBusOversetter(
                 } else {
                     null
                 },
-                if (Toggle.ValidereRettighetskategori.enabled) {
-                    Behov(
-                        Behov.Behovstype.RettighetskategoriResultat,
-                        mapOf(
-                            "rettighetskategoriId" to event.rettighetskategoriId,
-                        ),
-                    )
-                } else {
-                    null
-                },
+                Behov(
+                    Behov.Behovstype.RettighetskategoriResultat,
+                    mapOf(
+                        "rettighetskategoriId" to event.rettighetskategoriId,
+                    ),
+                ),
                 event.forsikringsvurderingId?.let { forsikringsvurderingId ->
                     Behov(
                         Behov.Behovstype.ForsikringsvurderingResultat,

@@ -169,6 +169,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun ytelser() {
+        besvarRettighetskategoriAutomatisk = false
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
             perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
@@ -177,6 +178,8 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertVedtaksperiodeBehov(utbetalinghistorikkbehov, Sykepengehistorikk)
         assertSykepengehistorikkdetaljer(utbetalinghistorikkbehov)
         sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        val rettighetskategoriId = UUID.randomUUID()
+        sendRettighetskategori(0, rettighetskategoriId = rettighetskategoriId)
         sendVilkårsgrunnlag(0)
         val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
         assertVedtaksperiodeBehov(
@@ -190,6 +193,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             Pleiepenger,
             InntekterForBeregning,
             OpptjeningsvurderingResultat,
+            RettighetskategoriResultat,
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
@@ -199,6 +203,12 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertOpplæringspengerdetaljer(behov)
         assertPleiepengerdetaljer(behov)
         assertInntekterForBeregning(behov)
+        assertEquals(
+            rettighetskategoriId.toString(),
+            behov.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asText(),
+        )
+        sendYtelser(0)
+        assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Simulering))
     }
 
     @Test
@@ -223,6 +233,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 InntekterForBeregning,
                 GraderteAndreYtelserForBeregning,
                 OpptjeningsvurderingResultat,
+                RettighetskategoriResultat,
             )
             assertEquals(3.januar, LocalDate.parse(behov.path(GraderteAndreYtelserForBeregning.utgåendeNavn).path("fom").asString()))
             assertEquals(26.januar, LocalDate.parse(behov.path(GraderteAndreYtelserForBeregning.utgåendeNavn).path("tom").asString()))
@@ -250,51 +261,13 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 InntekterForBeregning,
                 OpptjeningsvurderingResultat,
                 MedlemskapsvurderingResultat,
+                RettighetskategoriResultat,
             )
             assertDoesNotThrow {
                 UUID.fromString(
                     behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asString(),
                 )
             }
-        }
-
-    @Test
-    fun `ytelser med toggle for validering av rettighetskategori`() =
-        Toggle.ValidereRettighetskategori.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            )
-            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-            sendVilkårsgrunnlag(0)
-            val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
-            assertVedtaksperiodeBehov(
-                behov,
-                Arbeidsavklaringspenger,
-                Dagpenger,
-                Foreldrepenger,
-                Institusjonsopphold,
-                Omsorgspenger,
-                Opplæringspenger,
-                Pleiepenger,
-                InntekterForBeregning,
-                OpptjeningsvurderingResultat,
-                RettighetskategoriResultat,
-            )
-            assertTrue(
-                behov
-                    .path("@behov")
-                    .values()
-                    .map(JsonNode::asString)
-                    .contains(RettighetskategoriResultat.utgåendeNavn),
-            )
-            assertDoesNotThrow {
-                UUID.fromString(
-                    behov.path(RettighetskategoriResultat.utgåendeNavn).path("rettighetskategoriId").asString(),
-                )
-            }
-            sendYtelser(0)
-            assertTrue(testRapid.inspektør.harEtterspurteBehov(0, Simulering))
         }
 
     @Test

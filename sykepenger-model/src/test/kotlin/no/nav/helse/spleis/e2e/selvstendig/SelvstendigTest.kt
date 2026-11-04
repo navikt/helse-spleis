@@ -217,7 +217,8 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `Kaster ut overlappenden vedtaksperiode på tvers av yrkesaktivitetstype`() {
+    fun `Kaster ut overlappende vedtaksperioder på tvers av yrkesaktivitetstype når rettighetskategorien er avklart`() {
+        testperson.behovshåndterer.besvarRettighetskategoriAutomatisk = false
         a1 {
             håndterSøknad(1.januar til 14.januar)
             håndterSøknad(15.januar til 31.januar)
@@ -225,11 +226,19 @@ internal class SelvstendigTest : AbstractDslTest() {
 
         selvstendig {
             håndterFørstegangssøknadSelvstendig(14.januar til 31.januar)
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_RETTIGHETSKATEGORI)
+            assertIngenFunksjonellFeil(Varselkode.RV_SØ_53, 1.vedtaksperiode.filter())
+            håndterRettighetskategori(
+                1.vedtaksperiode,
+                hovedkategori = Rettighetskategori.Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE,
+            )
+            assertFunksjonellFeil(Varselkode.RV_RK_1, 1.vedtaksperiode.filter())
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
         }
 
         a1 {
-            assertSisteTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertSisteForkastetTilstand(2.vedtaksperiode, TIL_INFOTRYGD)
         }
     }
 

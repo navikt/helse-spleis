@@ -538,11 +538,6 @@ internal class Yrkesaktivitet private constructor(
             arbeidsgiver.forkastede.blokkererBehandlingAv(nyPeriode, organisasjonsnummer, aktivitetslogg)
         }
 
-        // Med togglen på vurderes kombinasjonen først når skjæringstidspunktet er kjent, se Vedtaksperiode.håndterSøknadFørsteGang
-        if (Toggle.ValidereRettighetskategori.disabled && perioderMedAnnenYrkesaktivitetstype(nyPeriode, yrkesaktiviteter).isNotEmpty()) {
-            aktivitetslogg.funksjonellFeil(Varselkode.RV_SØ_53)
-        }
-
         val opptjeningsdager = 90
 
         val harPotensiellSelvstendigGhost =

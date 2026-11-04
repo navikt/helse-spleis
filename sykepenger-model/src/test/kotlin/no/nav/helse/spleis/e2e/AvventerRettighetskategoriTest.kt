@@ -11,6 +11,7 @@ import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_IV_7
+import no.nav.helse.person.aktivitetslogg.Varselkode.RV_RK_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_53
 import no.nav.helse.person.tilstandsmaskin.TilstandType.*
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
@@ -307,11 +308,19 @@ internal class AvventerRettighetskategoriTest : AbstractDslTest() {
         }
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar)
-            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
-            assertFunksjonellFeil(RV_SØ_53, 1.vedtaksperiode.filter())
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_BLOKKERENDE_PERIODE)
+            assertIngenFunksjonellFeil(RV_SØ_53, 1.vedtaksperiode.filter())
             assertTrue(rettighetskategoribehov(1.vedtaksperiode).isEmpty())
         }
         a1 {
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_RETTIGHETSKATEGORI)
+            assertEquals(2, rettighetskategoribehov(1.vedtaksperiode).single().søknader.size)
+            håndterRettighetskategori(1.vedtaksperiode, hovedkategori = Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE)
+            assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
+            assertFunksjonellFeil(RV_RK_1, 1.vedtaksperiode.filter())
+        }
+        selvstendig {
             assertSisteForkastetTilstand(1.vedtaksperiode, TIL_INFOTRYGD)
             assertTrue(rettighetskategoribehov(1.vedtaksperiode).isEmpty())
         }

@@ -203,12 +203,11 @@ internal class Vedtaksperiode private constructor(
         infotrygdhistorikk.validerMedFunksjonellFeil(aktivitetsloggMedVedtaksperiodekontekst, periode)
 
         // Hentes før søknaden legges til, fordi den nye perioden kan flytte skjæringstidspunktet til de andre periodene
-        val perioderMedFulltVilkårsgrunnlag =
-            if (Toggle.ValidereRettighetskategori.enabled) person.vedtaksperioder { it.vilkårsgrunnlag != null } else emptyList()
+        val perioderMedFulltVilkårsgrunnlag = person.vedtaksperioder { it.vilkårsgrunnlag != null }
 
         håndterSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
 
-        if (Toggle.ValidereRettighetskategori.enabled && !aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) {
+        if (!aktivitetsloggMedVedtaksperiodekontekst.harFunksjonelleFeil()) {
             val harFulltVilkårsgrunnlag = vilkårsgrunnlag != null
             val perioderMedAnnenYrkesaktivitetstype = yrkesaktivitet.perioderMedAnnenYrkesaktivitetstype(periode, yrkesaktiviteter)
             val kanForkasteVedtakperioden =
@@ -1656,9 +1655,7 @@ internal class Vedtaksperiode private constructor(
         ytelser.validerRettighetskategori(aktivitetslogg, yrkesaktivitet.yrkesaktivitetstype)
         // En periode med en annen yrkesaktivitetstype enn vilkårsgrunnlaget skal ikke beregnes, fordi det gir misvisende varsler som RV_VV_4
         if (aktivitetslogg.harFunksjonelleFeil()) return forkast(eventBus, ytelser, aktivitetslogg)
-        if (Toggle.ValidereRettighetskategori.enabled &&
-            yrkesaktivitet.harForkastetPeriodeMedAnnenYrkesaktivitetstypeInntil(periode, person.yrkesaktiviteter)
-        ) {
+        if (yrkesaktivitet.harForkastetPeriodeMedAnnenYrkesaktivitetstypeInntil(periode, person.yrkesaktiviteter)) {
             aktivitetslogg.varsel(Varselkode.RV_RK_3)
         }
         // steg 1: sett sammen alle inntekter som skal brukes i beregning
@@ -2149,7 +2146,7 @@ internal class Vedtaksperiode private constructor(
             return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke rettighetskategori i %s".format(tilstand.type))
         }
         val ikkeStøttet = rettighetskategori.ikkeStøttet()
-        if (Toggle.ValidereRettighetskategori.enabled && !erRevurdering() && ikkeStøttet != null) {
+        if (!erRevurdering() && ikkeStøttet != null) {
             aktivitetsloggMedVedtaksperiodekontekst.funksjonellFeil(ikkeStøttet)
             return forkast(eventBus, rettighetskategori, aktivitetslogg)
         }
