@@ -16,7 +16,7 @@ data class Økonomi(
     val inntektjustering: Inntekt,
     val dekningsgrad: Prosentdel,
     val totalSykdomsgrad: Prosentdel = sykdomsgrad,
-    val andreYtelserGrad: Prosentdel = NullProsent,
+    val trekkFraSykdomsgrad: Prosentdel = NullProsent,
     val arbeidsgiverbeløp: Inntekt? = null,
     val personbeløp: Inntekt? = null,
     private val reservertArbeidsgiverbeløp: Inntekt? = null,
@@ -29,15 +29,15 @@ data class Økonomi(
             dekningsgrad: Prosentdel,
             refusjonsbeløp: Inntekt,
             inntektjustering: Inntekt,
-            andreYtelserGrad: Prosentdel,
+            trekkFraSykdomsgrad: Prosentdel,
         ) = Økonomi(
             sykdomsgrad = sykdomsgrad,
-            utbetalingsgrad = sykdomsgrad - andreYtelserGrad,
+            utbetalingsgrad = sykdomsgrad - trekkFraSykdomsgrad,
             refusjonsbeløp = refusjonsbeløp,
             aktuellDagsinntekt = aktuellDagsinntekt,
             inntektjustering = inntektjustering,
             dekningsgrad = dekningsgrad,
-            andreYtelserGrad = andreYtelserGrad,
+            trekkFraSykdomsgrad = trekkFraSykdomsgrad,
         )
 
         fun ikkeBetalt(
@@ -49,7 +49,7 @@ data class Økonomi(
             refusjonsbeløp = INGEN,
             dekningsgrad = DekningsgradArbeidstaker,
             inntektjustering = inntektjustering,
-            andreYtelserGrad = NullProsent,
+            trekkFraSykdomsgrad = NullProsent,
         ).ikkeBetalt()
 
         private fun List<Økonomi>.aktuellDagsinntekt() = map { it.aktuellDagsinntekt }.summer()
@@ -75,7 +75,7 @@ data class Økonomi(
         }
 
         fun totalSykdomsgrad(økonomiList: List<Økonomi>): List<Økonomi> {
-            val totalSykdomsgrad = totalGrad(økonomiList, { it.sykdomsgrad - it.andreYtelserGrad })
+            val totalSykdomsgrad = totalGrad(økonomiList, { it.sykdomsgrad - it.trekkFraSykdomsgrad })
             return økonomiList.map { økonomi ->
                 økonomi.copy(totalSykdomsgrad = totalSykdomsgrad)
             }
@@ -195,6 +195,7 @@ data class Økonomi(
                 sykdomsgrad = Prosentdel.gjenopprett(dto.grad),
                 totalSykdomsgrad = Prosentdel.gjenopprett(dto.totalGrad),
                 utbetalingsgrad = Prosentdel.gjenopprett(dto.utbetalingsgrad),
+                trekkFraSykdomsgrad = Prosentdel.gjenopprett(dto.trekkFraSykdomsgrad),
                 refusjonsbeløp = Inntekt.gjenopprett(dto.arbeidsgiverRefusjonsbeløp),
                 aktuellDagsinntekt = Inntekt.gjenopprett(dto.aktuellDagsinntekt),
                 inntektjustering = Inntekt.gjenopprett(dto.inntektjustering),
@@ -250,6 +251,7 @@ data class Økonomi(
             grad = sykdomsgrad.dto(),
             totalGrad = totalSykdomsgrad.dto(),
             utbetalingsgrad = utbetalingsgrad.dto(),
+            trekkFraSykdomsgrad = trekkFraSykdomsgrad.dto(),
             arbeidsgiverRefusjonsbeløp = refusjonsbeløp.dto(),
             aktuellDagsinntekt = aktuellDagsinntekt.dto(),
             inntektjustering = inntektjustering.dto(),

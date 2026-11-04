@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.CsvSource
 internal class ØkonomiTest {
     @Test
     fun `50 prosent sykepenger og 50 prosent andre ytelser`() {
-        val økonomiEnArbeidsgiver = listOf(50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 50.prosent))
+        val økonomiEnArbeidsgiver = listOf(50.prosent.inntekt(2000.daglig, trekkFraSykdomsgrad = 50.prosent))
         assertEquals(0.prosent, Økonomi.totalUtbetalingsgrad(økonomiEnArbeidsgiver))
     }
 
@@ -43,8 +43,8 @@ internal class ØkonomiTest {
     ) {
         val økonomiToArbeidsgivere =
             listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverEnGrad.prosent),
-                50.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = arbeidsgiverToGrad.prosent),
+                100.prosent.inntekt(2000.daglig, trekkFraSykdomsgrad = arbeidsgiverEnGrad.prosent),
+                50.prosent.inntekt(2000.daglig, trekkFraSykdomsgrad = arbeidsgiverToGrad.prosent),
             )
         assertEquals(totalUtbetalingsgrad.prosent, Økonomi.totalUtbetalingsgrad(økonomiToArbeidsgivere))
     }
@@ -59,7 +59,7 @@ internal class ØkonomiTest {
         assertEquals(87.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiUtenGraderteAndreYtelser))
         val økonomiMedGraderteAndreYtelser =
             listOf(
-                100.prosent.inntekt(2000.daglig, graderteAndreYtelserGrad = 50.prosent),
+                100.prosent.inntekt(2000.daglig, trekkFraSykdomsgrad = 50.prosent),
                 Økonomi.ikkeBetalt(0.daglig, inntektjustering = 250.daglig),
             )
         assertEquals(37.5.prosent, Økonomi.totalUtbetalingsgrad(økonomiMedGraderteAndreYtelser))
@@ -491,14 +491,14 @@ internal class ØkonomiTest {
         aktuellDagsinntekt: Inntekt,
         refusjonsbeløp: Inntekt = aktuellDagsinntekt,
         inntektjustering: Inntekt = INGEN,
-        graderteAndreYtelserGrad: Prosentdel = Prosentdel.NullProsent,
+        trekkFraSykdomsgrad: Prosentdel = Prosentdel.NullProsent,
     ) = Økonomi.inntekt(
         this,
         aktuellDagsinntekt,
         100.prosent,
         refusjonsbeløp,
         inntektjustering,
-        graderteAndreYtelserGrad,
+        trekkFraSykdomsgrad,
     )
 }
 

@@ -25,7 +25,7 @@ fun tidslinjeOf(
     .apply {
         utbetalingsdager.fold(
             startDato,
-        ) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, graderteAndreYtelserGrad, grad, arbeidsgiverbeløp) ->
+        ) { startDato, (antallDagerFun, utbetalingsdag, helgedag, dekningsgrunnlag, trekkFraSykdomsgrad, grad, arbeidsgiverbeløp) ->
             var dato = startDato
             val antallDager = antallDagerFun(startDato)
             repeat(antallDager) {
@@ -36,7 +36,7 @@ fun tidslinjeOf(
                         100.prosent,
                         inntektjustering = INGEN,
                         refusjonsbeløp = arbeidsgiverbeløp,
-                        andreYtelserGrad = graderteAndreYtelserGrad.prosent,
+                        trekkFraSykdomsgrad = trekkFraSykdomsgrad.prosent,
                     )
                 if (helgedag != null && dato.erHelg()) {
                     this.helgedag(dato, økonomi)
@@ -77,22 +77,22 @@ val Int.NAV get() = this.NAV(1200)
 fun Int.NAV(
     dekningsgrunnlag: Number,
     grad: Number = 100.0,
-    graderteAndreYtelserGrad: Number = 0.0,
+    trekkFraSykdomsgrad: Number = 0.0,
     refusjonsbeløp: Number = dekningsgrunnlag,
-) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig, graderteAndreYtelserGrad)
+) = NAV({ this }, dekningsgrunnlag.daglig, grad, refusjonsbeløp.daglig, trekkFraSykdomsgrad)
 
 private fun NAV(
     antallDager: (LocalDate) -> Int,
     dekningsgrunnlag: Inntekt,
     grad: Number = 100.0,
     refusjonsbeløp: Inntekt = dekningsgrunnlag,
-    graderteAndreYtelserGrad: Number = 0.0,
+    trekkFraSykdomsgrad: Number = 0.0,
 ) = Utbetalingsdager(
     antallDager = antallDager,
     addDagFun = Utbetalingstidslinje.Builder::addNAVdag,
     addHelgFun = Utbetalingstidslinje.Builder::addHelg,
     dekningsgrunnlag = dekningsgrunnlag,
-    graderteAndreYtelserGrad = graderteAndreYtelserGrad,
+    trekkFraSykdomsgrad = trekkFraSykdomsgrad,
     grad = grad,
     arbeidsgiverbeløp = refusjonsbeløp,
 )
@@ -186,7 +186,7 @@ data class Utbetalingsdager(
     val addDagFun: Utbetalingstidslinje.Builder.(LocalDate, Økonomi) -> Unit,
     val addHelgFun: (Utbetalingstidslinje.Builder.(LocalDate, Økonomi) -> Unit)? = null,
     val dekningsgrunnlag: Inntekt = 1200.daglig,
-    val graderteAndreYtelserGrad: Number = 0.0,
+    val trekkFraSykdomsgrad: Number = 0.0,
     val grad: Number = 0.0,
     val arbeidsgiverbeløp: Inntekt = dekningsgrunnlag,
 )

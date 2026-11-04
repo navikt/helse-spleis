@@ -7,6 +7,7 @@ data class ØkonomiInnDto(
     val grad: ProsentdelDto,
     val totalGrad: ProsentdelDto,
     val utbetalingsgrad: ProsentdelDto,
+    val trekkFraSykdomsgrad: ProsentdelDto,
     val arbeidsgiverRefusjonsbeløp: InntektbeløpDto.DagligDouble,
     val aktuellDagsinntekt: InntektbeløpDto.DagligDouble,
     val inntektjustering: InntektbeløpDto.DagligDouble,

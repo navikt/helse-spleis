@@ -49,15 +49,15 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel = Prosentdel.NullProsent,
-    ): Økonomi = medInntekt(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad)
+        trekkFraSykdomsgrad: Prosentdel = Prosentdel.NullProsent,
+    ): Økonomi = medInntekt(dato, grad, fastsattÅrsinntekt, inntektjusteringer, trekkFraSykdomsgrad)
 
     private fun medInntekt(
         dato: LocalDate,
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ): Økonomi =
         Økonomi.inntekt(
             sykdomsgrad = grad,
@@ -65,7 +65,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             dekningsgrad = 100.prosent,
             refusjonsbeløp = (refusjonstidslinje[dato] as? Beløpsdag)?.beløp ?: INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
-            andreYtelserGrad = graderteAndreYtelserGrad,
+            trekkFraSykdomsgrad = trekkFraSykdomsgrad,
         )
 
     private fun Utbetalingstidslinje.Builder.avslagsdagEller(
@@ -264,12 +264,12 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ) {
         if (erAGPNavAnsvar(dato) && !dato.erHelg()) {
             return builder.addArbeidsgiverperiodedagNav(
                 dato,
-                medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad),
+                medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, trekkFraSykdomsgrad),
             )
         }
         builder.addArbeidsgiverperiodedag(dato, medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer).ikkeBetalt())
@@ -312,11 +312,11 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         fastsattÅrsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ) {
         builder.addNAVdag(
             dato,
-            medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, graderteAndreYtelserGrad),
+            medInntektHvisFinnes(dato, grad, fastsattÅrsinntekt, inntektjusteringer, trekkFraSykdomsgrad),
         )
     }
 

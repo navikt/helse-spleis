@@ -1222,6 +1222,45 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         assertEquals(listOf(null), gamleData.tilPersonDto().graderteAndreYtelserIder().distinct())
     }
 
+    @Test
+    fun `trekket fra sykdomsgraden lagres per utbetalingsdag, og dager uten trekk leses som 0`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 31.januar) to 30)),
+            )
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+        val serialisertPerson = dto().tilPersonData().tilSerialisertPerson()
+        val personDto = serialisertPerson.tilPersonDto()
+        val utbetalingstidslinje = personDto.utbetalingstidslinjeFørsteVedtaksperiode()
+        val dagerMedTrekk = utbetalingstidslinje.dager.filter { it.dato >= 20.januar && it.dato <= 31.januar }
+        val dagerUtenTrekk = utbetalingstidslinje.dager.filter { it.dato < 20.januar }
+        assertEquals(
+            List(8) { 0.3 },
+            dagerMedTrekk
+                .filter {
+                    it.økonomi.trekkFraSykdomsgrad.prosentDesimal > 0.0
+                }.map { it.økonomi.trekkFraSykdomsgrad.prosentDesimal },
+        )
+        assertEquals(
+            listOf(20.januar, 21.januar, 27.januar, 28.januar),
+            dagerMedTrekk.filter { it.økonomi.trekkFraSykdomsgrad.prosentDesimal == 0.0 }.map { it.dato },
+        )
+        assertEquals(List(19) { 0.0 }, dagerUtenTrekk.map { it.økonomi.trekkFraSykdomsgrad.prosentDesimal })
+
+        medJSONPersonTekst(serialisertPerson.json, serialisertPerson.skjemaVersjon)
+        val gjenopprettetPerson = dto().tilPersonData().tilSerialisertPerson().tilPersonDto()
+        assertEquals(utbetalingstidslinje, gjenopprettetPerson.utbetalingstidslinjeFørsteVedtaksperiode())
+
+        val utenFeltet = jsonMapper.readTree(serialisertPerson.json).fjernFelt("trekkFraSykdomsgrad")
+        val gamleData = SerialisertPerson(jsonMapper.writeValueAsString(utenFeltet), serialisertPerson.skjemaVersjon)
+        val gamleDager = gamleData.tilPersonDto().utbetalingstidslinjeFørsteVedtaksperiode().dager
+        assertEquals(List(gamleDager.size) { 0.0 }, gamleDager.map { it.økonomi.trekkFraSykdomsgrad.prosentDesimal })
+    }
+
     private val jsonMapper = spleisJsonMapperBuilder().build()
 
     private fun PersonInnDto.graderteAndreYtelserIder() =
@@ -1230,6 +1269,17 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             .flatMap { it.behandlinger.behandlinger }
             .flatMap { it.endringer }
             .map { it.graderteAndreYtelserId }
+
+    private fun PersonInnDto.utbetalingstidslinjeFørsteVedtaksperiode() =
+        arbeidsgivere
+            .single()
+            .vedtaksperioder
+            .single()
+            .behandlinger
+            .behandlinger
+            .flatMap { it.endringer }
+            .last()
+            .utbetalingstidslinje
 
     private fun JsonNode.fjernFelt(navn: String): JsonNode {
         when (this) {

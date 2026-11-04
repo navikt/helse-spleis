@@ -602,6 +602,7 @@ private fun UtbetalingsdagUtDto.tilPersonData() =
         grad = this.økonomi.grad.prosentDesimal,
         totalGrad = this.økonomi.totalGrad.prosentDesimal,
         utbetalingsgrad = this.økonomi.utbetalingsgrad.prosentDesimal,
+        trekkFraSykdomsgrad = this.økonomi.trekkFraSykdomsgrad.prosentDesimal,
         arbeidsgiverRefusjonsbeløp = økonomi.arbeidsgiverRefusjonsbeløp.dagligDouble.beløp,
         arbeidsgiverbeløp =
             this.økonomi.arbeidsgiverbeløp

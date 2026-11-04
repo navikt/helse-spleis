@@ -26,15 +26,15 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel = Prosentdel.NullProsent,
-    ): Økonomi = medInntekt(dato, grad, næringsinntekt, inntektjusteringer, graderteAndreYtelserGrad)
+        trekkFraSykdomsgrad: Prosentdel = Prosentdel.NullProsent,
+    ): Økonomi = medInntekt(dato, grad, næringsinntekt, inntektjusteringer, trekkFraSykdomsgrad)
 
     private fun medInntekt(
         dato: LocalDate,
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ): Økonomi =
         Økonomi.inntekt(
             sykdomsgrad = grad,
@@ -49,7 +49,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                 ).riktigProsent,
             refusjonsbeløp = INGEN,
             inntektjustering = (inntektjusteringer[dato] as? Beløpsdag)?.beløp ?: INGEN,
-            andreYtelserGrad = graderteAndreYtelserGrad,
+            trekkFraSykdomsgrad = trekkFraSykdomsgrad,
         )
 
     private fun ForsikringsvurderingResultat.erOpphørtPå(dato: LocalDate): Boolean = opphørsdato != null && dato > opphørsdato
@@ -214,9 +214,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         grad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ) {
-        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer, graderteAndreYtelserGrad))
+        builder.addNAVdag(dato, medInntektHvisFinnes(dato, grad, næringsinntekt, inntektjusteringer, trekkFraSykdomsgrad))
     }
 
     private fun arbeidsdag(
@@ -244,9 +244,9 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
         sykdomsgrad: Prosentdel,
         næringsinntekt: Inntekt,
         inntektjusteringer: Beløpstidslinje,
-        graderteAndreYtelserGrad: Prosentdel,
+        trekkFraSykdomsgrad: Prosentdel,
     ) {
-        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer, graderteAndreYtelserGrad))
+        builder.addVentetidsdag(dato, medInntektHvisFinnes(dato, sykdomsgrad, næringsinntekt, inntektjusteringer, trekkFraSykdomsgrad))
     }
 
     private fun foreldetdag(
