@@ -10,7 +10,6 @@ data class BehandlingendringInnDto(
     val tidsstempel: LocalDateTime,
     val sykmeldingsperiode: PeriodeDto,
     val periode: PeriodeDto,
-    val arbeidssituasjon: ArbeidssituasjonDto,
     val vilkårsgrunnlagId: UUID?,
     val utbetalingId: UUID?,
     val dokumentsporing: DokumentsporingDto,

@@ -1,7 +1,6 @@
 package no.nav.helse.spleis.speil
 
 import no.nav.helse.Grunnbeløp.Companion.halvG
-import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.august
 import no.nav.helse.desember
@@ -234,24 +233,6 @@ internal class SpeilBehandlingerBuilderTest : AbstractSpeilBuilderTest() {
             }
         }
     }
-
-    @Test
-    fun `utbetalt jordbruker periode`() =
-        Toggle.Jordbruker.enable {
-            håndterSøknadSelvstendig(1.januar til 31.januar, 1.januar til 16.januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-            håndterVilkårsgrunnlag()
-            håndterYtelser()
-            håndterSimulering()
-            håndterUtbetalingsgodkjenning()
-            håndterUtbetalt()
-
-            generasjoner(organisasjonsnummer = selvstendig) {
-                assertEquals(1, size)
-                0.generasjon {
-                    beregnetPeriode(0) medTilstand Utbetalt
-                }
-            }
-        }
 
     @Test
     fun `utbetalt selvstendig periode avventer vilkårsprøving`() {

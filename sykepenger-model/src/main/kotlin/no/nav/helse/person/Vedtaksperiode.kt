@@ -18,8 +18,6 @@ import no.nav.helse.hendelser.Påminnelse.Predikat.Flagg
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.annullering
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.Ytelser.Companion.familieYtelserPeriode
-import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
-import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon.JORDBRUKER
 import no.nav.helse.person.Behandlinger.Behandlingkilde
 import no.nav.helse.person.Behandlinger.Companion.berik
 import no.nav.helse.person.Dokumentsporing.Companion.inntektsmeldingDager
@@ -84,7 +82,6 @@ internal class Vedtaksperiode private constructor(
         sykdomstidslinje: Sykdomstidslinje,
         dokumentsporing: Dokumentsporing,
         sykmeldingsperiode: Periode,
-        arbeidssituasjon: Arbeidssituasjon,
         faktaavklartInntekt: SelvstendigFaktaavklartInntekt?,
         regelverkslogg: Regelverkslogg,
     ) : this(
@@ -102,7 +99,6 @@ internal class Vedtaksperiode private constructor(
             behandlingEventBus = BehandlingEventBus(eventBus, yrkesaktivitet.yrkesaktivitetstype, id, emptySet()),
             sykmeldingsperiode = sykmeldingsperiode,
             sykdomstidslinje = sykdomstidslinje,
-            arbeidssituasjon = arbeidssituasjon,
             egenmeldingsdager = egenmeldingsperioder,
             faktaavklartInntekt = faktaavklartInntekt,
             dokumentsporing = dokumentsporing,
@@ -1815,6 +1811,7 @@ internal class Vedtaksperiode private constructor(
                 utbetalinger = yrkesaktivitet.utbetalinger,
                 mottakerRefusjon = yrkesaktivitet.organisasjonsnummer,
                 mottakerBruker = person.fødselsnummer,
+                yrkesaktivitet = yrkesaktivitet.yrkesaktivitetstype,
             )
         leggTilNyUtbetaling(eventBus, aktivitetslogg, utbetaling)
         eventBus.nyVedtaksperiodeUtbetaling(yrkesaktivitet.yrkesaktivitetstype, utbetaling.id, this.id)
@@ -3352,11 +3349,7 @@ internal class Vedtaksperiode private constructor(
                 behandlingId = behandlinger.sisteBehandlingId,
                 yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
                 skjæringstidspunkt = skjæringstidspunkt,
-                spesielleYrkesgrupper =
-                    when (behandlinger.arbeidssituasjon) {
-                        JORDBRUKER -> listOf("JORDBRUKER")
-                        else -> emptyList()
-                    },
+                spesielleYrkesgrupper = emptyList(),
                 periodeForMedlemskapsvurdering = periode,
                 beregningsperiodeForOpptjeningsvurdering =
                     EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent.Beregningsperiode(

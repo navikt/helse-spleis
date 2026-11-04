@@ -517,7 +517,6 @@ data class SpannerPersonDto(
                 data class EndringData(
                     val id: UUID,
                     val tidsstempel: LocalDateTime,
-                    val arbeidssituasjon: ArbeidssituasjonData,
                     val sykmeldingsperiodeFom: LocalDate,
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
@@ -546,17 +545,6 @@ data class SpannerPersonDto(
                     val ferdigAvklart: Boolean,
                     val dager: List<PeriodeData>,
                 )
-
-                enum class ArbeidssituasjonData {
-                    ARBEIDSTAKER,
-                    ARBEIDSLEDIG,
-                    FRILANSER,
-                    SELVSTENDIG_NÆRINGSDRIVENDE,
-                    BARNEPASSER,
-                    JORDBRUKER,
-                    FISKER,
-                    ANNET,
-                }
             }
 
             data class DataForSimuleringData(
@@ -1351,17 +1339,6 @@ private fun BehandlingendringUtDto.tilPersonData() =
     SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.BehandlingData.EndringData(
         id = id,
         tidsstempel = tidsstempel,
-        arbeidssituasjon =
-            when (arbeidssituasjon) {
-                ArbeidssituasjonDto.ARBEIDSTAKER -> ArbeidssituasjonData.ARBEIDSTAKER
-                ArbeidssituasjonDto.ARBEIDSLEDIG -> ArbeidssituasjonData.ARBEIDSLEDIG
-                ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
-                ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
-                ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
-                ArbeidssituasjonDto.JORDBRUKER -> ArbeidssituasjonData.JORDBRUKER
-                ArbeidssituasjonDto.FISKER -> ArbeidssituasjonData.FISKER
-                ArbeidssituasjonDto.ANNET -> ArbeidssituasjonData.ANNET
-            },
         sykmeldingsperiodeFom = sykmeldingsperiode.fom,
         sykmeldingsperiodeTom = sykmeldingsperiode.tom,
         fom = periode.fom,
@@ -1655,9 +1632,6 @@ private fun KlassekodeDto.tilPersonData() =
         KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
         KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
         KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
-        KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> "SPSNDDM-OP"
-        KlassekodeDto.SelvstendigNæringsdrivendeFisker -> "SPSNDFISK"
-        KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> "SPSNDJORD"
     }
 
 private fun SimuleringResultatDto.tilPersonData() =

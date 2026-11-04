@@ -1161,8 +1161,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `endrer linje når klassekode er eneste forskjell`() {
-        val original = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk)
-        val oppdatert = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeFisker)
+        val original = linjer(1.januar to 10.januar klassekode Klassekode.SykepengerArbeidstakerOrdinær)
+        val oppdatert = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeOppgavepliktig)
         val actual = oppdatert - original
         assertUtbetalinger(
             linjer(1.januar to 10.januar endrer original.last()),
@@ -1175,8 +1175,8 @@ internal class UtbetalingslinjeForskjellTest {
 
     @Test
     fun `lager ny linje når klassekode og periode er ulik`() {
-        val original = linjer(1.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeJordbrukOgSkogbruk)
-        val oppdatert = linjer(2.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeFisker)
+        val original = linjer(1.januar to 10.januar klassekode Klassekode.SykepengerArbeidstakerOrdinær)
+        val oppdatert = linjer(2.januar to 10.januar klassekode Klassekode.SelvstendigNæringsdrivendeOppgavepliktig)
         val actual = oppdatert - original
         assertUtbetalinger(
             linjer(

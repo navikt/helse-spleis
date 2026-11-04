@@ -3,7 +3,6 @@ package no.nav.helse.person.builders
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
-import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterHovedregel
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterSkjønn
@@ -81,10 +80,6 @@ internal class UtkastTilVedtakBuilder(
     private lateinit var behandlingId: UUID
 
     internal fun behandlingId(behandlingId: UUID) = apply { this.behandlingId = behandlingId }
-
-    private lateinit var arbeidssituasjon: Arbeidssituasjon
-
-    internal fun arbeidssituasjon(arbeidssituasjon: Arbeidssituasjon) = apply { this.arbeidssituasjon = arbeidssituasjon }
 
     private var vedtakFattet: LocalDateTime? = null
 
@@ -385,7 +380,6 @@ internal class UtkastTilVedtakBuilder(
                 gjenståendeSykedager = gjenståendeSykedager,
                 foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
                 utbetalingsdager = utbetalingsdager,
-                arbeidssituasjon = arbeidssituasjon.name,
                 sykepengegrunnlagsfakta =
                     when (yrkesaktivitetssporing) {
                         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,

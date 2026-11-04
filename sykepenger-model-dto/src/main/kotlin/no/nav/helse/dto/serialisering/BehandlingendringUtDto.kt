@@ -10,7 +10,6 @@ data class BehandlingendringUtDto(
     val tidsstempel: LocalDateTime,
     val sykmeldingsperiode: PeriodeDto,
     val periode: PeriodeDto,
-    val arbeidssituasjon: ArbeidssituasjonDto,
     val vilkårsgrunnlagId: UUID?,
     val skjæringstidspunkt: LocalDate,
     val skjæringstidspunkter: List<LocalDate>,

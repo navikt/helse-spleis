@@ -10,7 +10,6 @@ import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
-import no.nav.helse.person.Behandlinger.Behandling.Endring.Arbeidssituasjon
 import no.nav.helse.person.EventSubscription
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -88,7 +87,6 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
                 ),
             "selvstendig" to null,
         ),
-    arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
     actualBehov: Behovsoppsamler.Behovsdetaljer.Godkjenning,
     forsikringsvurderingId: UUID? = null,
     opptjeningsvurderingId: UUID = inspektør.vilkårsgrunnlag(vedtaksperiodeId)!!.opptjeningsvurderingId,
@@ -119,7 +117,6 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
             forbrukteSykedager = forbrukteSykedager,
             gjenståendeSykedager = gjenståendeSykedager,
             foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
-            arbeidssituasjon = arbeidssituasjon.name,
             utbetalingsdager =
                 utbetalingsdager.map {
                     EventSubscription.Utbetalingsdag(

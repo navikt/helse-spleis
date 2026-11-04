@@ -1081,7 +1081,6 @@ internal class EventBusOversetter(
                                 "arbeidsgivere" to emptyList<Map<String, Any>>(), // Selvstendig har ingen arbeidsgivere i sykepengegrunnlaget
                             )
                     },
-                "arbeidssituasjon" to event.arbeidssituasjon,
             ).toMap()
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer

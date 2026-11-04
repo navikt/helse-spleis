@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.mediator.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
@@ -49,45 +48,4 @@ internal class SelvstendigSpForsikringTest : AbstractEndToEndMediatorTest() {
             "AVVENTER_GODKJENNING",
         )
     }
-
-    @Test
-    fun `Jordbruker med kollektiv forsikring går videre når Jordbruker-toggle er enabled`() =
-        Toggle.Jordbruker.enable {
-            sendNySøknadSelvstendig(
-                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
-                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
-            )
-            sendSelvstendigsøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-                ventetid =
-                    3.januar til 18.januar,
-                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
-            )
-            val forsikringsvurderingId = UUID.randomUUID()
-            sendVilkårsgrunnlagSelvstendig(vedtaksperiodeIndeks = 0, forsikringsvurderingId = forsikringsvurderingId)
-            sendYtelser(
-                vedtaksperiodeIndeks = 0,
-                forsikringsvurderingResultat =
-                    ForsikringsvurderingResultat(
-                        forsikringsvurderingId = forsikringsvurderingId,
-                        dekning = ForsikringsvurderingResultat.Dekning(grad = 100, iVentetid = false),
-                        opphørsdato = null,
-                        harIndividuellForsikring = false,
-                        villeHattForsikringOmDenVarBetalt = false,
-                        harForsikringSomIkkePasserMedSøknadstype = false,
-                    ),
-                orgnummer = "SELVSTENDIG",
-            )
-            sendSimuleringSelvstendig(0, orgnummer = "SELVSTENDIG")
-            assertTilstander(
-                0,
-                "AVVENTER_INFOTRYGDHISTORIKK",
-                "AVVENTER_BLOKKERENDE_PERIODE",
-                "AVVENTER_RETTIGHETSKATEGORI",
-                "AVVENTER_VILKÅRSPRØVING",
-                "AVVENTER_HISTORIKK",
-                "AVVENTER_SIMULERING",
-                "AVVENTER_GODKJENNING",
-            )
-        }
 }

@@ -168,31 +168,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlag - jordbruker`() =
-        Toggle.Jordbruker.enable {
-            sendNySøknadSelvstendig(
-                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
-                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
-            )
-            sendSelvstendigsøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-                ventetid = 3.januar til 18.januar,
-                arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
-            )
-            val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
-            assertVedtaksperiodeBehov(
-                behov,
-                InntekterForSykepengegrunnlag,
-                InntekterForOpptjeningsvurdering,
-                Medlemskap,
-                Arbeidsforhold,
-                Opptjeningsvurdering,
-                Forsikringsvurdering,
-            )
-            assertForsikringsvurderingdetaljer(behov, listOf("JORDBRUKER"))
-        }
-
-    @Test
     fun ytelser() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(
@@ -366,7 +341,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimuleringSelvstendig(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
-        assertGodkjenningdetaljer(behov, erSelvstendig = true, "SELVSTENDIG_NÆRINGSDRIVENDE")
+        assertGodkjenningdetaljer(behov, erSelvstendig = true)
     }
 
     @Test
@@ -383,7 +358,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         sendSimulering(0, SimuleringMessage.Simuleringstatus.OK)
         val behov = testRapid.inspektør.etterspurteBehov(Godkjenning)
         assertVedtaksperiodeBehov(behov, Godkjenning)
-        assertGodkjenningdetaljer(behov, erSelvstendig = false, "ARBEIDSTAKER")
+        assertGodkjenningdetaljer(behov, erSelvstendig = false)
         assertEquals(opptjeningsvurderingId.toString(), behov.path(Godkjenning.utgåendeNavn).path("opptjeningsvurderingId").asString())
         assertEquals(medlemskapsvurderingId.toString(), behov.path(Godkjenning.utgåendeNavn).path("medlemskapsvurderingId").asString())
     }
@@ -546,7 +521,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertGodkjenningdetaljer(
         behov: JsonNode,
         erSelvstendig: Boolean,
-        arbeidssituasjon: String,
     ) {
         val godkjenning = behov.path(Godkjenning.utgåendeNavn)
         assertTrue(behov.path("utbetalingId").asString().isNotEmpty())
@@ -583,7 +557,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 }
             }
         }
-        assertEquals(arbeidssituasjon, godkjenning.path("arbeidssituasjon").asString())
         godkjenning.path("sykepengegrunnlagsfakta").also {
             it.path("fastsatt").asString() in listOf("EtterSkjønn", "EtterHovedregel", "IInfotrygd")
             assertTrue(it.path("6G").isDouble)

@@ -797,9 +797,6 @@ enum class Klassekode(
     RefusjonIkkeOpplysningspliktig(verdi = "SPREFAG-IOP"),
     SykepengerArbeidstakerOrdinær(verdi = "SPATORD"),
     SelvstendigNæringsdrivendeOppgavepliktig(verdi = "SPSND-OP"),
-    SelvstendigNæringsdrivendeFisker(verdi = "SPSNDFISK"),
-    SelvstendigNæringsdrivendeJordbrukOgSkogbruk(verdi = "SPSNDJORD"),
-    SelvstendigNæringsdrivendeBarnepasserOppgavepliktig(verdi = "SPSNDDM-OP"),
     ;
 
     companion object {
@@ -812,9 +809,6 @@ enum class Klassekode(
                 KlassekodeDto.RefusjonIkkeOpplysningspliktig -> RefusjonIkkeOpplysningspliktig
                 KlassekodeDto.SykepengerArbeidstakerOrdinær -> SykepengerArbeidstakerOrdinær
                 KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> SelvstendigNæringsdrivendeOppgavepliktig
-                KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-                KlassekodeDto.SelvstendigNæringsdrivendeFisker -> SelvstendigNæringsdrivendeFisker
-                KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> SelvstendigNæringsdrivendeJordbrukOgSkogbruk
             }
     }
 }

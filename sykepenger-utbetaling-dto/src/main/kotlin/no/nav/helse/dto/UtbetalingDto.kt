@@ -72,12 +72,6 @@ sealed class KlassekodeDto(
     data object SykepengerArbeidstakerOrdinær : KlassekodeDto("SPATORD")
 
     data object SelvstendigNæringsdrivendeOppgavepliktig : KlassekodeDto("SPSND-OP")
-
-    data object SelvstendigNæringsdrivendeFisker : KlassekodeDto("SPSNDFISK")
-
-    data object SelvstendigNæringsdrivendeJordbrukOgSkogbruk : KlassekodeDto("SPSNDJORD")
-
-    data object SelvstendigNæringsdrivendeBarnepasserOppgavepliktig : KlassekodeDto("SPSNDDM-OP")
 }
 
 sealed class FeriepengerfagområdeDto {

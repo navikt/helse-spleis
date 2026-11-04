@@ -945,7 +945,6 @@ data class PersonData(
                     val sykmeldingsperiodeTom: LocalDate,
                     val fom: LocalDate,
                     val tom: LocalDate,
-                    val arbeidssituasjon: ArbeidssituasjonData,
                     val skjæringstidspunkt: LocalDate,
                     val skjæringstidspunkter: List<LocalDate>,
                     val utbetalingId: UUID?,
@@ -971,17 +970,6 @@ data class PersonData(
                             tidsstempel = this.tidsstempel,
                             sykmeldingsperiode = PeriodeDto(fom = sykmeldingsperiodeFom, tom = sykmeldingsperiodeTom),
                             periode = PeriodeDto(fom = this.fom, tom = this.tom),
-                            arbeidssituasjon =
-                                when (this.arbeidssituasjon) {
-                                    ArbeidssituasjonData.ARBEIDSTAKER -> ArbeidssituasjonDto.ARBEIDSTAKER
-                                    ArbeidssituasjonData.ARBEIDSLEDIG -> ArbeidssituasjonDto.ARBEIDSLEDIG
-                                    ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE
-                                    ArbeidssituasjonData.BARNEPASSER -> ArbeidssituasjonDto.BARNEPASSER
-                                    ArbeidssituasjonData.FRILANSER -> ArbeidssituasjonDto.FRILANSER
-                                    ArbeidssituasjonData.JORDBRUKER -> ArbeidssituasjonDto.JORDBRUKER
-                                    ArbeidssituasjonData.FISKER -> ArbeidssituasjonDto.FISKER
-                                    ArbeidssituasjonData.ANNET -> ArbeidssituasjonDto.ANNET
-                                },
                             vilkårsgrunnlagId = this.vilkårsgrunnlagId,
                             utbetalingId = this.utbetalingId,
                             dokumentsporing = this.dokumentsporing.tilDto(),
@@ -1030,17 +1018,6 @@ data class PersonData(
                                 ferdigAvklart = this.ferdigAvklart,
                                 dager = this.dager.map { it.tilDto() },
                             )
-                    }
-
-                    enum class ArbeidssituasjonData {
-                        ARBEIDSTAKER,
-                        ARBEIDSLEDIG,
-                        FRILANSER,
-                        SELVSTENDIG_NÆRINGSDRIVENDE,
-                        BARNEPASSER,
-                        JORDBRUKER,
-                        FISKER,
-                        ANNET,
                     }
                 }
             }
@@ -1341,9 +1318,6 @@ data class PersonData(
                         "SPREFAG-IOP" -> KlassekodeDto.RefusjonIkkeOpplysningspliktig
                         "SPATORD" -> KlassekodeDto.SykepengerArbeidstakerOrdinær
                         "SPSND-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig
-                        "SPSNDDM-OP" -> KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig
-                        "SPSNDFISK" -> KlassekodeDto.SelvstendigNæringsdrivendeFisker
-                        "SPSNDJORD" -> KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk
                         else -> error("Ukjent klassekode: ${this.klassekode}")
                     },
                 datoStatusFom = this.datoStatusFom,

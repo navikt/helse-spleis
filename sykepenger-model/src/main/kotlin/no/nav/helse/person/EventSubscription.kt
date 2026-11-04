@@ -601,7 +601,6 @@ interface EventSubscription {
         val gjenståendeSykedager: Int,
         val foreløpigBeregnetSluttPåSykepenger: LocalDate,
         val utbetalingsdager: List<Utbetalingsdag>,
-        val arbeidssituasjon: String,
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     ) : Event {
         data class PeriodeMedSammeSkjæringstidspunkt(

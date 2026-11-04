@@ -417,17 +417,6 @@ private fun BehandlingendringUtDto.tilPersonData() =
         sykmeldingsperiodeTom = sykmeldingsperiode.tom,
         fom = periode.fom,
         tom = periode.tom,
-        arbeidssituasjon =
-            when (arbeidssituasjon) {
-                ArbeidssituasjonDto.ARBEIDSTAKER -> ArbeidssituasjonData.ARBEIDSTAKER
-                ArbeidssituasjonDto.ARBEIDSLEDIG -> ArbeidssituasjonData.ARBEIDSLEDIG
-                ArbeidssituasjonDto.SELVSTENDIG_NÆRINGSDRIVENDE -> ArbeidssituasjonData.SELVSTENDIG_NÆRINGSDRIVENDE
-                ArbeidssituasjonDto.BARNEPASSER -> ArbeidssituasjonData.BARNEPASSER
-                ArbeidssituasjonDto.FRILANSER -> ArbeidssituasjonData.FRILANSER
-                ArbeidssituasjonDto.JORDBRUKER -> ArbeidssituasjonData.JORDBRUKER
-                ArbeidssituasjonDto.FISKER -> ArbeidssituasjonData.FISKER
-                ArbeidssituasjonDto.ANNET -> ArbeidssituasjonData.ANNET
-            },
         skjæringstidspunkt = skjæringstidspunkt,
         skjæringstidspunkter = skjæringstidspunkter,
         utbetalingId = utbetalingId,
@@ -712,9 +701,6 @@ private fun KlassekodeDto.tilPersonData() =
         KlassekodeDto.RefusjonIkkeOpplysningspliktig -> "SPREFAG-IOP"
         KlassekodeDto.SykepengerArbeidstakerOrdinær -> "SPATORD"
         KlassekodeDto.SelvstendigNæringsdrivendeOppgavepliktig -> "SPSND-OP"
-        KlassekodeDto.SelvstendigNæringsdrivendeBarnepasserOppgavepliktig -> "SPSNDDM-OP"
-        KlassekodeDto.SelvstendigNæringsdrivendeFisker -> "SPSNDFISK"
-        KlassekodeDto.SelvstendigNæringsdrivendeJordbrukOgSkogbruk -> "SPSNDJORD"
     }
 
 private fun SimuleringResultatDto.tilPersonData() =
