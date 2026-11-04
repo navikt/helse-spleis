@@ -1055,6 +1055,7 @@ internal class Behandlinger private constructor(
                 inntektjusteringer: Map<Inntektskilde, Beløpstidslinje> = this.inntektjusteringer,
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
                 korrigertInntekt: Saksbehandler? = this.korrigertInntekt,
+                graderteAndreYtelserId: UUID? = this.graderteAndreYtelserId,
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -1075,6 +1076,7 @@ internal class Behandlinger private constructor(
                 inntektjusteringer = inntektjusteringer,
                 faktaavklartInntekt = faktaavklartInntekt,
                 korrigertInntekt = korrigertInntekt,
+                graderteAndreYtelserId = graderteAndreYtelserId,
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(
@@ -1103,6 +1105,7 @@ internal class Behandlinger private constructor(
                     utbetalingstidslinje = Utbetalingstidslinje(),
                     maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                     inntektjusteringer = emptyMap(),
+                    graderteAndreYtelserId = null,
                 )
 
             internal fun kopierMedBeregning(
@@ -1116,6 +1119,7 @@ internal class Behandlinger private constructor(
                 inntektjusteringer = beregning.alleInntektjusteringer,
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 faktaavklartInntekt = faktaavklartInntekt,
+                graderteAndreYtelserId = beregning.graderteAndreYtelserId,
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1129,6 +1133,7 @@ internal class Behandlinger private constructor(
                 utbetalingstidslinje = Utbetalingstidslinje(),
                 maksdatoresultat = Maksdatoresultat.IkkeVurdert,
                 inntektjusteringer = emptyMap(),
+                graderteAndreYtelserId = null,
             )
 
             internal fun kopierMedUtbetalingstidslinje(
@@ -2460,6 +2465,7 @@ internal data class BeregnetBehandling(
     val grunnlagsdata: KomplettVilkårsgrunnlag,
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
+    val graderteAndreYtelserId: UUID? = null,
 ) {
     fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,

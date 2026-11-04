@@ -1,12 +1,17 @@
 package no.nav.helse.spleis.e2e.andre_ytelser
 
 import no.nav.helse.dsl.*
+import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.hendelser.*
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.spleisJsonMapperBuilder
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
 import no.nav.helse.utbetalingslinjer.Oppdragstatus
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
@@ -18,6 +23,9 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.util.UUID
 import kotlin.test.assertIs
 
@@ -1152,13 +1160,115 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         }
     }
 
+    @Test
+    fun `endringen lagrer versjonen for sin egen arbeidsgiver`() {
+        listOf(a1, a2).nyeVedtak(januar, inntekt = 260_000.årlig)
+        val førsteVersjonA1 = UUID.randomUUID()
+        val førsteVersjonA2 = UUID.randomUUID()
+        val andreVersjonA1 = UUID.randomUUID()
+        val andreVersjonA2 = UUID.randomUUID()
+
+        fordelOgUtbetal(
+            graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30, versjon = førsteVersjonA1),
+            graderteAndreYtelser(Arbeidstaker(a2), (20.januar til 30.januar) to 20, versjon = førsteVersjonA2),
+        )
+        fordelOgUtbetal(
+            graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 10, versjon = andreVersjonA1),
+            graderteAndreYtelser(Arbeidstaker(a2), (20.januar til 30.januar) to 10, versjon = andreVersjonA2),
+        )
+
+        a1 {
+            assertEquals(listOf(null, førsteVersjonA1, andreVersjonA1), inspektør(1.vedtaksperiode).graderteAndreYtelserIder)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+        a2 {
+            assertEquals(listOf(null, førsteVersjonA2, andreVersjonA2), inspektør(1.vedtaksperiode).graderteAndreYtelserIder)
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `endringen har ingen versjon når løsningen ikke har noe for yrkesaktiviteten`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(graderteAndreYtelser(Arbeidstaker(a2), (20.januar til 30.januar) to 30)),
+            )
+            assertEquals(listOf(null, null), inspektør(1.vedtaksperiode).graderteAndreYtelserIder)
+        }
+    }
+
+    @Test
+    fun `versjonen på endringen lagres, og endringer uten versjon leses som tomme`() {
+        val versjon = UUID.randomUUID()
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser = listOf(graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30, versjon = versjon)),
+            )
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+        val serialisertPerson = dto().tilPersonData().tilSerialisertPerson()
+
+        val endringer = serialisertPerson.tilPersonDto().graderteAndreYtelserIder()
+        assertEquals(listOf(null, versjon), endringer.distinct())
+
+        val utenFeltet = jsonMapper.readTree(serialisertPerson.json).fjernFelt("graderteAndreYtelserId")
+        val gamleData = SerialisertPerson(jsonMapper.writeValueAsString(utenFeltet), serialisertPerson.skjemaVersjon)
+        assertEquals(listOf(null), gamleData.tilPersonDto().graderteAndreYtelserIder().distinct())
+    }
+
+    private val jsonMapper = spleisJsonMapperBuilder().build()
+
+    private fun PersonInnDto.graderteAndreYtelserIder() =
+        arbeidsgivere
+            .flatMap { it.vedtaksperioder }
+            .flatMap { it.behandlinger.behandlinger }
+            .flatMap { it.endringer }
+            .map { it.graderteAndreYtelserId }
+
+    private fun JsonNode.fjernFelt(navn: String): JsonNode {
+        when (this) {
+            is ObjectNode -> {
+                remove(navn)
+                values().forEach { it.fjernFelt(navn) }
+            }
+            is ArrayNode -> values().forEach { it.fjernFelt(navn) }
+            else -> Unit
+        }
+        return this
+    }
+
+    private fun fordelOgUtbetal(vararg graderteAndreYtelser: GraderteAndreYtelserForBeregning) {
+        a1 {
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = graderteAndreYtelser.toList())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+        a2 {
+            håndterYtelser(1.vedtaksperiode, graderteAndreYtelser = graderteAndreYtelser.toList())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode, true)
+            håndterUtbetalt(Oppdragstatus.AKSEPTERT)
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
+        }
+    }
+
     private fun graderteAndreYtelser(
         yrkesaktivitet: no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet,
         vararg trekk: Pair<Periode, Int>,
         sykdomsgradFørFordeling: Int = 100,
+        versjon: UUID = UUID.randomUUID(),
     ) = GraderteAndreYtelserForBeregning(
         yrkesaktivitet = yrkesaktivitet,
-        versjon = UUID.randomUUID(),
+        versjon = versjon,
         dager =
             trekk
                 .flatMap { (periode, trekkFraSykdomsgrad) ->

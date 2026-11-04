@@ -1725,6 +1725,7 @@ internal class Vedtaksperiode private constructor(
             beregnetTidslinjePerVedtaksperiode = beregnetTidslinjePerVedtaksperiode,
             inntektsperioder = inntektsperioder,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
+            graderteAndreYtelserVersjoner = ytelser.graderteAndreYtelserVersjoner(),
         )
 
         // steg 4.2 lag utbetalinger
@@ -1775,6 +1776,7 @@ internal class Vedtaksperiode private constructor(
         beregnetTidslinjePerVedtaksperiode: List<BeregnetPeriode>,
         inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>,
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+        graderteAndreYtelserVersjoner: Map<Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet, UUID>,
     ): List<BeregnetBehandling> {
         if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
 
@@ -1798,6 +1800,7 @@ internal class Vedtaksperiode private constructor(
                             .mapValues { (_, inntektjustering) -> inntektjustering.subset(periode).medBeløp() }
                             .filterValues { it.isNotEmpty() },
                     forsikringsvurderingResultat = forsikringsvurderingResultat,
+                    graderteAndreYtelserId = graderteAndreYtelserVersjoner[other.beregningsyrkesaktivitet],
                 )
             }
     }
@@ -3692,6 +3695,7 @@ internal class Vedtaksperiode private constructor(
         grunnlagsdata: VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag,
         alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+        graderteAndreYtelserId: UUID?,
     ): BeregnetBehandling {
         val beregnetBehandling =
             BeregnetBehandling(
@@ -3700,6 +3704,7 @@ internal class Vedtaksperiode private constructor(
                 grunnlagsdata = grunnlagsdata,
                 alleInntektjusteringer = alleInntektjusteringer,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
+                graderteAndreYtelserId = graderteAndreYtelserId,
             )
         behandlinger.beregnetBehandling(beregnetBehandling, this.yrkesaktivitet.yrkesaktivitetstype)
         return beregnetBehandling
@@ -4325,20 +4330,19 @@ internal fun lagArbeidsgiverberegning(
         build()
     }
 
+private val Vedtaksperiode.beregningsyrkesaktivitet: Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet
+    get() =
+        when (val yrkesaktivitetstype = yrkesaktivitet.yrkesaktivitetstype) {
+            Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
+            is Arbeidstaker -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(yrkesaktivitetstype.organisasjonsnummer)
+            Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
+            Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
+        }
+
 private fun Vedtaksperiode.medVedtaksperiode(
     builder: ArbeidsgiverberegningBuilder,
     forsikringsvurderingResultat: ForsikringsvurderingResultat?,
 ) {
-    val yrkesaktivitetstype =
-        when (yrkesaktivitet.yrkesaktivitetstype) {
-            Arbeidsledig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
-            is Arbeidstaker ->
-                Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(
-                    yrkesaktivitet.yrkesaktivitetstype.organisasjonsnummer,
-                )
-            Frilans -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
-            Selvstendig -> Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
-        }
     val utbetalingstidslinjeBuilder =
         when (yrkesaktivitet.yrkesaktivitetstype) {
             is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
@@ -4348,7 +4352,7 @@ private fun Vedtaksperiode.medVedtaksperiode(
             Frilans,
             -> error("Forventer ikke å lage utbetalingstidslinje for ${yrkesaktivitet.yrkesaktivitetstype::class.simpleName}")
         }
-    builder.vedtaksperiode(yrkesaktivitetstype, id, sykdomstidslinje, utbetalingstidslinjeBuilder)
+    builder.vedtaksperiode(beregningsyrkesaktivitet, id, sykdomstidslinje, utbetalingstidslinjeBuilder)
 }
 
 private fun nesteTilstandEtterIgangsattOverstyring(

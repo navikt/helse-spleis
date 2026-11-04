@@ -143,6 +143,12 @@ class Ytelser(
             }
     }
 
+    internal fun graderteAndreYtelserVersjoner(): Map<Yrkesaktivitet, UUID> =
+        graderteAndreYtelser.associate {
+            it.yrkesaktivitet to
+                it.versjon
+        }
+
     internal fun graderteAndreYtelser(): Map<Yrkesaktivitet, GraderteAndreYtelserTidslinje> =
         graderteAndreYtelser
             .groupBy { it.yrkesaktivitet }

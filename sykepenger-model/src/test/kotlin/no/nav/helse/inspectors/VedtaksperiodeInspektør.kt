@@ -74,6 +74,9 @@ internal class VedtaksperiodeInspektør(
         behandlinger
             .flatMap { it.endringer().mapNotNull { endring -> endring.utbetaling } }
 
+    internal val graderteAndreYtelserIder =
+        behandlinger.map { it.endringer().last().graderteAndreYtelserId }
+
     internal val hendelser: Set<Dokumentsporing> = vedtaksperiode.behandlinger.hendelseIder()
 
     internal val hendelseIder get() = hendelser.map { it.id }.toSet()
