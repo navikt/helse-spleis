@@ -43,6 +43,7 @@ import no.nav.helse.person.inntekt.Saksbehandler
 import no.nav.helse.person.inntekt.Skatteopplysning.Companion.subsumsjonsformat
 import no.nav.helse.person.refusjon.Refusjonsservitør
 import no.nav.helse.person.tilstandsmaskin.*
+import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingslinjer.Utbetaling
@@ -1840,6 +1841,16 @@ internal class Vedtaksperiode private constructor(
                 it.behandlinger.utbetalingstidslinje().negativEndringIBeløp(forrigeUtbetalingstidslinje)
             }.onEach {
                 it.registrerKontekst(aktivitetslogg).varsel(RV_UT_23)
+            }
+
+        val graderteAndreYtelser = ytelser.graderteAndreYtelser()
+        perioderDetSkalBeregnesUtbetalingFor
+            .filter { other ->
+                val tidslinje = graderteAndreYtelser[other.beregningsyrkesaktivitet] ?: return@filter false
+                val sykdomstidslinje = other.sykdomstidslinje
+                tidslinje.harEndretSykdomsgradEtterFordeling(other.periode) { dato -> (sykdomstidslinje[dato] as? Dag.Sykedag)?.grad }
+            }.onEach {
+                it.registrerKontekst(aktivitetslogg).varsel(RV_AY_13)
             }
 
         if (beregnetTidslinjePerVedtaksperiode.any {

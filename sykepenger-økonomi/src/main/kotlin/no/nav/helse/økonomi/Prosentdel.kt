@@ -78,6 +78,8 @@ class Prosentdel private constructor(
 
     fun toDouble() = brøkdel.multiply(HUNDRE_PROSENT, mc).toDouble()
 
+    fun avrundetTilHeleProsent() = toDouble().roundToInt().riktigProsent
+
     fun erUnderGrensen() = this < GRENSE
 
     fun dto() = ProsentdelDto(prosentDesimal = brøkdel.toDouble())

@@ -54,6 +54,13 @@ internal class ProsentdelTest {
     }
 
     @Test
+    fun `avrundet til hele prosent`() {
+        assertEquals(80.prosent, 80.4.prosent.avrundetTilHeleProsent())
+        assertEquals(81.prosent, 80.5.prosent.avrundetTilHeleProsent())
+        assertEquals(33.prosent, ratio(1.0, 3.0).avrundetTilHeleProsent())
+    }
+
+    @Test
     fun `opprette med Int`() {
         1.rangeTo(99).forEach { n ->
             assertEquals(n, n.prosent)

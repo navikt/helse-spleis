@@ -309,6 +309,7 @@ enum class Varselkode(
     RV_AY_10("Behandling av Ytelser feilet, årsak ukjent", avviklet = true),
     RV_AY_11("Det er utbetalt svangerskapspenger i samme periode."),
     RV_AY_12("Forlenger foreldrepenger med mer enn 14 dager."),
+    RV_AY_13("Sykdomsgraden er endret etter fordeling av dagen. Fordel dagen på nytt."),
 
     // SI: Simulering
     RV_SI_1("Feil under simulering", avviklet = true),

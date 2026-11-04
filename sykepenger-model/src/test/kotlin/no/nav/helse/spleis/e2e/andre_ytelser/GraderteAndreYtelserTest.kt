@@ -357,6 +357,151 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
     }
 
     @Test
+    fun `varsel når korrigerende søknad endrer sykdomsgraden etter fordeling`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 80.prosent))
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+
+            assertVarsel(Varselkode.RV_AY_13, 1.vedtaksperiode.filter())
+            assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `ingen varsel når overstyrt dag ikke lenger er sykedag etter fordeling`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+
+            håndterOverstyrTidslinje(listOf(manuellFeriedag(25.januar)))
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+        }
+    }
+
+    @Test
+    fun `ingen varsel når bare sykdomsgraden i helgen er endret etter fordeling`() {
+        a1 {
+            nyttVedtak(januar)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+
+            håndterSøknad(
+                Søknad.Søknadsperiode.Sykdom(1.januar, 26.januar, 100.prosent),
+                Søknad.Søknadsperiode.Sykdom(27.januar, 28.januar, 80.prosent),
+                Søknad.Søknadsperiode.Sykdom(29.januar, 31.januar, 100.prosent),
+            )
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (20.januar til 31.januar) to 30,
+                        ),
+                    ),
+            )
+
+            assertVarsler(1.vedtaksperiode, Varselkode.RV_UT_23)
+        }
+    }
+
+    @Test
+    fun `ingen varsel når sykdomsgraden er lik den før fordeling avrundet til hele prosent`() {
+        a1 {
+            tilGodkjenning(januar, grad = 80.4.prosent)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 31.januar) to 30, sykdomsgradFørFordeling = 80),
+                    ),
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING)
+        }
+    }
+
+    @Test
+    fun `ingen varsel når sykdomsgraden er lik den før fordeling`() {
+        a1 {
+            tilGodkjenning(januar, grad = 80.prosent)
+            håndterGraderteAndreYtelserEndret(20.januar)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 31.januar) to 30, sykdomsgradFørFordeling = 80),
+                    ),
+            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_SIMULERING)
+        }
+    }
+
+    @Test
     fun `gradert sykmeldt og graderte foreldrepenger trekkes direkte fra sykdomsgraden`() {
         a1 {
             nyttVedtak(1.juni(2025) til 30.juni(2025), beregnetInntekt = 2_000_000.årlig, grad = 50.prosent)

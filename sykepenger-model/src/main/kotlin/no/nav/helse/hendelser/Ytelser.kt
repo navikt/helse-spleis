@@ -184,4 +184,15 @@ internal class GraderteAndreYtelserTidslinje(
     override fun opprett(vararg perioder: Pair<Periode, GraderteAndreYtelserDag>) = GraderteAndreYtelserTidslinje(*perioder)
 
     internal fun trekkFraSykdomsgrad(dato: LocalDate) = this[dato]?.trekkFraSykdomsgrad ?: Prosentdel.NullProsent
+
+    // Trekket brukes bare på sykedager. For andre dager gir sykdomsgrad null, og en gammel fordeling der påvirker ikke utbetalingen.
+    // Speil sender sykdomsgraden avrundet til hele prosent, så vi sammenligner på samme presisjon.
+    internal fun harEndretSykdomsgradEtterFordeling(
+        periode: Periode,
+        sykdomsgrad: (LocalDate) -> Prosentdel?,
+    ) = any { (dato, dag) ->
+        if (dag == null || dato !in periode) return@any false
+        val sykdomsgradISpleis = sykdomsgrad(dato) ?: return@any false
+        dag.sykdomsgradFørFordeling != sykdomsgradISpleis.avrundetTilHeleProsent()
+    }
 }
