@@ -119,7 +119,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                                             dag.grad,
                                             inntekt,
                                             inntektjusteringer,
-                                            graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                            graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
                                         )
                                     false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
                                 }
@@ -130,7 +130,7 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                                     dag.grad,
                                     inntekt,
                                     inntektjusteringer,
-                                    graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                    graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
                                 )
                         }
                     }

@@ -7,7 +7,6 @@ import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mars
@@ -16,6 +15,8 @@ import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
 import no.nav.helse.spleis.meldinger.model.HendelseMessage
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Frilans
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Selvstendig
@@ -86,81 +87,107 @@ internal class YtelserRiverMappingTest :
     }
 
     @Test
-    fun `Mapping av graderte andre ytelser med yrkesaktivitet`() =
+    fun `Mapping av graderte andre ytelser for alle yrkesaktivitetstyper`() =
         Toggle.GraderteAndreYtelser.enable {
             val json =
                 medGraderteAndreYtelser(
-                    gradertAndreYtelse("FORELDREPENGER", yrkesaktivitet = "987654321"),
-                    gradertAndreYtelse("PLEIEPENGER", yrkesaktivitet = "SELVSTENDIG"),
-                    gradertAndreYtelse("OMSORGSPENGER", yrkesaktivitet = "FRILANS"),
+                    gradertAndreYtelse("ARBEIDSTAKER", organisasjonsnummer = "987654321", versjon = versjon1),
+                    gradertAndreYtelse("FRILANS", organisasjonsnummer = null, versjon = versjon2),
+                    gradertAndreYtelse("SELVSTENDIG", organisasjonsnummer = null, versjon = versjon3),
+                    gradertAndreYtelse("ARBEIDSLEDIG", organisasjonsnummer = null, versjon = versjon4),
                 )
             val message = checkNotNull(sendMedGraderteAndreYtelserToggle(json)) { "Meldingen ble ikke gjenkjent" }
             assertEquals(
                 listOf(
-                    GraderteAndreYtelserForBeregning(
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                1.januar,
-                                31.januar,
-                                50,
-                            ),
-                        ),
-                        GraderteAndreYtelserType.FORELDREPENGER,
-                        Arbeidstaker("987654321"),
-                    ),
-                    GraderteAndreYtelserForBeregning(
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                1.januar,
-                                31.januar,
-                                50,
-                            ),
-                        ),
-                        GraderteAndreYtelserType.PLEIEPENGER,
-                        Selvstendig,
-                    ),
-                    GraderteAndreYtelserForBeregning(
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                1.januar,
-                                31.januar,
-                                50,
-                            ),
-                        ),
-                        GraderteAndreYtelserType.OMSORGSPENGER,
-                        Frilans,
-                    ),
+                    forventetGradertAndreYtelse(Arbeidstaker("987654321"), versjon1),
+                    forventetGradertAndreYtelse(Frilans, versjon2),
+                    forventetGradertAndreYtelse(Selvstendig, versjon3),
+                    forventetGradertAndreYtelse(Arbeidsledig, versjon4),
                 ),
                 message.graderteAndreYtelser,
             )
         }
 
     @Test
-    fun `Graderte andre ytelser uten yrkesaktivitet avvises`() =
+    fun `Tom løsning på graderte andre ytelser gir ingen graderte andre ytelser`() =
         Toggle.GraderteAndreYtelser.enable {
-            val json = medGraderteAndreYtelser(gradertAndreYtelse("FORELDREPENGER", yrkesaktivitet = null))
+            val message = checkNotNull(sendMedGraderteAndreYtelserToggle(medGraderteAndreYtelser())) { "Meldingen ble ikke gjenkjent" }
+            assertEquals(emptyList<GraderteAndreYtelserForBeregning>(), message.graderteAndreYtelser)
+        }
+
+    @Test
+    fun `Graderte andre ytelser for arbeidstaker uten organisasjonsnummer avvises`() =
+        Toggle.GraderteAndreYtelser.enable {
+            val json = medGraderteAndreYtelser(gradertAndreYtelse("ARBEIDSTAKER", organisasjonsnummer = null))
             assertNull(sendMedGraderteAndreYtelserToggle(json))
         }
 
     @Test
-    fun `Graderte andre ytelser med ugyldig yrkesaktivitet avvises`() =
+    fun `Graderte andre ytelser med ugyldig organisasjonsnummer avvises`() =
         Toggle.GraderteAndreYtelser.enable {
-            val json = medGraderteAndreYtelser(gradertAndreYtelse("FORELDREPENGER", yrkesaktivitet = "a1"))
+            val json = medGraderteAndreYtelser(gradertAndreYtelse("ARBEIDSTAKER", organisasjonsnummer = "a1"))
+            assertNull(sendMedGraderteAndreYtelserToggle(json))
+        }
+
+    @Test
+    fun `Graderte andre ytelser med ukjent yrkesaktivitetstype avvises`() =
+        Toggle.GraderteAndreYtelser.enable {
+            val json = medGraderteAndreYtelser(gradertAndreYtelse("JORDBRUKER", organisasjonsnummer = null))
+            assertNull(sendMedGraderteAndreYtelserToggle(json))
+        }
+
+    @Test
+    fun `Graderte andre ytelser uten versjon avvises`() =
+        Toggle.GraderteAndreYtelser.enable {
+            val json = medGraderteAndreYtelser(gradertAndreYtelse("SELVSTENDIG", organisasjonsnummer = null).apply { remove("versjon") })
+            assertNull(sendMedGraderteAndreYtelserToggle(json))
+        }
+
+    @Test
+    fun `Graderte andre ytelser med trekk over 100 avvises`() =
+        Toggle.GraderteAndreYtelser.enable {
+            val json = medGraderteAndreYtelser(gradertAndreYtelse("SELVSTENDIG", organisasjonsnummer = null, trekkFraSykdomsgrad = 101))
             assertNull(sendMedGraderteAndreYtelserToggle(json))
         }
 
     private fun gradertAndreYtelse(
-        type: String,
-        yrkesaktivitet: String?,
+        yrkesaktivitetstype: String,
+        organisasjonsnummer: String?,
+        versjon: UUID = UUID.randomUUID(),
+        trekkFraSykdomsgrad: Int = 20,
     ) = spleisJsonMapperBuilder().build().createObjectNode().apply {
-        put("graderteAndreYtelserType", type)
-        if (yrkesaktivitet != null) put("yrkesaktivitet", yrkesaktivitet)
-        putArray("graderteAndreYtelserPerioder").addObject().apply {
-            put("fom", "2018-01-01")
-            put("tom", "2018-01-31")
-            put("grad", 50)
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
+        if (organisasjonsnummer != null) put("organisasjonsnummer", organisasjonsnummer) else putNull("organisasjonsnummer")
+        put("versjon", versjon.toString())
+        putArray("dager").apply {
+            addObject().apply {
+                put("dato", "2018-01-01")
+                put("trekkFraSykdomsgrad", trekkFraSykdomsgrad)
+                put("sykdomsgradFørFordeling", 50)
+                putObject("andreYtelserGrader").put("FORELDREPENGER", 20)
+                put("sykdomsgrad", 30)
+                put("arbeidsgrad", 50)
+            }
+            addObject().apply {
+                put("dato", "2018-01-02")
+                put("trekkFraSykdomsgrad", 0)
+                put("sykdomsgradFørFordeling", 100)
+            }
         }
     }
+
+    private fun forventetGradertAndreYtelse(
+        yrkesaktivitet: Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet,
+        versjon: UUID,
+    ) = GraderteAndreYtelserForBeregning(
+        yrkesaktivitet = yrkesaktivitet,
+        versjon = versjon,
+        dager =
+            listOf(
+                GraderteAndreYtelserForBeregning.Dag(1.januar, trekkFraSykdomsgrad = 20, sykdomsgradFørFordeling = 50),
+                GraderteAndreYtelserForBeregning.Dag(2.januar, trekkFraSykdomsgrad = 0, sykdomsgradFørFordeling = 100),
+            ),
+    )
 
     private fun medGraderteAndreYtelser(vararg graderteAndreYtelser: ObjectNode): String {
         val json = spleisJsonMapperBuilder().build().readTree(medArray)
@@ -243,6 +270,10 @@ internal class YtelserRiverMappingTest :
     }
 
     private companion object {
+        private val versjon1 = UUID.randomUUID()
+        private val versjon2 = UUID.randomUUID()
+        private val versjon3 = UUID.randomUUID()
+        private val versjon4 = UUID.randomUUID()
         private val forventetPleiepenger = Pleiepenger(listOf(GradertPeriode(1.januar til 15.januar, 50)))
         private val forventetForeldrepenger = Foreldrepenger(listOf(GradertPeriode(2.januar til 16.januar, 60)))
         private val forventetSvangerskapspenger = Svangerskapspenger(listOf(GradertPeriode(1.juni til 30.juni, 99)))

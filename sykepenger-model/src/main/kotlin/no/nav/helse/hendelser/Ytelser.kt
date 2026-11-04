@@ -148,9 +148,16 @@ class Ytelser(
             .groupBy { it.yrkesaktivitet }
             .mapValues { (_, graderteAndreYtelserForYrkesaktivitet) ->
                 graderteAndreYtelserForYrkesaktivitet
-                    .flatMap { it.graderteAndreYtelserForBeregningPeriodeList }
-                    .fold(GraderteAndreYtelserTidslinje()) { sammenslått, periode ->
-                        sammenslått + GraderteAndreYtelserTidslinje(periode.tilPeriode() to periode.grad.prosent)
+                    .flatMap { it.dager }
+                    .fold(GraderteAndreYtelserTidslinje()) { sammenslått, dag ->
+                        sammenslått +
+                            GraderteAndreYtelserTidslinje(
+                                dag.dato.somPeriode() to
+                                    GraderteAndreYtelserDag(
+                                        trekkFraSykdomsgrad = dag.trekkFraSykdomsgrad.prosent,
+                                        sykdomsgradFørFordeling = dag.sykdomsgradFørFordeling.prosent,
+                                    ),
+                            )
                     }
             }
 }
@@ -160,13 +167,15 @@ data class GradertPeriode(
     internal val grad: Int,
 )
 
-internal class GraderteAndreYtelserTidslinje(
-    vararg perioder: Pair<Periode, Prosentdel>,
-) : Tidslinje<Prosentdel, GraderteAndreYtelserTidslinje>(*perioder) {
-    override fun opprett(vararg perioder: Pair<Periode, Prosentdel>) = GraderteAndreYtelserTidslinje(*perioder)
+internal data class GraderteAndreYtelserDag(
+    val trekkFraSykdomsgrad: Prosentdel,
+    val sykdomsgradFørFordeling: Prosentdel,
+)
 
-    override fun pluss(
-        eksisterendeVerdi: Prosentdel,
-        nyVerdi: Prosentdel,
-    ) = eksisterendeVerdi + nyVerdi
+internal class GraderteAndreYtelserTidslinje(
+    vararg perioder: Pair<Periode, GraderteAndreYtelserDag>,
+) : Tidslinje<GraderteAndreYtelserDag, GraderteAndreYtelserTidslinje>(*perioder) {
+    override fun opprett(vararg perioder: Pair<Periode, GraderteAndreYtelserDag>) = GraderteAndreYtelserTidslinje(*perioder)
+
+    internal fun trekkFraSykdomsgrad(dato: LocalDate) = this[dato]?.trekkFraSykdomsgrad ?: Prosentdel.NullProsent
 }

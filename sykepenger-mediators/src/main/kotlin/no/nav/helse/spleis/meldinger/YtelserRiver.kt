@@ -2,15 +2,16 @@ package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.Toggle
-import no.nav.helse.hendelser.GraderteAndreYtelserType
 import no.nav.helse.hendelser.Rettighetskategori
 import no.nav.helse.spleis.Behov.Behovstype.*
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import tools.jackson.databind.JsonNode
+import java.util.*
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning as GraderteAndreYtelserForBeregningHendelse
 
 internal class YtelserRiver(
@@ -62,10 +63,18 @@ internal class YtelserRiver(
 
         if (Toggle.GraderteAndreYtelser.enabled) {
             message.interestedInArray("@løsning.${GraderteAndreYtelserForBeregning.utgåendeNavn}") {
-                require("yrkesaktivitet") { GraderteAndreYtelserForBeregningHendelse.yrkesaktivitet(it.asText()) }
-                require("graderteAndreYtelserType") { GraderteAndreYtelserType.valueOf(it.asText()) }
-                requireArray("graderteAndreYtelserPerioder") {
-                    validerGradertPeriode()
+                interestedIn("organisasjonsnummer")
+                require("yrkesaktivitetstype") {
+                    GraderteAndreYtelserForBeregningHendelse.yrkesaktivitet(
+                        yrkesaktivitetstype = it.asString(),
+                        organisasjonsnummer = this["organisasjonsnummer"].takeUnless(JsonNode::isMissingOrNull)?.asString(),
+                    )
+                }
+                require("versjon") { UUID.fromString(it.asString()) }
+                requireArray("dager") {
+                    require("dato", JsonNode::asLocalDate)
+                    require("trekkFraSykdomsgrad", ::validerProsent)
+                    require("sykdomsgradFørFordeling", ::validerProsent)
                 }
             }
         }
@@ -75,7 +84,7 @@ internal class YtelserRiver(
         message.interestedIn("@løsning.${MedlemskapsvurderingResultat.utgåendeNavn}.svar")
 
         message.interestedIn("@løsning.${RettighetskategoriResultat.utgåendeNavn}.hovedkategori") { hovedkategori ->
-            Rettighetskategori.Hovedkategori.valueOf(hovedkategori.asText())
+            Rettighetskategori.Hovedkategori.valueOf(hovedkategori.asString())
         }
 
         // Dagpenger & AAP
@@ -99,7 +108,7 @@ internal class YtelserRiver(
             require("fom", JsonNode::asLocalDate)
             require("tom", JsonNode::asLocalDate)
             require("inntektskilde", {
-                check(it.asText().isNotBlank())
+                check(it.asString().isNotBlank())
             })
             interestedIn("daglig", JsonNode::asDouble)
             interestedIn("måndelig", JsonNode::asDouble)
@@ -129,7 +138,7 @@ internal class YtelserRiver(
             meldingsporing =
                 Meldingsporing(
                     id = packet.meldingsreferanseId(),
-                    fødselsnummer = packet["fødselsnummer"].asText(),
+                    fødselsnummer = packet["fødselsnummer"].asString(),
                 ),
         )
 
@@ -137,5 +146,9 @@ internal class YtelserRiver(
         require("fom", JsonNode::asLocalDate)
         require("tom", JsonNode::asLocalDate)
         requireKey("grad")
+    }
+
+    private fun validerProsent(node: JsonNode) {
+        check(node.isInt && node.asInt() in 0..100) { "Forventet heltall mellom 0 og 100" }
     }
 }

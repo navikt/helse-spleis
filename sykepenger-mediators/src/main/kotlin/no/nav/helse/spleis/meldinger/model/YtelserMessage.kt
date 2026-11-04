@@ -27,7 +27,7 @@ internal class YtelserMessage(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText()
+    private val vedtaksperiodeId = packet["vedtaksperiodeId"].asString()
     private val yrkesaktivitetssporing = packet.yrkesaktivitetssporing
 
     private val foreldrepengerytelse =
@@ -70,24 +70,22 @@ internal class YtelserMessage(
         )
 
     internal val graderteAndreYtelser =
-        packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { gradertAndreYtelse ->
+        packet.mapFraArrayEllerObjectMedArray("@løsning", Behovstype.GraderteAndreYtelserForBeregning.utgåendeNavn) { yrkesaktivitet ->
             GraderteAndreYtelserForBeregning(
-                graderteAndreYtelserForBeregningPeriodeList =
-                    gradertAndreYtelse.path("graderteAndreYtelserPerioder").values().map { graderteAndreYtelserPeriode ->
-                        GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode(
-                            fom = graderteAndreYtelserPeriode.path("fom").asLocalDate(),
-                            tom = graderteAndreYtelserPeriode.path("tom").asLocalDate(),
-                            grad = graderteAndreYtelserPeriode.path("grad").asInt(),
-                        )
-                    },
-                graderteAndreYtelserType =
-                    GraderteAndreYtelserType.valueOf(
-                        gradertAndreYtelse.path("graderteAndreYtelserType").asText(),
-                    ),
                 yrkesaktivitet =
                     GraderteAndreYtelserForBeregning.yrkesaktivitet(
-                        gradertAndreYtelse.path("yrkesaktivitet").asText(),
+                        yrkesaktivitetstype = yrkesaktivitet.path("yrkesaktivitetstype").asString(),
+                        organisasjonsnummer = yrkesaktivitet.path("organisasjonsnummer").takeUnless { it.isMissingOrNull() }?.asString(),
                     ),
+                versjon = UUID.fromString(yrkesaktivitet.path("versjon").asString()),
+                dager =
+                    yrkesaktivitet.path("dager").values().map { dag ->
+                        GraderteAndreYtelserForBeregning.Dag(
+                            dato = dag.path("dato").asLocalDate(),
+                            trekkFraSykdomsgrad = dag.path("trekkFraSykdomsgrad").asInt(),
+                            sykdomsgradFørFordeling = dag.path("sykdomsgradFørFordeling").asInt(),
+                        )
+                    },
             )
         }
 
@@ -95,7 +93,7 @@ internal class YtelserMessage(
         InntekterForBeregning(
             packet["@løsning.${Behovstype.InntekterForBeregning.utgåendeNavn}.inntekter"].values().map {
                 InntekterForBeregning.Inntektsperiode(
-                    inntektskilde = it.path("inntektskilde").asText(),
+                    inntektskilde = it.path("inntektskilde").asString(),
                     periode = it.path("fom").asLocalDate() til it.path("tom").asLocalDate(),
                     beløp =
                         when {
@@ -123,7 +121,7 @@ internal class YtelserMessage(
             .takeUnless { it.isMissingOrNull() }
             ?.let { løsningJson ->
                 ForsikringsvurderingResultat(
-                    forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asText()),
+                    forsikringsvurderingId = UUID.fromString(løsningJson["forsikringsvurderingId"].asString()),
                     dekning =
                         løsningJson["dekning"]?.takeUnless { it.isMissingOrNull() }?.let { dekningJson ->
                             ForsikringsvurderingResultat.Dekning(
@@ -146,19 +144,19 @@ internal class YtelserMessage(
         packet["@løsning.${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}.svar"]
             .takeUnless { it.isMissingOrNull() }
             ?.let { svar ->
-                when (svar.asText()) {
+                when (svar.asString()) {
                     "JA" -> Medlemskapsvurdering.Medlemskapstatus.Ja
                     "NEI" -> Medlemskapsvurdering.Medlemskapstatus.Nei
                     "UAVKLART" -> Medlemskapsvurdering.Medlemskapstatus.VetIkke
                     "UAVKLART_MED_BRUKERSPORSMAAL" -> Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål
-                    else -> error("Ukjent svar på ${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}: ${svar.asText()}")
+                    else -> error("Ukjent svar på ${Behovstype.MedlemskapsvurderingResultat.utgåendeNavn}: ${svar.asString()}")
                 }
             }
 
     internal val rettighetskategoriResultat: Rettighetskategori.Hovedkategori? =
         packet["@løsning.${Behovstype.RettighetskategoriResultat.utgåendeNavn}.hovedkategori"]
             .takeUnless { it.isMissingOrNull() }
-            ?.let { Rettighetskategori.Hovedkategori.valueOf(it.asText()) }
+            ?.let { Rettighetskategori.Hovedkategori.valueOf(it.asString()) }
 
     internal val dagpengerV2 =
         Dagpenger(

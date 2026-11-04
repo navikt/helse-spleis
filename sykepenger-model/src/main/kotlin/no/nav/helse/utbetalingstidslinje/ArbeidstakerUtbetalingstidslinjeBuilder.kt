@@ -135,7 +135,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                                 dag.grad,
                                 inntekt,
                                 inntektjusteringer,
-                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
                             )
                         } else {
                             navDag(
@@ -144,7 +144,7 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                                 dag.grad,
                                 inntekt,
                                 inntektjusteringer,
-                                graderteAndreYtelserTidslinje[dag.dato] ?: Prosentdel.NullProsent,
+                                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
                             )
                         }
                     }

@@ -2,7 +2,6 @@ package no.nav.helse.spleis.e2e.andre_ytelser
 
 import no.nav.helse.dsl.*
 import no.nav.helse.hendelser.*
-import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning.GraderteAndreYtelserForBeregningPeriode
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
@@ -19,6 +18,7 @@ import no.nav.helse.økonomi.Inntekt.Companion.årlig
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.util.UUID
 import kotlin.test.assertIs
 
 internal class GraderteAndreYtelserTest : AbstractDslTest() {
@@ -37,18 +37,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        20.januar,
-                                        30.januar,
-                                        30,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30),
                     ),
             )
 
@@ -85,18 +74,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        20.januar,
-                                        30.januar,
-                                        30,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30),
                     ),
             )
 
@@ -115,18 +93,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        20.januar,
-                                        30.januar,
-                                        30,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30),
                     ),
             )
 
@@ -145,18 +112,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         val inntektPerArbeidsgiver = 260_000.årlig
         val gradertePleiepenger =
             listOf(a1, a2).map { orgnr ->
-                GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList =
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                20.januar,
-                                30.januar,
-                                30,
-                            ),
-                        ),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                    yrkesaktivitet = Arbeidstaker(orgnr),
-                )
+                graderteAndreYtelser(Arbeidstaker(orgnr), (20.januar til 30.januar) to 30)
             }
 
         listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
@@ -225,18 +181,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         val inntektA2 = 600_000.årlig
         val gradertePleiepenger =
             listOf(a1, a2).map { orgnr ->
-                GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList =
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                20.januar,
-                                30.januar,
-                                30,
-                            ),
-                        ),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                    yrkesaktivitet = Arbeidstaker(orgnr),
-                )
+                graderteAndreYtelser(Arbeidstaker(orgnr), (20.januar til 30.januar) to 30)
             }
 
         a1 {
@@ -328,18 +273,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                     ),
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        1.januar,
-                                        29.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (1.januar til 29.januar) to 50),
                     ),
             )
 
@@ -387,18 +321,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        1.januar,
-                                        31.januar,
-                                        81,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (1.januar til 31.januar) to 81),
                     ),
             )
 
@@ -440,18 +363,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        1.juni(2025),
-                                        30.juni(2025),
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (1.juni(2025) til 30.juni(2025)) to 50, sykdomsgradFørFordeling = 50),
                     ),
             )
 
@@ -482,53 +394,13 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        1.januar,
-                                        28.januar,
-                                        20,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        20,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        22.januar,
-                                        22.januar,
-                                        15,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        22.januar,
-                                        30.januar,
-                                        20,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OPPLARINGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
+                        graderteAndreYtelser(
+                            Arbeidstaker(a1),
+                            (1.januar til 16.januar) to 20,
+                            (17.januar til 21.januar) to 40,
+                            22.januar.somPeriode() to 75,
+                            (23.januar til 28.januar) to 40,
+                            (29.januar til 30.januar) to 20,
                         ),
                     ),
             )
@@ -548,18 +420,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         val inntektPerArbeidsgiver = 260_000.årlig
         val gradertePleiepengerMotA1 =
             listOf(
-                GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList =
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                20.januar,
-                                30.januar,
-                                30,
-                            ),
-                        ),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                    yrkesaktivitet = Arbeidstaker(a1),
-                ),
+                graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 30),
             )
 
         listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
@@ -617,30 +478,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
         val inntektPerArbeidsgiver = 260_000.årlig
         val gradertePleiepengerMotA1 =
             listOf(
-                GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList =
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                20.januar,
-                                30.januar,
-                                15,
-                            ),
-                        ),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                    yrkesaktivitet = Arbeidstaker(a1),
-                ),
-                GraderteAndreYtelserForBeregning(
-                    graderteAndreYtelserForBeregningPeriodeList =
-                        listOf(
-                            GraderteAndreYtelserForBeregningPeriode(
-                                20.januar,
-                                30.januar,
-                                15,
-                            ),
-                        ),
-                    graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                    yrkesaktivitet = Arbeidstaker(a2),
-                ),
+                graderteAndreYtelser(Arbeidstaker(a1), (20.januar til 30.januar) to 15),
+                graderteAndreYtelser(Arbeidstaker(a2), (20.januar til 30.januar) to 15),
             )
 
         listOf(a1, a2).nyeVedtak(januar, inntekt = inntektPerArbeidsgiver)
@@ -704,18 +543,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        20.januar,
-                                        30.januar,
-                                        30,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a2),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a2), (20.januar til 30.januar) to 30),
                     ),
             )
 
@@ -737,18 +565,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        1.januar,
-                                        31.januar,
-                                        40,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.FORELDREPENGER,
-                            yrkesaktivitet = Selvstendig,
-                        ),
+                        graderteAndreYtelser(Selvstendig, (1.januar til 31.januar) to 40),
                     ),
             )
 
@@ -797,18 +614,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 50),
                     ),
             )
             assertUtbetalingsbeløp(1.vedtaksperiode, 250, 500, 0, subset = 17.januar til 22.januar)
@@ -858,18 +664,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 50),
                     ),
             )
             assertUtbetalingsbeløp(1.vedtaksperiode, 125, 250, 125, subset = 17.januar til 22.januar)
@@ -917,18 +712,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 50),
                     ),
             )
             // 2160 =~ 6G.daglig
@@ -980,30 +764,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a2),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 60),
+                        graderteAndreYtelser(Arbeidstaker(a2), (17.januar til 22.januar) to 60),
                     ),
             )
             // 2160 =~ 6G.daglig
@@ -1055,30 +817,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a2),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 60),
+                        graderteAndreYtelser(Arbeidstaker(a2), (17.januar til 22.januar) to 60),
                     ),
             )
             // 2160 =~ 6G.daglig
@@ -1130,30 +870,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a2),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 60),
+                        graderteAndreYtelser(Arbeidstaker(a2), (17.januar til 22.januar) to 60),
                     ),
                 inntekterForBeregning =
                     listOf(
@@ -1214,30 +932,8 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.PLEIEPENGER,
-                            yrkesaktivitet = Arbeidstaker(a2),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 60),
+                        graderteAndreYtelser(Arbeidstaker(a2), (17.januar til 22.januar) to 60),
                     ),
                 inntekterForBeregning =
                     listOf(
@@ -1298,18 +994,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        60,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 60),
                     ),
                 inntekterForBeregning =
                     listOf(
@@ -1363,18 +1048,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 50, sykdomsgradFørFordeling = 50),
                     ),
             )
             // 2160 =~ 6G.daglig
@@ -1387,6 +1061,32 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar].also {
                 assertIs<Utbetalingsdag.AvvistDag>(it)
             }
+            assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
+        }
+    }
+
+    @Test
+    fun `trekk som er større enn sykdomsgraden gir justert sykdomsgrad 0`() {
+        a1 {
+            håndterSykmelding(Sykmeldingsperiode(1.januar, 31.januar))
+            håndterSøknad(Søknad.Søknadsperiode.Sykdom(1.januar, 31.januar, 50.prosent))
+            håndterArbeidsgiveropplysninger(
+                listOf(1.januar til 16.januar),
+                beregnetInntekt = 500.daglig,
+                vedtaksperiodeId = 1.vedtaksperiode,
+            )
+            håndterVilkårsgrunnlag(1.vedtaksperiode)
+            håndterYtelser(
+                1.vedtaksperiode,
+                graderteAndreYtelser =
+                    listOf(
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 31.januar) to 80, sykdomsgradFørFordeling = 50),
+                    ),
+            )
+
+            assertUtbetalingsbeløp(1.vedtaksperiode, 0, 500, 0, subset = 17.januar til 31.januar)
+            assertEquals(0.prosent, inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.totalSykdomsgrad(17.januar))
+            assertIs<Utbetalingsdag.AvvistDag>(inspektør.utbetalingstidslinjer(1.vedtaksperiode)[17.januar])
             assertVarsel(Varselkode.RV_VV_4, 1.vedtaksperiode.filter())
         }
     }
@@ -1424,18 +1124,7 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 graderteAndreYtelser =
                     listOf(
-                        GraderteAndreYtelserForBeregning(
-                            graderteAndreYtelserForBeregningPeriodeList =
-                                listOf(
-                                    GraderteAndreYtelserForBeregningPeriode(
-                                        17.januar,
-                                        22.januar,
-                                        50,
-                                    ),
-                                ),
-                            graderteAndreYtelserType = GraderteAndreYtelserType.OMSORGSPENGER,
-                            yrkesaktivitet = Arbeidstaker(a1),
-                        ),
+                        graderteAndreYtelser(Arbeidstaker(a1), (17.januar til 22.januar) to 50, sykdomsgradFørFordeling = 50),
                     ),
             )
             // 2160 =~ 6G.daglig
@@ -1462,4 +1151,18 @@ internal class GraderteAndreYtelserTest : AbstractDslTest() {
             }
         }
     }
+
+    private fun graderteAndreYtelser(
+        yrkesaktivitet: no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet,
+        vararg trekk: Pair<Periode, Int>,
+        sykdomsgradFørFordeling: Int = 100,
+    ) = GraderteAndreYtelserForBeregning(
+        yrkesaktivitet = yrkesaktivitet,
+        versjon = UUID.randomUUID(),
+        dager =
+            trekk
+                .flatMap { (periode, trekkFraSykdomsgrad) ->
+                    periode.map { dato -> GraderteAndreYtelserForBeregning.Dag(dato, trekkFraSykdomsgrad, sykdomsgradFørFordeling) }
+                }.sortedBy { it.dato },
+    )
 }
