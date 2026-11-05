@@ -531,8 +531,8 @@ internal class E2EEpic3Test : AbstractDslTest() {
                 vedtaksperiodeId = 1.vedtaksperiode,
             )
             håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
-            assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
             assertTilstander(

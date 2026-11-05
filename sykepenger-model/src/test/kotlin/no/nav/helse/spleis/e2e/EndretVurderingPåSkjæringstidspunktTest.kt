@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.nyttVedtak
@@ -107,64 +106,60 @@ internal class EndretVurderingPåSkjæringstidspunktTest : AbstractDslTest() {
 
     @Test
     fun `saksbehandler vurderer uavklart medlemskap til ja`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
-                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
+            assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-                val gammelMedlemskapsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId
-                val nyMedlemskapsvurderingId = UUID.randomUUID()
-                håndterEndretMedlemskapsvurdering(1.januar, nyMedlemskapsvurderingId)
+            val gammelMedlemskapsvurderingId = inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId
+            val nyMedlemskapsvurderingId = UUID.randomUUID()
+            håndterEndretMedlemskapsvurdering(1.januar, nyMedlemskapsvurderingId)
 
-                assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertNotEquals(gammelMedlemskapsvurderingId, nyMedlemskapsvurderingId)
-                assertEquals(nyMedlemskapsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId)
-                assertEquals(nyMedlemskapsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().medlemskapsvurderingId)
+            assertEquals(3, inspektør.vilkårsgrunnlagHistorikkInnslag().size)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertNotEquals(gammelMedlemskapsvurderingId, nyMedlemskapsvurderingId)
+            assertEquals(nyMedlemskapsvurderingId, inspektør.vilkårsgrunnlag(1.vedtaksperiode)!!.medlemskapsvurderingId)
+            assertEquals(nyMedlemskapsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().medlemskapsvurderingId)
 
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Ja)
-                assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
-            }
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Ja)
+            assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
         }
 
     @Test
     fun `saksbehandler vurderer uavklart medlemskap til nei`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
-                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
-                håndterSimulering(1.vedtaksperiode)
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
-                håndterUtbetalt()
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
+            assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+            håndterSimulering(1.vedtaksperiode)
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+            håndterUtbetalt()
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
 
-                val nyMedlemskapsvurderingId = UUID.randomUUID()
-                håndterEndretMedlemskapsvurdering(1.januar, nyMedlemskapsvurderingId)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-                assertEquals(nyMedlemskapsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().medlemskapsvurderingId)
+            val nyMedlemskapsvurderingId = UUID.randomUUID()
+            håndterEndretMedlemskapsvurdering(1.januar, nyMedlemskapsvurderingId)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
+            assertEquals(nyMedlemskapsvurderingId, observatør.trengerInformasjonTilBeregningEventer.last().medlemskapsvurderingId)
 
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Nei)
-                assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
-                assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
-                val utbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
-                assertTrue(utbetalingsdager.isNotEmpty())
-                utbetalingsdager.forEach { utbetalingsdag ->
-                    assertTrue(utbetalingsdag is AvvistDag)
-                    assertEquals(ManglerMedlemskap, (utbetalingsdag as AvvistDag).begrunnelser.single())
-                }
-                håndterSimulering(1.vedtaksperiode)
-                assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Nei)
+            assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
+            assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+            val utbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
+            assertTrue(utbetalingsdager.isNotEmpty())
+            utbetalingsdager.forEach { utbetalingsdag ->
+                assertTrue(utbetalingsdag is AvvistDag)
+                assertEquals(ManglerMedlemskap, (utbetalingsdag as AvvistDag).begrunnelser.single())
             }
+            håndterSimulering(1.vedtaksperiode)
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
         }
 
     @Test

@@ -1,6 +1,5 @@
 package no.nav.helse.hendelser
 
-import no.nav.helse.Toggle
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_1
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
@@ -8,12 +7,8 @@ import no.nav.helse.person.aktivitetslogg.Varselkode.RV_MV_2
 class Medlemskapsvurdering(
     private val medlemskapstatus: Medlemskapstatus,
 ) {
-    internal fun validert(aktivitetslogg: IAktivitetslogg): Medlemskapstatus {
-        if (Toggle.MedlemskapsvurderingResultatBehov.enabled) {
-            aktivitetslogg.info("Varsler om medlemskap gis ved beregning ut fra svaret fra sp-medlemskap")
-            return medlemskapstatus
-        }
-        varsle(medlemskapstatus, aktivitetslogg)
+    internal fun logget(aktivitetslogg: IAktivitetslogg): Medlemskapstatus {
+        aktivitetslogg.info("Mottok medlemskapsinfo med resultat $medlemskapstatus, men sp-medlemskap har siste ord i neste state")
         return medlemskapstatus
     }
 

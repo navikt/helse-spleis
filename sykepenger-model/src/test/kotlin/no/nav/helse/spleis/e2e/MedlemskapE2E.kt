@@ -1,6 +1,5 @@
 package no.nav.helse.spleis.e2e
 
-import no.nav.helse.Toggle
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.erHelg
@@ -46,8 +45,8 @@ internal class MedlemskapE2E : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
-            assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
@@ -65,7 +64,8 @@ internal class MedlemskapE2E : AbstractDslTest() {
                     30.januar,
                     31.januar,
                 )
-            val forventetAvvisteUtbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
+            val forventetAvvisteUtbetalingsdager =
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
             assertEquals(forventetAvvisteDager, forventetAvvisteUtbetalingsdager.map { it.dato }.toSet())
 
             forventetAvvisteUtbetalingsdager.forEach { utbetalingsdag ->
@@ -77,79 +77,70 @@ internal class MedlemskapE2E : AbstractDslTest() {
 
     @Test
     fun `medlemskapsvurderingresultat nei ved beregning avslår dager og gir varsel selv om vilkårsgrunnlaget sier ja`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Nei)
-                assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
-                håndterUtbetalingsgodkjenning(1.vedtaksperiode)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Nei)
+            assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
+            håndterUtbetalingsgodkjenning(1.vedtaksperiode)
 
-                assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
-                val utbetalingsdager = inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
-                assertTrue(utbetalingsdager.isNotEmpty())
-                utbetalingsdager.forEach { utbetalingsdag ->
-                    assertTrue(utbetalingsdag is AvvistDag)
-                    assertEquals(ManglerMedlemskap, (utbetalingsdag as AvvistDag).begrunnelser.single())
-                }
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET)
+            val utbetalingsdager =
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).drop(16).filterNot { it.dato.erHelg() }
+            assertTrue(utbetalingsdager.isNotEmpty())
+            utbetalingsdager.forEach { utbetalingsdag ->
+                assertTrue(utbetalingsdag is AvvistDag)
+                assertEquals(ManglerMedlemskap, (utbetalingsdag as AvvistDag).begrunnelser.single())
             }
         }
 
     @Test
     fun `medlemskapsvurderingresultat ja ved beregning gir utbetaling og ikke varsel selv om vilkårsgrunnlaget sier nei`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Ja)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Ja)
 
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-                assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
-            }
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
         }
 
     @Test
     fun `medlemskapsvurderingresultat uavklart med brukerspørsmål ved beregning gir varsel`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
-                håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Ja)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = UavklartMedBrukerspørsmål)
 
-                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
-                assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
-            }
+            assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
+            assertFalse(inspektør.utbetalingstidslinjer(1.vedtaksperiode).any { it is AvvistDag })
         }
 
     @Test
     fun `uten svar fra sp-medlemskap gir statusen Nei på vilkårsgrunnlaget varsel ved beregning`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-                håndterYtelser(1.vedtaksperiode)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = Nei)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
 
-                assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
         }
 
     @Test
     fun `uten svar fra sp-medlemskap gir statusen UavklartMedBrukerspørsmål på vilkårsgrunnlaget varsel ved beregning`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            a1 {
-                håndterSøknad(januar)
-                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
-                håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
-                håndterYtelser(1.vedtaksperiode)
+        a1 {
+            håndterSøknad(januar)
+            håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+            håndterVilkårsgrunnlag(1.vedtaksperiode, medlemskapstatus = UavklartMedBrukerspørsmål)
+            assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+            håndterYtelser(1.vedtaksperiode)
 
-                assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
-            }
+            assertVarsel(RV_MV_1, 1.vedtaksperiode.filter())
         }
 }

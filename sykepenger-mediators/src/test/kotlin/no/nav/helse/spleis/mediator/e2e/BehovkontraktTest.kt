@@ -194,6 +194,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForBeregning,
             OpptjeningsvurderingResultat,
             RettighetskategoriResultat,
+            MedlemskapsvurderingResultat,
         )
         assertArbeidsavklaringspengerdetaljer(behov)
         assertDagpengerdetaljer(behov)
@@ -234,41 +235,41 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
                 GraderteAndreYtelserForBeregning,
                 OpptjeningsvurderingResultat,
                 RettighetskategoriResultat,
+                MedlemskapsvurderingResultat,
             )
             assertEquals(3.januar, LocalDate.parse(behov.path(GraderteAndreYtelserForBeregning.utgåendeNavn).path("fom").asString()))
             assertEquals(26.januar, LocalDate.parse(behov.path(GraderteAndreYtelserForBeregning.utgåendeNavn).path("tom").asString()))
         }
 
     @Test
-    fun `ytelser med toggle for medlemskapsvurderingresultat`() =
-        Toggle.MedlemskapsvurderingResultatBehov.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+    fun `ytelser med toggle for medlemskapsvurderingresultat`() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+        )
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        sendVilkårsgrunnlag(0)
+        val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
+        assertVedtaksperiodeBehov(
+            behov,
+            Arbeidsavklaringspenger,
+            Dagpenger,
+            Foreldrepenger,
+            Institusjonsopphold,
+            Omsorgspenger,
+            Opplæringspenger,
+            Pleiepenger,
+            InntekterForBeregning,
+            OpptjeningsvurderingResultat,
+            MedlemskapsvurderingResultat,
+            RettighetskategoriResultat,
+        )
+        assertDoesNotThrow {
+            UUID.fromString(
+                behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asString(),
             )
-            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-            sendVilkårsgrunnlag(0)
-            val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
-            assertVedtaksperiodeBehov(
-                behov,
-                Arbeidsavklaringspenger,
-                Dagpenger,
-                Foreldrepenger,
-                Institusjonsopphold,
-                Omsorgspenger,
-                Opplæringspenger,
-                Pleiepenger,
-                InntekterForBeregning,
-                OpptjeningsvurderingResultat,
-                MedlemskapsvurderingResultat,
-                RettighetskategoriResultat,
-            )
-            assertDoesNotThrow {
-                UUID.fromString(
-                    behov.path(MedlemskapsvurderingResultat.utgåendeNavn).path("medlemskapsvurderingId").asString(),
-                )
-            }
         }
+    }
 
     @Test
     fun simulering() {

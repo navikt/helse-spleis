@@ -34,6 +34,7 @@ internal class VarselE2ETest : AbstractDslTest() {
             håndterSøknad(januar)
             håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
             håndterVilkårsgrunnlag(medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Nei)
 
             assertVarsel(RV_MV_2, 1.vedtaksperiode.filter())
         }

@@ -272,7 +272,7 @@ internal class InfotrygdTest : AbstractDslTest() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             nyPeriode(mars)
-            håndterYtelser(2.vedtaksperiode)
+            håndterYtelser(2.vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Ja)
             assertSisteTilstand(2.vedtaksperiode, AVVENTER_SIMULERING)
             assertIngenFunksjonelleFeil()
         }

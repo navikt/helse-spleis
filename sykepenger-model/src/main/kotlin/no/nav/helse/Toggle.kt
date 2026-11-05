@@ -45,7 +45,6 @@ class Toggle private constructor(
     companion object {
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false) // Denne MÅ settes til false når man er ferdig å kjøre feriepenger. Ref. den mystiske feriepengejobben som startet av seg selv (?) 08.08.2024
         val GraderteAndreYtelser = fraEnv("GRADERTE_ANDRE_YTELSER", false)
-        val MedlemskapsvurderingResultatBehov = fraEnv("MEDLEMSKAPSVURDERINGRESULTATBEHOV", false)
         val MedlemskapsvurderingBehov = fraEnv("MEDLEMSKAPSVURDERINGBEHOV", false)
 
         fun fraEnv(

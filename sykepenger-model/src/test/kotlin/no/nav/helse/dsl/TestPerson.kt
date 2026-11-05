@@ -869,6 +869,7 @@ internal class TestPerson(
                 }
 
             behovshåndterer.bekreftForespurtBeregningAvArbeidstaker(vedtaksperiodeId)
+            if (medlemskapsvurderingResultat != null) behovshåndterer.bekreftForespurtMedlemskapsvurderingResultat(vedtaksperiodeId)
             arbeidsgiverHendelsefabrikk
                 .lagYtelser(
                     vedtaksperiodeId,
@@ -1304,7 +1305,7 @@ internal fun TestPerson.TestArbeidsgiver.forlengelseTilGodkjenning(
     grad: Prosentdel = 100.prosent,
 ): UUID {
     val vedtaksperiode = nyPeriode(periode, grad)
-    håndterYtelser(vedtaksperiode)
+    håndterYtelser(vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Ja)
     håndterSimulering(vedtaksperiode)
     return vedtaksperiode
 }
@@ -1329,7 +1330,7 @@ internal fun TestPerson.TestArbeidsgiver.forlengVedtak(
     status: Oppdragstatus = Oppdragstatus.AKSEPTERT,
 ): UUID {
     val vedtaksperiode = nyPeriode(periode, grad)
-    håndterYtelser(vedtaksperiode)
+    håndterYtelser(vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Ja)
     håndterSimulering(vedtaksperiode)
     håndterUtbetalingsgodkjenning(vedtaksperiode)
     håndterUtbetalt(status)

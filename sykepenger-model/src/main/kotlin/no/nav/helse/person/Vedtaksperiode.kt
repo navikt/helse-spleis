@@ -1633,11 +1633,11 @@ internal class Vedtaksperiode private constructor(
                 "Medlemskapsvurderingresultat ($fraMedlemskapsvurderingResultat) er ulikt medlemskapstatus på vilkårsgrunnlaget ($fraVilkårsgrunnlag)",
             )
         }
-        val medlemskapstatus = fraMedlemskapsvurderingResultat ?: fraVilkårsgrunnlag
-        // Med togglen på gir ikke vilkårsprøvingen varsler om medlemskap, så de må komme her
-        if (Toggle.MedlemskapsvurderingResultatBehov.enabled && medlemskapstatus != null) {
-            Medlemskapsvurdering.varsle(medlemskapstatus, aktivitetslogg)
-        }
+        val medlemskapstatus =
+            checkNotNull(fraMedlemskapsvurderingResultat ?: fraVilkårsgrunnlag) {
+                "Mangler medlemskapstatus for skjæringstidspunkt $skjæringstidspunkt"
+            }
+        Medlemskapsvurdering.varsle(medlemskapstatus, aktivitetslogg)
         return medlemskapstatus
     }
 

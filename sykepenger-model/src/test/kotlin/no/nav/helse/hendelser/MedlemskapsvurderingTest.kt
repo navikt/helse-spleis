@@ -19,27 +19,27 @@ internal class MedlemskapsvurderingTest {
 
     @Test
     fun `bruker er medlem`() {
-        Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Ja).validert(aktivitetslogg)
+        Medlemskapsvurdering.varsle(Medlemskapsvurdering.Medlemskapstatus.Ja, aktivitetslogg)
         aktivitetslogg.assertIngenVarsler()
         aktivitetslogg.assertInfo("Bruker er medlem av Folketrygden")
     }
 
     @Test
     fun `bruker er kanskje medlem`() {
-        Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.VetIkke).validert(aktivitetslogg)
+        Medlemskapsvurdering.varsle(Medlemskapsvurdering.Medlemskapstatus.VetIkke, aktivitetslogg)
         aktivitetslogg.assertIngenVarsler()
         aktivitetslogg.assertInfo("Bruker er VetIkke-medlem av Folketrygden")
     }
 
     @Test
     fun `får varsel ved status UavklartMedBrukerspørsmål`() {
-        Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål).validert(aktivitetslogg)
+        Medlemskapsvurdering.varsle(Medlemskapsvurdering.Medlemskapstatus.UavklartMedBrukerspørsmål, aktivitetslogg)
         aktivitetslogg.assertVarsel(RV_MV_1)
     }
 
     @Test
     fun `bruker er ikke medlem`() {
-        Medlemskapsvurdering(Medlemskapsvurdering.Medlemskapstatus.Nei).validert(aktivitetslogg)
+        Medlemskapsvurdering.varsle(Medlemskapsvurdering.Medlemskapstatus.Nei, aktivitetslogg)
         aktivitetslogg.assertVarsel(RV_MV_2)
     }
 }

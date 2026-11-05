@@ -608,7 +608,7 @@ internal class EndaEnGodkjenningsbehovTest : AbstractDslTest() {
         a1 {
             håndterUtbetalingshistorikkEtterInfotrygdendring(utbetalinger = listOf(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar)))
             håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(20.februar, Dagtype.Sykedag, 50)))
-            håndterYtelser(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Ja)
             assertTags(
                 setOf(
                     "Førstegangsbehandling",

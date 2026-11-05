@@ -98,6 +98,21 @@ class Behovshåndterer(
             "Forventet at det skulle være forspurt informasjon til beregning av arbeidstaker-periode. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
+    fun bekreftForespurtMedlemskapsvurderingResultat(vedtaksperiodeId: UUID): UUID =
+        behovsoppsamler
+            .behovsdetaljer<Behovsoppsamler.Behovsdetaljer>()
+            .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+            .mapNotNull {
+                when (it) {
+                    is Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker -> it.medlemskapsvurderingId
+                    is Behovsoppsamler.Behovsdetaljer.InformasjonTilBeregningAvSelvstendig -> it.medlemskapsvurderingId
+                    else -> null
+                }
+            }.lastOrNull()
+            ?: fail(
+                "Forventet at det skulle være forespurt medlemskapsvurderingresultat. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}",
+            )
+
     override fun vedtaksperiodeEndret(event: EventSubscription.VedtaksperiodeEndretEvent) {
         tilstander[event.vedtaksperiodeId] = event.gjeldendeTilstand
     }

@@ -142,7 +142,7 @@ class Vilkårsgrunnlag(
                 skjæringstidspunkt = skjæringstidspunkt,
                 inntektsgrunnlag = inntektsgrunnlag,
                 opptjening = opptjening,
-                medlemskapstatus = medlemskapsvurdering.validert(aktivitetslogg),
+                medlemskapstatus = medlemskapsvurdering.logget(aktivitetslogg),
                 meldingsreferanseId = metadata.meldingsreferanseId,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 forsikringsvurderingId = forsikringsvurderingId,

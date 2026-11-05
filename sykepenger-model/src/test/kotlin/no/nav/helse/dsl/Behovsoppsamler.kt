@@ -136,12 +136,14 @@ sealed class Behovsoppsamler(
         data class InformasjonTilBeregningAvArbeidstaker(
             override val vedtaksperiodeId: UUID,
             val rettighetskategoriId: UUID,
+            val medlemskapsvurderingId: UUID,
             override val id: UUID = UUID.randomUUID(),
         ) : Behovsdetaljer
 
         data class InformasjonTilBeregningAvSelvstendig(
             override val vedtaksperiodeId: UUID,
             val rettighetskategoriId: UUID,
+            val medlemskapsvurderingId: UUID,
             override val id: UUID = UUID.randomUUID(),
         ) : Behovsdetaljer
 
@@ -206,8 +208,23 @@ sealed class Behovsoppsamler(
 
         override fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) =
             when (event.yrkesaktivitetssporing is Behandlingsporing.Yrkesaktivitet.Selvstendig) {
-                true -> registrer(Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(event.vedtaksperiodeId, event.rettighetskategoriId))
-                false -> registrer(Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(event.vedtaksperiodeId, event.rettighetskategoriId))
+                true ->
+                    registrer(
+                        Behovsdetaljer.InformasjonTilBeregningAvSelvstendig(
+                            event.vedtaksperiodeId,
+                            event.rettighetskategoriId,
+                            event.medlemskapsvurderingId,
+                        ),
+                    )
+
+                false ->
+                    registrer(
+                        Behovsdetaljer.InformasjonTilBeregningAvArbeidstaker(
+                            event.vedtaksperiodeId,
+                            event.rettighetskategoriId,
+                            event.medlemskapsvurderingId,
+                        ),
+                    )
             }
 
         override fun trengerInformasjonTilVilkårsprøving(event: EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent) =

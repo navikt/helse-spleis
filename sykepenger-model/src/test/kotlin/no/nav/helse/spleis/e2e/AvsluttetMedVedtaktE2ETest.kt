@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e
 import no.nav.helse.dsl.AbstractDslTest
 import no.nav.helse.dsl.a1
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Medlemskapsvurdering
 import no.nav.helse.januar
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.aktivitetslogg.Varselkode
@@ -19,7 +20,7 @@ internal class AvsluttetMedVedtaktE2ETest : AbstractDslTest() {
             håndterUtbetalingshistorikkEtterInfotrygdendring(ArbeidsgiverUtbetalingsperiode(a1, 1.januar, 31.januar))
             håndterSykmelding(februar)
             håndterSøknad(februar)
-            håndterYtelser(1.vedtaksperiode)
+            håndterYtelser(1.vedtaksperiode, medlemskapsvurderingResultat = Medlemskapsvurdering.Medlemskapstatus.Ja)
             håndterUtbetalingsgodkjenning(1.vedtaksperiode)
             assertVarsel(Varselkode.RV_IT_14, 1.vedtaksperiode.filter())
             assertEquals(1, observatør.avsluttetMedVedtakEvent.size)

@@ -1159,8 +1159,8 @@ internal class FlereArbeidsgivereTest : AbstractDslTest() {
                 1.vedtaksperiode,
                 medlemskapstatus = Medlemskapsvurdering.Medlemskapstatus.Nei,
             )
-            assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
             håndterYtelser(1.vedtaksperiode)
+            assertVarsel(Varselkode.RV_MV_2, 1.vedtaksperiode.filter())
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
         }
         a2 {

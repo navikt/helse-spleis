@@ -309,6 +309,7 @@ internal class YrkesaktivitetHendelsefabrikk(
         dagpengerV2: List<Periode> = emptyList(),
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
         opptjeningsvurderingResultatOk: Boolean = true,
+        medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = Medlemskapsvurdering.Medlemskapstatus.Ja,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -344,6 +345,7 @@ internal class YrkesaktivitetHendelsefabrikk(
             dagpenger = Dagpenger(dagpengerV2),
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
+            medlemskapsvurderingResultat = medlemskapsvurderingResultat,
         )
     }
 
