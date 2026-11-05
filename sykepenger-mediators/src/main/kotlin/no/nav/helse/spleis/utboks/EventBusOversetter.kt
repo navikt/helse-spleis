@@ -612,21 +612,14 @@ internal class EventBusOversetter(
                         "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
                     ),
                 ).takeIf { Toggle.MedlemskapsvurderingBehov.enabled },
-                if (event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG") {
-                    Behov(
-                        Behov.Behovstype.Forsikringsvurdering,
-                        mapOf(
-                            "skjæringstidspunkt" to event.skjæringstidspunkt,
-                            "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
-                            "rettighetskategoriId" to
-                                checkNotNull(event.rettighetskategoriId) {
-                                    "Forventer rettighetskategoriId når vi ber om forsikringsvurdering"
-                                },
-                        ),
-                    )
-                } else {
-                    null
-                },
+                Behov(
+                    Behov.Behovstype.Forsikringsvurdering,
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
+                        "rettighetskategoriId" to event.rettighetskategoriId,
+                    ),
+                ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
                 Behov(
                     Behov.Behovstype.Opptjeningsvurdering,
                     buildMap {
@@ -640,7 +633,7 @@ internal class EventBusOversetter(
                                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
                             },
                         )
-                        event.rettighetskategoriId?.let { put("rettighetskategoriId", it) }
+                        put("rettighetskategoriId", event.rettighetskategoriId)
                     },
                 ),
             )
