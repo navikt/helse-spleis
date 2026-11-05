@@ -141,6 +141,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     @Test
     fun `vilkårsgrunnlag - selvstendig`() {
+        besvarRettighetskategoriAutomatisk = false
         sendNySøknadSelvstendig(
             SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
@@ -150,7 +151,12 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             ventetid = 3.januar til 18.januar,
             arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
         )
+        val rettighetskategoriId = UUID.randomUUID()
+        sendRettighetskategori(0, rettighetskategoriId = rettighetskategoriId, hovedkategori = "SELVSTENDIG_NÆRINGSDRIVENDE")
         val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        assertEquals("SELVSTENDIG", behov.path("yrkesaktivitetstype").asString())
+        assertTrue(behov.path("vedtaksperiodeId").asString().isNotEmpty())
+        assertTrue(behov.path("behandlingId").asString().isNotEmpty())
         assertVedtaksperiodeBehov(
             behov,
             InntekterForSykepengegrunnlag,
@@ -164,7 +170,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
-        assertForsikringsvurderingdetaljer(behov, emptyList())
+        assertForsikringsvurderingdetaljer(behov, emptyList(), rettighetskategoriId)
     }
 
     @Test
@@ -437,8 +443,13 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     private fun assertForsikringsvurderingdetaljer(
         behov: JsonNode,
         forventedeSpesielleYrkesgrupper: List<String>,
+        forventetRettighetskategoriId: UUID,
     ) {
         assertDato(behov.path(Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asString())
+        assertEquals(
+            forventetRettighetskategoriId.toString(),
+            behov.path(Forsikringsvurdering.utgåendeNavn).path("rettighetskategoriId").asString(),
+        )
         assertEquals(
             forventedeSpesielleYrkesgrupper,
             behov

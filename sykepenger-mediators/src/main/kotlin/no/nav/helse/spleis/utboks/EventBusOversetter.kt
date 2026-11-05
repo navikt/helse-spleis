@@ -612,13 +612,21 @@ internal class EventBusOversetter(
                         "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
                     ),
                 ).takeIf { Toggle.MedlemskapsvurderingBehov.enabled },
-                Behov(
-                    Behov.Behovstype.Forsikringsvurdering,
-                    mapOf(
-                        "skjæringstidspunkt" to event.skjæringstidspunkt,
-                        "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
-                    ),
-                ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
+                if (event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG") {
+                    Behov(
+                        Behov.Behovstype.Forsikringsvurdering,
+                        mapOf(
+                            "skjæringstidspunkt" to event.skjæringstidspunkt,
+                            "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
+                            "rettighetskategoriId" to
+                                checkNotNull(event.rettighetskategoriId) {
+                                    "Forventer rettighetskategoriId når vi ber om forsikringsvurdering"
+                                },
+                        ),
+                    )
+                } else {
+                    null
+                },
                 Behov(
                     Behov.Behovstype.Opptjeningsvurdering,
                     buildMap {
