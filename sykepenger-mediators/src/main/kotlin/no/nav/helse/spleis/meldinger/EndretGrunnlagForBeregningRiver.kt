@@ -1,33 +1,35 @@
 package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import no.nav.helse.Toggle
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage
+import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage.Grunnlagsformat.Avslagsdager
 import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage.Grunnlagsformat.GraderteAndreYtelser
 import no.nav.helse.spleis.meldinger.model.EndretGrunnlagForBeregningMessage.Grunnlagsformat.Inntektsendringer
-import tools.jackson.databind.JsonNode
 
 internal class EndretGrunnlagForBeregningRiver(
     rapidsConnection: RapidsConnection,
     messageMediator: IMessageMediator,
 ) : HendelseRiver(rapidsConnection, messageMediator) {
-    private val grunnlag =
-        setOf(
-            GraderteAndreYtelser,
-            Inntektsendringer,
-        )
+    private val grunnlag
+        get() =
+            buildSet {
+                add(GraderteAndreYtelser)
+                add(Inntektsendringer)
+                if (Toggle.Avslagsdagerbehov.enabled) add(Avslagsdager)
+            }
 
-    override val eventNames = grunnlag.map { it.eventName }.toSet()
+    override val eventNames get() = grunnlag.map { it.eventName }.toSet()
 
     override val riverName = "Endret grunnlag for beregning"
 
     override fun validate(message: JsonMessage) {
         message.requireKey("fødselsnummer")
         message.interestedIn("manuellVurdering")
-        message.require(message.grunnlagsformat.fomPath, JsonNode::asLocalDate)
+        message.grunnlagsformat.validate(message)
     }
 
     override fun precondition(packet: JsonMessage) {

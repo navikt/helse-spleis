@@ -1762,6 +1762,16 @@ internal class TestMessageFactory(
             ),
         )
 
+    internal fun lagAvslagsdagerEndret(vararg perioder: Pair<LocalDate, LocalDate>) =
+        nyHendelse(
+            "avslagsdager_endret",
+            mutableMapOf(
+                "fødselsnummer" to fødselsnummer,
+                "vurderingId" to UUID.randomUUID(),
+                "perioder" to perioder.map { (fom, tom) -> mapOf("fom" to fom, "tom" to tom) },
+            ),
+        )
+
     internal fun lagEndretForsikringsvurdering(
         skjæringstidspunkt: LocalDate,
         forsikringsvurderingId: UUID,

@@ -281,6 +281,18 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun `avslagsdager endret`() =
+        Toggle.Avslagsdagerbehov.enable {
+            testRapid.sendTestMessage(meldingsfabrikk.lagAvslagsdagerEndret(10.mars to 12.mars, 5.januar to 6.januar))
+            val forventet =
+                TestHendelseMediator.EndretGrunnlagForBeregningData(
+                    type = "Avslagsdager",
+                    fom = 5.januar,
+                )
+            assertEquals(forventet, hendelseMediator.lestEndretGrunnlagForBeregning)
+        }
+
+    @Test
     fun inntektsendringer() {
         testRapid.sendTestMessage(meldingsfabrikk.lagInntektsendringer(7.januar))
         val forventet =
