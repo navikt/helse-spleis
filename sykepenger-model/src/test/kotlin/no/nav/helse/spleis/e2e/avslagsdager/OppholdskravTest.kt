@@ -120,6 +120,27 @@ internal class OppholdskravTest : AbstractDslTest() {
     }
 
     @Test
+    fun `overstyring av en dag som er avslått for oppholdskrav feiler`() {
+        val vurdering = UUID.randomUUID()
+        a1 {
+            tilYtelser(januar)
+            håndterYtelser(1.vedtaksperiode, avslagsdager = oppholdskravIkkeOppfylt(vurdering, avslåttePerioden))
+            håndterSimulering(1.vedtaksperiode)
+
+            assertThrows<IllegalStateException> {
+                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(23.januar, Dagtype.Sykedag, 100)))
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
+            assertAvslåttForOppholdskrav(1.vedtaksperiode, avslåttePerioden)
+
+            assertDoesNotThrow {
+                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(30.januar, Dagtype.Feriedag)))
+            }
+            assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
+        }
+    }
+
+    @Test
     fun `avslag for oppholdskrav på en dag saksbehandler har avslått feiler`() {
         val vurdering = UUID.randomUUID()
         selvstendig {

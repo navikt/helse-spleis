@@ -1029,6 +1029,15 @@ internal class Yrkesaktivitet private constructor(
         hendelse: OverstyrTidslinje,
         aktivitetslogg: IAktivitetslogg,
     ): Revurderingseventyr? {
+        // Et avslag fra sp-avslagsdager må gjøres om der, ikke overstyres i Spleis. Sjekkes før noe endres.
+        val avslagsdagerFraSpAvslagsdager =
+            vedtaksperioder
+                .flatMap { hendelse.overstyrteDagerMedAvslagFra(Avslagsdager.KILDE, it.behandlinger.avslagstidslinje) }
+                .distinct()
+                .sorted()
+        check(avslagsdagerFraSpAvslagsdager.isEmpty()) {
+            "Kan ikke overstyre dager som er avslått for løpende vilkår i sp-avslagsdager: $avslagsdagerFraSpAvslagsdager"
+        }
         val aktivitetsloggMedArbeidsgiverkontekst = aktivitetslogg.kontekst(this)
         return håndter {
             it.håndterOverstyrTidslinje(eventBus, hendelse, aktivitetsloggMedArbeidsgiverkontekst)

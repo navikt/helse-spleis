@@ -253,6 +253,11 @@ class OverstyrTidslinje(
         ) : Avslagsvurdering
     }
 
+    internal fun overstyrteDagerMedAvslagFra(
+        kilde: String,
+        avslagstidslinje: Avslagstidslinje,
+    ): List<LocalDate> = dager.map { it.dato }.filter { avslagstidslinje[it]?.kilde == kilde }
+
     internal fun avslagstidslinje(eksisterendeAvslagstidslinje: Avslagstidslinje): Avslagstidslinje {
         val vurderinger =
             dager
