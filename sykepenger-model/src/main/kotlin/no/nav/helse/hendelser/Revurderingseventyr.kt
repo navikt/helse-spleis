@@ -101,6 +101,16 @@ class Revurderingseventyr private constructor(
             hendelse,
         )
 
+        fun avslagsdagerEndret(
+            hendelse: Hendelse,
+            avslagsdagerEndretFom: LocalDate,
+        ) = Revurderingseventyr(
+            RevurderingÅrsak.AvslagsdagerEndret,
+            avslagsdagerEndretFom,
+            avslagsdagerEndretFom.somPeriode(),
+            hendelse,
+        )
+
         fun korrigertInntektsmeldingInntektsopplysninger(
             hendelse: Hendelse,
             skjæringstidspunkt: LocalDate,
@@ -227,6 +237,10 @@ class Revurderingseventyr private constructor(
 
         data object GraderteAndreYtelserEndret : RevurderingÅrsak {
             override fun navn() = "GRADERTE_ANDRE_YTELSER_ENDRET"
+        }
+
+        data object AvslagsdagerEndret : RevurderingÅrsak {
+            override fun navn() = "AVSLAGSDAGER_ENDRET"
         }
 
         data object Sykdomstidslinje : RevurderingÅrsak {

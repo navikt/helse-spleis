@@ -8,6 +8,8 @@ sealed interface Grunnlag {
     data object GraderteAndreYtelser : Grunnlag
 
     data object Inntektsendringer : Grunnlag
+
+    data object Avslagsdager : Grunnlag
 }
 
 class EndretGrunnlagForBeregning(
@@ -33,5 +35,6 @@ class EndretGrunnlagForBeregning(
         when (endretGrunnlag) {
             Grunnlag.GraderteAndreYtelser -> Revurderingseventyr.graderteAndreYtelserEndret(this, fom)
             Grunnlag.Inntektsendringer -> Revurderingseventyr.inntektsendringer(this, fom)
+            Grunnlag.Avslagsdager -> Revurderingseventyr.avslagsdagerEndret(this, fom)
         }
 }

@@ -122,6 +122,14 @@ internal class PersonHendelsefabrikk {
             avsender = Avsender.SYSTEM,
         )
 
+    internal fun lagAvslagsdagerEndret(avslagsdagerEndretFom: LocalDate) =
+        EndretGrunnlagForBeregning(
+            meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+            fom = avslagsdagerEndretFom,
+            endretGrunnlag = Grunnlag.Avslagsdager,
+            avsender = Avsender.SAKSBEHANDLER,
+        )
+
     internal fun lagEndretOpptjeningsvurdering(
         skjæringstidspunkt: LocalDate,
         opptjeningsvurderingId: UUID,

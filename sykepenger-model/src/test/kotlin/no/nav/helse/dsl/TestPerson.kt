@@ -903,6 +903,10 @@ internal class TestPerson(
                 ).håndter(Person::håndterEndretGrunnlagForBeregning)
         }
 
+        internal fun håndterAvslagsdagerEndret(avslagsdagerEndretFom: LocalDate) {
+            personHendelsefabrikk.lagAvslagsdagerEndret(avslagsdagerEndretFom).håndter(Person::håndterEndretGrunnlagForBeregning)
+        }
+
         internal fun rettighetskategoribehov(vedtaksperiodeId: UUID) =
             behovsoppsamler
                 .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Rettighetskategori>()
