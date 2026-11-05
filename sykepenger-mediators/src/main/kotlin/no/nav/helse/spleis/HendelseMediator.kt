@@ -602,6 +602,11 @@ internal class HendelseMediator(
         context: BehandlingContext,
     ) {
         hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
+            when (message.endretGrunnlag) {
+                Grunnlag.GraderteAndreYtelser -> HendelseProbe.onGraderteAndreYtelserEndret()
+                Grunnlag.Inntektsendringer -> HendelseProbe.onInntektsendringer()
+                Grunnlag.Avslagsdager -> HendelseProbe.onAvslagsdagerEndret()
+            }
             person.håndterEndretGrunnlagForBeregning(eventBus, endretGrunnlagForBeregning, aktivitetslogg)
         }
     }

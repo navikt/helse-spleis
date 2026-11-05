@@ -103,6 +103,10 @@ object HendelseProbe {
         tell("GraderteAndreYtelserEndret")
     }
 
+    fun onAvslagsdagerEndret() {
+        tell("AvslagsdagerEndret")
+    }
+
     fun onUtbetalingshistorikkEtterInfotrygdendring() {
         tell("UtbetalingshistorikkEtterInfotrygdendring")
     }
