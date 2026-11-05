@@ -31,6 +31,7 @@ class Ytelser(
     val forsikringsvurderingResultat: ForsikringsvurderingResultat?,
     val opptjeningsvurderingResultatOk: Boolean,
     private val graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+    internal val avslagsdager: Avslagsdager? = null,
     val medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
     private val rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = null,
 ) : Hendelse {

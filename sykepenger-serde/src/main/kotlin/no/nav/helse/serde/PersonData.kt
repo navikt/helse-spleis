@@ -963,6 +963,7 @@ data class PersonData(
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
                     val beregningId: UUID,
                     val graderteAndreYtelserId: UUID?,
+                    val avslagsdagerVurderingIder: Set<UUID>? = null,
                 ) {
                     fun tilDto() =
                         BehandlingendringInnDto(
@@ -992,6 +993,7 @@ data class PersonData(
                             korrigertInntekt = korrigertInntekt?.tilDto(),
                             beregningId = beregningId,
                             graderteAndreYtelserId = graderteAndreYtelserId,
+                            avslagsdagerVurderingIder = avslagsdagerVurderingIder ?: emptySet(),
                         )
 
                     data class AvslagstidslinjeData(

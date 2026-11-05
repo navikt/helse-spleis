@@ -12,6 +12,7 @@ import no.nav.helse.spleis.Meldingsporing
 import no.nav.helse.spleis.meldinger.model.YtelserMessage
 import tools.jackson.databind.JsonNode
 import java.util.*
+import no.nav.helse.hendelser.Avslagsdager as AvslagsdagerHendelse
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning as GraderteAndreYtelserForBeregningHendelse
 
 internal class YtelserRiver(
@@ -75,6 +76,23 @@ internal class YtelserRiver(
                     require("dato", JsonNode::asLocalDate)
                     require("trekkFraSykdomsgrad", ::validerProsent)
                     require("sykdomsgradFørFordeling", ::validerProsent)
+                }
+            }
+        }
+
+        if (Toggle.Avslagsdagerbehov.enabled) {
+            message.interestedIn("@løsning.${Avslagsdager.utgåendeNavn}") {
+                message.require("@løsning.${Avslagsdager.utgåendeNavn}.vurderingIder") { vurderingIder ->
+                    check(vurderingIder.isArray) { "Forventet vurderingIder som liste" }
+                    vurderingIder.values().forEach { UUID.fromString(it.asString()) }
+                }
+                message.requireArray("@løsning.${Avslagsdager.utgåendeNavn}.avslagsdager") {
+                    require("vurderingId") { UUID.fromString(it.asString()) }
+                    require("dato", JsonNode::asLocalDate)
+                    require("vilkårskoder") { vilkårskoder ->
+                        check(vilkårskoder.isArray) { "Forventet vilkårskoder som liste" }
+                        AvslagsdagerHendelse.begrunnelse(vilkårskoder.values().map { it.asString() })
+                    }
                 }
             }
         }

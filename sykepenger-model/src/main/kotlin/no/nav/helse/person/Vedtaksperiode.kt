@@ -1664,6 +1664,8 @@ internal class Vedtaksperiode private constructor(
         val (beregningsperiode, perioderSomMåHensyntasVedBeregning) = perioderSomMåHensyntasVedBeregning()
         val inntektsperioder = ytelser.inntektsendringer()
         val forsikringsvurderingResultat = ytelser.forsikringsvurderingResultat
+        val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
+        val avslagsdager = avslagsdagerFraLøsning(ytelser, beregningsperiode, perioderDetSkalBeregnesUtbetalingFor)
         val uberegnetTidslinjePerArbeidsgiver =
             lagArbeidsgiverberegning(
                 beregningsperiode = beregningsperiode,
@@ -1672,6 +1674,7 @@ internal class Vedtaksperiode private constructor(
                 inntektsperioder = inntektsperioder,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 graderteAndreYtelserTidslinjer = ytelser.graderteAndreYtelser(),
+                avslagstidslinjer = avslagsdager.mapValues { (_, it) -> it.avslagstidslinje },
             )
         // steg 3: beregn alle utbetalingstidslinjer (avslå dager, beregne maksdato og utbetalingsbeløp)
         val harOpptjening = ytelser.opptjeningsvurderingResultatOk
@@ -1712,7 +1715,6 @@ internal class Vedtaksperiode private constructor(
             )
         avslåtteDagerUtbetaltIInfotrygdObservatør.valider(aktivitetslogg)
         // steg 4.1: lag beregnede behandlinger
-        val perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor()
         lagBeregnetBehandlinger(
             perioderDetSkalBeregnesUtbetalingFor = perioderDetSkalBeregnesUtbetalingFor,
             grunnlagsdata = grunnlagsdata,
@@ -1720,6 +1722,7 @@ internal class Vedtaksperiode private constructor(
             inntektsperioder = inntektsperioder,
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             graderteAndreYtelserVersjoner = ytelser.graderteAndreYtelserVersjoner(),
+            avslagsdager = avslagsdager,
         )
 
         // steg 4.2 lag utbetalinger
@@ -1764,6 +1767,18 @@ internal class Vedtaksperiode private constructor(
         }
     }
 
+    // Lager alle avslagstidslinjene før noe endres, så en konflikt med et annet avslag stopper hele beregningen
+    private fun avslagsdagerFraLøsning(
+        ytelser: Ytelser,
+        beregningsperiode: Periode,
+        perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
+    ): Map<UUID, AvslagsdagerFraLøsning> {
+        val løsning = ytelser.avslagsdager ?: return emptyMap()
+        return perioderDetSkalBeregnesUtbetalingFor.associate { other ->
+            other.id to løsning.forPeriode(beregningsperiode, other.periode, other.behandlinger.avslagstidslinje)
+        }
+    }
+
     private fun lagBeregnetBehandlinger(
         perioderDetSkalBeregnesUtbetalingFor: List<Vedtaksperiode>,
         grunnlagsdata: VilkårsgrunnlagHistorikk.KomplettVilkårsgrunnlag,
@@ -1771,6 +1786,7 @@ internal class Vedtaksperiode private constructor(
         inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje>,
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
         graderteAndreYtelserVersjoner: Map<Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet, UUID>,
+        avslagsdager: Map<UUID, AvslagsdagerFraLøsning>,
     ): List<BeregnetBehandling> {
         if (perioderDetSkalBeregnesUtbetalingFor.isEmpty()) return emptyList()
 
@@ -1795,6 +1811,7 @@ internal class Vedtaksperiode private constructor(
                             .filterValues { it.isNotEmpty() },
                     forsikringsvurderingResultat = forsikringsvurderingResultat,
                     graderteAndreYtelserId = graderteAndreYtelserVersjoner[other.beregningsyrkesaktivitet],
+                    avslagsdager = avslagsdager[other.id],
                 )
             }
     }
@@ -3700,6 +3717,7 @@ internal class Vedtaksperiode private constructor(
         alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
         graderteAndreYtelserId: UUID?,
+        avslagsdager: AvslagsdagerFraLøsning?,
     ): BeregnetBehandling {
         val beregnetBehandling =
             BeregnetBehandling(
@@ -3709,6 +3727,7 @@ internal class Vedtaksperiode private constructor(
                 alleInntektjusteringer = alleInntektjusteringer,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 graderteAndreYtelserId = graderteAndreYtelserId,
+                avslagsdager = avslagsdager,
             )
         behandlinger.beregnetBehandling(beregnetBehandling, this.yrkesaktivitet.yrkesaktivitetstype)
         return beregnetBehandling
@@ -4310,6 +4329,7 @@ internal fun lagArbeidsgiverberegning(
     inntektsperioder: Map<Arbeidsgiverberegning.Inntektskilde, Beløpstidslinje> = emptyMap(),
     forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
     graderteAndreYtelserTidslinjer: Map<Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet, GraderteAndreYtelserTidslinje>,
+    avslagstidslinjer: Map<UUID, Avslagstidslinje> = emptyMap(),
 ): List<Arbeidsgiverberegning> =
     with(ArbeidsgiverberegningBuilder(beregningsperiode)) {
         vilkårsgrunnlag?.inntektsgrunnlag?.arbeidsgiverInntektsopplysninger?.forEach {
@@ -4327,7 +4347,7 @@ internal fun lagArbeidsgiverberegning(
         inntektsperioder.forEach { (inntektskilde, inntektsjusteringer) ->
             this.inntektsjusteringer(inntektskilde, inntektsjusteringer)
         }
-        vedtaksperioder.forEach { it.medVedtaksperiode(this, forsikringsvurderingResultat) }
+        vedtaksperioder.forEach { it.medVedtaksperiode(this, forsikringsvurderingResultat, avslagstidslinjer[it.id]) }
         graderteAndreYtelserTidslinjer.forEach { (inntektskilde, tidslinje) ->
             this.graderteAndreYtelser(inntektskilde, tidslinje)
         }
@@ -4346,11 +4366,12 @@ private val Vedtaksperiode.beregningsyrkesaktivitet: Arbeidsgiverberegning.Innte
 private fun Vedtaksperiode.medVedtaksperiode(
     builder: ArbeidsgiverberegningBuilder,
     forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+    avslagstidslinje: Avslagstidslinje?,
 ) {
     val utbetalingstidslinjeBuilder =
         when (yrkesaktivitet.yrkesaktivitetstype) {
-            is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker()
-            Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat)
+            is Arbeidstaker -> behandlinger.utbetalingstidslinjeBuilderForArbeidstaker(avslagstidslinje)
+            Selvstendig -> behandlinger.utbetalingstidslinjeBuilderForSelvstendig(forsikringsvurderingResultat, avslagstidslinje)
 
             Arbeidsledig,
             Frilans,

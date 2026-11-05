@@ -248,6 +248,35 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         }
 
     @Test
+    fun `ytelser med toggle for avslagsdager`() =
+        Toggle.Avslagsdagerbehov.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            sendVilkårsgrunnlag(0)
+            val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
+            assertVedtaksperiodeBehov(
+                behov,
+                Arbeidsavklaringspenger,
+                Dagpenger,
+                Foreldrepenger,
+                Institusjonsopphold,
+                Omsorgspenger,
+                Opplæringspenger,
+                Pleiepenger,
+                InntekterForBeregning,
+                OpptjeningsvurderingResultat,
+                RettighetskategoriResultat,
+                MedlemskapsvurderingResultat,
+                Avslagsdager,
+            )
+            assertEquals(3.januar, LocalDate.parse(behov.path(Avslagsdager.utgåendeNavn).path("fom").asString()))
+            assertEquals(26.januar, LocalDate.parse(behov.path(Avslagsdager.utgåendeNavn).path("tom").asString()))
+        }
+
+    @Test
     fun `ytelser med toggle for medlemskapsvurderingresultat`() {
         sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
         sendSøknad(

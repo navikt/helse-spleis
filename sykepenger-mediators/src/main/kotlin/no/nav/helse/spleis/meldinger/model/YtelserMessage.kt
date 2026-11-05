@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asOptionalLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
 import no.nav.helse.spleis.BehandlingContext
@@ -88,6 +89,30 @@ internal class YtelserMessage(
                     },
             )
         }
+
+    internal val avslagsdager =
+        packet
+            .takeIf { Toggle.Avslagsdagerbehov.enabled }
+            ?.get("@løsning.${Behovstype.Avslagsdager.utgåendeNavn}")
+            ?.takeUnless { it.isMissingOrNull() }
+            ?.let { løsning ->
+                Avslagsdager(
+                    vurderingIder =
+                        løsning
+                            .path("vurderingIder")
+                            .values()
+                            .map { UUID.fromString(it.asString()) }
+                            .toSet(),
+                    dager =
+                        løsning.path("avslagsdager").values().map { dag ->
+                            Avslagsdager.Dag(
+                                vurderingId = UUID.fromString(dag.path("vurderingId").asString()),
+                                dato = dag.path("dato").asLocalDate(),
+                                begrunnelse = Avslagsdager.begrunnelse(dag.path("vilkårskoder").values().map { it.asString() }),
+                            )
+                        },
+                )
+            }
 
     internal val inntekterForBeregning =
         InntekterForBeregning(
@@ -189,6 +214,7 @@ internal class YtelserMessage(
                 dagpenger = dagpengerV2,
                 inntekterForBeregning = inntekterForBeregning,
                 graderteAndreYtelser = graderteAndreYtelser,
+                avslagsdager = avslagsdager,
                 forsikringsvurderingResultat = forsikringsvurderingResultat,
                 opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
                 medlemskapsvurderingResultat = medlemskapsvurderingResultat,

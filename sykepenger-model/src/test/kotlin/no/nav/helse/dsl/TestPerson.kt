@@ -855,6 +855,7 @@ internal class TestPerson(
             opptjeningsvurderingResultatOk: Boolean? = null,
             medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
             rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = arbeidsgiverHendelsefabrikk.standardHovedkategori,
+            avslagsdager: Avslagsdager? = null,
         ) {
             val opptjeningsvurderingResultatOk =
                 opptjeningsvurderingResultatOk ?: if (inspektør.orgnummer == "SELVSTENDIG") {
@@ -887,6 +888,7 @@ internal class TestPerson(
                     opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
                     medlemskapsvurderingResultat = medlemskapsvurderingResultat,
                     rettighetskategoriResultat = rettighetskategoriResultat,
+                    avslagsdager = avslagsdager,
                 ).håndter(Person::håndterYtelser)
         }
 

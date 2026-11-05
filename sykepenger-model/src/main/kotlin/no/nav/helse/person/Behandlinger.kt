@@ -135,21 +135,24 @@ internal class Behandlinger private constructor(
             dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar,
         )
 
-    internal fun utbetalingstidslinjeBuilderForArbeidstaker(): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode =
+    internal fun utbetalingstidslinjeBuilderForArbeidstaker(
+        avslagstidslinje: Avslagstidslinje? = null,
+    ): ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode =
         ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             arbeidsgiverperiode = sisteBehandling.dagerUtenNavAnsvar.dager,
             dagerNavOvertarAnsvar = sisteBehandling.dagerNavOvertarAnsvar,
             refusjonstidslinje = sisteBehandling.refusjonstidslinje,
-            avslagstidslinje = sisteBehandling.avslagstidslinje,
+            avslagstidslinje = avslagstidslinje ?: sisteBehandling.avslagstidslinje,
         )
 
     internal fun utbetalingstidslinjeBuilderForSelvstendig(
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
+        avslagstidslinje: Avslagstidslinje? = null,
     ): SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode =
         SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             dagerUtenNavAnsvar = sisteBehandling.dagerUtenNavAnsvar,
-            avslagstidslinje = avslagstidslinje,
+            avslagstidslinje = avslagstidslinje ?: this.avslagstidslinje,
         )
 
     internal fun nyBehandling(
@@ -916,6 +919,7 @@ internal class Behandlinger private constructor(
             val korrigertInntekt: Saksbehandler?,
             val beregningId: UUID,
             val graderteAndreYtelserId: UUID?,
+            val avslagsdagerVurderingIder: Set<UUID>,
         ) {
             companion object {
                 val IKKE_FASTSATT_SKJÆRINGSTIDSPUNKT = LocalDate.MIN
@@ -1013,6 +1017,7 @@ internal class Behandlinger private constructor(
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
                         beregningId = dto.beregningId,
                         graderteAndreYtelserId = dto.graderteAndreYtelserId,
+                        avslagsdagerVurderingIder = dto.avslagsdagerVurderingIder,
                     )
                 }
             }
@@ -1040,6 +1045,8 @@ internal class Behandlinger private constructor(
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
                 korrigertInntekt: Saksbehandler? = this.korrigertInntekt,
                 graderteAndreYtelserId: UUID? = this.graderteAndreYtelserId,
+                avslagstidslinje: Avslagstidslinje = this.avslagstidslinje,
+                avslagsdagerVurderingIder: Set<UUID> = this.avslagsdagerVurderingIder,
             ) = copy(
                 id = UUID.randomUUID(),
                 tidsstempel = LocalDateTime.now(),
@@ -1061,6 +1068,8 @@ internal class Behandlinger private constructor(
                 faktaavklartInntekt = faktaavklartInntekt,
                 korrigertInntekt = korrigertInntekt,
                 graderteAndreYtelserId = graderteAndreYtelserId,
+                avslagstidslinje = avslagstidslinje,
+                avslagsdagerVurderingIder = avslagsdagerVurderingIder,
             )
 
             internal fun kopierMedNyttSkjæringstidspunkt(
@@ -1104,6 +1113,8 @@ internal class Behandlinger private constructor(
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 faktaavklartInntekt = faktaavklartInntekt,
                 graderteAndreYtelserId = beregning.graderteAndreYtelserId,
+                avslagstidslinje = beregning.avslagsdager?.avslagstidslinje ?: this.avslagstidslinje,
+                avslagsdagerVurderingIder = beregning.avslagsdager?.vurderingIder ?: this.avslagsdagerVurderingIder,
             )
 
             internal fun kopierMedUtbetaling(utbetaling: Utbetaling) = kopierMed(utbetaling = utbetaling)
@@ -1187,6 +1198,7 @@ internal class Behandlinger private constructor(
                     korrigertInntekt = korrigertInntekt?.dto(),
                     beregningId = beregningId,
                     graderteAndreYtelserId = graderteAndreYtelserId,
+                    avslagsdagerVurderingIder = avslagsdagerVurderingIder,
                 )
             }
         }
@@ -1733,6 +1745,7 @@ internal class Behandlinger private constructor(
                             korrigertInntekt = null,
                             beregningId = nyUuidv7(),
                             graderteAndreYtelserId = null,
+                            avslagsdagerVurderingIder = emptySet(),
                         ),
                     ),
                 avsluttet = null,
@@ -2425,6 +2438,7 @@ internal data class BeregnetBehandling(
     val alleInntektjusteringer: Map<Inntektskilde, Beløpstidslinje>,
     val forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
     val graderteAndreYtelserId: UUID? = null,
+    val avslagsdager: AvslagsdagerFraLøsning? = null,
 ) {
     fun lagUtbetaling(
         aktivitetslogg: IAktivitetslogg,
@@ -2481,3 +2495,9 @@ internal data class BeregnetBehandling(
             klassekodeBruker = klassekodeBruker,
         ).build()
 }
+
+/** Avslagstidslinjen fra løsningen på behovet `Avslagsdager`, og vurderingene den bygger på. */
+internal data class AvslagsdagerFraLøsning(
+    val avslagstidslinje: Avslagstidslinje,
+    val vurderingIder: Set<UUID>,
+)

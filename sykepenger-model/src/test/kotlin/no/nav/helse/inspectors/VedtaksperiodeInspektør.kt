@@ -77,6 +77,13 @@ internal class VedtaksperiodeInspektør(
     internal val graderteAndreYtelserIder =
         behandlinger.map { it.endringer().last().graderteAndreYtelserId }
 
+    internal val avslagsdagerVurderingIder get() =
+        behandlinger
+            .last()
+            .endringer()
+            .last()
+            .avslagsdagerVurderingIder
+
     internal val hendelser: Set<Dokumentsporing> = vedtaksperiode.behandlinger.hendelseIder()
 
     internal val hendelseIder get() = hendelser.map { it.id }.toSet()

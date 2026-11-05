@@ -767,6 +767,17 @@ internal class EventBusOversetter(
                         ),
                     )
                 },
+                if (Toggle.Avslagsdagerbehov.enabled) {
+                    Behov(
+                        Behov.Behovstype.Avslagsdager,
+                        mapOf(
+                            "fom" to event.beregningsperiode.start,
+                            "tom" to event.beregningsperiode.endInclusive,
+                        ),
+                    )
+                } else {
+                    null
+                },
             )
 
         // TODO: Her skulle vi brukt byggMedYrkesaktivitet - men må sjekke appene som svarer behovene for i dag har behovene alltid organisasjonsnummer

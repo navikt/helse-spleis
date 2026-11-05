@@ -72,6 +72,10 @@ data class Behov(
             override val utgåendeNavn = "GraderteAndreYtelserForBeregning"
         }
 
+        data object Avslagsdager : Behovstype {
+            override val utgåendeNavn = "Avslagsdager"
+        }
+
         data object Opptjeningsvurdering : Behovstype {
             override val utgåendeNavn = "Opptjeningsvurdering"
         }

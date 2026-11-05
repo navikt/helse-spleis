@@ -46,6 +46,7 @@ class Toggle private constructor(
         val SendFeriepengeOppdrag = fraEnv("SEND_FERIEPENGEOPPDRAG", false) // Denne MÅ settes til false når man er ferdig å kjøre feriepenger. Ref. den mystiske feriepengejobben som startet av seg selv (?) 08.08.2024
         val GraderteAndreYtelser = fraEnv("GRADERTE_ANDRE_YTELSER", false)
         val MedlemskapsvurderingBehov = fraEnv("MEDLEMSKAPSVURDERINGBEHOV", false)
+        val Avslagsdagerbehov = fraEnv("AVSLAGSDAGERBEHOV", false)
 
         fun fraEnv(
             navn: String,

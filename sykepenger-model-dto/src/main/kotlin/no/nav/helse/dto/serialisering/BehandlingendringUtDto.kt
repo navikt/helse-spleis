@@ -29,4 +29,5 @@ data class BehandlingendringUtDto(
     val korrigertInntekt: SaksbehandlerUtDto?,
     val beregningId: UUID,
     val graderteAndreYtelserId: UUID?,
+    val avslagsdagerVurderingIder: Set<UUID>,
 )

@@ -265,6 +265,7 @@ internal class ArbeidsgiverHendelsefabrikk(
         opptjeningsvurderingResultatOk: Boolean,
         medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = null,
         rettighetskategoriResultat: Rettighetskategori.Hovedkategori? = standardHovedkategori,
+        avslagsdager: Avslagsdager? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -303,6 +304,7 @@ internal class ArbeidsgiverHendelsefabrikk(
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
             medlemskapsvurderingResultat = medlemskapsvurderingResultat,
             rettighetskategoriResultat = rettighetskategoriResultat,
+            avslagsdager = avslagsdager,
         )
     }
 

@@ -439,6 +439,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         korrigertInntekt = korrigertInntekt?.tilPersonData(),
         beregningId = beregningId,
         graderteAndreYtelserId = graderteAndreYtelserId,
+        avslagsdagerVurderingIder = avslagsdagerVurderingIder,
     )
 
 private fun AvslagstidslinjeDto.tilPersonData() =
