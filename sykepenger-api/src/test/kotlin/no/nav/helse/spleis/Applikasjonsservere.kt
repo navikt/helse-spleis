@@ -16,7 +16,6 @@ import kotlinx.coroutines.*
 import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.testdatabase.TestDataSource
 import org.junit.jupiter.api.Assertions
-import java.net.ServerSocket
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -79,7 +78,6 @@ internal class Applikasjonsservere {
         azureConfig: AzureAdAppConfig,
         issuer: Issuer,
     ) {
-        private val randomPort = ServerSocket(0).use { it.localPort }
         private lateinit var testDataSource: TestDataSource
         private val registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         private val spekematClient = mockk<SpekematClient>()
@@ -89,12 +87,14 @@ internal class Applikasjonsservere {
                 spekematClient = spekematClient,
                 dataSourceProvider = { testDataSource.ds },
                 meterRegistry = registry,
-                port = randomPort,
+                port = 0,
             )
-        private val client = lagHttpklient(randomPort)
-        private val testContext = BlackboxTestContext(client, issuer)
 
-        private var startetOpp = false
+        private val testContext by lazy {
+            app.start(wait = false)
+            val port = runBlocking { app.engine.resolvedConnectors().first().port }
+            BlackboxTestContext(lagHttpklient(port), issuer)
+        }
 
         fun kjørTest(
             testdata: (TestDataSource) -> Unit = {},
@@ -112,10 +112,9 @@ internal class Applikasjonsservere {
                 // starter opp ting, i parallell
                 listOf(
                     launch { testdata(testDataSource) },
-                    launch { if (!startetOpp) app.start(wait = false) },
+                    launch { testContext },
                 ).joinAll()
             }
-            startetOpp = true
         }
 
         fun stopp() {
