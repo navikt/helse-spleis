@@ -411,6 +411,7 @@ internal class EventBusOversetter(
                         EksternBegrunnelseDTO.Over70 -> "Over70"
                         EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
                         EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
+                        EksternBegrunnelseDTO.Oppholdskrav -> "Oppholdskrav"
                     }
                 },
         )
@@ -978,6 +979,7 @@ internal class EventBusOversetter(
                             EksternBegrunnelseDTO.Over70 -> "Over70"
                             EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
                             EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
+                            EksternBegrunnelseDTO.Oppholdskrav -> "Oppholdskrav"
                         }
                     } ?: emptyList()
                 ),

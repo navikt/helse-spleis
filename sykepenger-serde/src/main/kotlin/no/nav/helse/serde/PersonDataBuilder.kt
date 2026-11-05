@@ -626,6 +626,7 @@ private fun BegrunnelseDto.tilPersonData() =
         BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.EgenmeldingUtenforArbeidsgiverperiode
         BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.MeldingTilNavDagUtenforVentetid
         BegrunnelseDto.AvslåttMeldingTilNavDag -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.AvslåttMeldingTilNavDag
+        BegrunnelseDto.Oppholdskrav -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.Oppholdskrav
         BegrunnelseDto.EtterDødsdato -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.EtterDødsdato
         BegrunnelseDto.ManglerMedlemskap -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.ManglerMedlemskap
         BegrunnelseDto.ManglerOpptjening -> PersonData.UtbetalingstidslinjeData.BegrunnelseData.ManglerOpptjening

@@ -146,6 +146,7 @@ private fun mapDag(dag: SammenslåttDag) =
                     BegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> ApiBegrunnelse.EgenmeldingUtenforArbeidsgiverperiode
                     BegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> ApiBegrunnelse.MeldingTilNavDagUtenforVentetid
                     BegrunnelseDTO.AvslåttMeldingTilNavDag -> ApiBegrunnelse.AvslattMeldingTilNavDag
+                    BegrunnelseDTO.Oppholdskrav -> ApiBegrunnelse.Oppholdskrav
                     BegrunnelseDTO.AndreYtelserAap -> ApiBegrunnelse.AndreYtelser
                     BegrunnelseDTO.AndreYtelserDagpenger -> ApiBegrunnelse.AndreYtelser
                     BegrunnelseDTO.AndreYtelserForeldrepenger -> ApiBegrunnelse.AndreYtelser

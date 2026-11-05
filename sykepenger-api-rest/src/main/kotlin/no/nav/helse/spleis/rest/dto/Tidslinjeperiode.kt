@@ -69,6 +69,7 @@ enum class ApiBegrunnelse {
     MinimumInntektOver67,
     EgenmeldingUtenforArbeidsgiverperiode,
     AvslattMeldingTilNavDag,
+    Oppholdskrav,
     MeldingTilNavDagUtenforVentetid,
     AndreYtelser,
     MinimumSykdomsgrad,

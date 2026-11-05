@@ -15,6 +15,8 @@ sealed class BegrunnelseDto {
 
     data object AvslåttMeldingTilNavDag : BegrunnelseDto()
 
+    data object Oppholdskrav : BegrunnelseDto()
+
     data object AndreYtelserForeldrepenger : BegrunnelseDto()
 
     data object AndreYtelserAap : BegrunnelseDto()

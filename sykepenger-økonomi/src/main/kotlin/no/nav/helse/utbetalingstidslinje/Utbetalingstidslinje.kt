@@ -282,6 +282,7 @@ sealed class Begrunnelse {
             EgenmeldingUtenforArbeidsgiverperiode -> BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode
             MeldingTilNavDagUtenforVentetid -> BegrunnelseDto.MeldingTilNavDagUtenforVentetid
             AvslåttMeldingTilNavDag -> BegrunnelseDto.AvslåttMeldingTilNavDag
+            Oppholdskrav -> BegrunnelseDto.Oppholdskrav
             EtterDødsdato -> BegrunnelseDto.EtterDødsdato
             ManglerMedlemskap -> BegrunnelseDto.ManglerMedlemskap
             ManglerOpptjening -> BegrunnelseDto.ManglerOpptjening
@@ -307,6 +308,9 @@ sealed class Begrunnelse {
     data object MeldingTilNavDagUtenforVentetid : Begrunnelse()
 
     data object AvslåttMeldingTilNavDag : Begrunnelse()
+
+    /** Folketrygdloven § 8-9: oppholdskravet er ikke oppfylt. Vurderingen eies av sp-avslagsdager. */
+    data object Oppholdskrav : Begrunnelse()
 
     data object AndreYtelserForeldrepenger : Begrunnelse()
 
@@ -350,6 +354,7 @@ sealed class Begrunnelse {
                 BegrunnelseDto.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                 BegrunnelseDto.MeldingTilNavDagUtenforVentetid -> MeldingTilNavDagUtenforVentetid
                 BegrunnelseDto.AvslåttMeldingTilNavDag -> AvslåttMeldingTilNavDag
+                BegrunnelseDto.Oppholdskrav -> Oppholdskrav
                 BegrunnelseDto.EtterDødsdato -> EtterDødsdato
                 BegrunnelseDto.ManglerMedlemskap -> ManglerMedlemskap
                 BegrunnelseDto.ManglerOpptjening -> ManglerOpptjening

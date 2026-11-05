@@ -377,6 +377,7 @@ interface EventSubscription {
             EgenmeldingUtenforArbeidsgiverperiode,
             MeldingTilNavDagUtenforVentetid,
             AvslåttMeldingTilNavDag,
+            Oppholdskrav,
             AndreYtelserAap,
             AndreYtelserDagpenger,
             AndreYtelserForeldrepenger,
@@ -400,6 +401,7 @@ interface EventSubscription {
                         is Begrunnelse.EgenmeldingUtenforArbeidsgiverperiode -> EgenmeldingUtenforArbeidsgiverperiode
                         is Begrunnelse.MeldingTilNavDagUtenforVentetid -> MeldingTilNavDagUtenforVentetid
                         is Begrunnelse.AvslåttMeldingTilNavDag -> AvslåttMeldingTilNavDag
+                        is Begrunnelse.Oppholdskrav -> Oppholdskrav
                         is Begrunnelse.MinimumInntekt -> MinimumInntekt
                         is Begrunnelse.MinimumInntektOver67 -> MinimumInntektOver67
                         is Begrunnelse.EtterDødsdato -> EtterDødsdato

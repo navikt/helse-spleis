@@ -143,6 +143,7 @@ private fun EksternBegrunnelseDTO.tilResponse() =
         EksternBegrunnelseDTO.EgenmeldingUtenforArbeidsgiverperiode -> "EgenmeldingUtenforArbeidsgiverperiode"
         EksternBegrunnelseDTO.MeldingTilNavDagUtenforVentetid -> "MeldingTilNavDagUtenforVentetid"
         EksternBegrunnelseDTO.AvslåttMeldingTilNavDag -> "AvslåttMeldingTilNavDag"
+        EksternBegrunnelseDTO.Oppholdskrav -> "Oppholdskrav"
         EksternBegrunnelseDTO.AndreYtelserAap -> "AndreYtelserAap"
         EksternBegrunnelseDTO.AndreYtelserDagpenger -> "AndreYtelserDagpenger"
         EksternBegrunnelseDTO.AndreYtelserForeldrepenger -> "AndreYtelserForeldrepenger"

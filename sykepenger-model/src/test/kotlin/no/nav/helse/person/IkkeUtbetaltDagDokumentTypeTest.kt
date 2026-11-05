@@ -27,6 +27,8 @@ internal class IkkeUtbetaltDagDokumentTypeTest {
                 "AndreYtelserSvangerskapspenger",
                 "AvslåttMeldingTilNavDag",
                 "MeldingTilNavDagUtenforVentetid",
+                // Sendes bare når togglen AVSLAGSDAGERBEHOV er på. Mottakerne følges opp i navikt/sas-issues#107
+                "Oppholdskrav",
             )
         EventSubscription.Utbetalingsdag.EksternBegrunnelseDTO.entries.forEach { begrunnelse ->
             assertTrue(begrunnelserSomSpreGosysKjennerTil.contains(begrunnelse.name)) {
