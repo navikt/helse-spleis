@@ -1683,17 +1683,6 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `selvstendig næringsdrivende får tom liste i spesielleYrkesgrupper`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE)
-            assertTilstand(1.vedtaksperiode, AVVENTER_VILKÅRSPRØVING)
-
-            val vilkårsprøvingEvent = observatør.trengerInformasjonTilVilkårsprøvingEventer.single()
-            assertEquals(emptyList<String>(), vilkårsprøvingEvent.spesielleYrkesgrupper)
-        }
-    }
-
-    @Test
     fun `tar inn jordbruker, men forkaster perioden`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)

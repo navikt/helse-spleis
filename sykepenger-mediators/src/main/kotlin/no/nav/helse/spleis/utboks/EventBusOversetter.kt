@@ -617,7 +617,6 @@ internal class EventBusOversetter(
                     Behov.Behovstype.Forsikringsvurdering,
                     mapOf(
                         "skjæringstidspunkt" to event.skjæringstidspunkt,
-                        "spesielleYrkesgrupper" to event.spesielleYrkesgrupper,
                         "rettighetskategoriId" to event.rettighetskategoriId,
                     ),
                 ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },

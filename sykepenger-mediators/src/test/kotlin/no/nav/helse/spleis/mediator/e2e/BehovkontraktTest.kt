@@ -170,7 +170,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
-        assertForsikringsvurderingdetaljer(behov, emptyList(), rettighetskategoriId)
+        assertForsikringsvurderingdetaljer(behov, rettighetskategoriId)
     }
 
     @Test
@@ -471,7 +471,6 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
 
     private fun assertForsikringsvurderingdetaljer(
         behov: JsonNode,
-        forventedeSpesielleYrkesgrupper: List<String>,
         forventetRettighetskategoriId: UUID,
     ) {
         assertDato(behov.path(Forsikringsvurdering.utgåendeNavn).path("skjæringstidspunkt").asString())
@@ -479,14 +478,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             forventetRettighetskategoriId.toString(),
             behov.path(Forsikringsvurdering.utgåendeNavn).path("rettighetskategoriId").asString(),
         )
-        assertEquals(
-            forventedeSpesielleYrkesgrupper,
-            behov
-                .path(Forsikringsvurdering.utgåendeNavn)
-                .path("spesielleYrkesgrupper")
-                .values()
-                .map(JsonNode::asString),
-        )
+        assertFalse(behov.path(Forsikringsvurdering.utgåendeNavn).has("spesielleYrkesgrupper"))
     }
 
     private fun assertForeldrepengerdetaljer(behov: JsonNode) {
