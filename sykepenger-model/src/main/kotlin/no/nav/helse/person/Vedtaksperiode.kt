@@ -1637,9 +1637,22 @@ internal class Vedtaksperiode private constructor(
             checkNotNull(fraMedlemskapsvurderingResultat ?: fraVilkårsgrunnlag) {
                 "Mangler medlemskapstatus for skjæringstidspunkt $skjæringstidspunkt"
             }
-        Medlemskapsvurdering.varsle(medlemskapstatus, aktivitetslogg)
+        // Saksbehandler har allerede tatt stilling til vurderingen da det ble fattet vedtak med den.
+        // Forlengelser og revurderinger skal derfor ikke få varselet på nytt, slik det var da varselet ble gitt ved vilkårsprøving.
+        if (harFattetVedtakMedMedlemskapsvurdering(grunnlagsdata.medlemskapsvurderingId)) {
+            aktivitetslogg.info(
+                "Det er allerede fattet vedtak med medlemskapsvurdering ${grunnlagsdata.medlemskapsvurderingId} ($medlemskapstatus), varsler ikke på nytt",
+            )
+        } else {
+            Medlemskapsvurdering.varsle(medlemskapstatus, aktivitetslogg)
+        }
         return medlemskapstatus
     }
+
+    private fun harFattetVedtakMedMedlemskapsvurdering(medlemskapsvurderingId: UUID) =
+        person
+            .vedtaksperioder { it.behandlinger.harFattetVedtakMedMedlemskapsvurdering(medlemskapsvurderingId) }
+            .isNotEmpty()
 
     private fun håndterYtelser(
         eventBus: EventBus,

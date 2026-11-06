@@ -101,6 +101,9 @@ internal class Behandlinger private constructor(
 
     internal fun harFattetVedtak() = tidligereBehandlinger.lastOrNull()?.erFattetVedtak() == true
 
+    internal fun harFattetVedtakMedMedlemskapsvurdering(medlemskapsvurderingId: UUID) =
+        behandlinger.any { it.erFattetVedtak() && it.medlemskapsvurderingId == medlemskapsvurderingId }
+
     internal fun erTidligereVilkårsprøvd() =
         åpenBehandling?.erTidligereVilkårsprøvd() == true || tidligereBehandlinger.any { it.erTidligereVilkårsprøvd() }
 
@@ -564,6 +567,7 @@ internal class Behandlinger private constructor(
         val maksdato get() = gjeldende.maksdatoresultat
         val dagerNavOvertarAnsvar get() = gjeldende.dagerNavOvertarAnsvar
         val forsikringsvurderingId get() = (gjeldende.grunnlagsdata as? VilkårsgrunnlagHistorikk.Grunnlagsdata)?.forsikringsvurderingId
+        val medlemskapsvurderingId get() = gjeldende.grunnlagsdata?.medlemskapsvurderingId
         val sykdomstidslinje get() = gjeldende.sykdomstidslinje
         val refusjonstidslinje get() = gjeldende.refusjonstidslinje
         val utbetalingstidslinje get() = gjeldende.utbetalingstidslinje
