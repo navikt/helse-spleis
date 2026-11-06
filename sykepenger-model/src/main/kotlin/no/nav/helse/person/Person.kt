@@ -22,6 +22,7 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.gjenopptaBehandling
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyrInntektsgrunnlag
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyringAvRefusjon
+import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Yrkesaktivitet.Companion.igangsettOverstyring
 import no.nav.helse.person.Yrkesaktivitet.Companion.mursteinsperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.nestemann
@@ -193,7 +194,23 @@ class Person private constructor(
                 infotrygdhistorikk,
             )
         igangsettOverstyring(eventBus, revurderingseventyr, aktivitetsloggMedPersonkontekst)
+        fjernRettighetskategorigrunnlagSomSøknadenKanEndre(søknad, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, søknad, aktivitetsloggMedPersonkontekst)
+    }
+
+    // En ny eller korrigert søknad kan gi en annen rettighetskategori, så perioder som ikke venter på vilkårsprøving må spørre på nytt
+    private fun fjernRettighetskategorigrunnlagSomSøknadenKanEndre(
+        søknad: Søknad,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val søknadsperiode = søknad.sykdomstidslinje.periode() ?: return
+        val skjæringstidspunkter =
+            vedtaksperioder { it.periode.overlapperMed(søknadsperiode) }
+                .map { it.skjæringstidspunkt }
+                .filterNot { skjæringstidspunkt ->
+                    vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(skjæringstidspunkt)).any { it.venterPåVilkårsprøving() }
+                }.toSet()
+        vilkårsgrunnlagHistorikk.fjernRettighetskategorigrunnlag(aktivitetslogg, skjæringstidspunkter)
     }
 
     fun håndterArbeidsgiveropplysninger(
@@ -398,6 +415,20 @@ class Person private constructor(
         lagreVilkårsgrunnlag(nyttGrunnlag)
         igangsettOverstyring(eventBus, endretVurderingPåSkjæringstidspunkt.revurderingseventyr(), aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, endretVurderingPåSkjæringstidspunkt, aktivitetsloggMedPersonkontekst)
+    }
+
+    fun håndterRettighetskategoriEndret(
+        eventBus: EventBus,
+        rettighetskategoriEndret: RettighetskategoriEndret,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler endret rettighetskategori")
+        if (!vilkårsgrunnlagHistorikk.endreRettighetskategori(aktivitetsloggMedPersonkontekst, rettighetskategoriEndret)) return
+        vedtaksperioder(MED_SKJÆRINGSTIDSPUNKT(rettighetskategoriEndret.skjæringstidspunkt))
+            .sorted()
+            .forEach { it.håndterRettighetskategoriEndret(eventBus, rettighetskategoriEndret, aktivitetsloggMedPersonkontekst) }
+        igangsettOverstyring(eventBus, rettighetskategoriEndret.revurderingseventyr(), aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, rettighetskategoriEndret, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterEndretGrunnlagForBeregning(

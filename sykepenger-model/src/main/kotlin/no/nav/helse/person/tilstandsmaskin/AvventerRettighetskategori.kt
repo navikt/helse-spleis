@@ -29,4 +29,8 @@ internal data object AvventerRettighetskategori : Vedtaksperiodetilstand {
 
     internal fun nesteTilstand(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand =
         if (vedtaksperiode.erRevurdering()) AvventerVilkårsprøvingRevurdering else AvventerVilkårsprøving
+
+    // Etter rettighetskategori_endret har skjæringstidspunktet allerede et minimalt vilkårsgrunnlag med den nye ID-en (ADR 0011)
+    internal fun nesteTilstandUtenVilkårsgrunnlag(vedtaksperiode: Vedtaksperiode): Vedtaksperiodetilstand =
+        if (vedtaksperiode.harRettighetskategorigrunnlag()) nesteTilstand(vedtaksperiode) else this
 }

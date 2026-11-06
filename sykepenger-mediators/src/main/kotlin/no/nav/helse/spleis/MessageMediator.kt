@@ -75,6 +75,7 @@ internal class MessageMediator(
             SkjønnsmessigFastsettelseRiver(it, this)
             MinimumSykdomsgradVurdertRiver(it, this)
             EndretVurderingPåSkjæringstidspunktRiver(it, this)
+            RettighetskategoriEndretRiver(it, this)
             EndretGrunnlagForBeregningRiver(it, this)
         }
     }
@@ -193,6 +194,7 @@ internal class MessageMediator(
             is SendtSøknadAnnetMessage,
             is SendtSøknadSelvstendigMessage,
             is EndretVurderingPåSkjæringstidspunktMessage,
+            is RettighetskategoriEndretMessage,
             -> true
         }
 

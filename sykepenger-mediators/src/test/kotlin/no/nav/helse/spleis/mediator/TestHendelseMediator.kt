@@ -34,6 +34,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestEndretVurderingPåSkjæringstidspunkt get() = lestEndretVurderingPåSkjæringstidspunktVerdi.get()
     val lestEndretGrunnlagForBeregning get() = lestEndretGrunnlagForBeregningVerdi.get()
     val lestAvbruttSøknad get() = lestAvbruttSøknadVerdi.get()
+    val lestRettighetskategoriEndret get() = lestRettighetskategoriEndretVerdi.get()
 
     private val lestNySøknadVerdi = ThreadLocal.withInitial { false }
     private val lestSendtSøknadArbeidsgiverVerdi = ThreadLocal.withInitial { false }
@@ -64,6 +65,7 @@ internal class TestHendelseMediator : IHendelseMediator {
             }
     private val lestEndretGrunnlagForBeregningVerdi: ThreadLocal<EndretGrunnlagForBeregningData?> = ThreadLocal.withInitial { null }
     private val lestAvbruttSøknadVerdi: ThreadLocal<AvbruttSøknadData?> = ThreadLocal.withInitial { null }
+    private val lestRettighetskategoriEndretVerdi: ThreadLocal<RettighetskategoriEndretData?> = ThreadLocal.withInitial { null }
 
     fun reset() {
         lestNySøknadVerdi.remove()
@@ -91,6 +93,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestEndretVurderingPåSkjæringstidspunktVerdi.remove()
         lestEndretGrunnlagForBeregningVerdi.remove()
         lestAvbruttSøknadVerdi.remove()
+        lestRettighetskategoriEndretVerdi.remove()
     }
 
     override fun behandle(
@@ -478,6 +481,26 @@ internal class TestHendelseMediator : IHendelseMediator {
                 vurderingId = message.vurdering.id,
                 type = message.vurdering::class.simpleName!!,
                 manuellVurdering = message.avsender == Avsender.SAKSBEHANDLER,
+            ),
+        )
+    }
+
+    data class RettighetskategoriEndretData(
+        val skjæringstidspunkt: LocalDate,
+        val rettighetskategoriId: UUID,
+        val hovedkategori: Rettighetskategori.Hovedkategori,
+    )
+
+    override fun behandle(
+        message: RettighetskategoriEndretMessage,
+        rettighetskategoriEndret: RettighetskategoriEndret,
+        context: BehandlingContext,
+    ) {
+        lestRettighetskategoriEndretVerdi.set(
+            RettighetskategoriEndretData(
+                skjæringstidspunkt = message.skjæringstidspunkt,
+                rettighetskategoriId = message.rettighetskategoriId,
+                hovedkategori = message.hovedkategori,
             ),
         )
     }

@@ -159,6 +159,17 @@ internal class PersonHendelsefabrikk {
         endretVurdering = Vurdering.Forsikringsvurdering(forsikringsvurderingId),
         avsender = Avsender.SYSTEM,
     )
+
+    internal fun lagRettighetskategoriEndret(
+        skjæringstidspunkt: LocalDate,
+        rettighetskategoriId: UUID,
+        hovedkategori: Rettighetskategori.Hovedkategori,
+    ) = RettighetskategoriEndret(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        skjæringstidspunkt = skjæringstidspunkt,
+        rettighetskategoriId = rettighetskategoriId,
+        hovedkategori = hovedkategori,
+    )
 }
 
 internal class OverstyrtArbeidsgiveropplysning(

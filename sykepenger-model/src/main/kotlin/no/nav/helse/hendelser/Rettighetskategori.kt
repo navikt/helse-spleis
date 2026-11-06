@@ -40,18 +40,21 @@ class Rettighetskategori(
         return false
     }
 
-    internal fun ikkeStøttet(): Varselkode? =
-        when (hovedkategori) {
-            Hovedkategori.ARBEIDSTAKER,
-            Hovedkategori.SELVSTENDIG_NÆRINGSDRIVENDE,
-            -> null
-
-            Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE -> Varselkode.RV_RK_1
-        }
+    internal fun ikkeStøttet() = hovedkategori.ikkeStøttet()
 
     enum class Hovedkategori {
         ARBEIDSTAKER,
         SELVSTENDIG_NÆRINGSDRIVENDE,
         ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE,
+        ;
+
+        internal fun ikkeStøttet(): Varselkode? =
+            when (this) {
+                ARBEIDSTAKER,
+                SELVSTENDIG_NÆRINGSDRIVENDE,
+                -> null
+
+                ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE -> Varselkode.RV_RK_1
+            }
     }
 }

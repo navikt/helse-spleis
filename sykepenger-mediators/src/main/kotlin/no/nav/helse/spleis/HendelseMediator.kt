@@ -597,6 +597,16 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
+        message: RettighetskategoriEndretMessage,
+        rettighetskategoriEndret: RettighetskategoriEndret,
+        context: BehandlingContext,
+    ) {
+        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
+            person.håndterRettighetskategoriEndret(eventBus, rettighetskategoriEndret, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(
         message: EndretGrunnlagForBeregningMessage,
         endretGrunnlagForBeregning: EndretGrunnlagForBeregning,
         context: BehandlingContext,
@@ -1039,6 +1049,12 @@ internal interface IHendelseMediator {
     fun behandle(
         message: EndretVurderingPåSkjæringstidspunktMessage,
         endretVurderingPåSkjæringstidspunkt: EndretVurderingPåSkjæringstidspunkt,
+        context: BehandlingContext,
+    )
+
+    fun behandle(
+        message: RettighetskategoriEndretMessage,
+        rettighetskategoriEndret: RettighetskategoriEndret,
         context: BehandlingContext,
     )
 

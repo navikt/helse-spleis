@@ -5,6 +5,7 @@ import no.nav.helse.*
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Medlemskapsvurdering
+import no.nav.helse.hendelser.Rettighetskategori
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.MessageMediator
 import no.nav.helse.spleis.mediator.e2e.AbstractEndToEndMediatorTest
@@ -315,6 +316,39 @@ internal class MessageMediatorTest {
     fun `melding med annet event name ignoreres i precondition i EndretGrunnlagForBeregningRiver`() {
         testRapid.sendTestMessage(meldingsfabrikk.lagEndretGrunnlagForBeregningMedUkjentEventName())
         assertNull(hendelseMediator.lestEndretGrunnlagForBeregning)
+    }
+
+    @Test
+    fun `rettighetskategori endret`() {
+        val rettighetskategoriId = UUID.randomUUID()
+
+        testRapid.sendTestMessage(
+            meldingsfabrikk.lagRettighetskategoriEndret(
+                skjæringstidspunkt = 1.januar,
+                rettighetskategoriId = rettighetskategoriId,
+                hovedkategori = "ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE",
+            ),
+        )
+        val forventet =
+            TestHendelseMediator.RettighetskategoriEndretData(
+                skjæringstidspunkt = 1.januar,
+                rettighetskategoriId = rettighetskategoriId,
+                hovedkategori = Rettighetskategori.Hovedkategori.ARBEIDSTAKER_OG_SELVSTENDIG_NÆRINGSDRIVENDE,
+            )
+        assertEquals(forventet, hendelseMediator.lestRettighetskategoriEndret)
+    }
+
+    @Test
+    fun `rettighetskategori endret krever skjæringstidspunkt, rettighetskategoriId og kjent hovedkategori`() {
+        listOf(
+            meldingsfabrikk.lagRettighetskategoriEndret(skjæringstidspunkt = null),
+            meldingsfabrikk.lagRettighetskategoriEndret(rettighetskategoriId = null),
+            meldingsfabrikk.lagRettighetskategoriEndret(hovedkategori = null),
+            meldingsfabrikk.lagRettighetskategoriEndret(hovedkategori = "UKJENT"),
+        ).forEach {
+            testRapid.sendTestMessage(it)
+            assertNull(hendelseMediator.lestRettighetskategoriEndret) { "Skal ikke lese $it" }
+        }
     }
 
     @Test
