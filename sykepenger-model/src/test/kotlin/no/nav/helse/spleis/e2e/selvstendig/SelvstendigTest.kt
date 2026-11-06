@@ -1683,16 +1683,6 @@ internal class SelvstendigTest : AbstractDslTest() {
     }
 
     @Test
-    fun `tar inn jordbruker, men forkaster perioden`() {
-        selvstendig {
-            håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.JORDBRUKER)
-            assertInfo("Har ikke støtte for søknadstypen JORDBRUKER", 1.vedtaksperiode.filter())
-            assertFunksjonellFeil(Varselkode.RV_SØ_39, 1.vedtaksperiode.filter())
-            assertForkastetPeriodeTilstander(1.vedtaksperiode, START, TIL_INFOTRYGD)
-        }
-    }
-
-    @Test
     fun `tar inn barnepasser, men forkaster perioden`() {
         selvstendig {
             håndterFørstegangssøknadSelvstendig(januar, arbeidssituasjon = Søknad.Arbeidssituasjon.BARNEPASSER)

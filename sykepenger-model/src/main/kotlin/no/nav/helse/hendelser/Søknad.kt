@@ -2,6 +2,7 @@ package no.nav.helse.hendelser
 
 import no.nav.helse.Alder
 import no.nav.helse.Grunnbeløp.Companion.`1G`
+import no.nav.helse.Toggle
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Subsumsjonslogg
 import no.nav.helse.etterlevelse.`§ 22-13 ledd 3`
@@ -124,8 +125,17 @@ class Søknad(
                 )
             Arbeidssituasjon.SELVSTENDIG_NÆRINGSDRIVENDE -> validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
 
+            Arbeidssituasjon.JORDBRUKER -> {
+                if (Toggle.Jordbruker.enabled) {
+                    aktivitetslogg.varsel(Varselkode.RV_SØ_55)
+                    validerSelvstendig(aktivitetslogg, skjæringstidspunkt, vilkårsgrunnlag)
+                } else {
+                    aktivitetslogg.info("Har ikke støtte for søknadstypen $arbeidssituasjon")
+                    aktivitetslogg.funksjonellFeil(`Støtter ikke søknadstypen`)
+                }
+            }
+
             Arbeidssituasjon.BARNEPASSER,
-            Arbeidssituasjon.JORDBRUKER,
             Arbeidssituasjon.FISKER,
             Arbeidssituasjon.ANNET,
             -> {

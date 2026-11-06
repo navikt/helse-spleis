@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.mediator.e2e
 
+import no.nav.helse.Toggle
 import no.nav.helse.flex.sykepengesoknad.kafka.ArbeidssituasjonDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.PeriodeDTO
 import no.nav.helse.flex.sykepengesoknad.kafka.SoknadsperiodeDTO
@@ -72,7 +73,29 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun jordbruker() {
+    fun `jordbruker forkastes når togglen er av`() =
+        Toggle.Jordbruker.disable {
+            sendJordbrukersøknad()
+            assertTilstander(
+                0,
+                "TIL_INFOTRYGD",
+            )
+        }
+
+    @Test
+    fun `jordbruker behandles som selvstendig når togglen er på`() =
+        Toggle.Jordbruker.enable {
+            sendJordbrukersøknad()
+            assertTilstander(
+                0,
+                "AVVENTER_INFOTRYGDHISTORIKK",
+                "AVVENTER_BLOKKERENDE_PERIODE",
+                "AVVENTER_RETTIGHETSKATEGORI",
+                "AVVENTER_VILKÅRSPRØVING",
+            )
+        }
+
+    private fun sendJordbrukersøknad() {
         sendNySøknadSelvstendig(
             SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
             arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
@@ -82,10 +105,6 @@ internal class SelvstendigMediatorTest : AbstractEndToEndMediatorTest() {
             ventetid =
                 3.januar til 18.januar,
             arbeidssituasjon = ArbeidssituasjonDTO.JORDBRUKER,
-        )
-        assertTilstander(
-            0,
-            "TIL_INFOTRYGD",
         )
     }
 
