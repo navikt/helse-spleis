@@ -1115,6 +1115,16 @@ internal class TestPerson(
                 .håndter(Person::håndterEndretVurderingPåSkjæringstidspunkt)
         }
 
+        internal fun håndterRettighetskategoriEndret(
+            skjæringstidspunkt: LocalDate,
+            rettighetskategoriId: UUID,
+            hovedkategori: Rettighetskategori.Hovedkategori = Rettighetskategori.Hovedkategori.ARBEIDSTAKER,
+        ) {
+            personHendelsefabrikk
+                .lagRettighetskategoriEndret(skjæringstidspunkt, rettighetskategoriId, hovedkategori)
+                .håndter(Person::håndterRettighetskategoriEndret)
+        }
+
         internal fun håndterMinimumSykdomsgradVurdert(
             perioderMedMinimumSykdomsgradVurdertOK: List<Periode>,
             perioderMedMinimumSykdomsgradVurdertIkkeOK: List<Periode> = emptyList(),

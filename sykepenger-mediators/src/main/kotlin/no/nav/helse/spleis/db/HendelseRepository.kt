@@ -115,6 +115,7 @@ internal class HendelseRepository(
             is UtbetalingshistorikkMessage,
             is InfotrygdendringMessage,
             is EndretVurderingPåSkjæringstidspunktMessage,
+            is RettighetskategoriEndretMessage,
             is EndretGrunnlagForBeregningMessage,
             -> null // Disse trenger vi ikke å lagre
         }

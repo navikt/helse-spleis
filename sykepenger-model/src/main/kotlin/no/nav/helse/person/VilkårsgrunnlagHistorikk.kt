@@ -48,6 +48,36 @@ internal class VilkårsgrunnlagHistorikk private constructor(
         leggTil(rettighetskategorigrunnlag)
     }
 
+    internal fun endreRettighetskategori(
+        aktivitetslogg: IAktivitetslogg,
+        rettighetskategoriEndret: RettighetskategoriEndret,
+    ): Boolean {
+        val skjæringstidspunkt = rettighetskategoriEndret.skjæringstidspunkt
+        val nyRettighetskategoriId = rettighetskategoriEndret.rettighetskategoriId
+        val eksisterende =
+            sisteInnlag()?.vilkårsgrunnlag?.get(skjæringstidspunkt)
+                ?: return false.also { aktivitetslogg.info("Fant ikke vilkårsgrunnlag på $skjæringstidspunkt") }
+        if (eksisterende is InfotrygdVilkårsgrunnlag) {
+            return false.also { aktivitetslogg.info("Kan ikke endre rettighetskategori på Infotrygdvilkårsgrunnlag") }
+        }
+        if (eksisterende.rettighetskategoriId == nyRettighetskategoriId) {
+            return false.also { aktivitetslogg.info("Rettighetskategorien er allerede lagt til grunn") }
+        }
+        leggTil(Rettighetskategorigrunnlag(skjæringstidspunkt, nyRettighetskategoriId))
+        return true
+    }
+
+    internal fun fjernRettighetskategorigrunnlag(
+        aktivitetslogg: IAktivitetslogg,
+        skjæringstidspunkter: Set<LocalDate>,
+    ) {
+        val siste = sisteInnlag() ?: return
+        val skalFjernes = skjæringstidspunkter.filter { siste.rettighetskategorigrunnlagFor(it) != null }.toSet()
+        if (skalFjernes.isEmpty()) return
+        aktivitetslogg.info("Fjerner minimalt vilkårsgrunnlag på $skalFjernes slik at rettighetskategorien avklares på nytt")
+        historikk.add(0, Innslag(siste.vilkårsgrunnlag - skalFjernes))
+    }
+
     private fun leggTil(vilkårsgrunnlag: VilkårsgrunnlagElement) {
         val siste = sisteInnlag()
         val nytt = Innslag(siste, vilkårsgrunnlag)

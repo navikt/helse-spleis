@@ -1812,6 +1812,20 @@ internal class TestMessageFactory(
         ),
     )
 
+    internal fun lagRettighetskategoriEndret(
+        skjæringstidspunkt: LocalDate? = LocalDate.of(2018, 1, 1),
+        rettighetskategoriId: UUID? = UUID.randomUUID(),
+        hovedkategori: String? = "ARBEIDSTAKER",
+    ) = nyHendelse(
+        "rettighetskategori_endret",
+        listOfNotNull(
+            "fødselsnummer" to fødselsnummer,
+            skjæringstidspunkt?.let { "skjæringstidspunkt" to it.toString() },
+            rettighetskategoriId?.let { "rettighetskategoriId" to it.toString() },
+            hovedkategori?.let { "hovedkategori" to it },
+        ).toMap(),
+    )
+
     internal fun lagInntektsendringer(fom: LocalDate) =
         nyHendelse(
             "inntektsendringer",

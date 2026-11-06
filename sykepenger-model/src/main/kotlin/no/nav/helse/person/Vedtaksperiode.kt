@@ -227,7 +227,7 @@ internal class Vedtaksperiode private constructor(
     private fun førstePeriodeHarSpurtUtenDenneSøknaden(): Boolean {
         val første = person.vedtaksperioder { it != this && it.skjæringstidspunkt == skjæringstidspunkt }.minOrNull() ?: return false
         if (første.periode.endInclusive >= periode.start) return false
-        return første.tilstand == AvventerRettighetskategori || person.rettighetskategorigrunnlagFor(skjæringstidspunkt) != null
+        return første.tilstand == AvventerRettighetskategori || harRettighetskategorigrunnlag()
     }
 
     internal fun håndterKorrigertSøknad(
@@ -2201,6 +2201,18 @@ internal class Vedtaksperiode private constructor(
         tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRettighetskategori.nesteTilstand(this))
     }
 
+    internal fun håndterRettighetskategoriEndret(
+        eventBus: EventBus,
+        rettighetskategoriEndret: RettighetskategoriEndret,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val ikkeStøttet = rettighetskategoriEndret.ikkeStøttet() ?: return
+        if (erRevurdering()) return
+        if (tilstand in setOf(TilInfotrygd, AvsluttetUtenUtbetaling, AvventerAvsluttetUtenUtbetaling)) return
+        registrerKontekst(aktivitetslogg).funksjonellFeil(ikkeStøttet)
+        forkast(eventBus, rettighetskategoriEndret, aktivitetslogg)
+    }
+
     internal fun håndterSimulering(
         eventBus: EventBus,
         simulering: Simulering,
@@ -3439,6 +3451,10 @@ internal class Vedtaksperiode private constructor(
     }
 
     internal fun erRevurdering() = behandlinger.harFattetVedtak()
+
+    internal fun harRettighetskategorigrunnlag() = person.rettighetskategorigrunnlagFor(skjæringstidspunkt) != null
+
+    internal fun venterPåVilkårsprøving() = tilstand == AvventerVilkårsprøving || tilstand == AvventerVilkårsprøvingRevurdering
 
     private fun emitVedtaksperiodeEndret(
         eventBus: EventBus,

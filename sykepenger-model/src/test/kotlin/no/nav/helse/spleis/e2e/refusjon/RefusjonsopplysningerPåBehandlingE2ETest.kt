@@ -677,7 +677,6 @@ internal class RefusjonsopplysningerPåBehandlingE2ETest : AbstractDslTest() {
                 1.vedtaksperiode,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
             )
             assertVarsel(Varselkode.RV_IM_4, 1.vedtaksperiode.filter())

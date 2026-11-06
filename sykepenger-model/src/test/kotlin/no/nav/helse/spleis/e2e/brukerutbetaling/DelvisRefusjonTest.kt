@@ -646,7 +646,6 @@ internal class DelvisRefusjonTest : AbstractDslTest() {
                 AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_BLOKKERENDE_PERIODE,
-                AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
                 AVVENTER_HISTORIKK,
                 AVVENTER_SIMULERING,
