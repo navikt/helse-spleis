@@ -55,7 +55,7 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         val behov = testRapid.inspektør.etterspurteBehov(Opptjeningsvurdering)
         val detaljer = behov.path(Opptjeningsvurdering.utgåendeNavn)
         assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asString())
-        assertEquals("Arbeidstaker", detaljer.path("arbeidssituasjon").asString())
+        assertFalse(detaljer.has("arbeidssituasjon"))
         assertEquals(rettighetskategoriId.toString(), detaljer.path("rettighetskategoriId").asString())
     }
 

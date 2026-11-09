@@ -622,19 +622,10 @@ internal class EventBusOversetter(
                 ).takeIf { event.yrkesaktivitetssporing.somYrkesaktivitetstype == "SELVSTENDIG" },
                 Behov(
                     Behov.Behovstype.Opptjeningsvurdering,
-                    buildMap {
-                        put("skjæringstidspunkt", event.skjæringstidspunkt)
-                        put(
-                            "arbeidssituasjon",
-                            when (event.yrkesaktivitetssporing) {
-                                Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> "Arbeidsledig"
-                                is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> "Arbeidstaker"
-                                Behandlingsporing.Yrkesaktivitet.Frilans -> "Frilans"
-                                Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SelvstendigNæringsdrivende"
-                            },
-                        )
-                        put("rettighetskategoriId", event.rettighetskategoriId)
-                    },
+                    mapOf(
+                        "skjæringstidspunkt" to event.skjæringstidspunkt,
+                        "rettighetskategoriId" to event.rettighetskategoriId,
+                    ),
                 ),
             )
 
