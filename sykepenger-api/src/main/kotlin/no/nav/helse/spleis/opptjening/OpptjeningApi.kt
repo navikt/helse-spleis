@@ -17,6 +17,7 @@ import no.nav.helse.person.Person
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.objectMapper
 import java.time.LocalDateTime
+import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 private data class PersonRequest(
@@ -26,23 +27,30 @@ private data class PersonRequest(
 internal data class Opptjeningsvurdering(
     val opprettet: LocalDateTime,
     val vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
+    val rettighetskategorier: List<Rettighetskategori>,
 )
 
-internal fun opptjeningsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto>): List<Opptjeningsvurdering> {
-    fun tidligstOpprettet(vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett) =
-        historikk
-            .filter { innslag ->
-                innslag.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().any {
-                    it.opptjeningsvurderingId ==
-                        vilkårsgrunnlag.opptjeningsvurderingId
-                }
-            }.minOf { it.opprettet }
+internal data class Rettighetskategori(
+    val id: UUID,
+    val opprettet: LocalDateTime,
+)
 
-    return historikk
-        .flatMap { it.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>() }
-        .distinctBy { it.opptjeningsvurderingId }
-        .map { Opptjeningsvurdering(tidligstOpprettet(it), it) }
-}
+internal fun opptjeningsvurderinger(historikk: List<VilkårsgrunnlagInnslagUtDto>): List<Opptjeningsvurdering> =
+    historikk
+        .flatMap { innslag ->
+            innslag.vilkårsgrunnlag.filterIsInstance<VilkårsgrunnlagUtDto.Komplett>().map { innslag.opprettet to it }
+        }.groupBy { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.opptjeningsvurderingId }
+        .values
+        .map { innslag ->
+            Opptjeningsvurdering(
+                opprettet = innslag.minOf { it.first },
+                vilkårsgrunnlag = innslag.first().second,
+                rettighetskategorier =
+                    innslag
+                        .groupBy { (_, vilkårsgrunnlag) -> vilkårsgrunnlag.rettighetskategoriId }
+                        .map { (id, kategoriinnslag) -> Rettighetskategori(id, kategoriinnslag.minOf { it.first }) },
+            )
+        }
 
 internal fun Application.opptjeningApi(personDao: PersonDao) {
     fun vilkårsgrunnlagHistorikk(fødselsnummer: String): VilkårsgrunnlaghistorikkUtDto {
@@ -51,48 +59,57 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
         return utDto.vilkårsgrunnlagHistorikk
     }
 
-    fun somJson(
-        opprettet: LocalDateTime,
-        vilkårsgrunnlag: VilkårsgrunnlagUtDto.Komplett,
-    ) = objectMapper.createObjectNode().apply {
-        put("opptjeningsvurderingId", vilkårsgrunnlag.opptjeningsvurderingId.toString())
-        put("opprettet", opprettet.toString())
-        put("skjæringstidspunkt", vilkårsgrunnlag.skjæringstidspunkt.toString())
-        when (vilkårsgrunnlag) {
-            is VilkårsgrunnlagUtDto.Spleis -> {
-                put("kilde", "SPLEIS")
-                val arbeidstakerOpptjening = vilkårsgrunnlag.opptjening
-                if (arbeidstakerOpptjening == null) {
-                    put("type", "SELVSTENDIG")
-                } else {
-                    put("type", "ARBEIDSTAKER")
-                    put("oppfylt", arbeidstakerOpptjening.erOppfylt)
-                    when (val opptjeningsperiode = arbeidstakerOpptjening.reellOpptjeningsperiode) {
-                        null -> putNull("opptjeningsperiode")
-                        else ->
-                            putObject("opptjeningsperiode").apply {
-                                put("fom", opptjeningsperiode.fom.toString())
-                                put("tom", opptjeningsperiode.tom.toString())
-                            }
+    fun somJson(vurdering: Opptjeningsvurdering) =
+        objectMapper.createObjectNode().apply {
+            val vilkårsgrunnlag = vurdering.vilkårsgrunnlag
+            put("opptjeningsvurderingId", vilkårsgrunnlag.opptjeningsvurderingId.toString())
+            put("opprettet", vurdering.opprettet.toString())
+            put("skjæringstidspunkt", vilkårsgrunnlag.skjæringstidspunkt.toString())
+            putArray("rettighetskategorier").apply {
+                vurdering.rettighetskategorier.forEach { kategori ->
+                    addObject().apply {
+                        put("id", kategori.id.toString())
+                        put("opprettet", kategori.opprettet.toString())
                     }
-                    put(
-                        "antallDager",
-                        arbeidstakerOpptjening.opptjeningsdager.takeUnless { arbeidstakerOpptjening.reellOpptjeningsperiode == null } ?: 0,
-                    )
-                    putArray("arbeidsforhold").apply {
-                        arbeidstakerOpptjening.arbeidsforhold.forEach arbeidsforhold@{ arbeidsforhold ->
-                            val ansettelsesperioder =
-                                arbeidsforhold.ansattPerioder.filterNot { it.deaktivert }.takeUnless { it.isEmpty() }
-                                    ?: return@arbeidsforhold
-                            addObject().apply {
-                                put("organisasjonsnummer", arbeidsforhold.orgnummer)
-                                putArray("ansettelsesperioder").apply {
-                                    ansettelsesperioder.forEach { ansettelsesperiode ->
-                                        addObject().apply {
-                                            put("fom", ansettelsesperiode.ansattFom.toString())
-                                            when (val tom = ansettelsesperiode.ansattTom) {
-                                                null -> putNull("tom")
-                                                else -> put("tom", tom.toString())
+                }
+            }
+            when (vilkårsgrunnlag) {
+                is VilkårsgrunnlagUtDto.Spleis -> {
+                    put("kilde", "SPLEIS")
+                    val arbeidstakerOpptjening = vilkårsgrunnlag.opptjening
+                    if (arbeidstakerOpptjening == null) {
+                        put("type", "SELVSTENDIG")
+                    } else {
+                        put("type", "ARBEIDSTAKER")
+                        put("oppfylt", arbeidstakerOpptjening.erOppfylt)
+                        when (val opptjeningsperiode = arbeidstakerOpptjening.reellOpptjeningsperiode) {
+                            null -> putNull("opptjeningsperiode")
+                            else ->
+                                putObject("opptjeningsperiode").apply {
+                                    put("fom", opptjeningsperiode.fom.toString())
+                                    put("tom", opptjeningsperiode.tom.toString())
+                                }
+                        }
+                        put(
+                            "antallDager",
+                            arbeidstakerOpptjening.opptjeningsdager.takeUnless { arbeidstakerOpptjening.reellOpptjeningsperiode == null }
+                                ?: 0,
+                        )
+                        putArray("arbeidsforhold").apply {
+                            arbeidstakerOpptjening.arbeidsforhold.forEach arbeidsforhold@{ arbeidsforhold ->
+                                val ansettelsesperioder =
+                                    arbeidsforhold.ansattPerioder.filterNot { it.deaktivert }.takeUnless { it.isEmpty() }
+                                        ?: return@arbeidsforhold
+                                addObject().apply {
+                                    put("organisasjonsnummer", arbeidsforhold.orgnummer)
+                                    putArray("ansettelsesperioder").apply {
+                                        ansettelsesperioder.forEach { ansettelsesperiode ->
+                                            addObject().apply {
+                                                put("fom", ansettelsesperiode.ansattFom.toString())
+                                                when (val tom = ansettelsesperiode.ansattTom) {
+                                                    null -> putNull("tom")
+                                                    else -> put("tom", tom.toString())
+                                                }
                                             }
                                         }
                                     }
@@ -101,13 +118,12 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
                         }
                     }
                 }
-            }
-            is VilkårsgrunnlagUtDto.Infotrygd -> {
-                put("type", "ARBEIDSTAKER")
-                put("kilde", "INFOTRYGD")
+                is VilkårsgrunnlagUtDto.Infotrygd -> {
+                    put("type", "ARBEIDSTAKER")
+                    put("kilde", "INFOTRYGD")
+                }
             }
         }
-    }
 
     routing {
         authenticate {
@@ -119,7 +135,7 @@ internal fun Application.opptjeningApi(personDao: PersonDao) {
 
                     val opptjeningsvurderinger =
                         opptjeningsvurderinger(vilkårsgrunnlagHistorikk.historikk)
-                            .map { somJson(it.opprettet, it.vilkårsgrunnlag) }
+                            .map(::somJson)
 
                     val response =
                         objectMapper

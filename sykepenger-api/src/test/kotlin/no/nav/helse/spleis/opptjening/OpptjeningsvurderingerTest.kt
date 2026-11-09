@@ -93,6 +93,7 @@ class OpptjeningsvurderingerTest {
     private fun vilkårsgrunnlag(opptjeningsvurderingId: UUID = UUID.randomUUID()) =
         mockk<VilkårsgrunnlagUtDto.Komplett> {
             every { this@mockk.opptjeningsvurderingId } returns opptjeningsvurderingId
+            every { rettighetskategoriId } returns UUID.randomUUID()
         }
 
     private fun historikkinnslag(
