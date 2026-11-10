@@ -205,7 +205,9 @@ internal class Behandlinger private constructor(
         return sisteAvsluttetBehandling.analytiskDatapakke(forrigeAvsluttetBehandling, yrkesaktivitetssporing, vedtaksperiodeId)
     }
 
-    internal fun utbetalingstidslinjeFraForrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }?.utbetalingstidslinje()
+    internal fun utbetalingstidslinjeFraForrigeVedtak() = forrigeVedtak()?.utbetalingstidslinje()
+
+    internal fun forrigeVedtak() = behandlinger.lastOrNull { it.erFattetVedtak() }
 
     internal fun utbetalingstidslinje() = sisteBehandling.utbetalingstidslinje()
 

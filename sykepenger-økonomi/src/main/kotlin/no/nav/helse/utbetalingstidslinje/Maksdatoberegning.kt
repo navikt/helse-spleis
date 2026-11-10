@@ -31,6 +31,13 @@ class Maksdatoberegning(
             .avgrensTil(periode.endInclusive)
             .beregnMaksdato(syttiårsdagen, dødsdato)
 
+    fun beregnMaksdatoForHistorikken(vurderTilOgMed: LocalDate): BeregnetMaksdato {
+        beregn(emptyList())
+        return sisteVurdering
+            .avgrensTil(vurderTilOgMed)
+            .beregnMaksdato(syttiårsdagen, dødsdato)
+    }
+
     private fun vurderStopp(dato: LocalDate) {
         when (state) {
             Initiell,

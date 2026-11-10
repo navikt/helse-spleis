@@ -37,9 +37,14 @@ import no.nav.helse.person.aktivitetslogg.SpesifikkKontekst
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdhistorikk
 import no.nav.helse.person.infotrygdhistorikk.InfotrygdhistorikkElement
+import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode
+import no.nav.helse.person.infotrygdhistorikk.Utbetalingsperiode
 import no.nav.helse.sykdomstidslinje.Skjæringstidspunkter
+import no.nav.helse.utbetalingstidslinje.BeregnetMaksdato
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler
 import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.NormalArbeidstaker
+import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -956,6 +961,28 @@ class Person private constructor(
 
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean =
         infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
+
+    // beregner gjenstående sykedager fra vedtatte behandlinger og innsendte Infotrygd-perioder, uten å endre personen
+    fun beregnGjenståendeSykedager(infotrygdperioder: List<Infotrygdperiode>): BeregnetMaksdato? {
+        val sisteVedtatteBehandlinger = vedtaksperioder { true }.mapNotNull { it.behandlinger.forrigeVedtak() }
+        val utbetalingerIInfotrygd = infotrygdperioder.filterIsInstance<Utbetalingsperiode>()
+        val sisteUtbetalteDag =
+            (sisteVedtatteBehandlinger.map { it.periode.endInclusive } + utbetalingerIInfotrygd.map { it.periode.endInclusive })
+                .maxOrNull() ?: return null
+        val infotrygdtidslinje =
+            infotrygdperioder
+                .map { it.utbetalingstidslinje() }
+                .fold(Utbetalingstidslinje(), Utbetalingstidslinje::plus)
+        val historisktidslinje =
+            sisteVedtatteBehandlinger.map { it.utbetalingstidslinje() }.fold(infotrygdtidslinje, Utbetalingstidslinje::plus)
+        return Maksdatoberegning(
+            sekstisyvårsdagen = alder.redusertYtelseAlder,
+            syttiårsdagen = alder.syttiårsdagen,
+            dødsdato = alder.dødsdato,
+            regler = regler,
+            historisktidslinje = historisktidslinje,
+        ).beregnMaksdatoForHistorikken(sisteUtbetalteDag)
+    }
 
     fun dto() =
         PersonUtDto(

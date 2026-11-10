@@ -42,6 +42,7 @@ spec:
         - application: sp-avslagsdager
         - application: speil
         - application: sporbar
+        - application: spokelse
     outbound:
       rules:
         - application: logging

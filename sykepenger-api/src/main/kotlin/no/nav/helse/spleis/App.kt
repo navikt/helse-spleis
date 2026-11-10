@@ -13,6 +13,7 @@ import no.nav.helse.spleis.config.AzureAdAppConfig
 import no.nav.helse.spleis.dao.HendelseDao
 import no.nav.helse.spleis.dao.PersonDao
 import no.nav.helse.spleis.dao.SendtDao
+import no.nav.helse.spleis.maksdato.maksdatoApi
 import no.nav.helse.spleis.medlemskap.medlemskapApi
 import no.nav.helse.spleis.opptjening.opptjeningApi
 import no.nav.helse.spleis.rest.personApi
@@ -108,4 +109,5 @@ internal fun Application.lagApplikasjonsmodul(
     medlemskapApi(personDao)
     rettighetskategoriApi(personDao)
     behandlingApi(personDao)
+    maksdatoApi(personDao)
 }
