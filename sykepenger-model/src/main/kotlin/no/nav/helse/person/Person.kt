@@ -8,8 +8,51 @@ import no.nav.helse.dto.serialisering.PersonUtDto
 import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.feriepenger.Feriepengeberegner
 import no.nav.helse.feriepenger.Feriepengegrunnlagstidslinje
-import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.AnmodningOmForkasting
+import no.nav.helse.hendelser.AnnullerUtbetaling
+import no.nav.helse.hendelser.Arbeidsgiveropplysninger
+import no.nav.helse.hendelser.AvbruttSøknad
+import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Dødsmelding
+import no.nav.helse.hendelser.EndretGrunnlagForBeregning
+import no.nav.helse.hendelser.EndretVurderingPåSkjæringstidspunkt
+import no.nav.helse.hendelser.FeriepengeutbetalingHendelse
+import no.nav.helse.hendelser.ForkastSykmeldingsperioder
+import no.nav.helse.hendelser.GjenopptaBehandling
+import no.nav.helse.hendelser.Grunnbeløpsregulering
+import no.nav.helse.hendelser.Hendelse
+import no.nav.helse.hendelser.IdentOpphørt
+import no.nav.helse.hendelser.Infotrygdendring
+import no.nav.helse.hendelser.InntektsmeldingerReplay
+import no.nav.helse.hendelser.InntektsopplysningerFraLagretInnteksmelding
+import no.nav.helse.hendelser.KanIkkeBehandlesHer
+import no.nav.helse.hendelser.KorrigerteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.MinimumSykdomsgradsvurderingMelding
+import no.nav.helse.hendelser.OverstyrArbeidsforhold
+import no.nav.helse.hendelser.OverstyrArbeidsgiveropplysninger
+import no.nav.helse.hendelser.OverstyrTidslinje
+import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.PersonPåminnelse
+import no.nav.helse.hendelser.Påminnelse
+import no.nav.helse.hendelser.Rettighetskategori
+import no.nav.helse.hendelser.RettighetskategoriEndret
+import no.nav.helse.hendelser.Revurderingseventyr
 import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
+import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
+import no.nav.helse.hendelser.Simulering
+import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Sykmelding
+import no.nav.helse.hendelser.Søknad
+import no.nav.helse.hendelser.UtbetalingHendelse
+import no.nav.helse.hendelser.Utbetalingsgodkjenning
+import no.nav.helse.hendelser.Utbetalingshistorikk
+import no.nav.helse.hendelser.UtbetalingshistorikkEtterInfotrygdendring
+import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
+import no.nav.helse.hendelser.VedtakFattet
+import no.nav.helse.hendelser.Vilkårsgrunnlag
+import no.nav.helse.hendelser.Ytelser
+import no.nav.helse.hendelser.somPeriode
+import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
 import no.nav.helse.person.Yrkesaktivitet.Companion.aktiveSkjæringstidspunkter
@@ -22,7 +65,6 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.gjenopptaBehandling
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyrInntektsgrunnlag
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyringAvInntekt
 import no.nav.helse.person.Yrkesaktivitet.Companion.håndterOverstyringAvRefusjon
-import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Yrkesaktivitet.Companion.igangsettOverstyring
 import no.nav.helse.person.Yrkesaktivitet.Companion.mursteinsperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.nestemann
@@ -47,7 +89,7 @@ import no.nav.helse.utbetalingstidslinje.MaksimumSykepengedagerregler.Companion.
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class Person private constructor(
     personidentifikator: Personidentifikator,
@@ -822,13 +864,23 @@ class Person private constructor(
         aktivitetslogg: IAktivitetslogg,
     ) = finn(behandlingsporing) ?: Yrkesaktivitet(this@Person, behandlingsporing, regelverkslogg).also { yrkesaktivitet ->
         when (behandlingsporing) {
-            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> aktivitetslogg.info("Ny yrkesaktivitet som Arbeidsledig for denne personen")
-            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker ->
+            Behandlingsporing.Yrkesaktivitet.Arbeidsledig -> {
+                aktivitetslogg.info("Ny yrkesaktivitet som Arbeidsledig for denne personen")
+            }
+
+            is Behandlingsporing.Yrkesaktivitet.Arbeidstaker -> {
                 aktivitetslogg.info(
                     "Ny yrkesaktivitet som Arbeidstaker med organisasjonsnummer ${behandlingsporing.organisasjonsnummer} for denne personen",
                 )
-            Behandlingsporing.Yrkesaktivitet.Frilans -> aktivitetslogg.info("Ny yrkesaktivitet som Frilans for denne personen")
-            Behandlingsporing.Yrkesaktivitet.Selvstendig -> aktivitetslogg.info("Ny yrkesaktivitet som Selvstendig for denne personen")
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Frilans -> {
+                aktivitetslogg.info("Ny yrkesaktivitet som Frilans for denne personen")
+            }
+
+            Behandlingsporing.Yrkesaktivitet.Selvstendig -> {
+                aktivitetslogg.info("Ny yrkesaktivitet som Selvstendig for denne personen")
+            }
         }
         add(yrkesaktivitet)
     }
@@ -913,6 +965,7 @@ class Person private constructor(
             is Sykmelding -> {
                 // Sykmelding fører ikke til endringer i tiltander, så sender ikke signal etter håndtering av den
             }
+
             else -> {
                 val eventer =
                     yrkesaktiviteter
