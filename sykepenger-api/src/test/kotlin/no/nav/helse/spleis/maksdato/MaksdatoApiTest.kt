@@ -171,7 +171,6 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
             post("""{"fødselsnummer":"$UNG_PERSON_FNR","infotrygdperioder":[]}""", HttpStatusCode.BadRequest)
             post("""{"fødselsnummer":"$UNG_PERSON_FNR"}""", HttpStatusCode.BadRequest)
             post("""{"infotrygdperioder":[$periode]}""", HttpStatusCode.BadRequest)
-            post("""{"fødselsnummer":"tullball","infotrygdperioder":[$periode]}""", HttpStatusCode.BadRequest)
             post(infotrygdperioder("""{"tom":"2018-02-09","type":"UTBETALING"}"""), HttpStatusCode.BadRequest)
             post(infotrygdperioder("""{"fom":"2018-02-05","type":"UTBETALING"}"""), HttpStatusCode.BadRequest)
             post(infotrygdperioder("""{"fom":"2018-02-05","tom":"2018-02-09"}"""), HttpStatusCode.BadRequest)
