@@ -962,7 +962,6 @@ class Person private constructor(
     internal fun erBehandletIInfotrygd(vedtaksperiode: Periode): Boolean =
         infotrygdhistorikk.harUtbetaltI(vedtaksperiode) || infotrygdhistorikk.harFerieI(vedtaksperiode)
 
-    // beregner gjenstående sykedager fra vedtatte behandlinger og innsendte Infotrygd-perioder, uten å endre personen
     fun beregnGjenståendeSykedager(infotrygdperioder: List<Infotrygdperiode>): BeregnetMaksdato? {
         val sisteVedtatteBehandlinger = vedtaksperioder { true }.mapNotNull { it.behandlinger.forrigeVedtak() }
         val utbetalingerIInfotrygd = infotrygdperioder.filterIsInstance<Utbetalingsperiode>()

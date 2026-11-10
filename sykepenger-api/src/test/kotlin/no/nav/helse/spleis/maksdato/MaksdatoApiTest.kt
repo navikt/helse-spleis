@@ -62,7 +62,6 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
     @Test
     fun `ny Infotrygd-periode etter vedtaket trekker fra ukedagene i perioden`() =
         spleisApiTestApplication(testdata = opprettPerson()) {
-            // 5. til 18. februar 2018 har 10 ukedager
             val svar =
                 hentMaksdato(
                     infotrygdperioder("""{"fom":"2018-02-05","tom":"2018-02-18","type":"UTBETALING","organisasjonsnummer":"123456789"}"""),
@@ -90,7 +89,6 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
     @Test
     fun `vurdertTilOgMed er siste dag i vedtaket når det slutter etter Infotrygd-periodene`() =
         spleisApiTestApplication(testdata = opprettPerson()) {
-            // 4. til 8. desember 2017 har 5 ukedager
             val svar = hentMaksdato(infotrygdperioder("""{"fom":"2017-12-04","tom":"2017-12-08","type":"UTBETALING"}"""))
 
             assertEquals(GJENSTÅENDE_DAGER_ETTER_VEDTAKET - 5, svar.gjenståendeDager)
@@ -118,7 +116,6 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
         spleisApiTestApplication(
             testdata =
                 opprettPerson {
-                    // revurderingen gjør 29. og 30. januar om til ferie og blir beregnet, men ikke vedtatt
                     person.håndterOverstyrTidslinje(
                         eventBus,
                         YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)).lagHåndterOverstyrTidslinje(
@@ -138,7 +135,6 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
     @Test
     fun `behandling som ikke er vedtatt teller ikke med`() =
         spleisApiTestApplication(testdata = opprettPerson(fattVedtak = false)) {
-            // perioden i Spleis er beregnet og venter på godkjenning, så bare de 5 ukedagene fra Infotrygd er brukt
             val svar = hentMaksdato(infotrygdperioder("""{"fom":"2017-12-04","tom":"2017-12-08","type":"UTBETALING"}"""))
 
             assertEquals(243, svar.gjenståendeDager)
@@ -246,7 +242,7 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
 
     private lateinit var dataSource: DataSource
 
-    // som opprettTestdata i AbstractSpleisApiTest, men uten de lagrede meldingene (faste id-er kolliderer mellom tester i den delte databasen)
+    // opprettTestdata i AbstractSpleisApiTest lagrer meldinger med faste id-er, som kolliderer mellom testene i den delte databasen
     private fun opprettPerson(
         fattVedtak: Boolean = true,
         førLagring: () -> Unit = {},

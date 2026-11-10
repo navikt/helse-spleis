@@ -33,7 +33,7 @@ private data class InfotrygdperiodeRequest(
     val type: String,
     val organisasjonsnummer: String?,
 ) {
-    // samme tolkning som Sykepengehistorikk-behovet (UtbetalingshistorikkMessage): typer som ikke gir dager, og perioder med tom før fom, blir utelatt
+    // samme tolkning som Sykepengehistorikk-behovet i UtbetalingshistorikkMessage
     fun tilInfotrygdperiode(): Infotrygdperiode? {
         if (fom > tom) return null
         val orgnr = organisasjonsnummer ?: ""
