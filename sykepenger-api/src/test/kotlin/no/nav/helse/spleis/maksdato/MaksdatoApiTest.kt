@@ -57,6 +57,7 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
             assertEquals(gjenståendeDagerIVedtaket(), svar.gjenståendeDager)
             assertEquals(GJENSTÅENDE_DAGER_ETTER_VEDTAKET, svar.gjenståendeDager)
             assertEquals(TOM.toString(), svar.vurdertTilOgMed)
+            assertEquals(vedtaket().maksdato.toString(), svar.maksdato)
         }
 
     @Test
@@ -210,20 +211,22 @@ internal class MaksdatoApiTest : AbstractSpleisApiTest() {
     private fun infotrygdperioder(vararg perioder: String) =
         """{"fødselsnummer":"$UNG_PERSON_FNR","infotrygdperioder":[${perioder.joinToString()}]}"""
 
-    private fun gjenståendeDagerIVedtaket() =
+    private fun vedtaket() =
         eventBus.events
             .filterIsInstance<EventSubscription.UtbetalingUtbetaltEvent>()
             .single()
-            .gjenståendeSykedager
+
+    private fun gjenståendeDagerIVedtaket() = vedtaket().gjenståendeSykedager
 
     private data class Svar(
         val gjenståendeDager: Int,
         val vurdertTilOgMed: String,
+        val maksdato: String,
     )
 
     private suspend fun TestContext.hentMaksdato(body: String): Svar {
         val json = objectMapper.readTree(post(body, HttpStatusCode.OK))
-        return Svar(json["gjenståendeDager"].asInt(), json["vurdertTilOgMed"].asText())
+        return Svar(json["gjenståendeDager"].asInt(), json["vurdertTilOgMed"].asText(), json["maksdato"].asText())
     }
 
     private suspend fun TestContext.post(

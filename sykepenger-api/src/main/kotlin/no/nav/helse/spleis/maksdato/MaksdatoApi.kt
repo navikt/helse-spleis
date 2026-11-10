@@ -49,6 +49,7 @@ private data class InfotrygdperiodeRequest(
 private data class MaksdatoResponse(
     val gjenståendeDager: Int,
     val vurdertTilOgMed: LocalDate,
+    val maksdato: LocalDate,
 )
 
 internal fun Application.maksdatoApi(personDao: PersonDao) {
@@ -67,7 +68,7 @@ internal fun Application.maksdatoApi(personDao: PersonDao) {
                     val beregnet =
                         person.beregnGjenståendeSykedager(infotrygdperioder)
                             ?: throw NotFoundException("Fant ingen utbetalte dager å beregne gjenstående sykedager fra")
-                    call.respond(MaksdatoResponse(beregnet.gjenståendeDager, beregnet.vurdertTilOgMed))
+                    call.respond(MaksdatoResponse(beregnet.gjenståendeDager, beregnet.vurdertTilOgMed, beregnet.maksdato))
                 }
             }
         }
