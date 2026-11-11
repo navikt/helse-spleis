@@ -263,7 +263,6 @@ internal class SelvstendigUtgåendeEventsTest : AbstractEndToEndMediatorTest() {
                 "NARINGSDRIVENDE_VIRKSOMHETEN_AVVIKLET" to false,
                 "NARINGSDRIVENDE_NY_I_ARBEIDSLIVET" to false,
                 "NARINGSDRIVENDE_VARIG_ENDRING" to false,
-                "FRAVAR_FOR_SYKMELDINGEN_V2" to false,
             )
         val (_, sendtSøknad) =
             meldingsfabrikk.lagSøknadSelvstendig(
