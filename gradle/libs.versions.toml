@@ -1,6 +1,6 @@
 [versions]
 sykepengerGradlePlugins = "20261029.1945"
-rapids-and-rivers = "2026091610031789545782"
+rapids-and-rivers = "2026110308421793691732"
 postgres = "42.7.14"
 hikari = "7.1.0"
 cloudsql = "1.30.2"
@@ -16,8 +16,8 @@ wiremock = "3.13.2"
 jsonassert = "1.5.3"
 spekemat = "2024.11.12-11.06-f3ac061f"
 spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
-syfokafka = "2026.05.13-10.24-d6649054"
-json-schema-validator = "3.0.8"
+syfokafka = "2026.10.28-17.30-e59ff951"
+json-schema-validator = "3.0.9"
 commons-codec = "1.23.0"
 testcontainers = "2.0.5"
 
