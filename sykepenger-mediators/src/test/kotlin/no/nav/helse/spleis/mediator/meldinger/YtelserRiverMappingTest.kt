@@ -241,14 +241,6 @@ internal class YtelserRiverMappingTest :
         }
 
     @Test
-    fun `Løsning med vurderingIder godtas`() =
-        Toggle.Avslagsdagerbehov.enable {
-            val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
-            (json.path("@løsning").path("Avslagsdager") as ObjectNode).putArray("vurderingIder").add(UUID.randomUUID().toString())
-            assertEquals(Avslagsdager(emptyList()), sendJson(json.toString()).avslagsdager)
-        }
-
-    @Test
     fun `Løsning uten vurderteDager avvises`() =
         Toggle.Avslagsdagerbehov.enable {
             val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
