@@ -91,6 +91,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
     forsikringsvurderingId: UUID? = null,
     opptjeningsvurderingId: UUID = inspektør.vilkårsgrunnlag(vedtaksperiodeId)!!.opptjeningsvurderingId,
     medlemskapsvurderingId: UUID = inspektør.vilkårsgrunnlag(vedtaksperiodeId)!!.medlemskapsvurderingId,
+    dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList(),
 ) {
     val benyttetUtbetalingId = UUID.randomUUID()
     val benyttetVilkårsgrunnlagId = UUID.randomUUID()
@@ -165,6 +166,7 @@ internal fun TestPerson.TestArbeidsgiver.assertGodkjenningsbehov(
                     Behandlingsporing.Yrkesaktivitet.Selvstendig -> somSelvstendigSykepengegrunnlagsfakta(sykepengegrunnlagsfakta)
                     Behandlingsporing.Yrkesaktivitet.Frilans -> error("Støtter ikke frilans")
                 },
+            dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
         )
     val actual =
         actualBehov.event.copy(

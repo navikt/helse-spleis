@@ -604,6 +604,7 @@ interface EventSubscription {
         val foreløpigBeregnetSluttPåSykepenger: LocalDate,
         val utbetalingsdager: List<Utbetalingsdag>,
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+        val dagerUtenVurderingAvOppholdskrav: List<LocalDate>,
     ) : Event {
         data class PeriodeMedSammeSkjæringstidspunkt(
             val vedtaksperiodeId: UUID,

@@ -1162,6 +1162,7 @@ internal class Behandlinger private constructor(
                     .periode(dagerUtenNavAnsvar.dager, dagerUtenNavAnsvar.ferdigAvklart, periode)
                     .skjæringstidspunkt(skjæringstidspunkt)
                     .utbetalingsinformasjon(utbetaling, utbetalingstidslinje, sykdomstidslinje, refusjonstidslinje)
+                    .dagerUtenVurderingAvOppholdskrav(sykdomstidslinje.subset(periode), vurderingerAvLøpendeVilkår)
                     .sykepengerettighet(maksdatoresultat.antallForbrukteDager, maksdatoresultat.gjenståendeDager, maksdatoresultat.maksdato)
                     .apply {
                         grunnlagsdata.inntektsgrunnlag.selvstendigInntektsopplysning?.faktaavklartInntekt?.also {

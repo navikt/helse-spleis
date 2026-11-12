@@ -1018,6 +1018,7 @@ internal class EventBusOversetter(
                 "gjenståendeSykedager" to event.gjenståendeSykedager,
                 "foreløpigBeregnetSluttPåSykepenger" to "${event.foreløpigBeregnetSluttPåSykepenger}",
                 "utbetalingsdager" to event.utbetalingsdager.map { it.tilBehovMap() },
+                "dagerUtenVurderingAvOppholdskrav" to event.dagerUtenVurderingAvOppholdskrav.map { "$it" },
                 "sykepengegrunnlagsfakta" to
                     when (val fakta = event.sykepengegrunnlagsfakta) {
                         is Sykepengegrunnlagsfakta.ArbeidstakerEtterHovedregel ->

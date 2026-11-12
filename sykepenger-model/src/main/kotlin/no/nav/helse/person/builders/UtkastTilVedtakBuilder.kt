@@ -9,6 +9,8 @@ import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattEtterS
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.FastsattIInfotrygd
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Inntektskilde
 import no.nav.helse.person.EventSubscription.UtkastTilVedtakEvent.Sykepengegrunnlagsfakta
+import no.nav.helse.person.LøpendeVilkår
+import no.nav.helse.person.VurderingerAvLøpendeVilkår
 import no.nav.helse.person.beløp.Beløpstidslinje
 import no.nav.helse.person.inntekt.SelvstendigFaktaavklartInntekt
 import no.nav.helse.sykdomstidslinje.Dag
@@ -221,6 +223,20 @@ internal class UtkastTilVedtakBuilder(
             if (sykdomstidslinje.any { it is Dag.Feriedag }) tags.add(Tag.Ferie)
         }
 
+    private var dagerUtenVurderingAvOppholdskrav: List<LocalDate> = emptyList()
+
+    // Saksbehandler må vurdere oppholdskravet for hver dag med syk utenfor EØS før perioden kan godkjennes (ADR 0016). Utfallet spiller ingen rolle.
+    internal fun dagerUtenVurderingAvOppholdskrav(
+        sykdomstidslinje: Sykdomstidslinje,
+        vurderinger: VurderingerAvLøpendeVilkår,
+    ) = apply {
+        this.dagerUtenVurderingAvOppholdskrav =
+            sykdomstidslinje
+                .filterIsInstance<Dag.SykUtenforEØS>()
+                .filter { dag -> vurderinger[dag.dato].orEmpty().none { it.vilkår == LøpendeVilkår.Oppholdskrav } }
+                .map { it.dato }
+    }
+
     private fun refusjonstidslinje(refusjonstidslinje: Beløpstidslinje) =
         apply {
             if (refusjonstidslinje.sumOf { it.beløp.årlig } > 0) tags.add(Tag.ArbeidsgiverØnskerRefusjon)
@@ -380,6 +396,7 @@ internal class UtkastTilVedtakBuilder(
                 gjenståendeSykedager = gjenståendeSykedager,
                 foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
                 utbetalingsdager = utbetalingsdager,
+                dagerUtenVurderingAvOppholdskrav = dagerUtenVurderingAvOppholdskrav,
                 sykepengegrunnlagsfakta =
                     when (yrkesaktivitetssporing) {
                         Behandlingsporing.Yrkesaktivitet.Arbeidsledig,

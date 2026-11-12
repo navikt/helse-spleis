@@ -6,6 +6,7 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.selvstendig
 import no.nav.helse.etterlevelse.Ledd.LEDD_1
 import no.nav.helse.etterlevelse.Paragraf.PARAGRAF_8_9
+import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.ManuellOverskrivingDag
@@ -18,11 +19,15 @@ import no.nav.helse.inspectors.SubsumsjonInspektør
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.juni
+import no.nav.helse.person.LøpendeVilkår
+import no.nav.helse.person.UtfallAvLøpendeVilkår
+import no.nav.helse.person.VurderingAvLøpendeVilkår
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_AY_13
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_SØ_8
 import no.nav.helse.person.aktivitetslogg.Varselkode.RV_UT_23
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.spleis.e2e.AktivitetsloggFilter.Companion.filter
+import no.nav.helse.spleis.e2e.enesteGodkjenningsbehovSomFølgeAv
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
@@ -190,6 +195,63 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
         }
 
     @Test
+    fun `godkjenningsbehov har dagene som mangler vurdering av oppholdskravet`() =
+        Toggle.SykUtenforEøs.enable {
+            a1 {
+                tilYtelser()
+                val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) { håndterSimulering(1.vedtaksperiode) }
+
+                assertEquals(utenlandsopphold.toList(), godkjenningsbehov.event.dagerUtenVurderingAvOppholdskrav)
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
+            }
+        }
+
+    @Test
+    fun `vurderte dager mangler ikke vurdering av oppholdskravet uansett utfall`() =
+        Toggle.SykUtenforEøs.enable {
+            a1 {
+                tilYtelser(
+                    avslagsdager =
+                        Avslagsdager(
+                            (22.januar til 24.januar).map { oppholdskrav(it, UtfallAvLøpendeVilkår.Oppfylt) } +
+                                oppholdskrav(25.januar, UtfallAvLøpendeVilkår.IkkeOppfylt),
+                        ),
+                )
+                val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) { håndterSimulering(1.vedtaksperiode) }
+
+                assertEquals(listOf(26.januar, 27.januar, 28.januar), godkjenningsbehov.event.dagerUtenVurderingAvOppholdskrav)
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
+            }
+        }
+
+    @Test
+    fun `dag som er overstyrt fra syk utenfor EØS mangler ikke vurdering`() =
+        Toggle.SykUtenforEøs.enable {
+            a1 {
+                tilYtelser()
+                håndterSimulering(1.vedtaksperiode)
+                håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(22.januar, Dagtype.Feriedag)))
+                håndterYtelser(1.vedtaksperiode)
+                val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) { håndterSimulering(1.vedtaksperiode) }
+
+                assertEquals((23.januar til 28.januar).toList(), godkjenningsbehov.event.dagerUtenVurderingAvOppholdskrav)
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
+            }
+        }
+
+    @Test
+    fun `uten syk utenfor EØS er listen over dager som mangler vurdering tom`() =
+        Toggle.SykUtenforEøs.disable {
+            a1 {
+                tilYtelser()
+                val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) { håndterSimulering(1.vedtaksperiode) }
+
+                assertEquals(emptyList<LocalDate>(), godkjenningsbehov.event.dagerUtenVurderingAvOppholdskrav)
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
+            }
+        }
+
+    @Test
     fun `uten togglen blir utenlandsopphold sykedager med varsel`() =
         Toggle.SykUtenforEøs.disable {
             a1 {
@@ -227,6 +289,22 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
         håndterSimulering(1.vedtaksperiode)
         assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
     }
+
+    private fun no.nav.helse.dsl.TestPerson.TestArbeidsgiver.tilYtelser(avslagsdager: Avslagsdager? = null) {
+        håndterSykmelding(januar)
+        håndterSøknad(
+            Sykdom(1.januar, 31.januar, 100.prosent),
+            Utlandsopphold(utenlandsopphold.start, utenlandsopphold.endInclusive),
+        )
+        håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+        håndterVilkårsgrunnlag(1.vedtaksperiode)
+        håndterYtelser(1.vedtaksperiode, avslagsdager = avslagsdager)
+    }
+
+    private fun oppholdskrav(
+        dato: LocalDate,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = Avslagsdager.VurdertDag(dato, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, UUID.randomUUID(), utfall))
 
     private fun graderteAndreYtelser(
         periode: Periode,
