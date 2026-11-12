@@ -62,7 +62,7 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
                     )
                     assertEquals(11, utbetalingstidslinje.navDagTeller)
                 }
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
                 SubsumsjonInspektør(jurist).assertIkkeVurdert(paragraf = PARAGRAF_8_9, versjon = 1.juni(2021), ledd = LEDD_1)
                 assertGjenoppbygget(dto())
             }
@@ -157,6 +157,7 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
                 assertEquals(utenlandsopphold.toList(), dagerUtenforEøs())
                 assertVarsel(RV_AY_13, 1.vedtaksperiode.filter())
                 assertVarsel(RV_UT_23, 1.vedtaksperiode.filter())
+                assertVarsel(RV_SØ_8, 1.vedtaksperiode.filter())
             }
         }
 
@@ -184,7 +185,7 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
                         utbetalingstidslinje.navHelgdager.map { it.dato }.filter { it in utenlandsopphold },
                     )
                 }
-                assertVarsler(emptyList(), 1.vedtaksperiode.filter())
+                assertVarsler(listOf(RV_SØ_8), 1.vedtaksperiode.filter())
             }
         }
 

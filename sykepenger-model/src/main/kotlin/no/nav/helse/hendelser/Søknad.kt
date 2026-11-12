@@ -487,7 +487,6 @@ class Søknad(
                 søknad: Søknad,
                 aktivitetslogg: IAktivitetslogg,
             ) {
-                if (Toggle.SykUtenforEøs.enabled) return
                 if (alleUtlandsdagerErFerie(søknad)) return
                 aktivitetslogg.varsel(RV_SØ_8)
             }
