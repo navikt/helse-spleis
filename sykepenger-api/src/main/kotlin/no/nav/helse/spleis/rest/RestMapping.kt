@@ -9,11 +9,11 @@ import no.nav.helse.spleis.rest.dto.ApiBegrunnelse
 import no.nav.helse.spleis.rest.dto.ApiDag
 import no.nav.helse.spleis.rest.dto.ApiHendelse
 import no.nav.helse.spleis.rest.dto.ApiInfotrygdVilkarsgrunnlag
-import no.nav.helse.spleis.rest.dto.ApiLøpendeVilkår
 import no.nav.helse.spleis.rest.dto.ApiInntektFraAOrdningen
 import no.nav.helse.spleis.rest.dto.ApiInntekterFraAOrdningen
 import no.nav.helse.spleis.rest.dto.ApiInntektskilde
 import no.nav.helse.spleis.rest.dto.ApiInntektsmelding
+import no.nav.helse.spleis.rest.dto.ApiLøpendeVilkår
 import no.nav.helse.spleis.rest.dto.ApiOmregnetArsinntekt
 import no.nav.helse.spleis.rest.dto.ApiOppdrag
 import no.nav.helse.spleis.rest.dto.ApiPensjonsgivendeInntekt
@@ -94,6 +94,7 @@ private fun mapDag(dag: SammenslåttDag) =
                 SykdomstidslinjedagType.SYKEDAG -> ApiSykdomsdagtype.Sykedag
                 SykdomstidslinjedagType.SYKEDAG_NAV -> ApiSykdomsdagtype.SykedagNav
                 SykdomstidslinjedagType.SYK_HELGEDAG -> ApiSykdomsdagtype.SykHelgedag
+                SykdomstidslinjedagType.SYK_UTENFOR_EØS -> ApiSykdomsdagtype.SykUtenforEøs
                 SykdomstidslinjedagType.ANDRE_YTELSER_FORELDREPENGER -> ApiSykdomsdagtype.AndreYtelserForeldrepenger
                 SykdomstidslinjedagType.ANDRE_YTELSER_AAP -> ApiSykdomsdagtype.AndreYtelserAap
                 SykdomstidslinjedagType.ANDRE_YTELSER_OMSORGSPENGER -> ApiSykdomsdagtype.AndreYtelserOmsorgspenger

@@ -92,6 +92,23 @@ class Søknad(
                 .map { it.sykdomstidslinje(avskjæringsdato(), kilde) }
                 .merge(Dagturnering.SØKNAD::beste)
                 .subset(sykdomsperiode)
+                .let { if (Toggle.SykUtenforEøs.enabled) it.medSykUtenforEøs(utenlandsopphold()) else it }
+    }
+
+    private fun utenlandsopphold() = perioder.filterIsInstance<Søknadsperiode.Utlandsopphold>().map { it.periode }
+
+    // Sykedager i et utenlandsopphold blir syk utenfor EØS. Dager som har vunnet over sykdom i turneringen (ferie, permisjon, arbeid, foreldet) står.
+    private fun Sykdomstidslinje.medSykUtenforEøs(utenlandsopphold: List<Periode>): Sykdomstidslinje {
+        val dagerUtenforEøs =
+            filter { dag -> utenlandsopphold.any { dag.dato in it } }
+                .mapNotNull { dag ->
+                    when (dag) {
+                        is Dag.Sykedag -> Dag.SykUtenforEØS(dag.dato, dag.grad, dag.kilde)
+                        is Dag.SykHelgedag -> Dag.SykUtenforEØS(dag.dato, dag.grad, dag.kilde)
+                        else -> null
+                    }
+                }.associateBy { it.dato }
+        return merge(Sykdomstidslinje(dagerUtenforEøs), Dag.override)
     }
 
     fun erRelevant(other: Periode): Boolean {
@@ -189,8 +206,9 @@ class Søknad(
         aktivitetslogg: IAktivitetslogg,
         subsumsjonslogg: Subsumsjonslogg,
     ): IAktivitetslogg {
-        val utlandsopphold = perioder.filterIsInstance<Søknadsperiode.Utlandsopphold>().map { it.periode }
-        subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utlandsopphold, this.perioder.subsumsjonsFormat()))
+        if (Toggle.SykUtenforEøs.disabled) {
+            subsumsjonslogg.logg(`§ 8-9 ledd 1`(false, utenlandsopphold(), this.perioder.subsumsjonsFormat()))
+        }
         perioder.forEach { it.valider(this, aktivitetslogg) }
         if (permittert) aktivitetslogg.varsel(RV_SØ_1)
         validerInntekterFraNyeArbeidsforhold(aktivitetslogg)
@@ -469,6 +487,7 @@ class Søknad(
                 søknad: Søknad,
                 aktivitetslogg: IAktivitetslogg,
             ) {
+                if (Toggle.SykUtenforEøs.enabled) return
                 if (alleUtlandsdagerErFerie(søknad)) return
                 aktivitetslogg.varsel(RV_SØ_8)
             }

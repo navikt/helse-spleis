@@ -26,6 +26,7 @@ import no.nav.helse.sykdomstidslinje.Dag.MeldingTilNavHelgedag
 import no.nav.helse.sykdomstidslinje.Dag.Permisjonsdag
 import no.nav.helse.sykdomstidslinje.Dag.ProblemDag
 import no.nav.helse.sykdomstidslinje.Dag.SykHelgedag
+import no.nav.helse.sykdomstidslinje.Dag.SykUtenforEØS
 import no.nav.helse.sykdomstidslinje.Dag.Sykedag
 import no.nav.helse.sykdomstidslinje.Dag.UkjentDag
 import no.nav.helse.økonomi.Prosentdel
@@ -167,6 +168,7 @@ class Sykdomstidslinje private constructor(
                         is UkjentDag -> "?"
                         is ProblemDag -> "X"
                         is SykHelgedag -> "H"
+                        is SykUtenforEØS -> "E"
                         is Arbeidsgiverdag -> "U"
                         is ArbeidsgiverHelgedag -> "G"
                         is MeldingTilNavDag -> "M"

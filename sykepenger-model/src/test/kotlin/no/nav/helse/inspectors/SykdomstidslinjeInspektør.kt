@@ -31,6 +31,7 @@ internal class SykdomstidslinjeInspektør(
                 is Dag.MeldingTilNavHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is Sykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is SykHelgedag -> set(dag, dag.dato, dag.grad, dag.kilde)
+                is SykUtenforEØS -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ForeldetSykedag -> set(dag, dag.dato, dag.grad, dag.kilde)
                 is ProblemDag -> set(dag, dag.dato, dag.kilde, dag.melding)
                 is AndreYtelser,

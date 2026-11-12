@@ -48,6 +48,7 @@ class Toggle private constructor(
         val GraderteAndreYtelser = fraEnv("GRADERTE_ANDRE_YTELSER", false)
         val MedlemskapsvurderingBehov = fraEnv("MEDLEMSKAPSVURDERINGBEHOV", false)
         val Avslagsdagerbehov = fraEnv("AVSLAGSDAGERBEHOV", false)
+        val SykUtenforEøs = fraEnv("SYK_UTENFOR_EOS", false)
 
         fun fraEnv(
             navn: String,

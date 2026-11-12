@@ -100,39 +100,30 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
                     builder.avslagsdagEller(dag.dato, 0.prosent, inntekt, inntektjusteringer) {
                         arbeidsdag(builder, dag.dato, inntekt, inntektjusteringer)
                     }
-                is Dag.SykHelgedag ->
-                    builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                        when (erVentetid || erFørVentetid) {
-                            true -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                            false -> helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                        }
-                    }
+                is Dag.SykHelgedag -> sykHelgedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, erVentetid || erFørVentetid)
                 is Dag.Sykedag ->
-                    builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                        when (erVentetid || erFørVentetid) {
-                            true ->
-                                when (navSkalUtbetaleVentetidsDag(dag.dato)) {
-                                    true ->
-                                        forsikringsdag(
-                                            builder,
-                                            dag.dato,
-                                            dag.grad,
-                                            inntekt,
-                                            inntektjusteringer,
-                                            graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
-                                        )
-                                    false -> ventetidsdag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                                }
-                            false ->
-                                navDag(
-                                    builder,
-                                    dag.dato,
-                                    dag.grad,
-                                    inntekt,
-                                    inntektjusteringer,
-                                    graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
-                                )
-                        }
+                    sykedag(
+                        builder,
+                        dag.dato,
+                        dag.grad,
+                        inntekt,
+                        inntektjusteringer,
+                        graderteAndreYtelserTidslinje,
+                        erVentetid || erFørVentetid,
+                    )
+                is Dag.SykUtenforEØS ->
+                    when (dag.erHelg()) {
+                        true -> sykHelgedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, erVentetid || erFørVentetid)
+                        false ->
+                            sykedag(
+                                builder,
+                                dag.dato,
+                                dag.grad,
+                                inntekt,
+                                inntektjusteringer,
+                                graderteAndreYtelserTidslinje,
+                                erVentetid || erFørVentetid,
+                            )
                     }
                 is Dag.MeldingTilNavDag ->
                     when (erVentetid) {
@@ -188,6 +179,55 @@ internal class SelvstendigUtbetalingstidslinjeBuilderVedtaksperiode(
             }
         }
         return builder.build()
+    }
+
+    private fun sykedag(
+        builder: Utbetalingstidslinje.Builder,
+        dato: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt,
+        inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
+        iEllerFørVentetid: Boolean,
+    ) = builder.avslagsdagEller(dato, grad, inntekt, inntektjusteringer) {
+        when (iEllerFørVentetid) {
+            true ->
+                when (navSkalUtbetaleVentetidsDag(dato)) {
+                    true ->
+                        forsikringsdag(
+                            builder,
+                            dato,
+                            grad,
+                            inntekt,
+                            inntektjusteringer,
+                            graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dato),
+                        )
+                    false -> ventetidsdag(builder, dato, grad, inntekt, inntektjusteringer)
+                }
+            false ->
+                navDag(
+                    builder,
+                    dato,
+                    grad,
+                    inntekt,
+                    inntektjusteringer,
+                    graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dato),
+                )
+        }
+    }
+
+    private fun sykHelgedag(
+        builder: Utbetalingstidslinje.Builder,
+        dato: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt,
+        inntektjusteringer: Beløpstidslinje,
+        iEllerFørVentetid: Boolean,
+    ) = builder.avslagsdagEller(dato, grad, inntekt, inntektjusteringer) {
+        when (iEllerFørVentetid) {
+            true -> ventetidsdag(builder, dato, grad, inntekt, inntektjusteringer)
+            false -> helg(builder, dato, grad, inntekt, inntektjusteringer)
+        }
     }
 
     private fun navSkalUtbetaleVentetidsDag(dato: LocalDate): Boolean {

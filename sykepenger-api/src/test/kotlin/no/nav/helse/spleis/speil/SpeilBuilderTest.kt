@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.speil
 
+import no.nav.helse.Toggle
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avslagsdager
@@ -9,6 +10,7 @@ import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.Søknad.Søknadsperiode.Sykdom
+import no.nav.helse.hendelser.Søknad.Søknadsperiode.Utlandsopphold
 import no.nav.helse.hendelser.til
 import no.nav.helse.januar
 import no.nav.helse.juni
@@ -20,11 +22,11 @@ import no.nav.helse.person.UtfallAvLøpendeVilkår
 import no.nav.helse.person.VurderingAvLøpendeVilkår
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
-import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.BegrunnelseDTO
+import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
-import no.nav.helse.spleis.speil.dto.LøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.LøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.PersonDTO
 import no.nav.helse.spleis.speil.dto.SammenslåttDag
@@ -267,6 +269,33 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         vurderingId: UUID,
         utfall: UtfallAvLøpendeVilkår,
     ) = Avslagsdager.VurdertDag(dato, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall))
+
+    @Test
+    fun `syk utenfor EØS mappes til egen dagtype`() =
+        Toggle.SykUtenforEøs.enable {
+            håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent), Utlandsopphold(26.januar, 27.januar))
+            håndterArbeidsgiveropplysninger(1.januar)
+            håndterVilkårsgrunnlag()
+            håndterYtelser()
+            håndterSimulering()
+
+            val tidslinje =
+                speilApi()
+                    .arbeidsgivere
+                    .single()
+                    .generasjoner
+                    .single()
+                    .perioder
+                    .single()
+                    .sammenslåttTidslinje
+                    .associateBy { it.dagen }
+
+            assertEquals(SykdomstidslinjedagType.SYKEDAG, tidslinje.getValue(25.januar).sykdomstidslinjedagtype)
+            assertEquals(SykdomstidslinjedagType.SYK_UTENFOR_EØS, tidslinje.getValue(26.januar).sykdomstidslinjedagtype)
+            assertEquals(UtbetalingstidslinjedagType.NavDag, tidslinje.getValue(26.januar).utbetalingstidslinjedagtype)
+            assertEquals(SykdomstidslinjedagType.SYK_UTENFOR_EØS, tidslinje.getValue(27.januar).sykdomstidslinjedagtype)
+            assertEquals(UtbetalingstidslinjedagType.NavHelgDag, tidslinje.getValue(27.januar).utbetalingstidslinjedagtype)
+        }
 
     @Test
     fun `Skjæringstidspunkt er etter ny g, men før virkningstidspunkt for gyldigSomMinsteinntektKrav`() {

@@ -126,36 +126,14 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
                     }
                 }
 
-                is Dag.Sykedag ->
-                    builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                        if (erAGP(dag.dato)) {
-                            arbeidsgiverperiodedagEllerNavAnsvar(
-                                builder,
-                                dag.dato,
-                                dag.grad,
-                                inntekt,
-                                inntektjusteringer,
-                                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
-                            )
-                        } else {
-                            navDag(
-                                builder,
-                                dag.dato,
-                                dag.grad,
-                                inntekt,
-                                inntektjusteringer,
-                                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dag.dato),
-                            )
-                        }
-                    }
+                is Dag.Sykedag -> sykedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
 
-                is Dag.SykHelgedag ->
-                    builder.avslagsdagEller(dag.dato, dag.grad, inntekt, inntektjusteringer) {
-                        if (erAGP(dag.dato)) {
-                            arbeidsgiverperiodedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                        } else {
-                            helg(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
-                        }
+                is Dag.SykHelgedag -> sykHelgedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+
+                is Dag.SykUtenforEØS ->
+                    when (dag.erHelg()) {
+                        true -> sykHelgedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer)
+                        false -> sykedag(builder, dag.dato, dag.grad, inntekt, inntektjusteringer, graderteAndreYtelserTidslinje)
                     }
 
                 is Dag.AndreYtelser -> {
@@ -252,6 +230,49 @@ internal class ArbeidstakerUtbetalingstidslinjeBuilderVedtaksperiode(
             }
         }
         return builder.build()
+    }
+
+    private fun sykedag(
+        builder: Utbetalingstidslinje.Builder,
+        dato: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt,
+        inntektjusteringer: Beløpstidslinje,
+        graderteAndreYtelserTidslinje: GraderteAndreYtelserTidslinje,
+    ) = builder.avslagsdagEller(dato, grad, inntekt, inntektjusteringer) {
+        if (erAGP(dato)) {
+            arbeidsgiverperiodedagEllerNavAnsvar(
+                builder,
+                dato,
+                grad,
+                inntekt,
+                inntektjusteringer,
+                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dato),
+            )
+        } else {
+            navDag(
+                builder,
+                dato,
+                grad,
+                inntekt,
+                inntektjusteringer,
+                graderteAndreYtelserTidslinje.trekkFraSykdomsgrad(dato),
+            )
+        }
+    }
+
+    private fun sykHelgedag(
+        builder: Utbetalingstidslinje.Builder,
+        dato: LocalDate,
+        grad: Prosentdel,
+        inntekt: Inntekt,
+        inntektjusteringer: Beløpstidslinje,
+    ) = builder.avslagsdagEller(dato, grad, inntekt, inntektjusteringer) {
+        if (erAGP(dato)) {
+            arbeidsgiverperiodedag(builder, dato, grad, inntekt, inntektjusteringer)
+        } else {
+            helg(builder, dato, grad, inntekt, inntektjusteringer)
+        }
     }
 
     private fun erAGP(dato: LocalDate) = arbeidsgiverperiode.any { dato in it }

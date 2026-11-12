@@ -212,6 +212,14 @@ internal class SykdomstidslinjeBuilder(
                     grad = (it.grad.prosentDesimal * 100).roundToInt(),
                 )
 
+            is SykdomstidslinjeDagDto.SykUtenforEøsDto ->
+                Sykdomstidslinjedag(
+                    dagen = it.dato,
+                    type = avslagsdagEller(it.dato) { SykdomstidslinjedagType.SYK_UTENFOR_EØS },
+                    kilde = it.kilde.tilKildeDTO(),
+                    grad = (it.grad.prosentDesimal * 100).roundToInt(),
+                )
+
             is SykdomstidslinjeDagDto.UkjentDagDto ->
                 Sykdomstidslinjedag(
                     dagen = it.dato,

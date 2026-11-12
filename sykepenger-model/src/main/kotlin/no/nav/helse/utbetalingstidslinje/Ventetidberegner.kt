@@ -25,6 +25,12 @@ internal class Ventetidberegner {
                 when (dag) {
                     is Dag.Sykedag -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
 
+                    is Dag.SykUtenforEØS ->
+                        when (dag.erHelg()) {
+                            true -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvventerUtbetaltDag)
+                            false -> sykedag(aktivVentetid, dag.dato, VentetidFerdigAvklart)
+                        }
+
                     is Dag.SykHelgedag,
                     is Dag.MeldingTilNavDag,
                     is Dag.MeldingTilNavHelgedag,

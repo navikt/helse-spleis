@@ -309,6 +309,18 @@ private fun SykdomstidslinjeDagDto.tilPersonData() =
                 fom = null,
                 tom = null,
             )
+
+        is SykdomstidslinjeDagDto.SykUtenforEøsDto ->
+            DagData(
+                type = PersonData.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYK_UTENFOR_EØS,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosentDesimal,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null,
+            )
     }
 
 private fun HendelseskildeDto.tilPersonData() =

@@ -141,6 +141,7 @@ internal class UtbetalingsdagerBuilder(
                         is Dag.ProblemDag,
                         is Dag.SykHelgedag,
                         is Dag.Sykedag,
+                        is Dag.SykUtenforEØS,
                         is Dag.UkjentDag,
                         ->
                             EventSubscription.Utbetalingsdag(

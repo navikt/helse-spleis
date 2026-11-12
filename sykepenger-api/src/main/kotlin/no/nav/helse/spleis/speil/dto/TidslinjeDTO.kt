@@ -52,6 +52,7 @@ enum class SykdomstidslinjedagType {
     SYKEDAG,
     SYKEDAG_NAV,
     SYK_HELGEDAG,
+    SYK_UTENFOR_EØS,
     UBESTEMTDAG,
     ANDRE_YTELSER_FORELDREPENGER,
     ANDRE_YTELSER_AAP,

@@ -1883,7 +1883,13 @@ internal class Vedtaksperiode private constructor(
             .filter { other ->
                 val tidslinje = graderteAndreYtelser[other.beregningsyrkesaktivitet] ?: return@filter false
                 val sykdomstidslinje = other.sykdomstidslinje
-                tidslinje.harEndretSykdomsgradEtterFordeling(other.periode) { dato -> (sykdomstidslinje[dato] as? Dag.Sykedag)?.grad }
+                tidslinje.harEndretSykdomsgradEtterFordeling(other.periode) { dato ->
+                    when (val dag = sykdomstidslinje[dato]) {
+                        is Dag.Sykedag -> dag.grad
+                        is Dag.SykUtenforEØS -> dag.grad.takeUnless { dag.erHelg() }
+                        else -> null
+                    }
+                }
             }.onEach {
                 it.registrerKontekst(aktivitetslogg).varsel(RV_AY_13)
             }

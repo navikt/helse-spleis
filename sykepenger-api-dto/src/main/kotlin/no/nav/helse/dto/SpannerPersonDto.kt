@@ -226,6 +226,7 @@ data class SpannerPersonDto(
                 PROBLEMDAG,
                 SYKEDAG,
                 SYKEDAG_NAV,
+                SYK_UTENFOR_EØS,
                 ANDRE_YTELSER_FORELDREPENGER,
                 ANDRE_YTELSER_AAP,
                 ANDRE_YTELSER_OMSORGSPENGER,
@@ -1187,6 +1188,18 @@ private fun SykdomstidslinjeDagDto.tilPersonData() =
                 fom = null,
                 tom = null,
             )
+
+        is SykdomstidslinjeDagDto.SykUtenforEøsDto ->
+            DagData(
+                type = SpannerPersonDto.ArbeidsgiverData.SykdomstidslinjeData.JsonDagType.SYK_UTENFOR_EØS,
+                kilde = this.kilde.tilPersonData(),
+                grad = this.grad.prosentDesimal,
+                other = null,
+                melding = null,
+                dato = dato,
+                fom = null,
+                tom = null,
+            )
     }
 
 private fun HendelseskildeDto.tilPersonData() =
@@ -1957,7 +1970,14 @@ private fun VurderingerAvLøpendeVilkårDto.tilPersonData() =
         SpannerPersonDto.VurdertPeriodeData(
             fom = periode.periode.fom,
             tom = periode.periode.tom,
-            vurderinger = periode.vurderinger.map { SpannerPersonDto.VurderingAvLøpendeVilkårData(it.vilkår.name, it.vurderingId, it.utfall.name) },
+            vurderinger =
+                periode.vurderinger.map {
+                    SpannerPersonDto.VurderingAvLøpendeVilkårData(
+                        it.vilkår.name,
+                        it.vurderingId,
+                        it.utfall.name,
+                    )
+                },
         )
     }
 

@@ -49,6 +49,7 @@ internal class Skjæringstidspunkt(
                 is Dag.ForeldetSykedag,
                 is Dag.SykHelgedag,
                 is Dag.Sykedag,
+                is Dag.SykUtenforEØS,
                 -> {
                     aktivtSkjæringspunkt =
                         when (aktivtSkjæringspunkt) {

@@ -456,6 +456,8 @@ data class PersonData(
                             SykedagDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
                         }
 
+                    JsonDagType.SYK_UTENFOR_EØS -> SykUtenforEøsDto(dato = dagen, kilde = kilde, grad = ProsentdelDto(grad))
+
                     JsonDagType.ANDRE_YTELSER_FORELDREPENGER ->
                         AndreYtelserDto(
                             dato = dagen,
@@ -509,6 +511,7 @@ data class PersonData(
                 PERMISJONSDAG,
                 PROBLEMDAG,
                 SYKEDAG,
+                SYK_UTENFOR_EØS,
 
                 ANDRE_YTELSER_FORELDREPENGER,
                 ANDRE_YTELSER_AAP,

@@ -66,6 +66,11 @@ internal class Arbeidsgiverperiodeberegner(
                     sykedag(dag.dato)
                 }
 
+                is Dag.SykUtenforEØS -> {
+                    ferdigstillTellingHvisInfotrygdHarUtbetalt(gjenståendeInfotrygdBetalteDager, dag.dato)
+                    sykedag(dag.dato)
+                }
+
                 is Dag.UkjentDag -> {
                     håndterUkjentDag(dag.dato, gjenståendeInfotrygdBetalteDager, gjenståendeInfotrygdFerieperioder)
                 }

@@ -105,6 +105,12 @@ sealed class SykdomstidslinjeDagDto {
         val grad: ProsentdelDto,
     ) : SykdomstidslinjeDagDto()
 
+    data class SykUtenforEøsDto(
+        override val dato: LocalDate,
+        override val kilde: HendelseskildeDto,
+        val grad: ProsentdelDto,
+    ) : SykdomstidslinjeDagDto()
+
     data class ForeldetSykedagDto(
         override val dato: LocalDate,
         override val kilde: HendelseskildeDto,

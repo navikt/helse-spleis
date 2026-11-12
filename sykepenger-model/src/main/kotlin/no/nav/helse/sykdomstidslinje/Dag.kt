@@ -48,6 +48,7 @@ sealed class Dag(
             when (venstre) {
                 is Sykedag,
                 is SykHelgedag,
+                is SykUtenforEØS,
                 is Arbeidsgiverdag,
                 is ArbeidsgiverHelgedag,
                 -> venstre
@@ -58,6 +59,7 @@ sealed class Dag(
                     when (høyre) {
                         is Sykedag,
                         is SykHelgedag,
+                        is SykUtenforEØS,
                         is Arbeidsgiverdag,
                         is ArbeidsgiverHelgedag,
                         -> høyre
@@ -97,6 +99,7 @@ sealed class Dag(
                 is SykdomstidslinjeDagDto.ProblemDagDto -> ProblemDag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykHelgedagDto -> SykHelgedag.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.SykedagDto -> Sykedag.gjenopprett(dag)
+                is SykdomstidslinjeDagDto.SykUtenforEøsDto -> SykUtenforEØS.gjenopprett(dag)
                 is SykdomstidslinjeDagDto.UkjentDagDto -> UkjentDag.gjenopprett(dag)
             }
     }
@@ -345,6 +348,30 @@ sealed class Dag(
         internal companion object {
             fun gjenopprett(dto: SykdomstidslinjeDagDto.SykHelgedagDto): SykHelgedag =
                 SykHelgedag(
+                    dato = dto.dato,
+                    grad = Prosentdel.gjenopprett(dto.grad),
+                    kilde = Hendelseskilde.gjenopprett(dto.kilde),
+                )
+        }
+    }
+
+    /**
+     * En sykedag der brukeren har oppgitt i søknaden at hen var utenfor EØS.
+     * Beregnes som Sykedag på hverdager og SykHelgedag i helgene. Saksbehandler må vurdere oppholdskravet (§ 8-9) for dagen.
+     */
+    internal class SykUtenforEØS(
+        dato: LocalDate,
+        val grad: Prosentdel,
+        kilde: Hendelseskilde,
+    ) : Dag(dato, kilde) {
+        override fun dto(
+            dato: LocalDate,
+            kilde: HendelseskildeDto,
+        ) = SykdomstidslinjeDagDto.SykUtenforEøsDto(dato, kilde, grad.dto())
+
+        internal companion object {
+            fun gjenopprett(dto: SykdomstidslinjeDagDto.SykUtenforEøsDto): SykUtenforEØS =
+                SykUtenforEØS(
                     dato = dto.dato,
                     grad = Prosentdel.gjenopprett(dto.grad),
                     kilde = Hendelseskilde.gjenopprett(dto.kilde),

@@ -962,6 +962,7 @@ internal class Behandlinger private constructor(
                                     is ForeldetSykedag,
                                     is SykHelgedag,
                                     is Sykedag,
+                                    is Dag.SykUtenforEØS,
                                     -> true
 
                                     is AndreYtelser,
@@ -1664,7 +1665,9 @@ internal class Behandlinger private constructor(
             return sykdomstidslinje
                 .fremTilOgMed(dagenFørSisteSkjæringstidspunkt) // Ser kun på dager i denne behandlingen frem til og med dagen før siste skjæringstidspunkt
                 .fraOgMed(førstePotensielleUtbetalingsdag) // .. og kun fra og med første potensielle utbetalingsdag
-                .any { it is Sykedag } // .. sitter vi nå igjen med noen sykedager så bør det flagges til saksbehandler
+                .any {
+                    it is Sykedag || (it is Dag.SykUtenforEØS && !it.erHelg())
+                } // .. sitter vi nå igjen med noen sykedager så bør det flagges til saksbehandler
         }
 
         private fun behandlingLukket(

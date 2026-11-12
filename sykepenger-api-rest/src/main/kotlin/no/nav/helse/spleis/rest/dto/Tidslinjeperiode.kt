@@ -31,6 +31,7 @@ enum class ApiSykdomsdagtype {
     Sykedag,
     SykedagNav,
     SykHelgedag,
+    SykUtenforEøs,
     Ubestemtdag,
     AndreYtelserForeldrepenger,
     AndreYtelserAap,

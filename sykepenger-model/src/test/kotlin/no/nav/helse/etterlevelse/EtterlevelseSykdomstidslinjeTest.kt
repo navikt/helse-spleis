@@ -27,6 +27,7 @@ internal class EtterlevelseSykdomstidslinjeTest {
                 10.januar.ikkeSubsummérbar { Dag.ProblemDag(it, INGEN, "Melding") },
                 11.januar.subsummérbar { Dag.SykHelgedag(it, 100.prosent, INGEN) },
                 12.januar.subsummérbar { Dag.Sykedag(it, 100.prosent, INGEN) },
+                15.januar.subsummérbar { Dag.SykUtenforEØS(it, 100.prosent, INGEN) },
                 13.januar.ikkeSubsummérbar { Dag.UkjentDag(it, INGEN) },
                 14.januar.ikkeSubsummérbar { Dag.MeldingTilNavDag(it, 100.prosent, INGEN) },
                 14.januar.ikkeSubsummérbar { Dag.MeldingTilNavHelgedag(it, 100.prosent, INGEN) },

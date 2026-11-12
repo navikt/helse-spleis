@@ -61,6 +61,7 @@ internal enum class Turneringsnøkkel {
                 dag is ProblemDag -> UbestemtDag
                 dag is Sykedag && dag.kommerFra(Søknad::class) -> Sykedag_SØ
                 dag is SykHelgedag && dag.kommerFra(Søknad::class) -> SykHelgedag_SØ
+                dag is Dag.SykUtenforEØS -> if (dag.erHelg()) SykHelgedag_SØ else Sykedag_SØ
                 dag is Dag.AndreYtelser -> AndreYtelserDag
                 dag is Dag.MeldingTilNavDag -> MeldingTilNavDag
                 dag is Dag.MeldingTilNavHelgedag -> MeldingTilNavHelgedag
