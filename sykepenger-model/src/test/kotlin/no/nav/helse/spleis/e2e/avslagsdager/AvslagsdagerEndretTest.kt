@@ -12,6 +12,10 @@ import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.mars
 import no.nav.helse.person.Avslagstidslinje
+import no.nav.helse.person.LøpendeVilkår
+import no.nav.helse.person.UtfallAvLøpendeVilkår
+import no.nav.helse.person.VurderingAvLøpendeVilkår
+import no.nav.helse.person.VurderingerAvLøpendeVilkår
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING_REVURDERING
@@ -42,7 +46,7 @@ internal class AvslagsdagerEndretTest : AbstractDslTest() {
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertAvslåttForOppholdskrav(1.vedtaksperiode, avslått)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -63,13 +67,17 @@ internal class AvslagsdagerEndretTest : AbstractDslTest() {
 
             håndterAvslagsdagerEndret(avslått.start)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING)
-            håndterYtelser(1.vedtaksperiode, avslagsdager = Avslagsdager(setOf(vurdering2), emptyList()))
+            håndterYtelser(1.vedtaksperiode, avslagsdager = oppholdskravOppfylt(vurdering2, avslått))
             håndterSimulering(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING_REVURDERING)
             assertEquals(Avslagstidslinje(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
             assertEquals(emptyList<LocalDate>(), inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedatoer)
-            assertEquals(setOf(vurdering2), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering2), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
+            assertEquals(
+                vurderinger(vurdering2, avslått, UtfallAvLøpendeVilkår.Oppfylt),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingerAvLøpendeVilkår,
+            )
         }
     }
 
@@ -116,7 +124,7 @@ internal class AvslagsdagerEndretTest : AbstractDslTest() {
         a2 {
             assertAvslåttForOppholdskrav(1.vedtaksperiode, avslått)
             assertVarsel(Varselkode.RV_UT_23, 1.vedtaksperiode.filter())
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -156,5 +164,24 @@ internal class AvslagsdagerEndretTest : AbstractDslTest() {
     private fun oppholdskravIkkeOppfylt(
         vurderingId: UUID,
         periode: Periode,
-    ) = Avslagsdager(setOf(vurderingId), periode.map { Avslagsdager.Dag(vurderingId, it, Begrunnelse.Oppholdskrav) })
+    ) = oppholdskrav(vurderingId, periode, UtfallAvLøpendeVilkår.IkkeOppfylt)
+
+    private fun oppholdskravOppfylt(
+        vurderingId: UUID,
+        periode: Periode,
+    ) = oppholdskrav(vurderingId, periode, UtfallAvLøpendeVilkår.Oppfylt)
+
+    private fun oppholdskrav(
+        vurderingId: UUID,
+        periode: Periode,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = Avslagsdager(
+        periode.map { Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)) },
+    )
+
+    private fun vurderinger(
+        vurderingId: UUID,
+        periode: Periode,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = VurderingerAvLøpendeVilkår(periode to listOf(VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)))
 }

@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import no.nav.helse.Toggle
 import no.nav.helse.hendelser.*
 import no.nav.helse.hendelser.Institusjonsopphold.Institusjonsoppholdsperiode
+import no.nav.helse.person.VurderingAvLøpendeVilkår
 import no.nav.helse.spleis.BehandlingContext
 import no.nav.helse.spleis.Behov.Behovstype
 import no.nav.helse.spleis.IHendelseMediator
@@ -97,18 +98,16 @@ internal class YtelserMessage(
             ?.takeUnless { it.isMissingOrNull() }
             ?.let { løsning ->
                 Avslagsdager(
-                    vurderingIder =
-                        løsning
-                            .path("vurderingIder")
-                            .values()
-                            .map { UUID.fromString(it.asString()) }
-                            .toSet(),
-                    dager =
-                        løsning.path("avslagsdager").values().map { dag ->
-                            Avslagsdager.Dag(
-                                vurderingId = UUID.fromString(dag.path("vurderingId").asString()),
+                    vurderteDager =
+                        løsning.path("vurderteDager").values().map { dag ->
+                            Avslagsdager.VurdertDag(
                                 dato = dag.path("dato").asLocalDate(),
-                                begrunnelse = Avslagsdager.begrunnelse(dag.path("vilkårskoder").values().map { it.asString() }),
+                                vurdering =
+                                    VurderingAvLøpendeVilkår(
+                                        vilkår = Avslagsdager.løpendeVilkår(dag.path("vilkår").asString()),
+                                        vurderingId = UUID.fromString(dag.path("vurderingId").asString()),
+                                        utfall = Avslagsdager.utfall(dag.path("utfall").asString()),
+                                    ),
                             )
                         },
                 )

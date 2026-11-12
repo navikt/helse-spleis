@@ -120,7 +120,7 @@ internal class SpeilGenerasjonerBuilder(
             kilde = generasjon.kilde.meldingsreferanseId.id,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
-            sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
+            sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje, sisteEndring.vurderingerAvLøpendeVilkår),
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // feltet gir ikke mening for uberegnede perioder
             erForkastet = erForkastet,
             opprettet = generasjon.endringer.first().tidsstempel,
@@ -195,7 +195,7 @@ internal class SpeilGenerasjonerBuilder(
             kilde = generasjon.kilde.meldingsreferanseId.id,
             fom = sisteEndring.periode.fom,
             tom = sisteEndring.periode.tom,
-            sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje),
+            sammenslåttTidslinje = sykdomstidslinje.merge(utbetalingstidslinje, sisteEndring.vurderingerAvLøpendeVilkår),
             erForkastet = false,
             periodetype = Tidslinjeperiodetype.FØRSTEGANGSBEHANDLING, // TODO: fikse
             opprettet = vedtaksperiode.opprettet,

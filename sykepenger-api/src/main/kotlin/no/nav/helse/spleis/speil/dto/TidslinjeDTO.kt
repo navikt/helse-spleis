@@ -11,6 +11,7 @@ data class SammenslåttDag(
     val grad: Int? = null,
     val utbetalingsinfo: Utbetalingsinfo? = null,
     val begrunnelser: List<BegrunnelseDTO>? = null,
+    val vurderingerAvLøpendeVilkår: List<VurderingAvLøpendeVilkårDTO> = emptyList(),
 ) {
     /*
         sammenligner ikke utbetalingsinfo (siden endring av beløp dekkes av sjekk på vilkårsgrunnlagId),
@@ -21,6 +22,21 @@ data class SammenslåttDag(
             this.sykdomstidslinjedagtype == other.sykdomstidslinjedagtype &&
             this.kilde == other.kilde &&
             this.grad == grad
+}
+
+data class VurderingAvLøpendeVilkårDTO(
+    val vilkår: LøpendeVilkårDTO,
+    val vurderingId: UUID,
+    val utfall: UtfallAvLøpendeVilkårDTO,
+)
+
+enum class LøpendeVilkårDTO {
+    Oppholdskrav,
+}
+
+enum class UtfallAvLøpendeVilkårDTO {
+    Oppfylt,
+    IkkeOppfylt,
 }
 
 enum class SykdomstidslinjedagType {

@@ -6,6 +6,7 @@ import no.nav.helse.etterlevelse.Regelverkslogg
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.februar
 import no.nav.helse.gjenopprettFraJSON
+import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
@@ -487,13 +488,20 @@ internal abstract class AbstractSpeilBuilderTest {
         håndterYtelserTilGodkjenning()
     }
 
-    protected fun håndterYtelser(forsikringsvurderingResultat: ForsikringsvurderingResultat? = null) {
+    protected fun håndterYtelser(
+        forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
+        avslagsdager: Avslagsdager? = null,
+    ) {
         val ytelsebehov = ytelserbehov() ?: error("Fant ikke ytelserbehov")
         val ytelser =
             fabrikker
                 .getValue(
                     ytelsebehov.orgnummer,
-                ).lagYtelser(vedtaksperiodeId = ytelsebehov.vedtaksperiodeId, forsikringsvurderingResultat = forsikringsvurderingResultat)
+                ).lagYtelser(
+                    vedtaksperiodeId = ytelsebehov.vedtaksperiodeId,
+                    forsikringsvurderingResultat = forsikringsvurderingResultat,
+                    avslagsdager = avslagsdager,
+                )
         ytelser.håndter(Person::håndterYtelser)
     }
 

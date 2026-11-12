@@ -4,6 +4,7 @@ import no.nav.helse.dto.SimuleringResultatDto
 import no.nav.helse.hendelser.AnmodningOmForkasting
 import no.nav.helse.hendelser.AnnullerUtbetaling
 import no.nav.helse.hendelser.Arbeidsavklaringspenger
+import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Arbeidsgiveropplysning
 import no.nav.helse.hendelser.Arbeidsgiveropplysninger
 import no.nav.helse.hendelser.Behandlingsporing
@@ -310,6 +311,7 @@ internal class YrkesaktivitetHendelsefabrikk(
         forsikringsvurderingResultat: ForsikringsvurderingResultat?,
         opptjeningsvurderingResultatOk: Boolean = true,
         medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = Medlemskapsvurdering.Medlemskapstatus.Ja,
+        avslagsdager: Avslagsdager? = null,
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -346,6 +348,7 @@ internal class YrkesaktivitetHendelsefabrikk(
             forsikringsvurderingResultat = forsikringsvurderingResultat,
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
             medlemskapsvurderingResultat = medlemskapsvurderingResultat,
+            avslagsdager = avslagsdager,
         )
     }
 

@@ -9,6 +9,7 @@ import no.nav.helse.spleis.rest.dto.ApiBegrunnelse
 import no.nav.helse.spleis.rest.dto.ApiDag
 import no.nav.helse.spleis.rest.dto.ApiHendelse
 import no.nav.helse.spleis.rest.dto.ApiInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.rest.dto.ApiLøpendeVilkår
 import no.nav.helse.spleis.rest.dto.ApiInntektFraAOrdningen
 import no.nav.helse.spleis.rest.dto.ApiInntekterFraAOrdningen
 import no.nav.helse.spleis.rest.dto.ApiInntektskilde
@@ -36,7 +37,9 @@ import no.nav.helse.spleis.rest.dto.ApiSykepengegrunnlagsgrense
 import no.nav.helse.spleis.rest.dto.ApiSykmelding
 import no.nav.helse.spleis.rest.dto.ApiUtbetalingsdagType
 import no.nav.helse.spleis.rest.dto.ApiUtbetalingsinfo
+import no.nav.helse.spleis.rest.dto.ApiUtfallAvLøpendeVilkår
 import no.nav.helse.spleis.rest.dto.ApiVurdering
+import no.nav.helse.spleis.rest.dto.ApiVurderingAvLøpendeVilkår
 import no.nav.helse.spleis.speil.builders.SykepengegrunnlagsgrenseDTO
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BegrunnelseDTO
@@ -44,6 +47,7 @@ import no.nav.helse.spleis.speil.dto.BeregnetPeriode
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
 import no.nav.helse.spleis.speil.dto.Inntekt
 import no.nav.helse.spleis.speil.dto.Inntektkilde
+import no.nav.helse.spleis.speil.dto.LøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.SammenslåttDag
 import no.nav.helse.spleis.speil.dto.SpeilOppdrag
@@ -57,6 +61,7 @@ import no.nav.helse.spleis.speil.dto.Utbetaling
 import no.nav.helse.spleis.speil.dto.Utbetalingstatus
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.Utbetalingtype
+import no.nav.helse.spleis.speil.dto.UtfallAvLøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.Vilkårsgrunnlag
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -160,6 +165,21 @@ private fun mapDag(dag: SammenslåttDag) =
                     BegrunnelseDTO.ManglerOpptjening -> ApiBegrunnelse.ManglerOpptjening
                     BegrunnelseDTO.Over70 -> ApiBegrunnelse.Over70
                 }
+            },
+        vurderingerAvLøpendeVilkår =
+            dag.vurderingerAvLøpendeVilkår.map {
+                ApiVurderingAvLøpendeVilkår(
+                    vilkår =
+                        when (it.vilkår) {
+                            LøpendeVilkårDTO.Oppholdskrav -> ApiLøpendeVilkår.Oppholdskrav
+                        },
+                    vurderingId = it.vurderingId,
+                    utfall =
+                        when (it.utfall) {
+                            UtfallAvLøpendeVilkårDTO.Oppfylt -> ApiUtfallAvLøpendeVilkår.Oppfylt
+                            UtfallAvLøpendeVilkårDTO.IkkeOppfylt -> ApiUtfallAvLøpendeVilkår.IkkeOppfylt
+                        },
+                )
             },
     )
 

@@ -170,7 +170,23 @@ data class ApiDag(
     val grad: Double?,
     val utbetalingsinfo: ApiUtbetalingsinfo?,
     val begrunnelser: List<ApiBegrunnelse>?,
+    val vurderingerAvLøpendeVilkår: List<ApiVurderingAvLøpendeVilkår>,
 )
+
+data class ApiVurderingAvLøpendeVilkår(
+    val vilkår: ApiLøpendeVilkår,
+    val vurderingId: UUID,
+    val utfall: ApiUtfallAvLøpendeVilkår,
+)
+
+enum class ApiLøpendeVilkår {
+    Oppholdskrav,
+}
+
+enum class ApiUtfallAvLøpendeVilkår {
+    Oppfylt,
+    IkkeOppfylt,
+}
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes(

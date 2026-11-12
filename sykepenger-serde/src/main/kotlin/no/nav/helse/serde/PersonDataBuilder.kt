@@ -439,7 +439,33 @@ private fun BehandlingendringUtDto.tilPersonData() =
         korrigertInntekt = korrigertInntekt?.tilPersonData(),
         beregningId = beregningId,
         graderteAndreYtelserId = graderteAndreYtelserId,
-        avslagsdagerVurderingIder = avslagsdagerVurderingIder,
+        vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår.tilPersonData(),
+    )
+
+private fun VurderingerAvLøpendeVilkårDto.tilPersonData() =
+    VurderingerAvLøpendeVilkårData(
+        perioder =
+            perioder.map { periode ->
+                VurderingerAvLøpendeVilkårData.VurdertPeriodeData(
+                    fom = periode.periode.fom,
+                    tom = periode.periode.tom,
+                    vurderinger =
+                        periode.vurderinger.map {
+                            VurderingerAvLøpendeVilkårData.VurderingData(
+                                vilkår =
+                                    when (it.vilkår) {
+                                        LøpendeVilkårDto.Oppholdskrav -> VurderingerAvLøpendeVilkårData.LøpendeVilkårData.Oppholdskrav
+                                    },
+                                vurderingId = it.vurderingId,
+                                utfall =
+                                    when (it.utfall) {
+                                        UtfallAvLøpendeVilkårDto.Oppfylt -> VurderingerAvLøpendeVilkårData.UtfallData.Oppfylt
+                                        UtfallAvLøpendeVilkårDto.IkkeOppfylt -> VurderingerAvLøpendeVilkårData.UtfallData.IkkeOppfylt
+                                    },
+                            )
+                        },
+                )
+            },
     )
 
 private fun AvslagstidslinjeDto.tilPersonData() =

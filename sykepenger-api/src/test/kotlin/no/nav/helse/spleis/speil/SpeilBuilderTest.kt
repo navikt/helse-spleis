@@ -2,6 +2,7 @@ package no.nav.helse.spleis.speil
 
 import no.nav.helse.dto.AnnulleringskandidatDto
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.Inntektsmelding
@@ -14,10 +15,15 @@ import no.nav.helse.juni
 import no.nav.helse.mai
 import no.nav.helse.mars
 import no.nav.helse.november
+import no.nav.helse.person.LøpendeVilkår
+import no.nav.helse.person.UtfallAvLøpendeVilkår
+import no.nav.helse.person.VurderingAvLøpendeVilkår
 import no.nav.helse.person.tilstandsmaskin.TilstandType
 import no.nav.helse.spleis.speil.dto.AnnullertPeriode
 import no.nav.helse.spleis.speil.dto.BeregnetPeriode
+import no.nav.helse.spleis.speil.dto.BegrunnelseDTO
 import no.nav.helse.spleis.speil.dto.InfotrygdVilkårsgrunnlag
+import no.nav.helse.spleis.speil.dto.LøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.Inntektkilde
 import no.nav.helse.spleis.speil.dto.Periodetilstand
 import no.nav.helse.spleis.speil.dto.PersonDTO
@@ -29,6 +35,8 @@ import no.nav.helse.spleis.speil.dto.SykdomstidslinjedagType
 import no.nav.helse.spleis.speil.dto.UberegnetPeriode
 import no.nav.helse.spleis.speil.dto.Utbetalingsinfo
 import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
+import no.nav.helse.spleis.speil.dto.UtfallAvLøpendeVilkårDTO
+import no.nav.helse.spleis.speil.dto.VurderingAvLøpendeVilkårDTO
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
@@ -39,6 +47,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.LocalDate.EPOCH
 import java.time.LocalDateTime
 import java.util.UUID
@@ -210,6 +219,54 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         assertEquals(SykdomstidslinjedagType.AVSLÅTT_MELDING_TIL_NAV_DAG, tidslinje.sykdomstidslinjedagtype)
         assertEquals(UtbetalingstidslinjedagType.AvvistDag, tidslinje.utbetalingstidslinjedagtype)
     }
+
+    @Test
+    fun `vurderinger av oppholdskravet mappes per dag`() {
+        val ikkeOppfylt = UUID.randomUUID()
+        val oppfylt = UUID.randomUUID()
+        håndterSøknad(januar)
+        håndterArbeidsgiveropplysninger(1.januar)
+        håndterVilkårsgrunnlag()
+        håndterYtelser(
+            avslagsdager =
+                Avslagsdager(
+                    listOf(
+                        vurdertDag(22.januar, ikkeOppfylt, UtfallAvLøpendeVilkår.IkkeOppfylt),
+                        vurdertDag(23.januar, oppfylt, UtfallAvLøpendeVilkår.Oppfylt),
+                    ),
+                ),
+        )
+        håndterSimulering()
+
+        val tidslinje =
+            speilApi()
+                .arbeidsgivere
+                .single()
+                .generasjoner
+                .single()
+                .perioder
+                .single()
+                .sammenslåttTidslinje
+                .associateBy { it.dagen }
+
+        assertEquals(
+            listOf(VurderingAvLøpendeVilkårDTO(LøpendeVilkårDTO.Oppholdskrav, ikkeOppfylt, UtfallAvLøpendeVilkårDTO.IkkeOppfylt)),
+            tidslinje.getValue(22.januar).vurderingerAvLøpendeVilkår,
+        )
+        assertEquals(listOf(BegrunnelseDTO.Oppholdskrav), tidslinje.getValue(22.januar).begrunnelser)
+        assertEquals(
+            listOf(VurderingAvLøpendeVilkårDTO(LøpendeVilkårDTO.Oppholdskrav, oppfylt, UtfallAvLøpendeVilkårDTO.Oppfylt)),
+            tidslinje.getValue(23.januar).vurderingerAvLøpendeVilkår,
+        )
+        assertEquals(UtbetalingstidslinjedagType.NavDag, tidslinje.getValue(23.januar).utbetalingstidslinjedagtype)
+        assertEquals(emptyList<VurderingAvLøpendeVilkårDTO>(), tidslinje.getValue(24.januar).vurderingerAvLøpendeVilkår)
+    }
+
+    private fun vurdertDag(
+        dato: LocalDate,
+        vurderingId: UUID,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = Avslagsdager.VurdertDag(dato, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall))
 
     @Test
     fun `Skjæringstidspunkt er etter ny g, men før virkningstidspunkt for gyldigSomMinsteinntektKrav`() {

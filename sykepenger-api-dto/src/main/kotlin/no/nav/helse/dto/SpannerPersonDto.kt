@@ -323,6 +323,7 @@ data class SpannerPersonDto(
             val korrigertInntekt: KorrigertInntektsopplysningData?,
             val beregningId: UUID,
             val avslagstidslinje: AvslagstidslinjeData,
+            val vurderingerAvLøpendeVilkår: List<VurdertPeriodeData>,
         )
 
         data class VedtaksperiodeData(
@@ -375,6 +376,7 @@ data class SpannerPersonDto(
                             korrigertInntekt = gjeldendeEndring.korrigertInntekt,
                             beregningId = gjeldendeEndring.beregningId,
                             avslagstidslinje = gjeldendeEndring.avslagstidslinje,
+                            vurderingerAvLøpendeVilkår = gjeldendeEndring.vurderingerAvLøpendeVilkår,
                         )
                     }
                 }
@@ -539,6 +541,7 @@ data class SpannerPersonDto(
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
                     val beregningId: UUID,
                     val avslagstidslinje: AvslagstidslinjeData,
+                    val vurderingerAvLøpendeVilkår: List<VurdertPeriodeData>,
                 )
 
                 data class PeriodeUtenNavAnsvarData(
@@ -771,6 +774,18 @@ data class SpannerPersonDto(
         val fom: LocalDate,
         val tom: LocalDate,
         val begrunnelser: List<BegrunnelseData>,
+    )
+
+    data class VurdertPeriodeData(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val vurderinger: List<VurderingAvLøpendeVilkårData>,
+    )
+
+    data class VurderingAvLøpendeVilkårData(
+        val vilkår: String,
+        val vurderingId: UUID,
+        val utfall: String,
     )
 
     sealed interface FaktaavklartInntektData {
@@ -1378,6 +1393,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         korrigertInntekt = this.korrigertInntekt?.tilPersonData(),
         beregningId = this.beregningId,
         avslagstidslinje = this.avslagstidslinje.tilPersonData(),
+        vurderingerAvLøpendeVilkår = this.vurderingerAvLøpendeVilkår.tilPersonData(),
     )
 
 private fun DagerUtenNavAnsvaravklaringDto.tilPersonData() =
@@ -1935,6 +1951,15 @@ private fun BeløpstidslinjeDto.tilPersonData() =
                 )
             },
     )
+
+private fun VurderingerAvLøpendeVilkårDto.tilPersonData() =
+    perioder.map { periode ->
+        SpannerPersonDto.VurdertPeriodeData(
+            fom = periode.periode.fom,
+            tom = periode.periode.tom,
+            vurderinger = periode.vurderinger.map { SpannerPersonDto.VurderingAvLøpendeVilkårData(it.vilkår.name, it.vurderingId, it.utfall.name) },
+        )
+    }
 
 private fun AvslagstidslinjeDto.tilPersonData() =
     SpannerPersonDto.AvslagstidslinjeData(

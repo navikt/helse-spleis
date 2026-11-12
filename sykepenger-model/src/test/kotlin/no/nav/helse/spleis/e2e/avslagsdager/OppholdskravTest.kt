@@ -5,6 +5,11 @@ import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
 import no.nav.helse.dsl.nyttVedtak
 import no.nav.helse.dsl.selvstendig
+import no.nav.helse.dto.LøpendeVilkårDto
+import no.nav.helse.dto.PeriodeDto
+import no.nav.helse.dto.UtfallAvLøpendeVilkårDto
+import no.nav.helse.dto.VurderingerAvLøpendeVilkårDto
+import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.februar
 import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Dagtype
@@ -17,14 +22,25 @@ import no.nav.helse.hendelser.til
 import no.nav.helse.inspectors.inspektør
 import no.nav.helse.januar
 import no.nav.helse.person.Avslagstidslinje
+import no.nav.helse.person.LøpendeVilkår
+import no.nav.helse.person.UtfallAvLøpendeVilkår
+import no.nav.helse.person.VurderingAvLøpendeVilkår
+import no.nav.helse.person.VurderingerAvLøpendeVilkår
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK
+import no.nav.helse.serde.SerialisertPerson
+import no.nav.helse.serde.spleisJsonMapperBuilder
+import no.nav.helse.serde.tilPersonData
+import no.nav.helse.serde.tilSerialisertPerson
 import no.nav.helse.utbetalingstidslinje.Begrunnelse
 import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ArrayNode
+import tools.jackson.databind.node.ObjectNode
 import java.time.LocalDate
 import java.util.UUID
 
@@ -41,13 +57,17 @@ internal class OppholdskravTest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertAvslåttForOppholdskrav(1.vedtaksperiode, avslåttePerioden)
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
+            assertEquals(
+                vurderinger(vurdering, avslåttePerioden, UtfallAvLøpendeVilkår.IkkeOppfylt),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingerAvLøpendeVilkår,
+            )
             assertGjenoppbygget(dto())
         }
     }
 
     @Test
-    fun `omgjøring med ny vurdering fjerner avslaget`() {
+    fun `omgjøring til oppfylt fjerner avslaget og gir oppfylte dager`() {
         val vurdering1 = UUID.randomUUID()
         val vurdering2 = UUID.randomUUID()
         a1 {
@@ -58,13 +78,17 @@ internal class OppholdskravTest : AbstractDslTest() {
 
             håndterPåminnelse(1.vedtaksperiode, AVVENTER_GODKJENNING, flagg = setOf("ønskerReberegning"))
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
-            håndterYtelser(1.vedtaksperiode, avslagsdager = Avslagsdager(setOf(vurdering2), emptyList()))
+            håndterYtelser(1.vedtaksperiode, avslagsdager = oppholdskravOppfylt(vurdering2, avslåttePerioden))
             håndterSimulering(1.vedtaksperiode)
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertEquals(Avslagstidslinje(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
             assertEquals(emptyList<LocalDate>(), inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.avvistedatoer)
-            assertEquals(setOf(vurdering2), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering2), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
+            assertEquals(
+                vurderinger(vurdering2, avslåttePerioden, UtfallAvLøpendeVilkår.Oppfylt),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingerAvLøpendeVilkår,
+            )
         }
     }
 
@@ -82,7 +106,7 @@ internal class OppholdskravTest : AbstractDslTest() {
 
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertAvslåttForOppholdskrav(1.vedtaksperiode, avslåttePerioden)
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -101,7 +125,7 @@ internal class OppholdskravTest : AbstractDslTest() {
         }
         a2 {
             assertAvslåttForOppholdskrav(1.vedtaksperiode, avslåttePerioden)
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -152,7 +176,7 @@ internal class OppholdskravTest : AbstractDslTest() {
             }
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK)
             assertEquals(avslåttAvSaksbehandler, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
-            assertEquals(emptySet<UUID>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(emptySet<UUID>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -162,12 +186,16 @@ internal class OppholdskravTest : AbstractDslTest() {
         selvstendig {
             saksbehandlerAvslårMeldingTilNav()
             håndterVilkårsgrunnlagSelvstendig(1.vedtaksperiode)
-            håndterYtelser(1.vedtaksperiode, avslagsdager = Avslagsdager(setOf(vurdering), emptyList()))
+            håndterYtelser(1.vedtaksperiode, avslagsdager = oppholdskravOppfylt(vurdering, 1.januar.somPeriode()))
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals(avslåttAvSaksbehandler, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
             assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.begrunnelse(1.januar))
-            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(
+                vurderinger(vurdering, 1.januar.somPeriode(), UtfallAvLøpendeVilkår.Oppfylt),
+                inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingerAvLøpendeVilkår,
+            )
+            assertEquals(setOf(vurdering), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
     }
 
@@ -179,8 +207,33 @@ internal class OppholdskravTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
             assertSisteTilstand(1.vedtaksperiode, AVVENTER_GODKJENNING)
             assertEquals(Avslagstidslinje(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
-            assertEquals(emptySet<UUID>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagsdagerVurderingIder)
+            assertEquals(emptySet<UUID>(), inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingIderAvLøpendeVilkår)
         }
+    }
+
+    @Test
+    fun `vurderingene på endringen lagres, og endringer uten vurderinger leses som tomme`() {
+        val vurdering = UUID.randomUUID()
+        a1 {
+            tilYtelser(januar)
+            håndterYtelser(1.vedtaksperiode, avslagsdager = oppholdskravOppfylt(vurdering, avslåttePerioden))
+        }
+        val serialisertPerson = dto().tilPersonData().tilSerialisertPerson()
+        val forventet =
+            VurderingerAvLøpendeVilkårDto(
+                listOf(
+                    VurderingerAvLøpendeVilkårDto.VurdertPeriodeDto(
+                        PeriodeDto(avslåttePerioden.start, avslåttePerioden.endInclusive),
+                        listOf(VurderingerAvLøpendeVilkårDto.VurderingDto(LøpendeVilkårDto.Oppholdskrav, vurdering, UtfallAvLøpendeVilkårDto.Oppfylt)),
+                    ),
+                ),
+            )
+        assertEquals(forventet, serialisertPerson.tilPersonDto().sisteVurderingerAvLøpendeVilkår())
+
+        val jsonMapper = spleisJsonMapperBuilder().build()
+        val utenFeltet = jsonMapper.readTree(serialisertPerson.json).fjernFelt("vurderingerAvLøpendeVilkår")
+        val gamleData = SerialisertPerson(jsonMapper.writeValueAsString(utenFeltet), serialisertPerson.skjemaVersjon)
+        assertEquals(VurderingerAvLøpendeVilkårDto(emptyList()), gamleData.tilPersonDto().sisteVurderingerAvLøpendeVilkår())
     }
 
     private val avslåttAvSaksbehandler =
@@ -219,5 +272,50 @@ internal class OppholdskravTest : AbstractDslTest() {
     private fun oppholdskravIkkeOppfylt(
         vurderingId: UUID,
         periode: Periode,
-    ) = Avslagsdager(setOf(vurderingId), periode.map { Avslagsdager.Dag(vurderingId, it, Begrunnelse.Oppholdskrav) })
+    ) = oppholdskrav(vurderingId, periode, UtfallAvLøpendeVilkår.IkkeOppfylt)
+
+    private fun oppholdskravOppfylt(
+        vurderingId: UUID,
+        periode: Periode,
+    ) = oppholdskrav(vurderingId, periode, UtfallAvLøpendeVilkår.Oppfylt)
+
+    private fun oppholdskrav(
+        vurderingId: UUID,
+        periode: Periode,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = Avslagsdager(
+        periode.map { Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)) },
+    )
+
+    private fun vurderinger(
+        vurderingId: UUID,
+        periode: Periode,
+        utfall: UtfallAvLøpendeVilkår,
+    ) = VurderingerAvLøpendeVilkår(periode to listOf(VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)))
+
+    private fun PersonInnDto.sisteVurderingerAvLøpendeVilkår() =
+        arbeidsgivere
+            .single()
+            .vedtaksperioder
+            .single()
+            .behandlinger
+            .behandlinger
+            .last()
+            .endringer
+            .last()
+            .vurderingerAvLøpendeVilkår
+
+    private fun JsonNode.fjernFelt(navn: String): JsonNode {
+        when (this) {
+            is ObjectNode -> {
+                remove(navn)
+                values().forEach { it.fjernFelt(navn) }
+            }
+
+            is ArrayNode -> values().forEach { it.fjernFelt(navn) }
+
+            else -> Unit
+        }
+        return this
+    }
 }

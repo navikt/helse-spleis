@@ -963,7 +963,7 @@ data class PersonData(
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
                     val beregningId: UUID,
                     val graderteAndreYtelserId: UUID?,
-                    val avslagsdagerVurderingIder: Set<UUID>? = null,
+                    val vurderingerAvLøpendeVilkår: VurderingerAvLøpendeVilkårData? = null,
                 ) {
                     fun tilDto() =
                         BehandlingendringInnDto(
@@ -993,7 +993,7 @@ data class PersonData(
                             korrigertInntekt = korrigertInntekt?.tilDto(),
                             beregningId = beregningId,
                             graderteAndreYtelserId = graderteAndreYtelserId,
-                            avslagsdagerVurderingIder = avslagsdagerVurderingIder ?: emptySet(),
+                            vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår?.tilDto() ?: VurderingerAvLøpendeVilkårDto(emptyList()),
                         )
 
                     data class AvslagstidslinjeData(
@@ -1009,6 +1009,53 @@ data class PersonData(
                         }
 
                         fun tilDto() = AvslagstidslinjeDto(perioder = perioder.map { it.tilDto() })
+                    }
+
+                    data class VurderingerAvLøpendeVilkårData(
+                        val perioder: List<VurdertPeriodeData>,
+                    ) {
+                        data class VurdertPeriodeData(
+                            val fom: LocalDate,
+                            val tom: LocalDate,
+                            val vurderinger: List<VurderingData>,
+                        ) {
+                            fun tilDto() =
+                                VurderingerAvLøpendeVilkårDto.VurdertPeriodeDto(
+                                    periode = PeriodeDto(fom = fom, tom = tom),
+                                    vurderinger = vurderinger.map { it.tilDto() },
+                                )
+                        }
+
+                        data class VurderingData(
+                            val vilkår: LøpendeVilkårData,
+                            val vurderingId: UUID,
+                            val utfall: UtfallData,
+                        ) {
+                            fun tilDto() =
+                                VurderingerAvLøpendeVilkårDto.VurderingDto(
+                                    vilkår =
+                                        when (vilkår) {
+                                            LøpendeVilkårData.Oppholdskrav -> LøpendeVilkårDto.Oppholdskrav
+                                        },
+                                    vurderingId = vurderingId,
+                                    utfall =
+                                        when (utfall) {
+                                            UtfallData.Oppfylt -> UtfallAvLøpendeVilkårDto.Oppfylt
+                                            UtfallData.IkkeOppfylt -> UtfallAvLøpendeVilkårDto.IkkeOppfylt
+                                        },
+                                )
+                        }
+
+                        enum class LøpendeVilkårData {
+                            Oppholdskrav,
+                        }
+
+                        enum class UtfallData {
+                            Oppfylt,
+                            IkkeOppfylt,
+                        }
+
+                        fun tilDto() = VurderingerAvLøpendeVilkårDto(perioder = perioder.map { it.tilDto() })
                     }
 
                     data class PeriodeUtenNavAnsvarData(

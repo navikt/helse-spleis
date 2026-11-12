@@ -82,16 +82,16 @@ internal class YtelserRiver(
 
         if (Toggle.Avslagsdagerbehov.enabled) {
             message.interestedIn("@løsning.${Avslagsdager.utgåendeNavn}") {
-                message.require("@løsning.${Avslagsdager.utgåendeNavn}.vurderingIder") { vurderingIder ->
-                    check(vurderingIder.isArray) { "Forventet vurderingIder som liste" }
-                    vurderingIder.values().forEach { UUID.fromString(it.asString()) }
-                }
-                message.requireArray("@løsning.${Avslagsdager.utgåendeNavn}.avslagsdager") {
-                    require("vurderingId") { UUID.fromString(it.asString()) }
-                    require("dato", JsonNode::asLocalDate)
-                    require("vilkårskoder") { vilkårskoder ->
+                message.require("@løsning.${Avslagsdager.utgåendeNavn}.vurderteDager") { vurderteDager ->
+                    check(vurderteDager.isArray) { "Forventet vurderteDager som liste" }
+                    vurderteDager.values().forEach { dag ->
+                        UUID.fromString(dag.path("vurderingId").asString())
+                        dag.path("dato").asLocalDate()
+                        AvslagsdagerHendelse.utfall(dag.path("utfall").asString())
+                        val vilkår = AvslagsdagerHendelse.løpendeVilkår(dag.path("vilkår").asString())
+                        val vilkårskoder = dag.path("vilkårskoder")
                         check(vilkårskoder.isArray) { "Forventet vilkårskoder som liste" }
-                        AvslagsdagerHendelse.begrunnelse(vilkårskoder.values().map { it.asString() })
+                        AvslagsdagerHendelse.validerVilkårskoder(vilkår, vilkårskoder.values().map { it.asString() })
                     }
                 }
             }

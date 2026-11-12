@@ -1788,7 +1788,12 @@ internal class Vedtaksperiode private constructor(
     ): Map<UUID, AvslagsdagerFraLøsning> {
         val løsning = ytelser.avslagsdager ?: return emptyMap()
         return perioderDetSkalBeregnesUtbetalingFor.associate { other ->
-            other.id to løsning.forPeriode(beregningsperiode, other.periode, other.behandlinger.avslagstidslinje)
+            other.id to løsning.forPeriode(
+                beregningsperiode,
+                other.periode,
+                other.behandlinger.avslagstidslinje,
+                other.behandlinger.vurderingerAvLøpendeVilkår,
+            )
         }
     }
 
