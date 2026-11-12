@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 
 internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
     @Test
-    fun `unødvendig revurdering av periode 2 fordi periode 1 ikke påvirker maksdatotellingen for periode 2`() {
+    fun `infotrygdendring før første tilfelle revurderer ikke tilfelle mer enn 26 uker senere`() {
         a1 {
             nyttVedtak(januar.i(2017))
             nyttVedtak(januar.i(2018))
@@ -25,21 +25,13 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                     ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)),
                 ),
             )
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, TilstandType.AVVENTER_REVURDERING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
-                    assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
-                },
-            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING)
+            assertSisteTilstand(2.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
 
     @Test
-    fun `unødvendig revurdering av periode fordi IT-utbetaling ett år tidligere ikke påvirker maksdatotellingen for perioden`() {
+    fun `infotrygdendring ett år tidligere revurderer ikke perioden`() {
         a1 {
             nyttVedtak(januar.i(2018))
             assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
@@ -48,14 +40,7 @@ internal class RevurderingPåTversAvMaksdatotellingerTest : AbstractDslTest() {
                     ArbeidsgiverUtbetalingsperiode(a1, 1.desember(2016), 31.desember(2016)),
                 ),
             )
-            assertForventetFeil(
-                nå = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVVENTER_HISTORIKK_REVURDERING)
-                },
-                ønsket = {
-                    assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
-                },
-            )
+            assertSisteTilstand(1.vedtaksperiode, TilstandType.AVSLUTTET)
         }
     }
 

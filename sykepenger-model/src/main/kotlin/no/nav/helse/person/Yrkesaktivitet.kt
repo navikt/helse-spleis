@@ -142,6 +142,9 @@ internal class Yrkesaktivitet private constructor(
             flatMap { it.vedtaksperioder }.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
         }
 
+        internal fun List<Yrkesaktivitet>.perioder() =
+            flatMap { yrkesaktivitet -> yrkesaktivitet.vedtaksperioder.map { it.periode } }
+
         internal fun List<Yrkesaktivitet>.venter() = flatMap { yrkesaktivitet -> yrkesaktivitet.vedtaksperioder.venter() }
 
         internal fun List<Yrkesaktivitet>.beregnSkjæringstidspunkt(infotrygdhistorikk: Infotrygdhistorikk): Skjæringstidspunkter =

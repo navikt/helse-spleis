@@ -223,7 +223,7 @@ internal class InfotrygdhistorikkTest {
                         ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 31.januar),
                     )
                 val gammel = nå.minusHours(24)
-                assertEquals(1.januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
+                assertEquals(januar, historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = gammel)))
                 assertNull(historikk.oppdaterHistorikk(historikkelement(perioder, oppdatert = nå)))
                 historikk.oppfrisk(aktivitetslogg, eventBus, tidligsteDato)
             },

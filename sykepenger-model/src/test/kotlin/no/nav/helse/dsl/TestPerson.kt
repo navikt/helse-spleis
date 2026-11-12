@@ -1340,6 +1340,15 @@ internal fun TestPerson.TestArbeidsgiver.nyttVedtak(
     håndterUtbetalt(status)
 }
 
+internal fun TestPerson.TestArbeidsgiver.nyttSelvstendigVedtak(periode: Periode) {
+    val vedtaksperiode = håndterFørstegangssøknadSelvstendig(periode)!!
+    håndterVilkårsgrunnlagSelvstendig(vedtaksperiode)
+    håndterYtelserSelvstendig(vedtaksperiode)
+    håndterSimulering(vedtaksperiode)
+    håndterUtbetalingsgodkjenning(vedtaksperiode)
+    håndterUtbetalt()
+}
+
 internal fun TestPerson.TestArbeidsgiver.forlengVedtak(
     periode: Periode,
     grad: Prosentdel = 100.prosent,

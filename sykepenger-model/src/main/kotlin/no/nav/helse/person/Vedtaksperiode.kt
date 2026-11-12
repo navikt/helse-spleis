@@ -3579,6 +3579,19 @@ internal class Vedtaksperiode private constructor(
         tilstand.gjenopptaBehandling(this, eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
     }
 
+    private fun hoppesOverFordiAvsluttetEtterBruddIKjeden(
+        revurdering: Revurderingseventyr,
+        aktivitetslogg: IAktivitetslogg,
+    ): Boolean {
+        if (tilstand !in setOf(Avsluttet, AvsluttetUtenUtbetaling)) return false
+        if (!revurdering.erEtterBruddIKjeden(periode)) return false
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        aktivitetsloggMedVedtaksperiodekontekst.info(
+            "Revurderer ikke perioden fordi det er minst 26 uker uten sykdom mellom endringen og perioden",
+        )
+        return true
+    }
+
     private fun igangsettOverstyringPåBehandlingen(
         eventBus: EventBus,
         revurdering: Revurderingseventyr,
@@ -3978,6 +3991,7 @@ internal class Vedtaksperiode private constructor(
         ) {
             this
                 .filterNot { revurdering.erIkkeRelevantFor(it.periode) }
+                .filterNot { it.hoppesOverFordiAvsluttetEtterBruddIKjeden(revurdering, aktivitetslogg) }
                 .onEach {
                     revurdering.inngå(
                         Revurderingseventyr.VedtaksperiodeData(

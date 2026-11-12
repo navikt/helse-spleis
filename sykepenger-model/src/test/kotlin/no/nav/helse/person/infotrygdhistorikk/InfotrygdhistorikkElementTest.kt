@@ -72,14 +72,14 @@ internal class InfotrygdhistorikkElementTest {
     }
 
     @Test
-    fun `tidligste endring mellom - forrige og nytt element er tomt`() {
+    fun `endring mellom - forrige og nytt element er tomt`() {
         val eksisterende = nyttHistorikkelement(perioder = emptyList())
         val nyttElement = nyttHistorikkelement(perioder = emptyList())
-        assertNull(nyttElement.tidligsteEndringMellom(eksisterende))
+        assertNull(nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - nytt element er likt`() {
+    fun `endring mellom - nytt element er likt`() {
         var perioder =
             listOf(
                 PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar),
@@ -87,11 +87,11 @@ internal class InfotrygdhistorikkElementTest {
             )
         val eksisterende = nyttHistorikkelement(perioder = perioder)
         val nyttElement = nyttHistorikkelement(perioder = perioder)
-        assertNull(nyttElement.tidligsteEndringMellom(eksisterende))
+        assertNull(nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - nytt element er tomt`() {
+    fun `endring mellom - nytt element er tomt`() {
         val eksisterende =
             nyttHistorikkelement(
                 perioder =
@@ -101,11 +101,11 @@ internal class InfotrygdhistorikkElementTest {
                     ),
             )
         val nyttElement = nyttHistorikkelement(perioder = emptyList())
-        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(3.januar til 20.januar, nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - eksisterende element er tomt`() {
+    fun `endring mellom - eksisterende element er tomt`() {
         val eksisterende = nyttHistorikkelement(perioder = emptyList())
         val nyttElement =
             nyttHistorikkelement(
@@ -115,11 +115,11 @@ internal class InfotrygdhistorikkElementTest {
                         ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar),
                     ),
             )
-        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(3.januar til 20.januar, nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - eksisterende element fjerner periode i starten`() {
+    fun `endring mellom - eksisterende element fjerner periode i starten`() {
         val eksisterende =
             nyttHistorikkelement(
                 perioder =
@@ -135,11 +135,11 @@ internal class InfotrygdhistorikkElementTest {
                         PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar),
                     ),
             )
-        assertEquals(3.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(3.januar.somPeriode(), nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - eksisterende element legger til periode i starten`() {
+    fun `endring mellom - eksisterende element legger til periode i starten`() {
         val eksisterende =
             nyttHistorikkelement(
                 perioder =
@@ -156,11 +156,11 @@ internal class InfotrygdhistorikkElementTest {
                         ArbeidsgiverUtbetalingsperiode("orgnr", 1.januar, 1.januar),
                     ),
             )
-        assertEquals(1.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(1.januar til 3.januar, nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - eksisterende element legger til periode i slutten`() {
+    fun `endring mellom - eksisterende element legger til periode i slutten`() {
         val eksisterende =
             nyttHistorikkelement(
                 perioder =
@@ -178,11 +178,11 @@ internal class InfotrygdhistorikkElementTest {
                         ArbeidsgiverUtbetalingsperiode("orgnr", 3.februar, 3.februar),
                     ),
             )
-        assertEquals(3.februar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(3.februar.somPeriode(), nyttElement.endringMellom(eksisterende))
     }
 
     @Test
-    fun `tidligste endring mellom - eksisterende element endrer personutbetaling til arbeidsgiverutbetaling`() {
+    fun `endring mellom - eksisterende element endrer personutbetaling til arbeidsgiverutbetaling`() {
         val eksisterende =
             nyttHistorikkelement(
                 perioder =
@@ -199,7 +199,41 @@ internal class InfotrygdhistorikkElementTest {
                         ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 3.januar),
                     ),
             )
-        assertEquals(10.januar, nyttElement.tidligsteEndringMellom(eksisterende))
+        assertEquals(10.januar til 20.januar, nyttElement.endringMellom(eksisterende))
+    }
+
+    @Test
+    fun `endring mellom - fjernet periode i starten og ny periode i slutten`() {
+        val eksisterende =
+            nyttHistorikkelement(
+                perioder =
+                    listOf(
+                        ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 5.januar),
+                        PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar),
+                    ),
+            )
+        val nyttElement =
+            nyttHistorikkelement(
+                perioder =
+                    listOf(
+                        PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar),
+                        ArbeidsgiverUtbetalingsperiode("orgnr", 3.februar, 10.februar),
+                    ),
+            )
+        assertEquals(3.januar til 10.februar, nyttElement.endringMellom(eksisterende))
+    }
+
+    @Test
+    fun `endring mellom - ingen forrige element`() {
+        val nyttElement =
+            nyttHistorikkelement(
+                perioder =
+                    listOf(
+                        ArbeidsgiverUtbetalingsperiode("orgnr", 3.januar, 5.januar),
+                        PersonUtbetalingsperiode("orgnr", 10.januar, 20.januar),
+                    ),
+            )
+        assertEquals(3.januar til 20.januar, nyttElement.endringMellom(null))
     }
 
     @Test

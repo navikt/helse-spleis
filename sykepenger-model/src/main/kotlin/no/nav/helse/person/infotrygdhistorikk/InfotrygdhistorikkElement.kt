@@ -5,12 +5,12 @@ import no.nav.helse.dto.serialisering.InfotrygdhistorikkelementUtDto
 import no.nav.helse.hendelser.Hendelseskilde
 import no.nav.helse.hendelser.MeldingsreferanseId
 import no.nav.helse.hendelser.Periode
+import no.nav.helse.hendelser.til
 import no.nav.helse.person.aktivitetslogg.IAktivitetslogg
 import no.nav.helse.person.infotrygdhistorikk.Infotrygdperiode.Companion.utbetalingsperioder
 import no.nav.helse.sykdomstidslinje.Dag.Companion.sammenhengendeSykdom
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
 import no.nav.helse.utbetalingstidslinje.Utbetalingstidslinje
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -109,27 +109,16 @@ class InfotrygdhistorikkElement private constructor(
         other.oppdatert = this.oppdatert
     }
 
-    internal fun tidligsteEndringMellom(other: InfotrygdhistorikkElement?): LocalDate? {
-        if (other == null || other.perioder.isEmpty()) {
-            return this.perioder
-                .firstOrNull()
-                ?.periode
-                ?.start
-        }
-        if (this.perioder.isEmpty()) {
-            return other.perioder
-                .first()
-                .periode.start
-        }
-        // tidligste dato som ikke er i begge lister
-        val førsteUlikePeriode = this.førsteUlikePeriode(other) ?: other.førsteUlikePeriode(this)
-        return førsteUlikePeriode?.periode?.start
+    internal fun endringMellom(other: InfotrygdhistorikkElement?): Periode? {
+        val forrigePerioder = other?.perioder ?: emptyList()
+        val endredePerioder =
+            this.perioder.filter { it.erUlikAlle(forrigePerioder) } +
+                forrigePerioder.filter { it.erUlikAlle(this.perioder) }
+        if (endredePerioder.isEmpty()) return null
+        return endredePerioder.minOf { it.periode.start } til endredePerioder.maxOf { it.periode.endInclusive }
     }
 
-    private fun førsteUlikePeriode(other: InfotrygdhistorikkElement): Infotrygdperiode? =
-        this.perioder.firstOrNull {
-            other.perioder.none { otherIt -> it.funksjoneltLik(otherIt) }
-        }
+    private fun Infotrygdperiode.erUlikAlle(perioder: List<Infotrygdperiode>) = perioder.none { it.funksjoneltLik(this) }
 
     internal fun harUtbetaltI(periode: Periode) = betaltePerioder().any { it.overlapperMed(periode) }
 

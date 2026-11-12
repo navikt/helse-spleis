@@ -104,11 +104,11 @@ internal class Infotrygdhistorikk private constructor(
         return siste.sykdomstidslinje()
     }
 
-    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): LocalDate? {
+    internal fun oppdaterHistorikk(element: InfotrygdhistorikkElement): Periode? {
         if (harHistorikk() && element.erstatter(siste)) return null
         val forrige = _elementer.firstOrNull()
         _elementer.add(0, element)
-        return element.tidligsteEndringMellom(forrige)
+        return element.endringMellom(forrige)
     }
 
     internal fun tøm() {

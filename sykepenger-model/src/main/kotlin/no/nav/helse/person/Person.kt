@@ -51,7 +51,6 @@ import no.nav.helse.hendelser.UtbetalingshistorikkForFeriepenger
 import no.nav.helse.hendelser.VedtakFattet
 import no.nav.helse.hendelser.Vilkårsgrunnlag
 import no.nav.helse.hendelser.Ytelser
-import no.nav.helse.hendelser.somPeriode
 import no.nav.helse.person.Vedtaksperiode.Companion.MED_SKJÆRINGSTIDSPUNKT
 import no.nav.helse.person.Vedtaksperiode.Companion.SPEILRELATERT
 import no.nav.helse.person.VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement
@@ -71,6 +70,7 @@ import no.nav.helse.person.Yrkesaktivitet.Companion.nestemann
 import no.nav.helse.person.Yrkesaktivitet.Companion.nåværendeVedtaksperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.tidligsteDato
 import no.nav.helse.person.Yrkesaktivitet.Companion.validerTilstand
+import no.nav.helse.person.Yrkesaktivitet.Companion.perioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.vedtaksperioder
 import no.nav.helse.person.Yrkesaktivitet.Companion.venter
 import no.nav.helse.person.aktivitetslogg.Aktivitetskontekst
@@ -522,17 +522,17 @@ class Person private constructor(
         element: InfotrygdhistorikkElement,
     ) {
         aktivitetslogg.info("Oppdaterer Infotrygdhistorikk")
-        val tidligsteDatoForEndring = infotrygdhistorikk.oppdaterHistorikk(element)
+        val periodeForEndring = infotrygdhistorikk.oppdaterHistorikk(element)
         val revurderingseventyr =
-            if (tidligsteDatoForEndring == null) {
+            if (periodeForEndring == null) {
                 aktivitetslogg.info("Oppfrisket Infotrygdhistorikk medførte ingen endringer")
                 null
             } else {
                 aktivitetslogg.info(
-                    "Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring $tidligsteDatoForEndring",
+                    "Oppfrisket Infotrygdhistorikk ble lagret, starter revurdering fra tidligste endring ${periodeForEndring.start}",
                 )
-                eventBus.nyInformasjonIInfotrygd(tidligsteDatoForEndring)
-                Revurderingseventyr.infotrygdendring(hendelse, tidligsteDatoForEndring, tidligsteDatoForEndring.somPeriode())
+                eventBus.nyInformasjonIInfotrygd(periodeForEndring.start)
+                Revurderingseventyr.infotrygdendring(hendelse, periodeForEndring.start, periodeForEndring)
             }
         beregnSkjæringstidspunkter()
         beregnArbeidsgiverperioder()
@@ -986,6 +986,7 @@ class Person private constructor(
         revurdering: Revurderingseventyr,
         aktivitetslogg: IAktivitetslogg,
     ) {
+        revurdering.finnBruddIKjeden(yrkesaktiviteter.perioder() + infotrygdhistorikk.betaltePerioder())
         yrkesaktiviteter.igangsettOverstyring(eventBus, revurdering, aktivitetslogg)
         ryddOppVilkårsgrunnlag(aktivitetslogg)
     }

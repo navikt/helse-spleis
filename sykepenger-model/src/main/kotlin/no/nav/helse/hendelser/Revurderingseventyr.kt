@@ -17,6 +17,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.NyPeriode
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Reberegning
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.SkjønssmessigFastsettelse
 import no.nav.helse.hendelser.Revurderingseventyr.RevurderingÅrsak.Sykdomstidslinje
+import no.nav.helse.utbetalingstidslinje.Maksdatoberegning.Companion.TILSTREKKELIG_OPPHOLD_I_SYKEDAGER
 import java.time.LocalDate
 import java.util.UUID
 
@@ -210,7 +211,29 @@ class Revurderingseventyr private constructor(
         vedtaksperioder.add(vedtaksperiode)
     }
 
+    private var førsteDagEtterBruddIKjeden: LocalDate? = null
+
+    internal fun finnBruddIKjeden(sykdomsperioder: List<Periode>) {
+        var kjeden = periodeForEndring
+        sykdomsperioder
+            .filter { it.endInclusive > kjeden.endInclusive }
+            .sortedBy { it.start }
+            .forEach { periode ->
+                val opphold = kjeden.periodeMellom(periode.start)?.count() ?: 0
+                if (opphold >= TILSTREKKELIG_OPPHOLD_I_SYKEDAGER) {
+                    førsteDagEtterBruddIKjeden = periode.start
+                    return
+                }
+                kjeden = kjeden.oppdaterTom(periode)
+            }
+    }
+
     internal fun erIkkeRelevantFor(vedtaksperiode: Periode): Boolean = periodeForEndring.starterEtter(vedtaksperiode)
+
+    internal fun erEtterBruddIKjeden(vedtaksperiode: Periode): Boolean {
+        val førsteDagEtterBrudd = førsteDagEtterBruddIKjeden ?: return false
+        return vedtaksperiode.start >= førsteDagEtterBrudd
+    }
 
     enum class TypeEndring {
         OVERSTYRING,
