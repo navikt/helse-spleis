@@ -96,6 +96,15 @@ internal class NavNoInntektsmeldingerRiverTest : RiverTest() {
         assertNoErrors(ValidInntektsmeldingMedOpphørAvNaturalytelser)
     }
 
+    @Test
+    fun `refusjonsbeløp som ikke kan leses som tall`() {
+        val inntektsmelding =
+            im.asObjectNode().apply {
+                (path("refusjon") as ObjectNode).put("beloepPrMnd", "null")
+            }
+        assertNoErrors(inntektsmelding.toJson())
+    }
+
     private fun JsonNode.toJson(): String = (this as ObjectNode).put("fødselsdato", "$fødselsdato").toString()
 }
 

@@ -24,12 +24,12 @@ internal class NavNoInntektsmeldingMessage(
 ) : HendelseMessage(packet) {
     private val refusjon =
         Inntektsmelding.Refusjon(
-            beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()?.månedlig,
+            beløp = packet["refusjon.beloepPrMnd"].takeUnless(JsonNode::isMissingOrNull)?.asDouble(0.0)?.månedlig,
             opphørsdato = packet["refusjon.opphoersdato"].asOptionalLocalDate(),
             endringerIRefusjon =
                 packet["endringIRefusjoner"].values().map {
                     Inntektsmelding.Refusjon.EndringIRefusjon(
-                        it.path("beloep").asDouble().månedlig,
+                        it.path("beloep").asDouble(0.0).månedlig,
                         it.path("endringsdato").asLocalDate(),
                     )
                 },
@@ -37,7 +37,7 @@ internal class NavNoInntektsmeldingMessage(
     private val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().toUUID()
     private val orgnummer = packet["virksomhetsnummer"].asText()
     private val mottatt = packet["mottattDato"].asLocalDateTime()
-    private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble()
+    private val beregnetInntekt = packet["beregnetInntekt"].takeUnless(JsonNode::isMissingOrNull)?.asDouble(0.0)
     private val arbeidsgiverperioder = packet["arbeidsgiverperioder"].values().map(::asPeriode)
     private val begrunnelseForReduksjonEllerIkkeUtbetalt =
         packet["begrunnelseForReduksjonEllerIkkeUtbetalt"]
