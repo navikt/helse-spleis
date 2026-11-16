@@ -102,6 +102,28 @@ internal class OverstyrArbeidsgiveropplysningerRiverTest : RiverTest() {
     }
 
     @Test
+    fun `skal feile om tom i en refusjonsopplysning er før fom`() {
+        assertErrors(
+            testMessageFactory.lagOverstyrArbeidsgiveropplysninger(
+                1.januar,
+                listOf(
+                    Arbeidsgiveropplysning(
+                        organisasjonsnummer = ORGNUMMER,
+                        månedligInntekt = INNTEKT,
+                        forklaring = "forklaring",
+                        subsumsjon = Subsumsjon("8-15", null, null),
+                        refusjonsopplysninger =
+                            listOf(
+                                Refusjonsopplysning(1.januar, 13.januar, 0.0),
+                                Refusjonsopplysning(14.januar, 13.januar, 0.0),
+                            ),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun `skal feile om om refusjonsopplysninger er null`() {
         assertErrors(
             testMessageFactory.lagOverstyrArbeidsgiveropplysninger(

@@ -2,6 +2,7 @@ package no.nav.helse.spleis.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.Meldingsporing
@@ -52,6 +53,13 @@ internal class OverstyrArbeidsgiveropplysningerRiver(
                     require("fom", JsonNode::asLocalDate)
                     interestedIn("tom", JsonNode::asLocalDate)
                     require("beløp") { require(it.gyldigDouble) }
+                }
+            }
+            require("arbeidsgivere") { arbeidsgivere ->
+                arbeidsgivere.values().flatMap { it.path("refusjonsopplysninger").values() }.forEach { refusjonsopplysning ->
+                    val tom = refusjonsopplysning.path("tom").takeUnless { it.isMissingOrNull() }?.asLocalDate() ?: return@forEach
+                    val fom = refusjonsopplysning.path("fom").asLocalDate()
+                    require(!tom.isBefore(fom)) { "Refusjonsopplysning har tom ($tom) før fom ($fom)" }
                 }
             }
             require("arbeidsgivere") { arbeidsgiveropplysning ->
