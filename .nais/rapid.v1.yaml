@@ -215,3 +215,6 @@ spec:
     - team: tbd
       application: sp-avslagsdager
       access: readwrite
+    - team: tbd
+      application: sp-sykepengegrunnlag
+      access: readwrite
