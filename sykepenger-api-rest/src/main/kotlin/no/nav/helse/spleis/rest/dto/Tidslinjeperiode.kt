@@ -256,6 +256,7 @@ data class ApiBeregnetPeriode(
     val vilkarsgrunnlagId: UUID?,
     val annulleringskandidater: List<ApiAnnulleringskandidat>,
     override val grunnbeløpsjustertGjennomsnitt: BigDecimal? = null,
+    val graderteAndreYtelserVersjon: UUID? = null,
 ) : ApiTidslinjeperiode {
     override val inntektstype: ApiInntektstype get() = ApiInntektstype.EnArbeidsgiver
 }

@@ -10,6 +10,7 @@ import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.ArbeidsgiverInntekt
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Hendelse
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
 import no.nav.helse.hendelser.InntekterForOpptjeningsvurdering
@@ -491,6 +492,7 @@ internal abstract class AbstractSpeilBuilderTest {
     protected fun håndterYtelser(
         forsikringsvurderingResultat: ForsikringsvurderingResultat? = null,
         avslagsdager: Avslagsdager? = null,
+        graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
     ) {
         val ytelsebehov = ytelserbehov() ?: error("Fant ikke ytelserbehov")
         val ytelser =
@@ -501,6 +503,7 @@ internal abstract class AbstractSpeilBuilderTest {
                     vedtaksperiodeId = ytelsebehov.vedtaksperiodeId,
                     forsikringsvurderingResultat = forsikringsvurderingResultat,
                     avslagsdager = avslagsdager,
+                    graderteAndreYtelser = graderteAndreYtelser,
                 )
         ytelser.håndter(Person::håndterYtelser)
     }

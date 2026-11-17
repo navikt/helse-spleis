@@ -13,6 +13,7 @@ import no.nav.helse.hendelser.Foreldrepenger
 import no.nav.helse.hendelser.ForkastSykmeldingsperioder
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
 import no.nav.helse.hendelser.GradertPeriode
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Grunnbeløpsregulering
 import no.nav.helse.hendelser.IdentOpphørt
 import no.nav.helse.hendelser.InntektForSykepengegrunnlag
@@ -312,6 +313,7 @@ internal class YrkesaktivitetHendelsefabrikk(
         opptjeningsvurderingResultatOk: Boolean = true,
         medlemskapsvurderingResultat: Medlemskapsvurdering.Medlemskapstatus? = Medlemskapsvurdering.Medlemskapstatus.Ja,
         avslagsdager: Avslagsdager? = null,
+        graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
     ): Ytelser {
         val meldingsreferanseId = UUID.randomUUID()
         return Ytelser(
@@ -349,6 +351,7 @@ internal class YrkesaktivitetHendelsefabrikk(
             opptjeningsvurderingResultatOk = opptjeningsvurderingResultatOk,
             medlemskapsvurderingResultat = medlemskapsvurderingResultat,
             avslagsdager = avslagsdager,
+            graderteAndreYtelser = graderteAndreYtelser,
         )
     }
 

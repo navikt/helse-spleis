@@ -6,6 +6,7 @@ import no.nav.helse.februar
 import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.ForsikringsvurderingResultat
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
 import no.nav.helse.hendelser.Inntektsmelding
 import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.Periode
@@ -40,6 +41,7 @@ import no.nav.helse.spleis.speil.dto.UtbetalingstidslinjedagType
 import no.nav.helse.spleis.speil.dto.UtfallAvLøpendeVilkårDTO
 import no.nav.helse.spleis.speil.dto.VurderingAvLøpendeVilkårDTO
 import no.nav.helse.spleis.testhelpers.OverstyrtArbeidsgiveropplysning
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker
 import no.nav.helse.økonomi.Inntekt.Companion.INGEN
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import no.nav.helse.økonomi.Inntekt.Companion.årlig
@@ -47,6 +49,7 @@ import no.nav.helse.økonomi.Prosentdel.Companion.prosent
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertInstanceOf
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -944,4 +947,52 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                 .omregnetÅrsinntekt.kilde,
         )
     }
+
+    @Test
+    fun `beregnet periode har versjonen av graderte andre ytelser som behandlingen ble beregnet med`() {
+        val versjon = UUID.randomUUID()
+        tilYtelser(1.januar, 31.januar, a1 to 1)
+        håndterYtelser(graderteAndreYtelser = listOf(graderteAndreYtelser(versjon, 22.januar)))
+
+        assertEquals(versjon, beregnedePerioder().single().graderteAndreYtelserVersjon)
+    }
+
+    @Test
+    fun `beregnet periode uten graderte andre ytelser har ingen versjon`() {
+        tilGodkjenning(1.januar, 31.januar)
+
+        assertNull(beregnedePerioder().single().graderteAndreYtelserVersjon)
+    }
+
+    @Test
+    fun `hver behandling har versjonen av graderte andre ytelser den ble beregnet med`() {
+        val førsteVersjon = UUID.randomUUID()
+        val andreVersjon = UUID.randomUUID()
+        tilYtelser(1.januar, 31.januar, a1 to 1)
+        håndterYtelser(graderteAndreYtelser = listOf(graderteAndreYtelser(førsteVersjon, 22.januar)))
+        håndterSimulering()
+        håndterUtbetalingsgodkjenning()
+        håndterUtbetalt()
+
+        håndterOverstyrTidslinje(listOf(ManuellOverskrivingDag(31.januar, Dagtype.Feriedag)))
+        håndterYtelser(graderteAndreYtelser = listOf(graderteAndreYtelser(andreVersjon, 23.januar)))
+
+        assertEquals(listOf(andreVersjon, førsteVersjon), beregnedePerioder().map { it.graderteAndreYtelserVersjon })
+    }
+
+    private fun beregnedePerioder() =
+        speilApi()
+            .arbeidsgivere
+            .single()
+            .generasjoner
+            .map { it.perioder.single() as BeregnetPeriode }
+
+    private fun graderteAndreYtelser(
+        versjon: UUID,
+        dato: LocalDate,
+    ) = GraderteAndreYtelserForBeregning(
+        yrkesaktivitet = Arbeidstaker(a1),
+        versjon = versjon,
+        dager = listOf(GraderteAndreYtelserForBeregning.Dag(dato, trekkFraSykdomsgrad = 20, sykdomsgradFørFordeling = 100)),
+    )
 }

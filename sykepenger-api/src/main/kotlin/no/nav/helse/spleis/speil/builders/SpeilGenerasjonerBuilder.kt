@@ -225,6 +225,7 @@ internal class SpeilGenerasjonerBuilder(
                     ?.beløp
                     ?.årlig
                     ?.beløp,
+            graderteAndreYtelserVersjon = sisteEndring.graderteAndreYtelserId,
         )
     }
 

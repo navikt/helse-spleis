@@ -432,6 +432,7 @@ private fun mapBeregnetPeriode(
     pensjonsgivendeInntekter = mapPensjonsgivendeInntekter(periode.pensjonsgivendeInntekter),
     annulleringskandidater = mapAnnulleringskandidater(periode.annulleringskandidater),
     grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt?.let(::BigDecimal),
+    graderteAndreYtelserVersjon = periode.graderteAndreYtelserVersjon,
 )
 
 private fun mapAnnulleringskandidater(annulleringskandidater: List<AnnulleringskandidatDto>) =
