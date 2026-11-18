@@ -8,6 +8,9 @@ import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
 import no.nav.helse.hendelser.Behandlingsporing
+import no.nav.helse.hendelser.Dagtype
+import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
+import no.nav.helse.hendelser.ManuellOverskrivingDag
 import no.nav.helse.hendelser.til
 import no.nav.helse.person.EventBus
 import no.nav.helse.person.EventSubscription
@@ -16,6 +19,7 @@ import no.nav.helse.person.aktivitetslogg.Aktivitetslogg
 import no.nav.helse.spleis.testhelpers.TestObservatør
 import no.nav.helse.spleis.testhelpers.YrkesaktivitetHendelsefabrikk
 import no.nav.helse.testdatabase.TestDataSource
+import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning
 import no.nav.helse.økonomi.Inntekt.Companion.månedlig
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -69,7 +73,78 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
         }
     }
 
+    @Test
+    fun `behandlingen har versjonen av graderte andre ytelser den ble beregnet med`() {
+        val versjon = UUID.randomUUID()
+        val simuleringsutfisker = Simuleringsutfisker()
+        val eventBus = nyPerson(simuleringsutfisker)
+
+        spleisApiTestApplication(testdata = opprettPersonMedUtbetaling(eventBus, listOf(graderteAndreYtelser(versjon)))) {
+            val json = objectMapper.readTree(hentBehandling(simuleringsutfisker.behandlingId))
+
+            assertEquals(versjon.toString(), json["graderteAndreYtelserVersjon"].asText())
+        }
+    }
+
+    @Test
+    fun `behandling uten graderte andre ytelser har ingen versjon`() {
+        val simuleringsutfisker = Simuleringsutfisker()
+        val eventBus = nyPerson(simuleringsutfisker)
+
+        spleisApiTestApplication(testdata = opprettPersonMedUtbetaling(eventBus)) {
+            val json = objectMapper.readTree(hentBehandling(simuleringsutfisker.behandlingId))
+
+            assertTrue(json["graderteAndreYtelserVersjon"].isNull)
+        }
+    }
+
+    @Test
+    fun `hver behandling har versjonen av graderte andre ytelser den ble beregnet med`() {
+        val førsteVersjon = UUID.randomUUID()
+        val andreVersjon = UUID.randomUUID()
+        val eventBus = nyPerson()
+
+        val testdata =
+            opprettPersonMedUtbetaling(eventBus, listOf(graderteAndreYtelser(førsteVersjon))) {
+                person.håndterOverstyrTidslinje(
+                    eventBus,
+                    YrkesaktivitetHendelsefabrikk(Behandlingsporing.Yrkesaktivitet.Arbeidstaker(ORGNUMMER)).lagHåndterOverstyrTidslinje(
+                        listOf(ManuellOverskrivingDag(TOM.minusDays(1), Dagtype.Feriedag)),
+                    ),
+                    Aktivitetslogg(),
+                )
+                person.håndterYtelser(eventBus, ytelser(graderteAndreYtelser = listOf(graderteAndreYtelser(andreVersjon))), Aktivitetslogg())
+            }
+
+        spleisApiTestApplication(testdata = testdata) {
+            val (førsteBehandling, andreBehandling) =
+                eventBus.events
+                    .filterIsInstance<EventSubscription.SimuleringEvent>()
+                    .map { it.behandlingId }
+                    .distinct()
+
+            assertEquals(førsteVersjon.toString(), objectMapper.readTree(hentBehandling(førsteBehandling))["graderteAndreYtelserVersjon"].asText())
+            assertEquals(andreVersjon.toString(), objectMapper.readTree(hentBehandling(andreBehandling))["graderteAndreYtelserVersjon"].asText())
+        }
+    }
+
     private val arbeidsgiveropplysningerId = UUID.randomUUID()
+
+    private fun nyPerson(vararg abonnenter: EventSubscription): EventBus {
+        observatør = TestObservatør()
+        person = Person(Personidentifikator(UNG_PERSON_FNR), UNG_PERSON_FØDSELSDATO.alder, EmptyLog)
+        return EventBus().apply {
+            register(observatør)
+            abonnenter.forEach { register(it) }
+        }
+    }
+
+    private fun graderteAndreYtelser(versjon: UUID) =
+        GraderteAndreYtelserForBeregning(
+            yrkesaktivitet = Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidstaker(ORGNUMMER),
+            versjon = versjon,
+            dager = listOf(GraderteAndreYtelserForBeregning.Dag(TOM, trekkFraSykdomsgrad = 20, sykdomsgradFørFordeling = 100)),
+        )
 
     @Test
     fun `ukjent person gir 404`() =
@@ -104,7 +179,11 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
         }
 
     // Samme flyt som opprettTestdata, men uten å lagre meldinger: melding-id-ene er delt på tvers av testklasser
-    private fun opprettPersonMedUtbetaling(eventBus: EventBus): (TestDataSource) -> Unit =
+    private fun opprettPersonMedUtbetaling(
+        eventBus: EventBus,
+        graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+        etterUtbetaling: () -> Unit = {},
+    ): (TestDataSource) -> Unit =
         { testDataSource ->
             person.håndterSykmelding(eventBus, sykmelding(), Aktivitetslogg())
             person.håndterUtbetalingshistorikkEtterInfotrygdendring(eventBus, utbetalinghistorikk(), Aktivitetslogg())
@@ -129,7 +208,7 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val simuleringsutfisker = Simuleringsutfisker()
             eventBus.register(simuleringsutfisker)
-            person.håndterYtelser(eventBus, ytelser(), Aktivitetslogg())
+            person.håndterYtelser(eventBus, ytelser(graderteAndreYtelser = graderteAndreYtelser), Aktivitetslogg())
             val behandlingId = simuleringsutfisker.behandlingId
             val utbetalingId = simuleringsutfisker.utbetalingId
             val fagsystemId = simuleringsutfisker.fagsystemId
@@ -153,8 +232,12 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
                 ),
                 Aktivitetslogg(),
             )
+            etterUtbetaling()
             lagrePerson(testDataSource.ds, UNG_PERSON_FNR, person)
         }
+
+    private suspend fun TestContext.hentBehandling(behandlingId: UUID) =
+        hentBehandling("""{"fødselsnummer":"$UNG_PERSON_FNR","behandlingId":"$behandlingId"}""", HttpStatusCode.OK)
 
     private suspend fun TestContext.hentBehandling(
         body: String,

@@ -79,6 +79,7 @@ private fun BehandlingInnDto.tilResponse(
         behandlingId = id,
         organisasjonsnummer = organisasjonsnummer,
         yrkesaktivitetstype = yrkesaktivitetstype,
+        graderteAndreYtelserVersjon = sisteEndring.graderteAndreYtelserId,
         utbetalingstidslinje = utbetalingsdager.map { it.tilResponse(sisteEndring.refusjonstidslinje) },
     )
 }
@@ -177,6 +178,7 @@ private data class BehandlingResponse(
     val behandlingId: UUID,
     val organisasjonsnummer: String,
     val yrkesaktivitetstype: String,
+    val graderteAndreYtelserVersjon: UUID?,
     val utbetalingstidslinje: List<UtbetalingsdagResponse>,
 )
 
