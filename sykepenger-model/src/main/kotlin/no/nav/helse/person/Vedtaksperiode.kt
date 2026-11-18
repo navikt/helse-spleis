@@ -3590,6 +3590,7 @@ internal class Vedtaksperiode private constructor(
         aktivitetslogg: IAktivitetslogg,
     ): Boolean {
         if (tilstand !in setOf(Avsluttet, AvsluttetUtenUtbetaling)) return false
+        if (behandlinger.åpenForEndring()) return false
         if (!revurdering.erEtterBruddIKjeden(periode)) return false
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         aktivitetsloggMedVedtaksperiodekontekst.info(

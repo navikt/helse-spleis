@@ -3,6 +3,7 @@ package no.nav.helse.spleis.e2e.revurdering
 import no.nav.helse.april
 import no.nav.helse.desember
 import no.nav.helse.dsl.AbstractDslTest
+import no.nav.helse.dsl.INNTEKT
 import no.nav.helse.dsl.TestPerson
 import no.nav.helse.dsl.a1
 import no.nav.helse.dsl.a2
@@ -12,6 +13,9 @@ import no.nav.helse.dsl.selvstendig
 import no.nav.helse.dsl.nyttSelvstendigVedtak
 import no.nav.helse.dsl.tilGodkjenning
 import no.nav.helse.februar
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittArbeidgiverperiode
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittInntekt
+import no.nav.helse.hendelser.Arbeidsgiveropplysning.OppgittRefusjon
 import no.nav.helse.hendelser.Periode
 import no.nav.helse.hendelser.til
 import no.nav.helse.i
@@ -24,6 +28,7 @@ import no.nav.helse.oktober
 import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.person.infotrygdhistorikk.ArbeidsgiverUtbetalingsperiode
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET
+import no.nav.helse.person.tilstandsmaskin.TilstandType.AVSLUTTET_UTEN_UTBETALING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_BLOKKERENDE_PERIODE
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_GODKJENNING
 import no.nav.helse.person.tilstandsmaskin.TilstandType.AVVENTER_HISTORIKK_REVURDERING
@@ -218,6 +223,23 @@ internal class RevurderingMedOppholdIKjedenTest : AbstractDslTest() {
         a1 { håndterOverstyrTidslinje(listOf(manuellFeriedag(31.januar(2017)))) }
         a1 { assertSisteTilstand(1.vedtaksperiode, AVVENTER_HISTORIKK_REVURDERING) }
         selvstendig { assertSisteTilstand(1.vedtaksperiode, AVSLUTTET) }
+    }
+
+    @Test
+    fun `selvbestemte arbeidsgiveropplysninger på kort periode etter bruddet med arbeidsgiverperiode i gammelt tilfelle`() {
+        a1 {
+            håndterSøknad(1.juli(2017) til 16.juli(2017))
+            håndterSøknad(1.oktober(2018) til 16.oktober(2018))
+            håndterSelvbestemtArbeidsgiveropplysninger(
+                2.vedtaksperiode,
+                OppgittArbeidgiverperiode(listOf(1.juli(2017) til 16.juli(2017))),
+                OppgittInntekt(INNTEKT),
+                OppgittRefusjon(beløp = INNTEKT, endringer = emptyList(), refusjonskravGyldigFra = null),
+            )
+            assertSisteTilstand(1.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertSisteTilstand(2.vedtaksperiode, AVSLUTTET_UTEN_UTBETALING)
+            assertVarsler(2.vedtaksperiode, Varselkode.RV_AO_3, Varselkode.RV_IM_3)
+        }
     }
 
     private fun TestPerson.TestArbeidsgiver.forlengVedtakUtenUtbetaling(periode: Periode) {
