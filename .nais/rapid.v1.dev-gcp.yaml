@@ -68,3 +68,6 @@ spec:
     - team: tbd
       application: sp-avslagsdager-opprydding-dev
       access: readwrite
+    - team: tbd
+      application: sp-sykepengegrunnlag-opprydding-dev
+      access: readwrite
