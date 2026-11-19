@@ -7,7 +7,6 @@ import no.nav.helse.testdatabase.DatabaseContainer
 // kjøre parallelt mot den så lenge Hikari-poolen er stor nok til å dekke JUnit-parallellismen.
 val databaseContainer =
     DatabaseContainer(
-        appnavn = "spleis-api",
         maxHikariPoolSize = 32,
         postgresVersjon = 17,
     )

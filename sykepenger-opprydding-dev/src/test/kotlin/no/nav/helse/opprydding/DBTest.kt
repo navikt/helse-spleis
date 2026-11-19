@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach
 // kjøre parallelt mot den så lenge Hikari-poolen er stor nok til å dekke JUnit-parallellismen.
 val databaseContainer =
     DatabaseContainer(
-        appnavn = "spleis-opprydding-dev",
         maxHikariPoolSize = 32,
         postgresVersjon = 17,
     )

@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.toUUID
 import com.github.navikt.tbd_libs.sql_dsl.*
-import com.zaxxer.hikari.HikariDataSource
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.februar
 import no.nav.helse.flex.sykepengesoknad.kafka.*
@@ -49,6 +48,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.*
+import javax.sql.DataSource
 import no.nav.helse.hendelser.Periode as Hendelseperiode
 
 internal abstract class AbstractEndToEndMediatorTest {
@@ -1081,7 +1081,7 @@ internal abstract class AbstractEndToEndMediatorTest {
 
     private class InntektsmeldingerReplayObserver(
         private val testRapid: TestRapid,
-        private val dataSource: HikariDataSource,
+        private val dataSource: DataSource,
     ) : TestRapid.TestRapidObserver,
         TestUtsenderObservatør {
         private companion object {

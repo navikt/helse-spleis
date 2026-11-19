@@ -19,7 +19,7 @@ spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
 syfokafka = "2026.10.28-17.30-e59ff951"
 json-schema-validator = "3.0.9"
 commons-codec = "1.23.0"
-testcontainers = "2.0.5"
+sykepenger-libs-postgres = "20261116.0849"
 
 [libraries]
 rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
@@ -46,7 +46,7 @@ tbd-rapids-and-rivers-test = { group = "com.github.navikt.tbd-libs", name = "rap
 
 cloudsql = { group = "com.google.cloud.sql", name = "postgres-socket-factory", version.ref = "cloudsql" }
 flyway-postgres = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
-testcontainers-postgres = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
+sykepenger-libs-postgres = { group = "no.nav.sykepenger.libs", name = "postgres", version.ref = "sykepenger-libs-postgres" }
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 
