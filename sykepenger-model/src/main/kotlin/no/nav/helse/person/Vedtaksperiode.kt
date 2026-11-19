@@ -252,6 +252,7 @@ internal class Vedtaksperiode private constructor(
             AvventerHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             -> håndterOverlappendeSøknad(eventBus, søknad, aktivitetsloggMedVedtaksperiodekontekst)
 
             AvventerRettighetskategori ->
@@ -334,6 +335,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             Start,
             TilInfotrygd,
@@ -384,6 +386,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerSimuleringRevurdering,
                 AvventerRettighetskategori,
                 AvventerVilkårsprøving,
+                AvventerSykepengegrunnlag,
                 AvventerVilkårsprøvingRevurdering,
 
                 -> håndterHistorikkÅpenBehandling(eventBus, hendelse, aktivitetsloggMedVedtaksperiodekontekst)
@@ -464,6 +467,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerSimuleringRevurdering,
                 AvventerRettighetskategori,
                 AvventerVilkårsprøving,
+                AvventerSykepengegrunnlag,
                 AvventerVilkårsprøvingRevurdering,
                 Start,
                 TilInfotrygd,
@@ -546,6 +550,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             -> {
             }
@@ -674,6 +679,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             AvventerAnnullering,
             AvventerAnnulleringTilUtbetaling,
@@ -969,6 +975,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             -> {
                 // det er oppgitt arbeidsgiverperiode på uventede perioder; mest sannsynlig
@@ -1141,6 +1148,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             -> {
             }
@@ -1390,6 +1398,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             -> håndterKorrigerendeInntektsmelding(eventBus, dager, aktivitetsloggMedVedtaksperiodekontekst)
 
@@ -1444,6 +1453,7 @@ internal class Vedtaksperiode private constructor(
             AvventerInfotrygdHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             -> dager.skalHåndteresAv(periode)
 
             AvventerRettighetskategori ->
@@ -1554,6 +1564,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             Start,
             TilUtbetaling,
@@ -1597,6 +1608,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerSimuleringRevurdering,
                 AvventerRettighetskategori,
                 AvventerVilkårsprøving,
+                AvventerSykepengegrunnlag,
                 AvventerVilkårsprøvingRevurdering,
                 Start,
                 TilAnnullering,
@@ -2042,6 +2054,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             Start,
             TilAnnullering,
@@ -2150,7 +2163,7 @@ internal class Vedtaksperiode private constructor(
         val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
         val nesteTilstand =
             when (tilstand) {
-                AvventerVilkårsprøving -> AvventerHistorikk
+                AvventerVilkårsprøving -> AvventerSykepengegrunnlag.etterVilkårsprøving
                 AvventerVilkårsprøvingRevurdering -> AvventerHistorikkRevurdering
 
                 Start,
@@ -2174,6 +2187,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerSimulering,
                 AvventerSimuleringRevurdering,
                 AvventerSøknadForOverlappendePeriode,
+                AvventerSykepengegrunnlag,
                 TilAnnullering,
                 TilInfotrygd,
                 TilUtbetaling,
@@ -2210,6 +2224,19 @@ internal class Vedtaksperiode private constructor(
             ),
         )
         tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerRettighetskategori.nesteTilstand(this))
+    }
+
+    internal fun håndterSykepengegrunnlag(
+        eventBus: EventBus,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        if (!sykepengegrunnlag.erRelevant(aktivitetslogg, id, skjæringstidspunkt)) return
+        val aktivitetsloggMedVedtaksperiodekontekst = registrerKontekst(aktivitetslogg)
+        if (tilstand != AvventerSykepengegrunnlag) {
+            return aktivitetsloggMedVedtaksperiodekontekst.info("Forventet ikke sykepengegrunnlag i %s".format(tilstand.type))
+        }
+        tilstand(eventBus, aktivitetsloggMedVedtaksperiodekontekst, AvventerHistorikk)
     }
 
     internal fun håndterRettighetskategoriEndret(
@@ -2256,6 +2283,7 @@ internal class Vedtaksperiode private constructor(
                 AvventerSøknadForOverlappendePeriode,
                 AvventerRettighetskategori,
                 AvventerVilkårsprøving,
+                AvventerSykepengegrunnlag,
                 AvventerVilkårsprøvingRevurdering,
                 TilAnnullering,
                 TilInfotrygd,
@@ -2312,6 +2340,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             AvventerRevurdering,
             Start,
@@ -2499,6 +2528,7 @@ internal class Vedtaksperiode private constructor(
             AvventerInfotrygdHistorikk,
             AvventerSimulering,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             TilInfotrygd,
             -> error("Forventet ikke annulleringshendelse i tilstand $tilstand for vedtaksperiodeId $id")
         }
@@ -2671,6 +2701,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             -> {
             }
@@ -2811,6 +2842,7 @@ internal class Vedtaksperiode private constructor(
             AvventerInntektsmelding,
             AvventerSimulering,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerRettighetskategori,
             Start,
             -> {
@@ -2946,6 +2978,7 @@ internal class Vedtaksperiode private constructor(
             AvventerSimuleringRevurdering,
             AvventerRettighetskategori,
             AvventerVilkårsprøving,
+            AvventerSykepengegrunnlag,
             AvventerVilkårsprøvingRevurdering,
             Start,
             TilAnnullering,
@@ -3060,6 +3093,7 @@ internal class Vedtaksperiode private constructor(
                             setOf(
                                 AvventerRettighetskategori,
                                 AvventerVilkårsprøving,
+                                AvventerSykepengegrunnlag,
                                 AvventerBlokkerendePeriode,
                                 AvventerInntektsopplysningerForAnnenArbeidsgiver,
                                 AvventerAvsluttetUtenUtbetaling,
@@ -3461,6 +3495,48 @@ internal class Vedtaksperiode private constructor(
         eventBus.trengerRettighetskategori(event)
     }
 
+    internal fun trengerSykepengegrunnlag(
+        aktivitetslogg: IAktivitetslogg,
+        eventBus: EventBus,
+    ) {
+        val grunnlag = checkNotNull(vilkårsgrunnlag) { "Forventer vilkårsgrunnlag når vi trenger sykepengegrunnlag" }
+        val inntektsgrunnlag = grunnlag.inntektsgrunnlag
+
+        val event =
+            EventSubscription.TrengerSykepengegrunnlagEvent(
+                vedtaksperiodeId = id,
+                behandlingId = behandlinger.sisteBehandlingId,
+                yrkesaktivitetssporing = yrkesaktivitet.yrkesaktivitetstype,
+                skjæringstidspunkt = skjæringstidspunkt,
+                rettighetskategoriId = grunnlag.rettighetskategoriId,
+                arbeidsgivere = inntektsgrunnlag.arbeidsgiverInntektsopplysninger.map { it.tilSykepengegrunnlagbehov() },
+                selvstendig =
+                    inntektsgrunnlag.selvstendigInntektsopplysning?.let {
+                        EventSubscription.TrengerSykepengegrunnlagEvent.Selvstendig(
+                            søknadMeldingsreferanseId = it.faktaavklartInntekt.inntektsdata.hendelseId.id,
+                        )
+                    },
+            )
+
+        aktivitetslogg.info("Sender ut event om at vi trenger sykepengegrunnlag")
+        eventBus.trengerSykepengegrunnlag(event)
+    }
+
+    private fun ArbeidsgiverInntektsopplysning.tilSykepengegrunnlagbehov(): EventSubscription.TrengerSykepengegrunnlagEvent.Arbeidsgiver {
+        val (inntektskilde, inntektsmeldingMeldingsreferanseId) =
+            when (faktaavklartInntekt.inntektsopplysningskilde) {
+                Arbeidstakerinntektskilde.Arbeidsgiver ->
+                    EventSubscription.TrengerSykepengegrunnlagEvent.Inntektskilde.INNTEKTSMELDING to faktaavklartInntekt.inntektsdata.hendelseId.id
+                is Arbeidstakerinntektskilde.AOrdningen -> EventSubscription.TrengerSykepengegrunnlagEvent.Inntektskilde.A_ORDNINGEN to null
+                Arbeidstakerinntektskilde.Infotrygd -> error("Forventer ikke inntekt fra Infotrygd i et vilkårsgrunnlag fra Spleis")
+            }
+        return EventSubscription.TrengerSykepengegrunnlagEvent.Arbeidsgiver(
+            orgnummer = orgnummer,
+            inntektskilde = inntektskilde,
+            inntektsmeldingMeldingsreferanseId = inntektsmeldingMeldingsreferanseId,
+        )
+    }
+
     internal fun erRevurdering() = behandlinger.harFattetVedtak()
 
     internal fun harRettighetskategorigrunnlag() = person.rettighetskategorigrunnlagFor(skjæringstidspunkt) != null
@@ -3718,6 +3794,10 @@ internal class Vedtaksperiode private constructor(
 
                 AvventerVilkårsprøvingRevurdering,
                 -> VenterPå.SegSelv(Venteårsak.VILKÅRSPRØVING fordi Venteårsak.Hvorfor.OVERSTYRING_IGANGSATT)
+
+                // Blir man stående her er behovet om sykepengegrunnlag ikke besvart
+                AvventerSykepengegrunnlag,
+                -> VenterPå.SegSelv(Venteårsak.SYKEPENGEGRUNNLAG)
 
                 // Blir man stående her er behovet om rettighetskategori ikke besvart
                 AvventerRettighetskategori ->
@@ -4133,6 +4213,7 @@ internal class Vedtaksperiode private constructor(
                         VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AvventerSimulering
                         VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AvventerSimuleringRevurdering
                         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AvventerVilkårsprøving
+                        VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG -> AvventerSykepengegrunnlag
                         VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI -> AvventerRettighetskategori
                         VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AvventerVilkårsprøvingRevurdering
                         VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TilInfotrygd
@@ -4220,6 +4301,7 @@ internal class Vedtaksperiode private constructor(
                     AvventerSimulering -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING
                     AvventerSimuleringRevurdering -> VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING
                     AvventerVilkårsprøving -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+                    AvventerSykepengegrunnlag -> VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG
                     AvventerRettighetskategori -> VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI
                     AvventerVilkårsprøvingRevurdering -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING
                     Start -> VedtaksperiodetilstandDto.ARBEIDSTAKER_START
@@ -4495,6 +4577,7 @@ private fun nesteTilstandEtterIgangsattOverstyring(
     AvventerHistorikk,
     AvventerSimulering,
     AvventerVilkårsprøving,
+    AvventerSykepengegrunnlag,
     -> nesteTilstandForFørstegangsbehandlingEtterIgangsattOverstyring(vedtaksperiode, tilstand)
 
     AvventerRettighetskategori ->

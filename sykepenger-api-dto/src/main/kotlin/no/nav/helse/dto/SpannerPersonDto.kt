@@ -400,6 +400,7 @@ data class SpannerPersonDto(
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_SYKEPENGEGRUNNLAG,
                 AVVENTER_REVURDERING,
                 AVVENTER_REVURDERING_TIL_UTBETALING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -1247,6 +1248,7 @@ private fun VedtaksperiodeUtDto.tilPersonData(
             VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING
             VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SIMULERING_REVURDERING
             VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING
+            VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_SYKEPENGEGRUNNLAG
             VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_RETTIGHETSKATEGORI
             VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.AVVENTER_VILKÅRSPRØVING_REVURDERING
             VedtaksperiodetilstandDto.TIL_INFOTRYGD -> SpannerPersonDto.ArbeidsgiverData.VedtaksperiodeData.TilstandType.TIL_INFOTRYGD

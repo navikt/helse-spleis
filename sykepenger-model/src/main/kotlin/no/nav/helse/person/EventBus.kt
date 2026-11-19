@@ -285,6 +285,11 @@ class EventBus {
         observers.forEach { it.trengerRettighetskategori(event) }
     }
 
+    internal fun trengerSykepengegrunnlag(event: EventSubscription.TrengerSykepengegrunnlagEvent) {
+        _events.add(event)
+        observers.forEach { it.trengerSykepengegrunnlag(event) }
+    }
+
     internal fun trengerInformasjonTilBeregning(event: EventSubscription.TrengerInformasjonTilBeregningEvent) {
         _events.add(event)
         observers.forEach { it.trengerInformasjonTilBeregning(event) }

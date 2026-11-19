@@ -194,6 +194,8 @@ sealed class VedtaksperiodetilstandDto {
 
     data object AVVENTER_VILKÅRSPRØVING : VedtaksperiodetilstandDto()
 
+    data object AVVENTER_SYKEPENGEGRUNNLAG : VedtaksperiodetilstandDto()
+
     data object AVVENTER_REVURDERING : VedtaksperiodetilstandDto()
 
     data object AVVENTER_REVURDERING_TIL_UTBETALING : VedtaksperiodetilstandDto()

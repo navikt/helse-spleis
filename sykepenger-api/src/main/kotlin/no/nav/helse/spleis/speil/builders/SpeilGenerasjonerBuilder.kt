@@ -148,6 +148,7 @@ internal class SpeilGenerasjonerBuilder(
                     is VedtaksperiodetilstandDto.AVVENTER_HISTORIKK_REVURDERING,
                     is VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI,
                     is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
+                    is VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG,
                     is VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                     -> Periodetilstand.ForberederGodkjenning
 
@@ -344,6 +345,7 @@ internal class SpeilGenerasjonerBuilder(
                 VedtaksperiodetilstandDto.AVVENTER_INFOTRYGDHISTORIKK,
                 VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING,
+                VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG,
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING,
                 VedtaksperiodetilstandDto.ARBEIDSTAKER_START,
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD,

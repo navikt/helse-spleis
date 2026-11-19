@@ -60,6 +60,7 @@ internal class EventBusOversetter(
                     is EventSubscription.SelvstendigUtbetaltEtterVentetidEvent -> mapSelvstendigUtbetaltEtterVentetid(event) // ✅ Er selvstendig-spesifikk, så den er grei
                     is EventSubscription.TrengerInformasjonTilVilkårsprøvingEvent -> mapTrengerInformasjonTilVilkårsprøving(event)
                     is EventSubscription.TrengerRettighetskategoriEvent -> mapTrengerRettighetskategori(event)
+                    is EventSubscription.TrengerSykepengegrunnlagEvent -> mapTrengerSykepengegrunnlag(event)
                     is EventSubscription.TrengerInformasjonTilBeregningEvent -> mapTrengerInformasjonTilBeregning(event)
                     is EventSubscription.TrengerInitiellHistorikkFraInfotrygdEvent -> mapTrengerInitiellHistorikkFraInfotrygd(event)
                     is EventSubscription.TrengerOppdatertHistorikkFraInfotrygdEvent -> mapTrengerOppdatertHistorikkFraInfotrygd(event) // ✅ Meldingen er på person-nivå, så den er grei
@@ -649,6 +650,37 @@ internal class EventBusOversetter(
                     "skjæringstidspunkt" to event.skjæringstidspunkt,
                     "søknader" to event.søknader,
                 ),
+            ),
+        ).utgåendeBehov(
+            message.meldingsporing.id,
+            byggMedYrkesaktivitet(
+                event.yrkesaktivitetssporing,
+                mapOf(
+                    "vedtaksperiodeId" to event.vedtaksperiodeId,
+                    "behandlingId" to event.behandlingId,
+                ),
+            ),
+        )
+
+    private fun mapTrengerSykepengegrunnlag(event: EventSubscription.TrengerSykepengegrunnlagEvent): Utboksmelding =
+        listOf(
+            Behov(
+                Behov.Behovstype.Sykepengegrunnlag,
+                buildMap {
+                    put("skjæringstidspunkt", event.skjæringstidspunkt)
+                    put("rettighetskategoriId", event.rettighetskategoriId)
+                    put(
+                        "arbeidsgivere",
+                        event.arbeidsgivere.map { arbeidsgiver ->
+                            buildMap {
+                                put("orgnummer", arbeidsgiver.orgnummer)
+                                put("inntektskilde", arbeidsgiver.inntektskilde.name)
+                                arbeidsgiver.inntektsmeldingMeldingsreferanseId?.let { put("inntektsmeldingMeldingsreferanseId", it) }
+                            }
+                        },
+                    )
+                    event.selvstendig?.let { put("selvstendig", mapOf("søknadMeldingsreferanseId" to it.søknadMeldingsreferanseId)) }
+                },
             ),
         ).utgåendeBehov(
             message.meldingsporing.id,

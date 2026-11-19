@@ -41,6 +41,7 @@ import no.nav.helse.hendelser.Revurderingseventyr.Companion.tidligsteEventyr
 import no.nav.helse.hendelser.SelvbestemteArbeidsgiveropplysninger
 import no.nav.helse.hendelser.Simulering
 import no.nav.helse.hendelser.SkjønnsmessigFastsettelse
+import no.nav.helse.hendelser.Sykepengegrunnlag
 import no.nav.helse.hendelser.Sykmelding
 import no.nav.helse.hendelser.Søknad
 import no.nav.helse.hendelser.UtbetalingHendelse
@@ -667,6 +668,18 @@ class Person private constructor(
             rettighetskategori.behandlingsporing,
         ).håndterRettighetskategori(eventBus, rettighetskategori, aktivitetsloggMedPersonkontekst)
         håndterGjenoppta(eventBus, rettighetskategori, aktivitetsloggMedPersonkontekst)
+    }
+
+    fun håndterSykepengegrunnlag(
+        eventBus: EventBus,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val aktivitetsloggMedPersonkontekst = registrer(aktivitetslogg, "Behandler sykepengegrunnlag")
+        finnYrkesaktivitet(
+            sykepengegrunnlag.behandlingsporing,
+        ).håndterSykepengegrunnlag(eventBus, sykepengegrunnlag, aktivitetsloggMedPersonkontekst)
+        håndterGjenoppta(eventBus, sykepengegrunnlag, aktivitetsloggMedPersonkontekst)
     }
 
     fun håndterSimulering(

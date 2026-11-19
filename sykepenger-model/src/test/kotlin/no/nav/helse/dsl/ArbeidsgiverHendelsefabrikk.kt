@@ -329,6 +329,16 @@ internal class ArbeidsgiverHendelsefabrikk(
         hovedkategori = hovedkategori,
     )
 
+    internal fun lagSykepengegrunnlag(
+        vedtaksperiodeId: UUID,
+        skjæringstidspunkt: LocalDate,
+    ) = Sykepengegrunnlag(
+        meldingsreferanseId = MeldingsreferanseId(UUID.randomUUID()),
+        vedtaksperiodeId = vedtaksperiodeId,
+        skjæringstidspunkt = skjæringstidspunkt,
+        behandlingsporing = behandlingsporing,
+    )
+
     internal fun lagSimulering(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,

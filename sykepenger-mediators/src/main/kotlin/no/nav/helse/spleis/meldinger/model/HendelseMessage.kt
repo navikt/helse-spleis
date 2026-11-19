@@ -89,6 +89,7 @@ private val HendelseMessage.kontekstnavn
             is AvstemmingMessage -> "Avstemming"
             is SimuleringMessage -> "Simulering"
             is RettighetskategoriMessage -> "Rettighetskategori"
+            is SykepengegrunnlagMessage -> "Sykepengegrunnlag"
             is UtbetalingMessage -> "UtbetalingHendelse"
             is FeriepengeutbetalingMessage -> "Feriepengeutbetaling"
             is UtbetalingsgodkjenningMessage -> "Utbetalingsgodkjenning"

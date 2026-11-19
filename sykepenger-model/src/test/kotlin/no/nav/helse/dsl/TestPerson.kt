@@ -937,6 +937,23 @@ internal class TestPerson(
                 .håndter(Person::håndterRettighetskategori)
         }
 
+        internal fun sykepengegrunnlagbehov(vedtaksperiodeId: UUID) =
+            behovsoppsamler
+                .behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Sykepengegrunnlag>()
+                .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+                .map { it.event }
+
+        internal fun håndterSykepengegrunnlag(
+            vedtaksperiodeId: UUID = 1.vedtaksperiode,
+            skjæringstidspunkt: LocalDate? = null,
+        ) {
+            behovshåndterer.bekreftForespurtSykepengegrunnlag(vedtaksperiodeId)
+            val skjæringstidspunkt = skjæringstidspunkt ?: inspektør.skjæringstidspunkt(vedtaksperiodeId)
+            arbeidsgiverHendelsefabrikk
+                .lagSykepengegrunnlag(vedtaksperiodeId, skjæringstidspunkt)
+                .håndter(Person::håndterSykepengegrunnlag)
+        }
+
         internal fun håndterSimulering(
             vedtaksperiodeId: UUID,
             simuleringOK: Boolean = true,

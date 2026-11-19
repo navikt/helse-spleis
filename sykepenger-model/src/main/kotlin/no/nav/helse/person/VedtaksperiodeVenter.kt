@@ -129,6 +129,7 @@ internal data class Venteårsak(
         val UTBETALING = Venteårsak("UTBETALING", null)
         val VILKÅRSPRØVING = Venteårsak("VILKÅRSPRØVING", null)
         val RETTIGHETSKATEGORI = Venteårsak("RETTIGHETSKATEGORI", null)
+        val SYKEPENGEGRUNNLAG = Venteårsak("SYKEPENGEGRUNNLAG", null)
         val INFOTRYGDHISTORIKK = Venteårsak("INFOTRYGDHISTORIKK", null)
         val HJELP = Venteårsak("HJELP", null)
 

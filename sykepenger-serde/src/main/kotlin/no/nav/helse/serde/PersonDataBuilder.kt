@@ -364,6 +364,7 @@ private fun VedtaksperiodeUtDto.tilPersonData() =
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING -> AVVENTER_SIMULERING
                 VedtaksperiodetilstandDto.AVVENTER_SIMULERING_REVURDERING -> AVVENTER_SIMULERING_REVURDERING
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING -> AVVENTER_VILKÅRSPRØVING
+                VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG -> AVVENTER_SYKEPENGEGRUNNLAG
                 VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI -> AVVENTER_RETTIGHETSKATEGORI
                 VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING_REVURDERING -> AVVENTER_VILKÅRSPRØVING_REVURDERING
                 VedtaksperiodetilstandDto.TIL_INFOTRYGD -> TIL_INFOTRYGD

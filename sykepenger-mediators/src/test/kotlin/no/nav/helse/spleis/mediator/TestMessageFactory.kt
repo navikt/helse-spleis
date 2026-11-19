@@ -1309,6 +1309,36 @@ internal class TestMessageFactory(
                 ),
         )
 
+    fun lagSykepengegrunnlag(
+        vedtaksperiodeId: UUID,
+        behandlingId: UUID,
+        skjæringstidspunkt: LocalDate,
+        sykepengegrunnlagId: String,
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
+        orgnummer: String? = organisasjonsnummer.takeIf { yrkesaktivitetstype == "ARBEIDSTAKER" },
+    ): Pair<String, String> =
+        lagBehovMedLøsning(
+            behov = listOf("Sykepengegrunnlag"),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            orgnummer = orgnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            ekstraFelter =
+                mapOf(
+                    "Sykepengegrunnlag" to
+                        mapOf(
+                            "skjæringstidspunkt" to skjæringstidspunkt,
+                        ),
+                ),
+            løsninger =
+                mapOf(
+                    "Sykepengegrunnlag" to
+                        mapOf(
+                            "id" to sykepengegrunnlagId,
+                        ),
+                ),
+        )
+
     fun lagSimulering(
         vedtaksperiodeId: UUID,
         behandlingId: UUID,

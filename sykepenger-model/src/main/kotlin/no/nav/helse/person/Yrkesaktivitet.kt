@@ -901,6 +901,17 @@ internal class Yrkesaktivitet private constructor(
         }
     }
 
+    internal fun håndterSykepengegrunnlag(
+        eventBus: EventBus,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        aktivitetslogg: IAktivitetslogg,
+    ) {
+        val aktivitetsloggMedYrkesaktivitetkontekst = aktivitetslogg.kontekst(this)
+        håndter {
+            it.håndterSykepengegrunnlag(eventBus, sykepengegrunnlag, aktivitetsloggMedYrkesaktivitetkontekst)
+        }
+    }
+
     internal fun håndterSimulering(
         eventBus: EventBus,
         simulering: Simulering,

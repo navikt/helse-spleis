@@ -731,6 +731,31 @@ interface EventSubscription {
         val søknader: List<UUID>,
     ) : Event
 
+    data class TrengerSykepengegrunnlagEvent(
+        val vedtaksperiodeId: UUID,
+        val behandlingId: UUID,
+        val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+        val skjæringstidspunkt: LocalDate,
+        val rettighetskategoriId: UUID,
+        val arbeidsgivere: List<Arbeidsgiver>,
+        val selvstendig: Selvstendig?,
+    ) : Event {
+        data class Arbeidsgiver(
+            val orgnummer: String,
+            val inntektskilde: Inntektskilde,
+            val inntektsmeldingMeldingsreferanseId: UUID?,
+        )
+
+        enum class Inntektskilde {
+            INNTEKTSMELDING,
+            A_ORDNINGEN,
+        }
+
+        data class Selvstendig(
+            val søknadMeldingsreferanseId: UUID,
+        )
+    }
+
     data class TrengerInformasjonTilBeregningEvent(
         val vedtaksperiodeId: UUID,
         val behandlingId: UUID,
@@ -907,6 +932,8 @@ interface EventSubscription {
     fun trengerInformasjonTilVilkårsprøving(event: TrengerInformasjonTilVilkårsprøvingEvent) {}
 
     fun trengerRettighetskategori(event: TrengerRettighetskategoriEvent) {}
+
+    fun trengerSykepengegrunnlag(event: TrengerSykepengegrunnlagEvent) {}
 
     fun trengerInformasjonTilBeregning(event: TrengerInformasjonTilBeregningEvent) {}
 

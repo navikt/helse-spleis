@@ -325,6 +325,17 @@ internal class HendelseMediator(
     }
 
     override fun behandle(
+        message: SykepengegrunnlagMessage,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        context: BehandlingContext,
+    ) {
+        hentPersonOgHåndter(message, context) { eventBus, person, aktivitetslogg ->
+            HendelseProbe.onSykepengegrunnlag()
+            person.håndterSykepengegrunnlag(eventBus, sykepengegrunnlag, aktivitetslogg)
+        }
+    }
+
+    override fun behandle(
         message: SimuleringMessage,
         simulering: Simulering,
         context: BehandlingContext,
@@ -951,6 +962,12 @@ internal interface IHendelseMediator {
     fun behandle(
         message: RettighetskategoriMessage,
         rettighetskategori: Rettighetskategori,
+        context: BehandlingContext,
+    )
+
+    fun behandle(
+        message: SykepengegrunnlagMessage,
+        sykepengegrunnlag: Sykepengegrunnlag,
         context: BehandlingContext,
     )
 

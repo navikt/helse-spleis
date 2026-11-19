@@ -382,6 +382,19 @@ internal class PersonDataBuilderTest : AbstractDslTest() {
     }
 
     @Test
+    fun `AVVENTER_SYKEPENGEGRUNNLAG overlever serialisering`() =
+        Toggle.AvventerSykepengegrunnlag.enable {
+            a1 {
+                håndterSøknad(Sykdom(1.januar, 31.januar, 100.prosent))
+                håndterArbeidsgiveropplysninger(listOf(1.januar til 16.januar))
+                håndterVilkårsgrunnlag(1.vedtaksperiode)
+            }
+            val json = dto().tilPersonData().tilSerialisertPerson().json
+            assert("\"AVVENTER_SYKEPENGEGRUNNLAG\"" in json)
+            assertGjenoppbygget(dto())
+        }
+
+    @Test
     fun `forsikringsvurderingId lagres på vilkårsgrunnlag og overlever serialisering`() {
         val forsikringsvurderingId = UUID.randomUUID()
         a1 {

@@ -730,6 +730,7 @@ data class PersonData(
                 AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE,
                 AVVENTER_RETTIGHETSKATEGORI,
                 AVVENTER_VILKÅRSPRØVING,
+                AVVENTER_SYKEPENGEGRUNNLAG,
                 AVVENTER_REVURDERING,
                 AVVENTER_REVURDERING_TIL_UTBETALING,
                 AVVENTER_HISTORIKK_REVURDERING,
@@ -763,6 +764,7 @@ data class PersonData(
                             TilstandTypeData.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER -> VedtaksperiodetilstandDto.AVVENTER_INNTEKTSOPPLYSNINGER_FOR_ANNEN_ARBEIDSGIVER
                             TilstandTypeData.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE -> VedtaksperiodetilstandDto.AVVENTER_REFUSJONSOPPLYSNINGER_ANNEN_PERIODE
                             TilstandTypeData.AVVENTER_VILKÅRSPRØVING -> VedtaksperiodetilstandDto.AVVENTER_VILKÅRSPRØVING
+                            TilstandTypeData.AVVENTER_SYKEPENGEGRUNNLAG -> VedtaksperiodetilstandDto.AVVENTER_SYKEPENGEGRUNNLAG
                             TilstandTypeData.AVVENTER_RETTIGHETSKATEGORI -> VedtaksperiodetilstandDto.AVVENTER_RETTIGHETSKATEGORI
                             TilstandTypeData.AVVENTER_REVURDERING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING
                             TilstandTypeData.AVVENTER_REVURDERING_TIL_UTBETALING -> VedtaksperiodetilstandDto.AVVENTER_REVURDERING_TIL_UTBETALING

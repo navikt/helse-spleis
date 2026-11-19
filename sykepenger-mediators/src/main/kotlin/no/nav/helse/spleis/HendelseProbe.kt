@@ -47,6 +47,10 @@ object HendelseProbe {
         tell("Rettighetskategori")
     }
 
+    fun onSykepengegrunnlag() {
+        tell("Sykepengegrunnlag")
+    }
+
     fun onNavNoInntektsmelding() {
         tell("NavNoInntektsmelding")
     }

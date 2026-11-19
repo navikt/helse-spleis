@@ -87,6 +87,7 @@ internal class HendelseRepository(
             is VilkårsgrunnlagMessage -> VILKÅRSGRUNNLAG
             is SimuleringMessage -> SIMULERING
             is RettighetskategoriMessage -> RETTIGHETSKATEGORI
+            is SykepengegrunnlagMessage -> SYKEPENGEGRUNNLAG
             is UtbetalingsgodkjenningMessage -> UTBETALINGSGODKJENNING
             is UtbetalingMessage -> UTBETALING
             is FeriepengeutbetalingMessage -> FERIEPENGEUTBETALING
@@ -206,5 +207,6 @@ internal class HendelseRepository(
         SYKEPENGEGRUNNLAG_FOR_ARBEIDSGIVER,
         INNTEKTSOPPLYSNINGER_FRA_LAGRET_INNTEKTSMELDING,
         RETTIGHETSKATEGORI,
+        SYKEPENGEGRUNNLAG,
     }
 }

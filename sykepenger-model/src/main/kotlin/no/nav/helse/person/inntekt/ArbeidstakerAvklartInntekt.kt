@@ -54,6 +54,7 @@ private fun Vedtaksperiodetilstand.harAvklartArbeidstakerinntekt(): Boolean =
         AvventerSimuleringRevurdering,
         AvventerSøknadForOverlappendePeriode,
         AvventerVilkårsprøving,
+        AvventerSykepengegrunnlag,
         AvventerVilkårsprøvingRevurdering,
         TilAnnullering,
         TilUtbetaling,

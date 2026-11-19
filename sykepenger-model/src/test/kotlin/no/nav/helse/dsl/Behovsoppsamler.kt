@@ -160,6 +160,12 @@ sealed class Behovsoppsamler(
             override val id: UUID = UUID.randomUUID(),
         ) : Behovsdetaljer
 
+        data class Sykepengegrunnlag(
+            override val vedtaksperiodeId: UUID,
+            val event: EventSubscription.TrengerSykepengegrunnlagEvent,
+            override val id: UUID = UUID.randomUUID(),
+        ) : Behovsdetaljer
+
         data class InntektsmeldingReplay(
             override val vedtaksperiodeId: UUID,
             val forespørsel: Forespørsel,
@@ -239,5 +245,8 @@ sealed class Behovsoppsamler(
                     event.søknader,
                 ),
             )
+
+        override fun trengerSykepengegrunnlag(event: EventSubscription.TrengerSykepengegrunnlagEvent) =
+            registrer(Behovsdetaljer.Sykepengegrunnlag(event.vedtaksperiodeId, event))
     }
 }

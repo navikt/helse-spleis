@@ -12,6 +12,7 @@ import no.nav.inntektsmeldingkontrakt.Arbeidsgivertype
 import no.nav.inntektsmeldingkontrakt.AvsenderSystem
 import no.nav.inntektsmeldingkontrakt.Refusjon
 import no.nav.inntektsmeldingkontrakt.Status
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.assertNotNull
 import java.math.BigDecimal
@@ -76,6 +77,13 @@ class Behovshåndterer(
             },
         ) {
             "Forventet at det skulle være forespurt rettighetskategori. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
+        }
+
+    fun bekreftForespurtSykepengegrunnlag(vedtaksperiodeId: UUID) =
+        assertTrue(
+            behovsoppsamler.behovsdetaljer<Behovsoppsamler.Behovsdetaljer.Sykepengegrunnlag>().any { it.vedtaksperiodeId == vedtaksperiodeId },
+        ) {
+            "Forventet at det skulle være forespurt sykepengegrunnlag. Vedtaksperioden er i tilstand ${tilstander[vedtaksperiodeId]}"
         }
 
     fun bekreftForespurtBeregningAvSelvstendig(vedtaksperiodeId: UUID) =

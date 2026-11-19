@@ -140,6 +140,67 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
+    fun sykepengegrunnlag() =
+        Toggle.AvventerSykepengegrunnlag.enable {
+            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+            sendSøknad(
+                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+            )
+            val (inntektsmeldingId, _) = sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+            sendVilkårsgrunnlag(0)
+            assertTilstand(0, "AVVENTER_SYKEPENGEGRUNNLAG")
+            val behov = testRapid.inspektør.etterspurteBehov(Sykepengegrunnlag)
+            assertVedtaksperiodeBehov(behov, Sykepengegrunnlag)
+            assertEquals("ARBEIDSTAKER", behov.path("yrkesaktivitetstype").asString())
+            assertEquals(ORGNUMMER, behov.path("organisasjonsnummer").asString())
+            assertTrue(behov.path("behandlingId").asString().isNotEmpty())
+            val detaljer = behov.path(Sykepengegrunnlag.utgåendeNavn)
+            assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asString())
+            assertDoesNotThrow { UUID.fromString(detaljer.path("rettighetskategoriId").asString()) }
+            val arbeidsgivere = detaljer.path("arbeidsgivere").values().toList()
+            assertEquals(1, arbeidsgivere.size)
+            assertEquals(ORGNUMMER, arbeidsgivere.single().path("orgnummer").asString())
+            assertEquals("INNTEKTSMELDING", arbeidsgivere.single().path("inntektskilde").asString())
+            assertEquals(inntektsmeldingId.toString(), arbeidsgivere.single().path("inntektsmeldingMeldingsreferanseId").asString())
+            assertTrue(detaljer.path("selvstendig").isMissingNode)
+
+            val sykepengegrunnlagId = UUID.randomUUID()
+            sendSykepengegrunnlag(0, sykepengegrunnlagId = sykepengegrunnlagId)
+            assertTilstand(0, "AVVENTER_HISTORIKK")
+        }
+
+    @Test
+    fun `sykepengegrunnlag - selvstendig`() =
+        Toggle.AvventerSykepengegrunnlag.enable {
+            besvarRettighetskategoriAutomatisk = false
+            sendNySøknadSelvstendig(
+                SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100),
+                arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+            )
+            val søknadId =
+                sendSelvstendigsøknad(
+                    perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                    ventetid = 3.januar til 18.januar,
+                    arbeidssituasjon = ArbeidssituasjonDTO.SELVSTENDIG_NARINGSDRIVENDE,
+                )
+            val rettighetskategoriId = UUID.randomUUID()
+            sendRettighetskategori(0, rettighetskategoriId = rettighetskategoriId, hovedkategori = "SELVSTENDIG_NÆRINGSDRIVENDE")
+            sendVilkårsgrunnlagSelvstendig(0, forsikringsvurderingId = UUID.randomUUID())
+            assertTilstand(0, "AVVENTER_SYKEPENGEGRUNNLAG")
+            val behov = testRapid.inspektør.etterspurteBehov(Sykepengegrunnlag)
+            assertVedtaksperiodeBehov(behov, Sykepengegrunnlag)
+            assertEquals("SELVSTENDIG", behov.path("yrkesaktivitetstype").asString())
+            val detaljer = behov.path(Sykepengegrunnlag.utgåendeNavn)
+            assertEquals("2018-01-03", detaljer.path("skjæringstidspunkt").asString())
+            assertEquals(rettighetskategoriId.toString(), detaljer.path("rettighetskategoriId").asString())
+            assertEquals(0, detaljer.path("arbeidsgivere").size())
+            assertEquals(søknadId.toString(), detaljer.path("selvstendig").path("søknadMeldingsreferanseId").asString())
+
+            sendSykepengegrunnlag(0)
+            assertTilstand(0, "AVVENTER_HISTORIKK")
+        }
+
+    @Test
     fun `vilkårsgrunnlag - selvstendig`() {
         besvarRettighetskategoriAutomatisk = false
         sendNySøknadSelvstendig(

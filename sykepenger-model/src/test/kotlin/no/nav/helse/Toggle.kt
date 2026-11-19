@@ -20,3 +20,18 @@ private class EnableFeriepengerInterceptor : InvocationInterceptor {
         Toggle.SendFeriepengeOppdrag.enable { invocation.proceed() }
     }
 }
+
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@ExtendWith(EnableAvventerSykepengegrunnlagInterceptor::class)
+internal annotation class EnableAvventerSykepengegrunnlag
+
+private class EnableAvventerSykepengegrunnlagInterceptor : InvocationInterceptor {
+    override fun interceptTestMethod(
+        invocation: InvocationInterceptor.Invocation<Void?>,
+        invocationContext: ReflectiveInvocationContext<Method>,
+        extensionContext: ExtensionContext,
+    ) {
+        Toggle.AvventerSykepengegrunnlag.enable { invocation.proceed() }
+    }
+}

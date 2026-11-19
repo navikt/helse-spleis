@@ -142,6 +142,36 @@ internal class MessageMediatorTest {
     }
 
     @Test
+    fun sykepengegrunnlag() {
+        fun løsning(
+            yrkesaktivitetstype: String = "ARBEIDSTAKER",
+            orgnummer: String? = AbstractEndToEndMediatorTest.ORGNUMMER,
+            sykepengegrunnlagId: String = UUID.randomUUID().toString(),
+        ) = meldingsfabrikk.lagSykepengegrunnlag(
+            vedtaksperiodeId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
+            skjæringstidspunkt = LocalDate.of(2018, 1, 1),
+            sykepengegrunnlagId = sykepengegrunnlagId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            orgnummer = orgnummer,
+        )
+
+        testRapid.sendTestMessage(løsning())
+        assertTrue(hendelseMediator.lestSykepengegrunnlag) { "Skal lese løsning for arbeidstaker" }
+        hendelseMediator.reset()
+
+        testRapid.sendTestMessage(løsning(yrkesaktivitetstype = "SELVSTENDIG", orgnummer = null))
+        assertTrue(hendelseMediator.lestSykepengegrunnlag) { "Skal lese løsning for selvstendig uten organisasjonsnummer" }
+        hendelseMediator.reset()
+
+        testRapid.sendTestMessage(løsning(orgnummer = null))
+        assertFalse(hendelseMediator.lestSykepengegrunnlag) { "Skal ikke lese løsning for arbeidstaker uten organisasjonsnummer" }
+
+        testRapid.sendTestMessage(løsning(sykepengegrunnlagId = "ikke-en-uuid"))
+        assertFalse(hendelseMediator.lestSykepengegrunnlag) { "Skal ikke lese løsning uten gyldig id" }
+    }
+
+    @Test
     fun simuleringer() {
         testRapid.sendTestMessage(
             meldingsfabrikk.lagSimulering(UUID.randomUUID(), UUID.randomUUID(), SimuleringMessage.Simuleringstatus.OK, UUID.randomUUID()),

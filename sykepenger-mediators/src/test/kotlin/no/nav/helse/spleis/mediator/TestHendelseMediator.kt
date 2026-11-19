@@ -25,6 +25,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     val lestVilkårsgrunnlag get() = lestVilkårsgrunnlagVerdi.get()
     val lestSimulering get() = lestSimuleringVerdi.get()
     val lestRettighetskategori get() = lestRettighetskategoriVerdi.get()
+    val lestSykepengegrunnlag get() = lestSykepengegrunnlagVerdi.get()
     val lestUtbetalingsgodkjenning get() = lestUtbetalingsgodkjenningVerdi.get()
     val lestUtbetaling get() = lestUtbetalingVerdi.get()
     val lestAnnullerUtbetaling get() = lestAnnullerUtbetalingVerdi.get()
@@ -52,6 +53,7 @@ internal class TestHendelseMediator : IHendelseMediator {
     private val lestVilkårsgrunnlagVerdi = ThreadLocal.withInitial { false }
     private val lestSimuleringVerdi = ThreadLocal.withInitial { false }
     private val lestRettighetskategoriVerdi = ThreadLocal.withInitial { false }
+    private val lestSykepengegrunnlagVerdi = ThreadLocal.withInitial { false }
     private val lestUtbetalingsgodkjenningVerdi = ThreadLocal.withInitial { false }
     private val lestUtbetalingVerdi = ThreadLocal.withInitial { false }
     private val lestAnnullerUtbetalingVerdi = ThreadLocal.withInitial { false }
@@ -83,6 +85,7 @@ internal class TestHendelseMediator : IHendelseMediator {
         lestVilkårsgrunnlagVerdi.remove()
         lestSimuleringVerdi.remove()
         lestRettighetskategoriVerdi.remove()
+        lestSykepengegrunnlagVerdi.remove()
         lestUtbetalingsgodkjenningVerdi.remove()
         lestUtbetalingVerdi.remove()
         lestAnnullerUtbetalingVerdi.remove()
@@ -361,6 +364,14 @@ internal class TestHendelseMediator : IHendelseMediator {
         context: BehandlingContext,
     ) {
         lestRettighetskategoriVerdi.set(true)
+    }
+
+    override fun behandle(
+        message: SykepengegrunnlagMessage,
+        sykepengegrunnlag: Sykepengegrunnlag,
+        context: BehandlingContext,
+    ) {
+        lestSykepengegrunnlagVerdi.set(true)
     }
 
     override fun behandle(
