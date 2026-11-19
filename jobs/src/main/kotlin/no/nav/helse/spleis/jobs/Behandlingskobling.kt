@@ -1,6 +1,7 @@
 package no.nav.helse.spleis.jobs
 
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
+import no.nav.helse.dto.BehandlingtilstandDto
 import no.nav.helse.dto.deserialisering.PersonInnDto
 import no.nav.helse.dto.deserialisering.VedtaksperiodeInnDto
 import no.nav.helse.serde.SerialisertPerson
@@ -59,6 +60,7 @@ private fun VedtaksperiodeInnDto.behandlingskobling(): KobletVedtaksperiode =
             behandlinger.behandlinger.map { behandling ->
                 kobletBehandling(
                     behandlingId = behandling.id,
+                    tilstand = behandling.tilstand,
                     endringer = behandling.endringer.map { it.tidsstempel to it.utbetalingId },
                 )
             },
@@ -67,13 +69,37 @@ private fun VedtaksperiodeInnDto.behandlingskobling(): KobletVedtaksperiode =
 // opprettet er tidsstempelet til første endring. utbetalinger er alle utbetalingene behandlingen har hatt, uten duplikater.
 internal fun kobletBehandling(
     behandlingId: UUID,
+    tilstand: BehandlingtilstandDto,
     endringer: List<Pair<LocalDateTime, UUID?>>,
 ): KobletBehandling =
     KobletBehandling(
         behandlingId = behandlingId,
         opprettet = endringer.first().first,
         utbetalinger = endringer.mapNotNull { it.second }.distinct(),
+        erÅpenForEndring = tilstand.erÅpenForEndring(),
     )
+
+// Samme regel som Behandling.erÅpenForEndring i modellen
+private fun BehandlingtilstandDto.erÅpenForEndring() =
+    when (this) {
+        BehandlingtilstandDto.UBEREGNET,
+        BehandlingtilstandDto.UBEREGNET_OMGJØRING,
+        BehandlingtilstandDto.UBEREGNET_REVURDERING,
+        BehandlingtilstandDto.UBEREGNET_ANNULLERING,
+        BehandlingtilstandDto.BEREGNET,
+        BehandlingtilstandDto.BEREGNET_OMGJØRING,
+        BehandlingtilstandDto.BEREGNET_REVURDERING,
+        -> true
+
+        BehandlingtilstandDto.VEDTAK_FATTET,
+        BehandlingtilstandDto.VEDTAK_IVERKSATT,
+        BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
+        BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK,
+        BehandlingtilstandDto.ANNULLERT_PERIODE,
+        BehandlingtilstandDto.OVERFØRT_ANNULLERING,
+        BehandlingtilstandDto.TIL_INFOTRYGD,
+        -> false
+    }
 
 internal data class Behandlingskobling(
     val fødselsnummer: String,
@@ -102,4 +128,5 @@ internal data class KobletBehandling(
     val behandlingId: UUID,
     val opprettet: LocalDateTime,
     val utbetalinger: List<UUID>,
+    val erÅpenForEndring: Boolean,
 )

@@ -1,5 +1,6 @@
 package no.nav.helse.spleis.jobs
 
+import no.nav.helse.dto.BehandlingtilstandDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.jacksonObjectMapper
@@ -13,9 +14,9 @@ class BehandlingskoblingTest {
 
     @Test
     fun `opprettet er tidsstempelet til første endring`() {
-        val koblet = kobletBehandling(behandlingId, listOf(tidspunkt to null, tidspunkt.plusDays(1) to null))
+        val koblet = kobletBehandling(behandlingId, BehandlingtilstandDto.UBEREGNET, listOf(tidspunkt to null, tidspunkt.plusDays(1) to null))
 
-        assertEquals(KobletBehandling(behandlingId, tidspunkt, emptyList()), koblet)
+        assertEquals(KobletBehandling(behandlingId, tidspunkt, emptyList(), erÅpenForEndring = true), koblet)
     }
 
     @Test
@@ -26,6 +27,7 @@ class BehandlingskoblingTest {
         val koblet =
             kobletBehandling(
                 behandlingId,
+                BehandlingtilstandDto.VEDTAK_IVERKSATT,
                 listOf(
                     tidspunkt to null,
                     tidspunkt.plusHours(1) to utbetaling1,
@@ -35,6 +37,33 @@ class BehandlingskoblingTest {
             )
 
         assertEquals(listOf(utbetaling1, utbetaling2), koblet.utbetalinger)
+    }
+
+    @Test
+    fun `behandlingen er åpen for endring til den er avsluttet`() {
+        val åpne =
+            listOf(
+                BehandlingtilstandDto.UBEREGNET,
+                BehandlingtilstandDto.UBEREGNET_OMGJØRING,
+                BehandlingtilstandDto.UBEREGNET_REVURDERING,
+                BehandlingtilstandDto.UBEREGNET_ANNULLERING,
+                BehandlingtilstandDto.BEREGNET,
+                BehandlingtilstandDto.BEREGNET_OMGJØRING,
+                BehandlingtilstandDto.BEREGNET_REVURDERING,
+            )
+        val lukkede =
+            listOf(
+                BehandlingtilstandDto.VEDTAK_FATTET,
+                BehandlingtilstandDto.VEDTAK_IVERKSATT,
+                BehandlingtilstandDto.REVURDERT_VEDTAK_AVVIST,
+                BehandlingtilstandDto.AVSLUTTET_UTEN_VEDTAK,
+                BehandlingtilstandDto.ANNULLERT_PERIODE,
+                BehandlingtilstandDto.OVERFØRT_ANNULLERING,
+                BehandlingtilstandDto.TIL_INFOTRYGD,
+            )
+
+        åpne.forEach { assertEquals(true, kobletBehandling(behandlingId, it, listOf(tidspunkt to null)).erÅpenForEndring, "$it") }
+        lukkede.forEach { assertEquals(false, kobletBehandling(behandlingId, it, listOf(tidspunkt to null)).erÅpenForEndring, "$it") }
     }
 
     @Test
@@ -48,7 +77,7 @@ class BehandlingskoblingTest {
                     listOf(
                         KobletVedtaksperiode(
                             vedtaksperiodeId,
-                            listOf(KobletBehandling(behandlingId, tidspunkt, listOf(utbetalingId))),
+                            listOf(KobletBehandling(behandlingId, tidspunkt, listOf(utbetalingId), erÅpenForEndring = true)),
                         ),
                     ),
             )
@@ -63,6 +92,7 @@ class BehandlingskoblingTest {
         val behandling = vedtaksperiode.path("behandlinger").values().single()
         assertEquals(behandlingId.toString(), behandling.path("behandlingId").asString())
         assertEquals("2024-01-01T12:00:00", behandling.path("opprettet").asString())
+        assertEquals(true, behandling.path("erÅpenForEndring").asBoolean())
         assertEquals(
             utbetalingId.toString(),
             behandling
