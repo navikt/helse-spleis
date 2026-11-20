@@ -32,13 +32,15 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
             Opptjeningsvurdering,
+            Medlemskapsvurdering,
             Medlemskap,
             Arbeidsforhold,
         )
-        assertMedlemskapdetaljer(behov)
+        assertMedlemskapvurderingdetaljer(behov, "ARBEIDSTAKER")
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
+        assertMedlemskapvurderingdetaljer(behov, "ARBEIDSTAKER")
     }
 
     @Test
@@ -60,28 +62,27 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     }
 
     @Test
-    fun `vilkårsgrunnlag med toggle for medlemskapsvurdering`() =
-        Toggle.MedlemskapsvurderingBehov.enable {
-            sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            )
-            sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
-            val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
-            assertVedtaksperiodeBehov(
-                behov,
-                InntekterForSykepengegrunnlag,
-                InntekterForOpptjeningsvurdering,
-                Opptjeningsvurdering,
-                Medlemskap,
-                Medlemskapsvurdering,
-                Arbeidsforhold,
-            )
-            assertMedlemskapdetaljer(behov)
-            assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("skjæringstidspunkt").asString())
-            assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeFom").asString())
-            assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeTom").asString())
-        }
+    fun medlemskapsvurdering() {
+        sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
+        sendSøknad(
+            perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+        )
+        sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
+        val behov = testRapid.inspektør.etterspurteBehov(Medlemskap)
+        assertVedtaksperiodeBehov(
+            behov,
+            InntekterForSykepengegrunnlag,
+            InntekterForOpptjeningsvurdering,
+            Opptjeningsvurdering,
+            Medlemskap,
+            Medlemskapsvurdering,
+            Arbeidsforhold,
+        )
+        assertMedlemskapvurderingdetaljer(behov, "ARBEIDSTAKER")
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("skjæringstidspunkt").asString())
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeFom").asString())
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeTom").asString())
+    }
 
     @Test
     fun rettighetskategori() {
@@ -226,11 +227,12 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             InntekterForSykepengegrunnlag,
             InntekterForOpptjeningsvurdering,
             Medlemskap,
+            Medlemskapsvurdering,
             Arbeidsforhold,
             Forsikringsvurdering,
             Opptjeningsvurdering,
         )
-        assertMedlemskapdetaljer(behov)
+        assertMedlemskapvurderingdetaljer(behov, "SELVSTENDIG")
         assertInntekterForSykepengegrunnlagdetaljer(behov)
         assertInntekterForOpptjeningsvurderingdetaljer(behov)
         assertArbeidsforholdV2detaljer(behov)
@@ -527,6 +529,16 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
         assertDato(behov.path(Medlemskap.utgåendeNavn).path("skjæringstidspunkt").asString())
         assertDato(behov.path(Medlemskap.utgåendeNavn).path("medlemskapPeriodeFom").asString())
         assertDato(behov.path(Medlemskap.utgåendeNavn).path("medlemskapPeriodeTom").asString())
+    }
+
+    private fun assertMedlemskapvurderingdetaljer(
+        behov: JsonNode,
+        yrkesaktivitetstype: String,
+    ) {
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("skjæringstidspunkt").asString())
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeFom").asString())
+        assertDato(behov.path(Medlemskapsvurdering.utgåendeNavn).path("medlemskapPeriodeTom").asString())
+        assertEquals(yrkesaktivitetstype, behov.path("yrkesaktivitetstype").asString())
     }
 
     private fun assertArbeidsforholdV2detaljer(behov: JsonNode) {

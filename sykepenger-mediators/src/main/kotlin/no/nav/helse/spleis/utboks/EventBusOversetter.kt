@@ -613,7 +613,7 @@ internal class EventBusOversetter(
                         "medlemskapPeriodeFom" to event.periodeForMedlemskapsvurdering.start,
                         "medlemskapPeriodeTom" to event.periodeForMedlemskapsvurdering.endInclusive,
                     ),
-                ).takeIf { Toggle.MedlemskapsvurderingBehov.enabled },
+                ),
                 Behov(
                     Behov.Behovstype.Forsikringsvurdering,
                     mapOf(

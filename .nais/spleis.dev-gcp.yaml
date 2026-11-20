@@ -42,10 +42,6 @@ spec:
       value: "true"
     - name: GRADERTE_ANDRE_YTELSER
       value: "true"
-    - name: MEDLEMSKAPSVURDERINGRESULTATBEHOV
-      value: "true"
-    - name: MEDLEMSKAPSVURDERINGBEHOV
-      value: "true"
     - name: AVSLAGSDAGERBEHOV
       value: "true"
     - name: SYK_UTENFOR_EOS
