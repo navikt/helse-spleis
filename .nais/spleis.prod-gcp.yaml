@@ -29,7 +29,7 @@ spec:
         diskSize: 250
         diskType: SSD
         name: spleis2
-        tier: db-custom-16-20480
+        tier: db-custom-64-65536
         retainedBackups: 14
         databases:
           - name: spleis
@@ -59,6 +59,8 @@ spec:
     - name: MEDLEMSKAPSVURDERINGBEHOV
       value: "true"
     - name: GRADERTE_ANDRE_YTELSER
+      value: "true"
+    - name: SEND_FERIEPENGEOPPDRAG
       value: "true"
     - name: JAVA_TOOL_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spleis,-cprof_project_id=tbd-prod-eacd,-logtostderr,-minloglevel=1
