@@ -5,7 +5,7 @@ postgres = "42.7.14"
 hikari = "7.1.0"
 cloudsql = "1.31.0"
 flyway = "13.12.2"
-logback = "1.6.6"
+logback = "1.6.7"
 logstash = "9.0"
 tbd-libs = "20261029.1843"
 junit-jupiter = "6.1.3"
@@ -19,7 +19,7 @@ spill-av-im-matching = "2026.05.12-11.59-aa0ff460"
 syfokafka = "2026.10.28-17.30-e59ff951"
 json-schema-validator = "3.0.9"
 commons-codec = "1.23.0"
-sykepenger-libs-postgres = "20261116.0849"
+sykepenger-libs-postgres = "20261120.1340"
 
 [libraries]
 rapids-and-rivers = { group = "com.github.navikt", name = "rapids-and-rivers", version.ref = "rapids-and-rivers" }
