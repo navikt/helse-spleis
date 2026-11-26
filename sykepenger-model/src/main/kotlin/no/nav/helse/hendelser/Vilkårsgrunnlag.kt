@@ -147,7 +147,7 @@ class Vilkårsgrunnlag(
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 forsikringsvurderingId = forsikringsvurderingId,
                 opptjeningsvurderingId = opptjeningsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når vi alltid får
-                medlemskapsvurderingId = medlemskapsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når MEDLEMSKAPSVURDERINGBEHOV er på i prod og alle gamle behov er besvart
+                medlemskapsvurderingId = medlemskapsvurderingId ?: UUID.randomUUID(), // TODO: fjern random når alle Medlemskapsvurdering-behov sendt før 13.11.2026 er besvart
                 rettighetskategoriId =
                     rettighetskategoriId ?: VilkårsgrunnlagHistorikk.VilkårsgrunnlagElement.deterministiskRettighetskategoriId(
                         vilkårsgrunnlagId,
