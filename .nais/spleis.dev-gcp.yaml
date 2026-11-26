@@ -1,11 +1,6 @@
 metadata:
   name: helse-spleis
 spec:
-  startup:
-    path: isready
-    initialDelay: 20
-    periodSeconds: 5
-    failureThreshold: 9
   resources:
     limits:
       memory: 1024Mi

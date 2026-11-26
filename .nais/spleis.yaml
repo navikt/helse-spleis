@@ -8,6 +8,10 @@ spec:
   port: 8080
   strategy:
     type: Recreate
+  startup:
+    path: isalive
+    periodSeconds: 5
+    failureThreshold: 36
   liveness:
     path: isalive
   readiness:
