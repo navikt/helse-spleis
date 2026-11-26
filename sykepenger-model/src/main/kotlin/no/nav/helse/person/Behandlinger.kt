@@ -927,6 +927,7 @@ internal class Behandlinger private constructor(
             val korrigertInntekt: Saksbehandler?,
             val beregningId: UUID,
             val graderteAndreYtelserId: UUID?,
+            val grunnlagForLøpendeVilkårId: UUID?,
             val vurderingerAvLøpendeVilkår: VurderingerAvLøpendeVilkår,
         ) {
             companion object {
@@ -1026,6 +1027,7 @@ internal class Behandlinger private constructor(
                         korrigertInntekt = dto.korrigertInntekt?.let { Saksbehandler.gjenopprett(it) },
                         beregningId = dto.beregningId,
                         graderteAndreYtelserId = dto.graderteAndreYtelserId,
+                        grunnlagForLøpendeVilkårId = dto.grunnlagForLøpendeVilkårId,
                         vurderingerAvLøpendeVilkår = VurderingerAvLøpendeVilkår.gjenopprett(dto.vurderingerAvLøpendeVilkår),
                     )
                 }
@@ -1054,6 +1056,7 @@ internal class Behandlinger private constructor(
                 faktaavklartInntekt: FaktaavklartInntekt? = this.faktaavklartInntekt,
                 korrigertInntekt: Saksbehandler? = this.korrigertInntekt,
                 graderteAndreYtelserId: UUID? = this.graderteAndreYtelserId,
+                grunnlagForLøpendeVilkårId: UUID? = this.grunnlagForLøpendeVilkårId,
                 avslagstidslinje: Avslagstidslinje = this.avslagstidslinje,
                 vurderingerAvLøpendeVilkår: VurderingerAvLøpendeVilkår = this.vurderingerAvLøpendeVilkår,
             ) = copy(
@@ -1077,6 +1080,7 @@ internal class Behandlinger private constructor(
                 faktaavklartInntekt = faktaavklartInntekt,
                 korrigertInntekt = korrigertInntekt,
                 graderteAndreYtelserId = graderteAndreYtelserId,
+                grunnlagForLøpendeVilkårId = grunnlagForLøpendeVilkårId,
                 avslagstidslinje = avslagstidslinje,
                 vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår,
             )
@@ -1122,6 +1126,7 @@ internal class Behandlinger private constructor(
                 dagerNavOvertarAnsvar = dagerNavOvertarAnsvar,
                 faktaavklartInntekt = faktaavklartInntekt,
                 graderteAndreYtelserId = beregning.graderteAndreYtelserId,
+                grunnlagForLøpendeVilkårId = beregning.avslagsdager?.grunnlagForLøpendeVilkårId ?: this.grunnlagForLøpendeVilkårId,
                 avslagstidslinje = beregning.avslagsdager?.avslagstidslinje ?: this.avslagstidslinje,
                 vurderingerAvLøpendeVilkår = beregning.avslagsdager?.vurderinger ?: this.vurderingerAvLøpendeVilkår,
             )
@@ -1208,6 +1213,7 @@ internal class Behandlinger private constructor(
                     korrigertInntekt = korrigertInntekt?.dto(),
                     beregningId = beregningId,
                     graderteAndreYtelserId = graderteAndreYtelserId,
+                    grunnlagForLøpendeVilkårId = grunnlagForLøpendeVilkårId,
                     vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår.dto(),
                 )
             }
@@ -1757,6 +1763,7 @@ internal class Behandlinger private constructor(
                             korrigertInntekt = null,
                             beregningId = nyUuidv7(),
                             graderteAndreYtelserId = null,
+                            grunnlagForLøpendeVilkårId = null,
                             vurderingerAvLøpendeVilkår = VurderingerAvLøpendeVilkår(),
                         ),
                     ),
@@ -2512,4 +2519,5 @@ internal data class BeregnetBehandling(
 internal data class AvslagsdagerFraLøsning(
     val avslagstidslinje: Avslagstidslinje,
     val vurderinger: VurderingerAvLøpendeVilkår,
+    val grunnlagForLøpendeVilkårId: UUID,
 )

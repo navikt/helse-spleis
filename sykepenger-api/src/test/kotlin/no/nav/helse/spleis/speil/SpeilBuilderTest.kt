@@ -239,6 +239,9 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
                         vurdertDag(22.januar, ikkeOppfylt, UtfallAvLøpendeVilkår.IkkeOppfylt),
                         vurdertDag(23.januar, oppfylt, UtfallAvLøpendeVilkår.Oppfylt),
                     ),
+                    avslagsdager = listOf(Avslagsdager.Avslagsdag(22.januar, LøpendeVilkår.Oppholdskrav)),
+                    grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                    varsler = emptyList(),
                 ),
         )
         håndterSimulering()
@@ -955,6 +958,22 @@ internal class SpeilBuilderTest : AbstractSpeilBuilderTest() {
         håndterYtelser(graderteAndreYtelser = listOf(graderteAndreYtelser(versjon, 22.januar)))
 
         assertEquals(versjon, beregnedePerioder().single().graderteAndreYtelserVersjon)
+    }
+
+    @Test
+    fun `beregnet periode har grunnlaget for løpende vilkår som behandlingen ble beregnet med`() {
+        val grunnlagId = UUID.randomUUID()
+        tilYtelser(1.januar, 31.januar, a1 to 1)
+        håndterYtelser(avslagsdager = Avslagsdager(emptyList(), emptyList(), grunnlagId, emptyList()))
+
+        assertEquals(grunnlagId, beregnedePerioder().single().grunnlagForLøpendeVilkårId)
+    }
+
+    @Test
+    fun `beregnet periode uten løsning på avslagsdager har ikke grunnlag for løpende vilkår`() {
+        tilGodkjenning(1.januar, 31.januar)
+
+        assertNull(beregnedePerioder().single().grunnlagForLøpendeVilkårId)
     }
 
     @Test

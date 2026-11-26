@@ -90,6 +90,17 @@ internal class EventBusOversetter(
                 Behandlingsporing.Yrkesaktivitet.Selvstendig -> "SELVSTENDIG"
             }
 
+    private fun TrengerInformasjonTilBeregningEvent.YrkesaktivitetIBeregningsperioden.tilAvslagsdagerbehov() =
+        mapOf(
+            "yrkesaktivitetstype" to yrkesaktivitetssporing.somYrkesaktivitetstype,
+            "organisasjonsnummer" to (yrkesaktivitetssporing as? Behandlingsporing.Yrkesaktivitet.Arbeidstaker)?.organisasjonsnummer,
+            "sykdomstidslinje" to
+                sykdomstidslinje.dager.map { dag ->
+                    mapOf("dato" to dag.dato, "dagtype" to dag.avslagsdagerdagtype().name)
+                },
+            "søknadMeldingsreferanseIder" to søknadIder.sorted(),
+        )
+
     private fun mapInntektsmeldingFørSøknad(event: EventSubscription.InntektsmeldingFørSøknadEvent): Utboksmelding =
         utgåendeSomBeholdesEtterSending(
             "inntektsmelding_før_søknad",
@@ -795,6 +806,7 @@ internal class EventBusOversetter(
                         mapOf(
                             "fom" to event.beregningsperiode.start,
                             "tom" to event.beregningsperiode.endInclusive,
+                            "yrkesaktiviteter" to event.yrkesaktiviteterIBeregningsperioden.map { it.tilAvslagsdagerbehov() },
                         ),
                     )
                 } else {

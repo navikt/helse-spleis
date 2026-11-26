@@ -968,6 +968,7 @@ data class PersonData(
                     val korrigertInntekt: KorrigertInntektsopplysningData?,
                     val beregningId: UUID,
                     val graderteAndreYtelserId: UUID?,
+                    val grunnlagForLøpendeVilkårId: UUID? = null,
                     val vurderingerAvLøpendeVilkår: VurderingerAvLøpendeVilkårData? = null,
                 ) {
                     fun tilDto() =
@@ -998,6 +999,7 @@ data class PersonData(
                             korrigertInntekt = korrigertInntekt?.tilDto(),
                             beregningId = beregningId,
                             graderteAndreYtelserId = graderteAndreYtelserId,
+                            grunnlagForLøpendeVilkårId = grunnlagForLøpendeVilkårId,
                             vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår?.tilDto() ?: VurderingerAvLøpendeVilkårDto(emptyList()),
                         )
 

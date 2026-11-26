@@ -1,6 +1,7 @@
 package no.nav.helse.person
 
 import no.nav.helse.Personidentifikator
+import no.nav.helse.dto.SykdomstidslinjeDto
 import no.nav.helse.feriepenger.Feriepengeoppdrag
 import no.nav.helse.hendelser.Avsender
 import no.nav.helse.hendelser.Behandlingsporing
@@ -773,7 +774,14 @@ interface EventSubscription {
         val opptjeningsvurderingId: UUID,
         val medlemskapsvurderingId: UUID,
         val rettighetskategoriId: UUID,
-    ) : Event
+        val yrkesaktiviteterIBeregningsperioden: List<YrkesaktivitetIBeregningsperioden>,
+    ) : Event {
+        data class YrkesaktivitetIBeregningsperioden(
+            val yrkesaktivitetssporing: Behandlingsporing.Yrkesaktivitet,
+            val sykdomstidslinje: SykdomstidslinjeDto,
+            val søknadIder: Set<UUID>,
+        )
+    }
 
     data class TrengerInitiellHistorikkFraInfotrygdEvent(
         val periode: Periode,

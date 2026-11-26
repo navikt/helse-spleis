@@ -452,6 +452,7 @@ private fun BehandlingendringUtDto.tilPersonData() =
         korrigertInntekt = korrigertInntekt?.tilPersonData(),
         beregningId = beregningId,
         graderteAndreYtelserId = graderteAndreYtelserId,
+        grunnlagForLøpendeVilkårId = grunnlagForLøpendeVilkårId,
         vurderingerAvLøpendeVilkår = vurderingerAvLøpendeVilkår.tilPersonData(),
     )
 

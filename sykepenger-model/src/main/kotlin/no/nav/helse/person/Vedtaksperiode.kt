@@ -46,6 +46,7 @@ import no.nav.helse.person.tilstandsmaskin.*
 import no.nav.helse.sykdomstidslinje.Dag
 import no.nav.helse.sykdomstidslinje.Dag.Companion.replace
 import no.nav.helse.sykdomstidslinje.Sykdomstidslinje
+import no.nav.helse.sykdomstidslinje.merge
 import no.nav.helse.utbetalingslinjer.Utbetaling
 import no.nav.helse.utbetalingstidslinje.*
 import no.nav.helse.utbetalingstidslinje.Arbeidsgiverberegning.Inntektskilde.Yrkesaktivitet.Arbeidsledig.somString
@@ -1800,12 +1801,13 @@ internal class Vedtaksperiode private constructor(
     ): Map<UUID, AvslagsdagerFraLøsning> {
         val løsning = ytelser.avslagsdager ?: return emptyMap()
         return perioderDetSkalBeregnesUtbetalingFor.associate { other ->
-            other.id to løsning.forPeriode(
-                beregningsperiode,
-                other.periode,
-                other.behandlinger.avslagstidslinje,
-                other.behandlinger.vurderingerAvLøpendeVilkår,
-            )
+            other.id to
+                løsning.forPeriode(
+                    beregningsperiode,
+                    other.periode,
+                    other.behandlinger.avslagstidslinje,
+                    other.behandlinger.vurderingerAvLøpendeVilkår,
+                )
         }
     }
 
@@ -1889,6 +1891,12 @@ internal class Vedtaksperiode private constructor(
             }.onEach {
                 it.registrerKontekst(aktivitetslogg).varsel(RV_UT_23)
             }
+
+        ytelser.avslagsdager?.varsler.orEmpty().forEach { varsel ->
+            perioderDetSkalBeregnesUtbetalingFor
+                .filter { it.yrkesaktivitet.yrkesaktivitetstype == varsel.yrkesaktivitet }
+                .forEach { it.registrerKontekst(aktivitetslogg).varsel(varsel.varselkode) }
+        }
 
         val graderteAndreYtelser = ytelser.graderteAndreYtelser()
         perioderDetSkalBeregnesUtbetalingFor
@@ -3407,7 +3415,7 @@ internal class Vedtaksperiode private constructor(
     ) {
         val søkevinduFamilieytelser = periode.familieYtelserPeriode
         val grunnlag = vilkårsgrunnlag ?: error("forventer vilkårsgrunnlag når vi beregner")
-        val (beregningsperiode, _) = perioderSomMåHensyntasVedBeregning()
+        val (beregningsperiode, perioderIBeregningen) = perioderSomMåHensyntasVedBeregning()
 
         val event =
             EventSubscription.TrengerInformasjonTilBeregningEvent(
@@ -3427,10 +3435,29 @@ internal class Vedtaksperiode private constructor(
                 opptjeningsvurderingId = grunnlag.opptjeningsvurderingId,
                 medlemskapsvurderingId = grunnlag.medlemskapsvurderingId,
                 rettighetskategoriId = grunnlag.rettighetskategoriId,
+                yrkesaktiviteterIBeregningsperioden = yrkesaktiviteterIBeregningsperioden(beregningsperiode, perioderIBeregningen),
             )
         aktivitetslogg.info("Sender ut event om at vi trenger informasjon til beregning")
         eventBus.trengerInformasjonTilBeregning(event)
     }
+
+    private fun yrkesaktiviteterIBeregningsperioden(
+        beregningsperiode: Periode,
+        perioderIBeregningen: List<Vedtaksperiode>,
+    ) = perioderIBeregningen
+        .groupBy { it.yrkesaktivitet.yrkesaktivitetstype }
+        .map { (yrkesaktivitetstype, vedtaksperioder) ->
+            EventSubscription.TrengerInformasjonTilBeregningEvent.YrkesaktivitetIBeregningsperioden(
+                yrkesaktivitetssporing = yrkesaktivitetstype,
+                sykdomstidslinje =
+                    vedtaksperioder
+                        .map { it.sykdomstidslinje }
+                        .merge()
+                        .subset(beregningsperiode)
+                        .dto(),
+                søknadIder = vedtaksperioder.flatMap { it.behandlinger.søknadIder() }.map { it.id }.toSet(),
+            )
+        }
 
     internal fun trengerVilkårsgrunnlag(
         aktivitetslogg: IAktivitetslogg,
@@ -3526,7 +3553,8 @@ internal class Vedtaksperiode private constructor(
         val (inntektskilde, inntektsmeldingMeldingsreferanseId) =
             when (faktaavklartInntekt.inntektsopplysningskilde) {
                 Arbeidstakerinntektskilde.Arbeidsgiver ->
-                    EventSubscription.TrengerSykepengegrunnlagEvent.Inntektskilde.INNTEKTSMELDING to faktaavklartInntekt.inntektsdata.hendelseId.id
+                    EventSubscription.TrengerSykepengegrunnlagEvent.Inntektskilde.INNTEKTSMELDING to
+                        faktaavklartInntekt.inntektsdata.hendelseId.id
                 is Arbeidstakerinntektskilde.AOrdningen -> EventSubscription.TrengerSykepengegrunnlagEvent.Inntektskilde.A_ORDNINGEN to null
                 Arbeidstakerinntektskilde.Infotrygd -> error("Forventer ikke inntekt fra Infotrygd i et vilkårsgrunnlag fra Spleis")
             }

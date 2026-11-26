@@ -94,6 +94,27 @@ internal class YtelserRiver(
                         AvslagsdagerHendelse.validerVilkårskoder(vilkår, vilkårskoder.values().map { it.asString() })
                     }
                 }
+                message.require("@løsning.${Avslagsdager.utgåendeNavn}.avslagsdager") { avslagsdager ->
+                    check(avslagsdager.isArray) { "Forventet avslagsdager som liste" }
+                    avslagsdager.values().forEach { dag ->
+                        dag.path("dato").asLocalDate()
+                        val vilkår = AvslagsdagerHendelse.løpendeVilkår(dag.path("vilkår").asString())
+                        val vilkårskoder = dag.path("vilkårskoder")
+                        check(vilkårskoder.isArray) { "Forventet vilkårskoder som liste" }
+                        AvslagsdagerHendelse.validerVilkårskoder(vilkår, vilkårskoder.values().map { it.asString() })
+                    }
+                }
+                message.require("@løsning.${Avslagsdager.utgåendeNavn}.grunnlagForLøpendeVilkårId") { UUID.fromString(it.asString()) }
+                message.require("@løsning.${Avslagsdager.utgåendeNavn}.varsler") { varsler ->
+                    check(varsler.isArray) { "Forventet varsler som liste" }
+                    varsler.values().forEach { varsel ->
+                        AvslagsdagerHendelse.yrkesaktivitet(
+                            yrkesaktivitetstype = varsel.path("yrkesaktivitetstype").asString(),
+                            organisasjonsnummer = varsel.path("organisasjonsnummer").takeUnless(JsonNode::isMissingOrNull)?.asString(),
+                        )
+                        AvslagsdagerHendelse.varselkode(varsel.path("varselkode").asString())
+                    }
+                }
             }
         }
 

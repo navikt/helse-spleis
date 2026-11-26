@@ -110,6 +110,30 @@ internal class YtelserMessage(
                                     ),
                             )
                         },
+                    avslagsdager =
+                        løsning.path("avslagsdager").values().map { dag ->
+                            Avslagsdager.Avslagsdag(
+                                dato = dag.path("dato").asLocalDate(),
+                                vilkår = Avslagsdager.løpendeVilkår(dag.path("vilkår").asString()),
+                            )
+                        },
+                    grunnlagForLøpendeVilkårId = UUID.fromString(løsning.path("grunnlagForLøpendeVilkårId").asString()),
+                    varsler =
+                        løsning.path("varsler").values().map { varsel ->
+                            Avslagsdager.Varsel(
+                                yrkesaktivitet =
+                                    Avslagsdager.yrkesaktivitet(
+                                        yrkesaktivitetstype = varsel.path("yrkesaktivitetstype").asString(),
+                                        organisasjonsnummer =
+                                            varsel
+                                                .path(
+                                                    "organisasjonsnummer",
+                                                ).takeUnless { it.isMissingOrNull() }
+                                                ?.asString(),
+                                    ),
+                                varselkode = Avslagsdager.varselkode(varsel.path("varselkode").asString()),
+                            )
+                        },
                 )
             }
 

@@ -23,13 +23,37 @@ internal class AvslagsdagerTest {
     private val saksbehandler = Avslagsdag(listOf(Begrunnelse.AvslåttMeldingTilNavDag), "Saksbehandler")
 
     @Test
+    fun `avslagene kommer fra avslagsdagene i løsningen`() {
+        val løsning =
+            Avslagsdager(
+                listOf(vurdertDag(vurdering1, 2.januar, IkkeOppfylt), vurdertDag(vurdering1, 3.januar, Oppfylt)),
+                avslagsdager = listOf(avslagsdag(3.januar)),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
+            )
+
+        val resultat = løsning.forPeriode(1.januar til 31.januar, 1.januar til 31.januar, Avslagstidslinje(), VurderingerAvLøpendeVilkår())
+
+        assertEquals(Avslagstidslinje(3.januar, oppholdskrav), resultat.avslagstidslinje)
+    }
+
+    @Test
     fun `avslag fra sp-avslagsdager utenfor beregningsperioden står urørt`() {
         val eksisterende = Avslagstidslinje(1.januar til 12.januar to oppholdskrav)
-        val løsning = Avslagsdager(listOf(vurdertDag(vurdering2, 9.januar, IkkeOppfylt)))
+        val løsning =
+            Avslagsdager(
+                listOf(vurdertDag(vurdering2, 9.januar, IkkeOppfylt)),
+                avslagsdager = listOf(avslagsdag(9.januar)),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
+            )
 
         val resultat = løsning.forPeriode(8.januar til 31.januar, 1.januar til 12.januar, eksisterende, VurderingerAvLøpendeVilkår())
 
-        assertEquals(Avslagstidslinje(1.januar til 7.januar to oppholdskrav, 9.januar til 9.januar to oppholdskrav), resultat.avslagstidslinje)
+        assertEquals(
+            Avslagstidslinje(1.januar til 7.januar to oppholdskrav, 9.januar til 9.januar to oppholdskrav),
+            resultat.avslagstidslinje,
+        )
     }
 
     @Test
@@ -37,6 +61,9 @@ internal class AvslagsdagerTest {
         val løsning =
             Avslagsdager(
                 listOf(vurdertDag(vurdering1, 2.januar, IkkeOppfylt), vurdertDag(vurdering1, 20.januar, IkkeOppfylt)),
+                avslagsdager = listOf(avslagsdag(2.januar), avslagsdag(20.januar)),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
             )
 
         val resultat = løsning.forPeriode(1.januar til 31.januar, 1.januar til 10.januar, Avslagstidslinje(), VurderingerAvLøpendeVilkår())
@@ -48,7 +75,13 @@ internal class AvslagsdagerTest {
     @Test
     fun `kaster før noe endres når en dag fra løsningen har avslag med annen kilde`() {
         val eksisterende = Avslagstidslinje(1.januar, saksbehandler)
-        val løsning = Avslagsdager(listOf(vurdertDag(vurdering1, 1.januar, IkkeOppfylt)))
+        val løsning =
+            Avslagsdager(
+                listOf(vurdertDag(vurdering1, 1.januar, IkkeOppfylt)),
+                avslagsdager = listOf(avslagsdag(1.januar)),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
+            )
 
         assertThrows<IllegalStateException> {
             løsning.forPeriode(1.januar til 2.januar, 1.januar til 2.januar, eksisterende, VurderingerAvLøpendeVilkår())
@@ -58,7 +91,13 @@ internal class AvslagsdagerTest {
     @Test
     fun `oppfylt vurdering fjerner avslag fra sp-avslagsdager og lar avslag fra saksbehandler stå`() {
         val eksisterende = Avslagstidslinje(1.januar til 1.januar to saksbehandler, 2.januar til 2.januar to oppholdskrav)
-        val løsning = Avslagsdager(listOf(vurdertDag(vurdering1, 2.januar, Oppfylt)))
+        val løsning =
+            Avslagsdager(
+                listOf(vurdertDag(vurdering1, 2.januar, Oppfylt)),
+                avslagsdager = emptyList(),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
+            )
 
         val resultat = løsning.forPeriode(1.januar til 2.januar, 1.januar til 2.januar, eksisterende, VurderingerAvLøpendeVilkår())
 
@@ -68,7 +107,13 @@ internal class AvslagsdagerTest {
     @Test
     fun `oppfylt vurdering av en dag med avslag fra saksbehandler er ingen konflikt`() {
         val eksisterende = Avslagstidslinje(1.januar, saksbehandler)
-        val løsning = Avslagsdager(listOf(vurdertDag(vurdering1, 1.januar, Oppfylt)))
+        val løsning =
+            Avslagsdager(
+                listOf(vurdertDag(vurdering1, 1.januar, Oppfylt)),
+                avslagsdager = emptyList(),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
+            )
 
         val resultat = løsning.forPeriode(1.januar til 2.januar, 1.januar til 2.januar, eksisterende, VurderingerAvLøpendeVilkår())
 
@@ -85,6 +130,9 @@ internal class AvslagsdagerTest {
         val løsning =
             Avslagsdager(
                 listOf(vurdertDag(vurdering2, 9.januar, Oppfylt), vurdertDag(vurdering2, 10.januar, IkkeOppfylt)),
+                avslagsdager = listOf(avslagsdag(10.januar)),
+                grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                varsler = emptyList(),
             )
 
         val resultat = løsning.forPeriode(8.januar til 31.januar, 1.januar til 12.januar, Avslagstidslinje(), eksisterende)
@@ -98,6 +146,8 @@ internal class AvslagsdagerTest {
             resultat.vurderinger,
         )
     }
+
+    private fun avslagsdag(dato: LocalDate) = Avslagsdager.Avslagsdag(dato, LøpendeVilkår.Oppholdskrav)
 
     private fun vurdertDag(
         vurderingId: UUID,

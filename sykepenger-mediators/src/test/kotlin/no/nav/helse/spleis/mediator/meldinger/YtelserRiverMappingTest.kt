@@ -7,12 +7,14 @@ import no.nav.helse.Toggle
 import no.nav.helse.april
 import no.nav.helse.februar
 import no.nav.helse.hendelser.*
+import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.januar
 import no.nav.helse.juni
 import no.nav.helse.mars
 import no.nav.helse.person.LøpendeVilkår
 import no.nav.helse.person.UtfallAvLøpendeVilkår
 import no.nav.helse.person.VurderingAvLøpendeVilkår
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import no.nav.helse.serde.spleisJsonMapperBuilder
 import no.nav.helse.spleis.IMessageMediator
 import no.nav.helse.spleis.meldinger.YtelserRiver
@@ -171,11 +173,31 @@ internal class YtelserRiverMappingTest :
         Toggle.Avslagsdagerbehov.enable {
             val ikkeOppfylt = UUID.randomUUID()
             val oppfylt = UUID.randomUUID()
+            val grunnlagId = UUID.randomUUID()
             val json =
                 medVurderteDager(
-                    vurdertDag(ikkeOppfylt, "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_EØS_ELLER_AVTALELAND", "UNNTAK_INNLAGT_HELSEINSTITUSJON"),
-                    vurdertDag(ikkeOppfylt, "2018-01-02", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER", "UNNTAK_MEDLEM_ETTER_2_5_2_6_2_8"),
+                    vurdertDag(
+                        ikkeOppfylt,
+                        "2018-01-01",
+                        "IkkeOppfylt",
+                        "OPPHOLD_I_NORGE_EØS_ELLER_AVTALELAND",
+                        "UNNTAK_INNLAGT_HELSEINSTITUSJON",
+                    ),
+                    vurdertDag(
+                        ikkeOppfylt,
+                        "2018-01-02",
+                        "IkkeOppfylt",
+                        "OPPHOLD_I_NORGE_IKKE_EØS_BORGER",
+                        "UNNTAK_MEDLEM_ETTER_2_5_2_6_2_8",
+                    ),
                     vurdertDag(oppfylt, "2018-01-03", "Oppfylt", "UNNTAK_GODKJENT_OPPHOLD_INNTIL_FIRE_UKER"),
+                    avslagsdager =
+                        listOf(
+                            avslagsdag("2018-01-01", "OPPHOLD_I_NORGE_EØS_ELLER_AVTALELAND", "UNNTAK_INNLAGT_HELSEINSTITUSJON"),
+                            avslagsdag("2018-01-02", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER", "UNNTAK_MEDLEM_ETTER_2_5_2_6_2_8"),
+                        ),
+                    grunnlagForLøpendeVilkårId = grunnlagId,
+                    varsler = listOf(varsel("ARBEIDSTAKER", "987654321"), varsel("SELVSTENDIG", null)),
                 )
             assertEquals(
                 Avslagsdager(
@@ -184,6 +206,17 @@ internal class YtelserRiverMappingTest :
                         vurdertDag(2.januar, ikkeOppfylt, UtfallAvLøpendeVilkår.IkkeOppfylt),
                         vurdertDag(3.januar, oppfylt, UtfallAvLøpendeVilkår.Oppfylt),
                     ),
+                    avslagsdager =
+                        listOf(
+                            Avslagsdager.Avslagsdag(1.januar, LøpendeVilkår.Oppholdskrav),
+                            Avslagsdager.Avslagsdag(2.januar, LøpendeVilkår.Oppholdskrav),
+                        ),
+                    grunnlagForLøpendeVilkårId = grunnlagId,
+                    varsler =
+                        listOf(
+                            Avslagsdager.Varsel(Behandlingsporing.Yrkesaktivitet.Arbeidstaker("987654321"), Varselkode.RV_SØ_8),
+                            Avslagsdager.Varsel(Behandlingsporing.Yrkesaktivitet.Selvstendig, Varselkode.RV_SØ_8),
+                        ),
                 ),
                 sendJson(json).avslagsdager,
             )
@@ -192,13 +225,20 @@ internal class YtelserRiverMappingTest :
     @Test
     fun `Tom løsning på avslagsdager gir ingen vurderte dager`() =
         Toggle.Avslagsdagerbehov.enable {
-            assertEquals(Avslagsdager(emptyList()), sendJson(medVurderteDager()).avslagsdager)
+            val grunnlagId = UUID.randomUUID()
+            assertEquals(
+                Avslagsdager(emptyList(), emptyList(), grunnlagId, emptyList()),
+                sendJson(medVurderteDager(grunnlagForLøpendeVilkårId = grunnlagId)).avslagsdager,
+            )
         }
 
     @Test
     fun `Vurdert dag med ukjent vilkårskode avvises`() =
         Toggle.Avslagsdagerbehov.enable {
-            val json = medVurderteDager(vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_EØS_ELLER_AVTALELAND", "ARBEIDSUFØR"))
+            val json =
+                medVurderteDager(
+                    vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_EØS_ELLER_AVTALELAND", "ARBEIDSUFØR"),
+                )
             assertThrows<IllegalStateException> { sendJson(json) }
         }
 
@@ -212,7 +252,10 @@ internal class YtelserRiverMappingTest :
     @Test
     fun `Vurdert dag med ukjent vilkår avvises`() =
         Toggle.Avslagsdagerbehov.enable {
-            val json = medVurderteDager(vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER", vilkår = "MEDLEMSKAP"))
+            val json =
+                medVurderteDager(
+                    vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER", vilkår = "MEDLEMSKAP"),
+                )
             assertThrows<IllegalStateException> { sendJson(json) }
         }
 
@@ -228,7 +271,12 @@ internal class YtelserRiverMappingTest :
         Toggle.Avslagsdagerbehov.enable {
             val json =
                 medVurderteDager(
-                    vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER").apply { remove("vurderingId") },
+                    vurdertDag(
+                        UUID.randomUUID(),
+                        "2018-01-01",
+                        "IkkeOppfylt",
+                        "OPPHOLD_I_NORGE_IKKE_EØS_BORGER",
+                    ).apply { remove("vurderingId") },
                 )
             assertThrows<IllegalStateException> { sendJson(json) }
         }
@@ -236,7 +284,10 @@ internal class YtelserRiverMappingTest :
     @Test
     fun `Vurdert dag uten dato avvises`() =
         Toggle.Avslagsdagerbehov.enable {
-            val json = medVurderteDager(vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER").apply { remove("dato") })
+            val json =
+                medVurderteDager(
+                    vurdertDag(UUID.randomUUID(), "2018-01-01", "IkkeOppfylt", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER").apply { remove("dato") },
+                )
             assertThrows<IllegalStateException> { sendJson(json) }
         }
 
@@ -246,6 +297,102 @@ internal class YtelserRiverMappingTest :
             val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
             (json.path("@løsning").path("Avslagsdager") as ObjectNode).remove("vurderteDager")
             assertThrows<IllegalStateException> { sendJson(json.toString()) }
+        }
+
+    @Test
+    fun `Løsning uten avslagsdager avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
+            (json.path("@løsning").path("Avslagsdager") as ObjectNode).remove("avslagsdager")
+            assertThrows<IllegalStateException> { sendJson(json.toString()) }
+        }
+
+    @Test
+    fun `Avslagsdag med ukjent vilkår avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json =
+                medVurderteDager(
+                    avslagsdager = listOf(avslagsdag("2018-01-01", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER", vilkår = "ARBEIDSUFØRHET")),
+                )
+            assertThrows<IllegalStateException> { sendJson(json) }
+        }
+
+    @Test
+    fun `Avslagsdag med ukjent vilkårskode avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = medVurderteDager(avslagsdager = listOf(avslagsdag("2018-01-01", "ARBEIDSUFØR")))
+            assertThrows<IllegalStateException> { sendJson(json) }
+        }
+
+    @Test
+    fun `Avslagsdag uten vilkårskoder avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = medVurderteDager(avslagsdager = listOf(avslagsdag("2018-01-01")))
+            assertThrows<IllegalStateException> { sendJson(json) }
+        }
+
+    @Test
+    fun `Avslagsdag uten dato avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val avslagsdag = avslagsdag("2018-01-01", "OPPHOLD_I_NORGE_IKKE_EØS_BORGER").apply { remove("dato") }
+            assertThrows<IllegalStateException> { sendJson(medVurderteDager(avslagsdager = listOf(avslagsdag))) }
+        }
+
+    private fun avslagsdag(
+        dato: String,
+        vararg vilkårskoder: String,
+        vilkår: String = "OPPHOLDSKRAV",
+    ) = spleisJsonMapperBuilder().build().createObjectNode().apply {
+        put("dato", dato)
+        put("vilkår", vilkår)
+        putArray("vilkårskoder").apply { vilkårskoder.forEach { add(it) } }
+    }
+
+    private fun varsel(
+        yrkesaktivitetstype: String,
+        organisasjonsnummer: String?,
+        varselkode: String = "RV_SØ_8",
+    ) = spleisJsonMapperBuilder().build().createObjectNode().apply {
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
+        if (organisasjonsnummer != null) put("organisasjonsnummer", organisasjonsnummer) else putNull("organisasjonsnummer")
+        put("varselkode", varselkode)
+    }
+
+    @Test
+    fun `Løsning uten grunnlagForLøpendeVilkårId avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
+            (json.path("@løsning").path("Avslagsdager") as ObjectNode).remove("grunnlagForLøpendeVilkårId")
+            assertThrows<IllegalStateException> { sendJson(json.toString()) }
+        }
+
+    @Test
+    fun `Løsning uten varsler avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = spleisJsonMapperBuilder().build().readTree(medVurderteDager()) as ObjectNode
+            (json.path("@løsning").path("Avslagsdager") as ObjectNode).remove("varsler")
+            assertThrows<IllegalStateException> { sendJson(json.toString()) }
+        }
+
+    @Test
+    fun `Varsel med ukjent varselkode avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = medVurderteDager(varsler = listOf(varsel("ARBEIDSTAKER", "987654321", varselkode = "RV_SØ_57")))
+            assertThrows<IllegalStateException> { sendJson(json) }
+        }
+
+    @Test
+    fun `Varsel med ukjent yrkesaktivitetstype avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = medVurderteDager(varsler = listOf(varsel("FISKER", null)))
+            assertThrows<IllegalStateException> { sendJson(json) }
+        }
+
+    @Test
+    fun `Varsel for arbeidstaker uten organisasjonsnummer avvises`() =
+        Toggle.Avslagsdagerbehov.enable {
+            val json = medVurderteDager(varsler = listOf(varsel("ARBEIDSTAKER", null)))
+            assertThrows<IllegalStateException> { sendJson(json) }
         }
 
     private fun vurdertDag(
@@ -268,10 +415,18 @@ internal class YtelserRiverMappingTest :
         putArray("vilkårskoder").apply { vilkårskoder.forEach { add(it) } }
     }
 
-    private fun medVurderteDager(vararg vurderteDager: ObjectNode): String {
+    private fun medVurderteDager(
+        vararg vurderteDager: ObjectNode,
+        grunnlagForLøpendeVilkårId: UUID = UUID.randomUUID(),
+        varsler: List<ObjectNode> = emptyList(),
+        avslagsdager: List<ObjectNode> = emptyList(),
+    ): String {
         val json = spleisJsonMapperBuilder().build().readTree(medArray)
         val løsning = (json.path("@løsning") as ObjectNode).putObject("Avslagsdager")
         løsning.putArray("vurderteDager").addAll(vurderteDager.toList())
+        løsning.put("grunnlagForLøpendeVilkårId", grunnlagForLøpendeVilkårId.toString())
+        løsning.putArray("varsler").addAll(varsler)
+        løsning.putArray("avslagsdager").addAll(avslagsdager)
         return json.toString()
     }
 

@@ -488,6 +488,11 @@ class Søknad(
                 aktivitetslogg: IAktivitetslogg,
             ) {
                 if (alleUtlandsdagerErFerie(søknad)) return
+                // Med behovet Avslagsdager på kommer RV_SØ_8 fra sp-avslagsdager
+                if (Toggle.Avslagsdagerbehov.enabled) {
+                    aktivitetslogg.info("Avslagsdagerbehov toggle er aktivert, så RV_SØ_8-varsel skal komme fra sp-avslagsdager")
+                    return
+                }
                 aktivitetslogg.varsel(RV_SØ_8)
             }
 

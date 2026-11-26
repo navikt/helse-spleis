@@ -317,9 +317,10 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
     fun `ytelser med toggle for avslagsdager`() =
         Toggle.Avslagsdagerbehov.enable {
             sendNySøknad(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100))
-            sendSøknad(
-                perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
-            )
+            val søknadId =
+                sendSøknad(
+                    perioder = listOf(SoknadsperiodeDTO(fom = 3.januar, tom = 26.januar, sykmeldingsgrad = 100)),
+                )
             sendNavNoInntektsmelding(listOf(Periode(fom = 3.januar, tom = 18.januar)))
             sendVilkårsgrunnlag(0)
             val behov = testRapid.inspektør.etterspurteBehov(InntekterForBeregning)
@@ -340,6 +341,18 @@ internal class BehovkontraktTest : AbstractEndToEndMediatorTest() {
             )
             assertEquals(3.januar, LocalDate.parse(behov.path(Avslagsdager.utgåendeNavn).path("fom").asString()))
             assertEquals(26.januar, LocalDate.parse(behov.path(Avslagsdager.utgåendeNavn).path("tom").asString()))
+            val yrkesaktivitet =
+                behov
+                    .path(Avslagsdager.utgåendeNavn)
+                    .path("yrkesaktiviteter")
+                    .values()
+                    .single()
+            assertEquals("ARBEIDSTAKER", yrkesaktivitet.path("yrkesaktivitetstype").asString())
+            assertEquals(ORGNUMMER, yrkesaktivitet.path("organisasjonsnummer").asString())
+            assertEquals(listOf(søknadId.toString()), yrkesaktivitet.path("søknadMeldingsreferanseIder").values().map { it.asString() })
+            val sykdomstidslinje = yrkesaktivitet.path("sykdomstidslinje")
+            assertEquals((3.januar til 26.januar).toList(), sykdomstidslinje.values().map { LocalDate.parse(it.path("dato").asString()) })
+            assertEquals(setOf("SYKEDAG"), sykdomstidslinje.values().map { it.path("dagtype").asString() }.toSet())
         }
 
     @Test

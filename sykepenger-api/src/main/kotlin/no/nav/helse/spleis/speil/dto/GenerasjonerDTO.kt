@@ -165,6 +165,7 @@ data class BeregnetPeriode(
     val annulleringskandidater: List<AnnulleringskandidatDto>,
     override val grunnbeløpsjustertGjennomsnitt: Double? = null,
     val graderteAndreYtelserVersjon: UUID? = null,
+    val grunnlagForLøpendeVilkårId: UUID? = null,
 ) : SpeilTidslinjeperiode() {
     override fun registrerBruk(
         vilkårsgrunnlaghistorikk: IVilkårsgrunnlagHistorikk,

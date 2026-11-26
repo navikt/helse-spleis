@@ -433,6 +433,7 @@ private fun mapBeregnetPeriode(
     annulleringskandidater = mapAnnulleringskandidater(periode.annulleringskandidater),
     grunnbeløpsjustertGjennomsnitt = periode.grunnbeløpsjustertGjennomsnitt?.let(::BigDecimal),
     graderteAndreYtelserVersjon = periode.graderteAndreYtelserVersjon,
+    grunnlagForLøpendeVilkårId = periode.grunnlagForLøpendeVilkårId,
 )
 
 private fun mapAnnulleringskandidater(annulleringskandidater: List<AnnulleringskandidatDto>) =

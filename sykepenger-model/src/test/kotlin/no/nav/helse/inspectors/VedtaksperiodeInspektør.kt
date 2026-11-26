@@ -77,6 +77,9 @@ internal class VedtaksperiodeInspektør(
     internal val graderteAndreYtelserIder =
         behandlinger.map { it.endringer().last().graderteAndreYtelserId }
 
+    internal val grunnlagForLøpendeVilkårIder =
+        behandlinger.map { it.endringer().last().grunnlagForLøpendeVilkårId }
+
     internal val vurderingIderAvLøpendeVilkår get() =
         vurderingerAvLøpendeVilkår
             .flatMap { it.verdi.orEmpty() }

@@ -7,6 +7,7 @@ import io.ktor.http.*
 import no.nav.helse.Alder.Companion.alder
 import no.nav.helse.Personidentifikator
 import no.nav.helse.etterlevelse.Regelverkslogg.Companion.EmptyLog
+import no.nav.helse.hendelser.Avslagsdager
 import no.nav.helse.hendelser.Behandlingsporing
 import no.nav.helse.hendelser.Dagtype
 import no.nav.helse.hendelser.GraderteAndreYtelserForBeregning
@@ -87,6 +88,32 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
     }
 
     @Test
+    fun `behandlingen har grunnlaget for løpende vilkår den ble beregnet med`() {
+        val grunnlagId = UUID.randomUUID()
+        val simuleringsutfisker = Simuleringsutfisker()
+        val eventBus = nyPerson(simuleringsutfisker)
+        val avslagsdager = Avslagsdager(emptyList(), emptyList(), grunnlagId, emptyList())
+
+        spleisApiTestApplication(testdata = opprettPersonMedUtbetaling(eventBus, avslagsdager = avslagsdager)) {
+            val json = objectMapper.readTree(hentBehandling(simuleringsutfisker.behandlingId))
+
+            assertEquals(grunnlagId.toString(), json["grunnlagForLøpendeVilkårId"].asText())
+        }
+    }
+
+    @Test
+    fun `behandling uten løsning på avslagsdager har ikke grunnlag for løpende vilkår`() {
+        val simuleringsutfisker = Simuleringsutfisker()
+        val eventBus = nyPerson(simuleringsutfisker)
+
+        spleisApiTestApplication(testdata = opprettPersonMedUtbetaling(eventBus)) {
+            val json = objectMapper.readTree(hentBehandling(simuleringsutfisker.behandlingId))
+
+            assertTrue(json["grunnlagForLøpendeVilkårId"].isNull)
+        }
+    }
+
+    @Test
     fun `behandling uten graderte andre ytelser har ingen versjon`() {
         val simuleringsutfisker = Simuleringsutfisker()
         val eventBus = nyPerson(simuleringsutfisker)
@@ -113,7 +140,11 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
                     ),
                     Aktivitetslogg(),
                 )
-                person.håndterYtelser(eventBus, ytelser(graderteAndreYtelser = listOf(graderteAndreYtelser(andreVersjon))), Aktivitetslogg())
+                person.håndterYtelser(
+                    eventBus,
+                    ytelser(graderteAndreYtelser = listOf(graderteAndreYtelser(andreVersjon))),
+                    Aktivitetslogg(),
+                )
             }
 
         spleisApiTestApplication(testdata = testdata) {
@@ -123,8 +154,14 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
                     .map { it.behandlingId }
                     .distinct()
 
-            assertEquals(førsteVersjon.toString(), objectMapper.readTree(hentBehandling(førsteBehandling))["graderteAndreYtelserVersjon"].asText())
-            assertEquals(andreVersjon.toString(), objectMapper.readTree(hentBehandling(andreBehandling))["graderteAndreYtelserVersjon"].asText())
+            assertEquals(
+                førsteVersjon.toString(),
+                objectMapper.readTree(hentBehandling(førsteBehandling))["graderteAndreYtelserVersjon"].asText(),
+            )
+            assertEquals(
+                andreVersjon.toString(),
+                objectMapper.readTree(hentBehandling(andreBehandling))["graderteAndreYtelserVersjon"].asText(),
+            )
         }
     }
 
@@ -182,6 +219,7 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
     private fun opprettPersonMedUtbetaling(
         eventBus: EventBus,
         graderteAndreYtelser: List<GraderteAndreYtelserForBeregning> = emptyList(),
+        avslagsdager: Avslagsdager? = null,
         etterUtbetaling: () -> Unit = {},
     ): (TestDataSource) -> Unit =
         { testDataSource ->
@@ -208,7 +246,11 @@ internal class BehandlingApiTest : AbstractSpleisApiTest() {
             person.håndterVilkårsgrunnlag(eventBus, vilkårsgrunnlag(), Aktivitetslogg())
             val simuleringsutfisker = Simuleringsutfisker()
             eventBus.register(simuleringsutfisker)
-            person.håndterYtelser(eventBus, ytelser(graderteAndreYtelser = graderteAndreYtelser), Aktivitetslogg())
+            person.håndterYtelser(
+                eventBus,
+                ytelser(graderteAndreYtelser = graderteAndreYtelser, avslagsdager = avslagsdager),
+                Aktivitetslogg(),
+            )
             val behandlingId = simuleringsutfisker.behandlingId
             val utbetalingId = simuleringsutfisker.utbetalingId
             val fagsystemId = simuleringsutfisker.fagsystemId

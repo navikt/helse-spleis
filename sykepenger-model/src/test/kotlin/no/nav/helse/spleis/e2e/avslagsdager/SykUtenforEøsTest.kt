@@ -215,6 +215,9 @@ internal class SykUtenforEøsTest : AbstractDslTest() {
                         Avslagsdager(
                             (22.januar til 24.januar).map { oppholdskrav(it, UtfallAvLøpendeVilkår.Oppfylt) } +
                                 oppholdskrav(25.januar, UtfallAvLøpendeVilkår.IkkeOppfylt),
+                            avslagsdager = listOf(Avslagsdager.Avslagsdag(25.januar, LøpendeVilkår.Oppholdskrav)),
+                            grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+                            varsler = emptyList(),
                         ),
                 )
                 val godkjenningsbehov = enesteGodkjenningsbehovSomFølgeAv({ 1.vedtaksperiode }) { håndterSimulering(1.vedtaksperiode) }

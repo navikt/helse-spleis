@@ -176,7 +176,19 @@ internal class AvslagsdagerEndretTest : AbstractDslTest() {
         periode: Periode,
         utfall: UtfallAvLøpendeVilkår,
     ) = Avslagsdager(
-        periode.map { Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)) },
+        periode.map {
+            Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall))
+        },
+        avslagsdager =
+            if (utfall ==
+                UtfallAvLøpendeVilkår.IkkeOppfylt
+            ) {
+                periode.map { Avslagsdager.Avslagsdag(it, LøpendeVilkår.Oppholdskrav) }
+            } else {
+                emptyList()
+            },
+        grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+        varsler = emptyList(),
     )
 
     private fun vurderinger(

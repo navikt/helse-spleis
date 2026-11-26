@@ -6,15 +6,33 @@ import no.nav.helse.person.LøpendeVilkår
 import no.nav.helse.person.UtfallAvLøpendeVilkår
 import no.nav.helse.person.VurderingAvLøpendeVilkår
 import no.nav.helse.person.VurderingerAvLøpendeVilkår
+import no.nav.helse.person.aktivitetslogg.Varselkode
 import java.time.LocalDate
+import java.util.UUID
 
 /**
- * Løsningen på behovet `Avslagsdager` fra sp-avslagsdager for beregningsperioden: utfallet av den gjeldende vurderingen
- * for hver dag og hvert løpende vilkår (ADR 0016).
+ * Løsningen på behovet `Avslagsdager` fra sp-avslagsdager for beregningsperioden: [avslagsdager] er dagene som er
+ * avslått etter et løpende vilkår, og [vurderteDager] er utfallet av den gjeldende vurderingen for hver dag og hvert
+ * løpende vilkår (ADR 0016). [grunnlagForLøpendeVilkårId] peker på grunnlaget
+ * sp-avslagsdager har lagret for beregningen (ADR 0023), og [varsler] er varslene sp-avslagsdager vil ha på
+ * vedtaksperiodene til hver yrkesaktivitet.
  */
 data class Avslagsdager(
     val vurderteDager: List<VurdertDag>,
+    val avslagsdager: List<Avslagsdag>,
+    val grunnlagForLøpendeVilkårId: UUID,
+    val varsler: List<Varsel>,
 ) {
+    data class Varsel(
+        val yrkesaktivitet: Behandlingsporing.Yrkesaktivitet,
+        val varselkode: Varselkode,
+    )
+
+    data class Avslagsdag(
+        val dato: LocalDate,
+        val vilkår: LøpendeVilkår,
+    )
+
     data class VurdertDag(
         val dato: LocalDate,
         val vurdering: VurderingAvLøpendeVilkår,
@@ -24,7 +42,7 @@ data class Avslagsdager(
      * Lager avslagstidslinjen og vurderingene per dag for [periode] fra løsningen. Løsningen svarer for hele
      * [beregningsperioden], så avslag og vurderinger fra sp-avslagsdager i beregningsperioden erstattes av dagene i
      * løsningen. Avslag og vurderinger utenfor beregningsperioden, og avslag med andre kilder, står urørt.
-     * Dagene som ikke er oppfylt, blir avslag. Kaster hvis en slik dag allerede er avslått med en annen kilde, siden en
+     * Avslagsdagene i løsningen blir avslag med begrunnelsen for vilkåret. Kaster hvis en slik dag allerede er avslått med en annen kilde, siden en
      * dag bare kan ha én avslagsårsak.
      */
     internal fun forPeriode(
@@ -39,10 +57,10 @@ data class Avslagsdager(
                 .filter { besvart != null && it.dato in besvart }
                 .groupBy({ it.dato }, { it.vurdering })
         val nyeAvslag =
-            vurderingerIPerioden
-                .mapValues { (_, vurderinger) ->
-                    vurderinger.filter { it.utfall == UtfallAvLøpendeVilkår.IkkeOppfylt }.map { it.vilkår.begrunnelse }.distinct()
-                }.filterValues { it.isNotEmpty() }
+            avslagsdager
+                .filter { besvart != null && it.dato in besvart }
+                .groupBy({ it.dato }, { it.vilkår.begrunnelse })
+                .mapValues { (_, begrunnelser) -> begrunnelser.distinct() }
 
         val konflikter = nyeAvslag.keys.filter { dato -> eksisterende[dato]?.let { it.kilde != KILDE } ?: false }.sorted()
         check(konflikter.isEmpty()) {
@@ -60,7 +78,9 @@ data class Avslagsdager(
 
         return AvslagsdagerFraLøsning(
             avslagstidslinje = Avslagstidslinje(*(utenTidligereAvslagFraSpAvslagsdager + avslagFraLøsningen).toTypedArray()),
-            vurderinger = (eksisterendeVurderinger - beregningsperiode) + VurderingerAvLøpendeVilkår(*vurderingerFraLøsningen.toTypedArray()),
+            vurderinger =
+                (eksisterendeVurderinger - beregningsperiode) + VurderingerAvLøpendeVilkår(*vurderingerFraLøsningen.toTypedArray()),
+            grunnlagForLøpendeVilkårId = grunnlagForLøpendeVilkårId,
         )
     }
 
@@ -75,6 +95,29 @@ data class Avslagsdager(
                 "UNNTAK_INNLAGT_HELSEINSTITUSJON",
                 "UNNTAK_GODKJENT_OPPHOLD_INNTIL_FIRE_UKER",
             )
+
+        fun yrkesaktivitet(
+            yrkesaktivitetstype: String,
+            organisasjonsnummer: String?,
+        ): Behandlingsporing.Yrkesaktivitet =
+            when (yrkesaktivitetstype) {
+                "ARBEIDSTAKER" ->
+                    Behandlingsporing.Yrkesaktivitet.Arbeidstaker(
+                        requireNotNull(organisasjonsnummer) {
+                            "Mangler organisasjonsnummer for arbeidstaker"
+                        },
+                    )
+                "FRILANS" -> Behandlingsporing.Yrkesaktivitet.Frilans
+                "SELVSTENDIG" -> Behandlingsporing.Yrkesaktivitet.Selvstendig
+                "ARBEIDSLEDIG" -> Behandlingsporing.Yrkesaktivitet.Arbeidsledig
+                else -> throw IllegalArgumentException("Ukjent yrkesaktivitetstype fra sp-avslagsdager: $yrkesaktivitetstype")
+            }
+
+        fun varselkode(varselkode: String): Varselkode =
+            when (varselkode) {
+                "RV_SØ_8" -> Varselkode.RV_SØ_8
+                else -> throw IllegalArgumentException("Ukjent varselkode fra sp-avslagsdager: $varselkode")
+            }
 
         fun løpendeVilkår(vilkår: String): LøpendeVilkår =
             when (vilkår) {

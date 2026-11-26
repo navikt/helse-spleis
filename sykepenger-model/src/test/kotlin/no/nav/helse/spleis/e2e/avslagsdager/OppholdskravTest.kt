@@ -190,7 +190,10 @@ internal class OppholdskravTest : AbstractDslTest() {
             håndterSimulering(1.vedtaksperiode)
 
             assertEquals(avslåttAvSaksbehandler, inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.avslagstidslinje)
-            assertEquals(listOf(Begrunnelse.AvslåttMeldingTilNavDag), inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.begrunnelse(1.januar))
+            assertEquals(
+                listOf(Begrunnelse.AvslåttMeldingTilNavDag),
+                inspektør.utbetalingstidslinjer(1.vedtaksperiode).inspektør.begrunnelse(1.januar),
+            )
             assertEquals(
                 vurderinger(vurdering, 1.januar.somPeriode(), UtfallAvLøpendeVilkår.Oppfylt),
                 inspektør.vedtaksperioder(1.vedtaksperiode).inspektør.vurderingerAvLøpendeVilkår,
@@ -224,7 +227,13 @@ internal class OppholdskravTest : AbstractDslTest() {
                 listOf(
                     VurderingerAvLøpendeVilkårDto.VurdertPeriodeDto(
                         PeriodeDto(avslåttePerioden.start, avslåttePerioden.endInclusive),
-                        listOf(VurderingerAvLøpendeVilkårDto.VurderingDto(LøpendeVilkårDto.Oppholdskrav, vurdering, UtfallAvLøpendeVilkårDto.Oppfylt)),
+                        listOf(
+                            VurderingerAvLøpendeVilkårDto.VurderingDto(
+                                LøpendeVilkårDto.Oppholdskrav,
+                                vurdering,
+                                UtfallAvLøpendeVilkårDto.Oppfylt,
+                            ),
+                        ),
                     ),
                 ),
             )
@@ -284,7 +293,19 @@ internal class OppholdskravTest : AbstractDslTest() {
         periode: Periode,
         utfall: UtfallAvLøpendeVilkår,
     ) = Avslagsdager(
-        periode.map { Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall)) },
+        periode.map {
+            Avslagsdager.VurdertDag(it, VurderingAvLøpendeVilkår(LøpendeVilkår.Oppholdskrav, vurderingId, utfall))
+        },
+        avslagsdager =
+            if (utfall ==
+                UtfallAvLøpendeVilkår.IkkeOppfylt
+            ) {
+                periode.map { Avslagsdager.Avslagsdag(it, LøpendeVilkår.Oppholdskrav) }
+            } else {
+                emptyList()
+            },
+        grunnlagForLøpendeVilkårId = UUID.randomUUID(),
+        varsler = emptyList(),
     )
 
     private fun vurderinger(
